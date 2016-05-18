@@ -1,5 +1,5 @@
 # chatbot
-A simple chatbot framework in C
+A simple Stack Exchange chatbot framework in C
 
 This is a simple Stack Exchange chatbot in C.  
 
