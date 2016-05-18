@@ -2,7 +2,7 @@
 //  main.c
 //  chatbot
 //
-//  Created by Jonathan Keller on 4/29/16.
+//  Created on 4/29/16.
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
@@ -19,6 +19,7 @@
 #include "ChatBot.h"
 #include "cJSON.h"
 #include "commands.h"
+#include "WebSocket.h"
 
 void unrecognizedCommand(RunningCommand *c, void *ctx) {
     ChatBot *bot = ctx;
@@ -26,6 +27,16 @@ void unrecognizedCommand(RunningCommand *c, void *ctx) {
     asprintf(&str, "Unrecognized command \"%s\"", c->message->content);
     postReply(bot->room, str, c->message);
     free(str);
+}
+
+void testWebSocketOpened(WebSocket *ws) {
+    puts("Test web socket opened");
+    sendDataOnWebsocket(ws->ws, "155-questions-active", 0);
+}
+
+void testWebSocketRecieve(WebSocket *ws, char *data, size_t len) {
+    cJSON *json = cJSON_Parse(data);
+    puts(cJSON_Print(cJSON_Parse(cJSON_GetObjectItem(json, "data")->valuestring)));
 }
 
 int main(int argc, const char * argv[]) {
@@ -58,18 +69,29 @@ int main(int argc, const char * argv[]) {
     
     Client *client = createClient("stackoverflow.com", cookiePath);
     if (!client->isLoggedIn) {
-        //Get the email from the user
-        printf("Email address: ");
-        char email[_PASSWORD_LEN];
-        fgets(email, _PASSWORD_LEN, stdin);
-        email[_PASSWORD_LEN-1] = 0;   //make sure it's null terminated
-        
-        char *password = getpass("Password: ");
-        loginWithEmailAndPassword(client, email, password);
-        //overwrite the password so it doesn't stay in memory
-        memset(password, 0, strlen(password));
+        char *env_email, *env_pass;
+        if (
+            (env_email = getenv("ChatBotEmail")) == NULL ||
+            (env_pass = getenv("ChatBotPass")) == NULL
+            ) {
+            //Get the email from the user
+            printf("Email address: ");
+            char email[_PASSWORD_LEN];
+            fgets(email, _PASSWORD_LEN, stdin);
+            email[_PASSWORD_LEN-1] = 0;   //make sure it's null terminated
+            
+            char *password = getpass("Password: ");
+            loginWithEmailAndPassword(client, email, password);
+            //overwrite the password so it doesn't stay in memory
+            memset(password, 0, strlen(password));
+        }
+        else {
+            loginWithEmailAndPassword(client, env_email, env_pass);
+            memset(env_pass, 0, strlen(env_pass));
+        }
     }
     ChatRoom *room = createChatRoom(client, 41570);
+    
     enterChatRoom(room);
     Command *commands[] = {
         createCommand("I can put anything I want here; the first command runs when no other commands match", unrecognizedCommand),
@@ -86,9 +108,17 @@ int main(int argc, const char * argv[]) {
     };
     ChatBot *bot = createChatBot(room, commands);
     
+    WebSocket *socket = createWebSocketWithClient(client);
+    addWebsocket(client, socket);
+    socket->openCallback = testWebSocketOpened;
+    socket->recieveCallback = testWebSocketRecieve;
+    connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
+    
     puts("Started.");
     
+    
     for (;;) {
+        serviceWebsockets(client);
         StopAction action = runChatBot(bot);
         if (action == ACTION_STOP) {
             break;

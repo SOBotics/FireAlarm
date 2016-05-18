@@ -11,6 +11,8 @@
 		84457F721CD3C700005EFA4F /* ChatRoom.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F701CD3C700005EFA4F /* ChatRoom.c */; };
 		84457F751CD3C7C3005EFA4F /* Client.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F731CD3C7C3005EFA4F /* Client.c */; };
 		84457F771CD3D098005EFA4F /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84457F761CD3D098005EFA4F /* libcurl.tbd */; };
+		845D93B71CEC223500DCC224 /* libwebsockets.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 845D93B61CEC223500DCC224 /* libwebsockets.6.dylib */; };
+		845D93BA1CECE07200DCC224 /* WebSocket.c in Sources */ = {isa = PBXBuildFile; fileRef = 845D93B81CECE07200DCC224 /* WebSocket.c */; };
 		8490322E1CD95CCA000605EA /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 8490322C1CD95CCA000605EA /* cJSON.c */; };
 		849032311CD9AB7F000605EA /* Command.c in Sources */ = {isa = PBXBuildFile; fileRef = 8490322F1CD9AB7F000605EA /* Command.c */; };
 		849032341CDA6150000605EA /* ChatMessage.c in Sources */ = {isa = PBXBuildFile; fileRef = 849032321CDA6150000605EA /* ChatMessage.c */; };
@@ -33,29 +35,32 @@
 
 /* Begin PBXFileReference section */
 		84457F661CD3C403005EFA4F /* chatbot */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = chatbot; sourceTree = BUILT_PRODUCTS_DIR; };
-		84457F691CD3C403005EFA4F /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		84457F701CD3C700005EFA4F /* ChatRoom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ChatRoom.c; sourceTree = "<group>"; };
-		84457F711CD3C700005EFA4F /* ChatRoom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatRoom.h; sourceTree = "<group>"; };
-		84457F731CD3C7C3005EFA4F /* Client.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Client.c; sourceTree = "<group>"; };
-		84457F741CD3C7C3005EFA4F /* Client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Client.h; sourceTree = "<group>"; };
+		84457F691CD3C403005EFA4F /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = main.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		84457F701CD3C700005EFA4F /* ChatRoom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = ChatRoom.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		84457F711CD3C700005EFA4F /* ChatRoom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ChatRoom.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		84457F731CD3C7C3005EFA4F /* Client.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = Client.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		84457F741CD3C7C3005EFA4F /* Client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Client.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		84457F761CD3D098005EFA4F /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
-		8448C7E91CE1340500F6E64D /* commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = commands.h; sourceTree = "<group>"; };
-		8448C7EA1CE1341C00F6E64D /* test_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = test_commands.h; sourceTree = "<group>"; };
-		8448C7EB1CE1342700F6E64D /* misc_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = misc_commands.h; sourceTree = "<group>"; };
-		8448C7EC1CE1342E00F6E64D /* stop_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stop_commands.h; sourceTree = "<group>"; };
-		8448C7EE1CE1346700F6E64D /* users_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = users_commands.h; sourceTree = "<group>"; };
+		8448C7E91CE1340500F6E64D /* commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = commands.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		8448C7EA1CE1341C00F6E64D /* test_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = test_commands.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		8448C7EB1CE1342700F6E64D /* misc_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = misc_commands.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		8448C7EC1CE1342E00F6E64D /* stop_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = stop_commands.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		8448C7EE1CE1346700F6E64D /* users_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = users_commands.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		845D93B61CEC223500DCC224 /* libwebsockets.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libwebsockets.6.dylib; path = /usr/local/Cellar/libwebsockets/1.6.2/lib/libwebsockets.6.dylib; sourceTree = "<absolute>"; };
+		845D93B81CECE07200DCC224 /* WebSocket.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = WebSocket.c; sourceTree = "<group>"; };
+		845D93B91CECE07200DCC224 /* WebSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = WebSocket.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		8490322C1CD95CCA000605EA /* cJSON.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON.c; sourceTree = "<group>"; };
 		8490322D1CD95CCA000605EA /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
-		8490322F1CD9AB7F000605EA /* Command.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Command.c; sourceTree = "<group>"; };
-		849032301CD9AB7F000605EA /* Command.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Command.h; sourceTree = "<group>"; };
-		849032321CDA6150000605EA /* ChatMessage.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ChatMessage.c; sourceTree = "<group>"; };
-		849032331CDA6150000605EA /* ChatMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatMessage.h; sourceTree = "<group>"; };
-		849032351CDA6163000605EA /* ChatUser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ChatUser.c; sourceTree = "<group>"; };
-		849032361CDA6163000605EA /* ChatUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatUser.h; sourceTree = "<group>"; };
-		84BD4F311CDABD2C00D31751 /* RunningCommand.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RunningCommand.c; sourceTree = "<group>"; };
-		84BD4F321CDABD2C00D31751 /* RunningCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RunningCommand.h; sourceTree = "<group>"; };
-		84BD4F371CDBE6DC00D31751 /* ChatBot.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ChatBot.c; sourceTree = "<group>"; };
-		84BD4F381CDBE6DC00D31751 /* ChatBot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatBot.h; sourceTree = "<group>"; };
+		8490322F1CD9AB7F000605EA /* Command.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = Command.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		849032301CD9AB7F000605EA /* Command.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Command.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		849032321CDA6150000605EA /* ChatMessage.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = ChatMessage.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		849032331CDA6150000605EA /* ChatMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ChatMessage.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		849032351CDA6163000605EA /* ChatUser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = ChatUser.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		849032361CDA6163000605EA /* ChatUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ChatUser.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		84BD4F311CDABD2C00D31751 /* RunningCommand.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = RunningCommand.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		84BD4F321CDABD2C00D31751 /* RunningCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = RunningCommand.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		84BD4F371CDBE6DC00D31751 /* ChatBot.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = ChatBot.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		84BD4F381CDBE6DC00D31751 /* ChatBot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ChatBot.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				845D93B71CEC223500DCC224 /* libwebsockets.6.dylib in Frameworks */,
 				84457F771CD3D098005EFA4F /* libcurl.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -93,6 +99,8 @@
 				8448C7ED1CE1343900F6E64D /* Commands */,
 				84457F741CD3C7C3005EFA4F /* Client.h */,
 				84457F731CD3C7C3005EFA4F /* Client.c */,
+				845D93B91CECE07200DCC224 /* WebSocket.h */,
+				845D93B81CECE07200DCC224 /* WebSocket.c */,
 				84457F711CD3C700005EFA4F /* ChatRoom.h */,
 				84457F701CD3C700005EFA4F /* ChatRoom.c */,
 				849032331CDA6150000605EA /* ChatMessage.h */,
@@ -128,6 +136,7 @@
 				8490322D1CD95CCA000605EA /* cJSON.h */,
 				8490322C1CD95CCA000605EA /* cJSON.c */,
 				84457F761CD3D098005EFA4F /* libcurl.tbd */,
+				845D93B61CEC223500DCC224 /* libwebsockets.6.dylib */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -189,6 +198,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84457F751CD3C7C3005EFA4F /* Client.c in Sources */,
+				845D93BA1CECE07200DCC224 /* WebSocket.c in Sources */,
 				84BD4F331CDABD2C00D31751 /* RunningCommand.c in Sources */,
 				8490322E1CD95CCA000605EA /* cJSON.c in Sources */,
 				849032371CDA6163000605EA /* ChatUser.c in Sources */,
@@ -240,6 +250,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = /usr/local/lib/;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -278,6 +289,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = /usr/local/lib/;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
@@ -292,7 +304,10 @@
 					/usr/local/include,
 					/usr/local/opt/openssl/include,
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/libwebsockets/1.6.2/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -305,7 +320,10 @@
 					/usr/local/include,
 					/usr/local/opt/openssl/include,
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/libwebsockets/1.6.2/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

@@ -2,7 +2,7 @@
 //  Client.c
 //  chatbot
 //
-//  Created by Jonathan Keller on 4/29/16.
+//  Created on 4/29/16.
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "WebSocket.h"
 
 void checkCurlError(CURLcode code, const char *func, const char *file, int line) {
     if (code) {
@@ -59,6 +61,8 @@ int curlDebug(CURL *curl, curl_infotype type, char *data, size_t size, void *usr
 Client *createClient(const char *host, const char *cookiefile) {
     Client *c = malloc(sizeof(Client));
     c->fkey = NULL;
+    c->sockets = NULL;
+    c->socketCount = 0;
     c->host = malloc(strlen(host) + 1);
     strcpy(c->host, host);
     
@@ -273,9 +277,143 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
     }
 }
 
-void processClientEvents(Client *client) {
+WebSocket *webSocketWithLWS(Client *c, struct lws *ws) {
+    for (int i = 0; i < c->socketCount; i++) {
+        if (c->sockets[i]->ws == ws) {
+            return c->sockets[i];
+        }
+    }
+    
+    return NULL;
+}
+
+int websocketCallback(struct lws *ws,
+                      enum lws_callback_reasons reason,
+                      void *user,
+                      void *in, size_t len) {
+    char *data;
+    Client *c = NULL;
+    if (ws) {
+        c = (Client *)lws_context_user(lws_get_context(ws));
+    }
+    WebSocket *socket = NULL;
+    if (user) {
+        socket = *(WebSocket**)user;
+    }
+    switch (reason) {
+        case LWS_CALLBACK_CLIENT_ESTABLISHED:
+            puts("Connection established");
+            for (int i = 0; i < c->socketCount; i++) {
+                if (c->sockets[i]->isSetUp == 0) {
+                    socket = c->sockets[i];
+                    socket->isSetUp = 1;
+                    break;
+                }
+            }
+            *(WebSocket**)user = socket;
+            socket->ws = ws;
+            if (socket->openCallback != NULL) {
+                socket->openCallback(socket);
+            }
+            break;
+        case LWS_CALLBACK_CLIENT_RECEIVE:
+            data = malloc((strlen(in) + 1) * sizeof(char));
+            strcpy(data, in);
+            
+            if (socket->recieveCallback != NULL) {
+                socket->recieveCallback(socket, data, strlen(in));
+            }
+            
+            free(data);
+            break;
+        case LWS_CALLBACK_CLOSED:
+            puts("Connection closed.");
+            break;
+        default:
+            break;
+    }
+    return 0;
+}
+
+void setupWebsocketContext(Client *c) {
+    struct lws_context_creation_info info;
+    struct lws_protocols *protocols = malloc(sizeof(struct lws_protocols) * 3);
+    
+    memset(&info, 0, sizeof(info));
+    info.port = CONTEXT_PORT_NO_LISTEN;
+    info.iface = NULL;
+    info.protocols = protocols;
+    info.extensions = NULL;
+    info.ssl_cert_filepath = NULL;
+    info.ssl_private_key_filepath = NULL;
+    info.extensions = lws_get_internal_extensions();
+    info.gid = -1;
+    info.uid = -1;
+    info.options = 0;
+    info.user = c;
+    
+    
+    
+    protocols[0].name = "http-only";
+    protocols[1].name = "";
+    protocols[2].name = "";
+    
+    protocols[0].callback = websocketCallback;
+    protocols[1].callback = websocketCallback;
+    protocols[2].callback = NULL;
+    
+    protocols[0].id = 0;
+    protocols[1].id = 0;
+    protocols[2].id = 0;
+    
+    protocols[0].per_session_data_size = sizeof(WebSocket*);
+    protocols[1].per_session_data_size = sizeof(WebSocket*);
+    protocols[2].per_session_data_size = sizeof(WebSocket*);
+    
+    protocols[0].user = c;
+    protocols[1].user = c;
+    protocols[2].user = c;
+    
+    protocols[0].rx_buffer_size = 0;
+    protocols[1].rx_buffer_size = 0;
+    protocols[2].rx_buffer_size = 0;
+    
+    
+    
+    c->wsContext = lws_create_context(&info);
+    if (c->wsContext == NULL) {
+        fputs("Failed to create websocket context!\n", stderr);
+        exit(EXIT_FAILURE);
+    }
     
 }
+
+void serviceWebsockets(Client *client) {
+    lws_service(client->wsContext, 50);
+}
+
+///Sends data across the websocket.
+///@param socket: The websocket to send data to.
+///@param data: The data to send.
+///@param len: The size in bytes of the data.  If len is 0, strlen(buf) bytes are sent.
+unsigned sendDataOnWebsocket(struct lws *socket, void *data, size_t len) {
+    if (len == 0) {
+        len = strlen(data);
+    }
+    unsigned char *buf = malloc(LWS_SEND_BUFFER_PRE_PADDING + len + LWS_SEND_BUFFER_POST_PADDING);
+    memcpy(buf + LWS_SEND_BUFFER_PRE_PADDING, data, len);
+    
+    int ret = lws_write(socket, buf + LWS_SEND_BUFFER_PRE_PADDING, len, LWS_WRITE_TEXT);
+    
+    free(buf);
+    return ret;
+}
+
+void addWebsocket(Client *client, WebSocket *ws) {
+    client->sockets = realloc(client->sockets, ++client->socketCount * sizeof(WebSocket*));
+    client->sockets[client->socketCount - 1] = ws;
+}
+
 
 unsigned long connectClientToRoom(Client *client, unsigned roomID) {
     CURL *curl = client->curl;
@@ -304,6 +442,9 @@ unsigned long connectClientToRoom(Client *client, unsigned roomID) {
         exit(EXIT_FAILURE);
     }
     
+    setupWebsocketContext(client);
+    //client->ws = connectWebsocket(client, "qa.sockets.stackexchange.com", "/");
+    //sendDataOnWebsocket(client->ws, "155-questions-active", 0);
     
     //get the timestamp
     
@@ -313,7 +454,6 @@ unsigned long connectClientToRoom(Client *client, unsigned roomID) {
     snprintf(postBuffer, maxPostLength - 1, "roomid=%d&fkey=%s", roomID, client->fkey);
     checkCURL(curl_easy_setopt(curl, CURLOPT_POST, 1));
     checkCURL(curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postBuffer));
-    
     
     
     
