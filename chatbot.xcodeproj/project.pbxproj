@@ -1,0 +1,337 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		84457F6A1CD3C403005EFA4F /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F691CD3C403005EFA4F /* main.c */; };
+		84457F721CD3C700005EFA4F /* ChatRoom.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F701CD3C700005EFA4F /* ChatRoom.c */; };
+		84457F751CD3C7C3005EFA4F /* Client.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F731CD3C7C3005EFA4F /* Client.c */; };
+		84457F771CD3D098005EFA4F /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84457F761CD3D098005EFA4F /* libcurl.tbd */; };
+		8490322E1CD95CCA000605EA /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 8490322C1CD95CCA000605EA /* cJSON.c */; };
+		849032311CD9AB7F000605EA /* Command.c in Sources */ = {isa = PBXBuildFile; fileRef = 8490322F1CD9AB7F000605EA /* Command.c */; };
+		849032341CDA6150000605EA /* ChatMessage.c in Sources */ = {isa = PBXBuildFile; fileRef = 849032321CDA6150000605EA /* ChatMessage.c */; };
+		849032371CDA6163000605EA /* ChatUser.c in Sources */ = {isa = PBXBuildFile; fileRef = 849032351CDA6163000605EA /* ChatUser.c */; };
+		84BD4F331CDABD2C00D31751 /* RunningCommand.c in Sources */ = {isa = PBXBuildFile; fileRef = 84BD4F311CDABD2C00D31751 /* RunningCommand.c */; };
+		84BD4F391CDBE6DC00D31751 /* ChatBot.c in Sources */ = {isa = PBXBuildFile; fileRef = 84BD4F371CDBE6DC00D31751 /* ChatBot.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		84457F641CD3C403005EFA4F /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		84457F661CD3C403005EFA4F /* chatbot */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = chatbot; sourceTree = BUILT_PRODUCTS_DIR; };
+		84457F691CD3C403005EFA4F /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		84457F701CD3C700005EFA4F /* ChatRoom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ChatRoom.c; sourceTree = "<group>"; };
+		84457F711CD3C700005EFA4F /* ChatRoom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatRoom.h; sourceTree = "<group>"; };
+		84457F731CD3C7C3005EFA4F /* Client.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Client.c; sourceTree = "<group>"; };
+		84457F741CD3C7C3005EFA4F /* Client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Client.h; sourceTree = "<group>"; };
+		84457F761CD3D098005EFA4F /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
+		8448C7E91CE1340500F6E64D /* commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = commands.h; sourceTree = "<group>"; };
+		8448C7EA1CE1341C00F6E64D /* test_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = test_commands.h; sourceTree = "<group>"; };
+		8448C7EB1CE1342700F6E64D /* misc_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = misc_commands.h; sourceTree = "<group>"; };
+		8448C7EC1CE1342E00F6E64D /* stop_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stop_commands.h; sourceTree = "<group>"; };
+		8448C7EE1CE1346700F6E64D /* users_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = users_commands.h; sourceTree = "<group>"; };
+		8490322C1CD95CCA000605EA /* cJSON.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON.c; sourceTree = "<group>"; };
+		8490322D1CD95CCA000605EA /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
+		8490322F1CD9AB7F000605EA /* Command.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Command.c; sourceTree = "<group>"; };
+		849032301CD9AB7F000605EA /* Command.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Command.h; sourceTree = "<group>"; };
+		849032321CDA6150000605EA /* ChatMessage.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ChatMessage.c; sourceTree = "<group>"; };
+		849032331CDA6150000605EA /* ChatMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatMessage.h; sourceTree = "<group>"; };
+		849032351CDA6163000605EA /* ChatUser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ChatUser.c; sourceTree = "<group>"; };
+		849032361CDA6163000605EA /* ChatUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatUser.h; sourceTree = "<group>"; };
+		84BD4F311CDABD2C00D31751 /* RunningCommand.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RunningCommand.c; sourceTree = "<group>"; };
+		84BD4F321CDABD2C00D31751 /* RunningCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RunningCommand.h; sourceTree = "<group>"; };
+		84BD4F371CDBE6DC00D31751 /* ChatBot.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ChatBot.c; sourceTree = "<group>"; };
+		84BD4F381CDBE6DC00D31751 /* ChatBot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatBot.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		84457F631CD3C403005EFA4F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84457F771CD3D098005EFA4F /* libcurl.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		84457F5D1CD3C403005EFA4F = {
+			isa = PBXGroup;
+			children = (
+				84457F681CD3C403005EFA4F /* chatbot */,
+				84457F671CD3C403005EFA4F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		84457F671CD3C403005EFA4F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				84457F661CD3C403005EFA4F /* chatbot */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		84457F681CD3C403005EFA4F /* chatbot */ = {
+			isa = PBXGroup;
+			children = (
+				84457F691CD3C403005EFA4F /* main.c */,
+				8448C7ED1CE1343900F6E64D /* Commands */,
+				84457F741CD3C7C3005EFA4F /* Client.h */,
+				84457F731CD3C7C3005EFA4F /* Client.c */,
+				84457F711CD3C700005EFA4F /* ChatRoom.h */,
+				84457F701CD3C700005EFA4F /* ChatRoom.c */,
+				849032331CDA6150000605EA /* ChatMessage.h */,
+				849032321CDA6150000605EA /* ChatMessage.c */,
+				849032361CDA6163000605EA /* ChatUser.h */,
+				849032351CDA6163000605EA /* ChatUser.c */,
+				84BD4F381CDBE6DC00D31751 /* ChatBot.h */,
+				84BD4F371CDBE6DC00D31751 /* ChatBot.c */,
+				849032301CD9AB7F000605EA /* Command.h */,
+				8490322F1CD9AB7F000605EA /* Command.c */,
+				84BD4F321CDABD2C00D31751 /* RunningCommand.h */,
+				84BD4F311CDABD2C00D31751 /* RunningCommand.c */,
+				8490322B1CD956F6000605EA /* Libraries */,
+			);
+			path = chatbot;
+			sourceTree = "<group>";
+		};
+		8448C7ED1CE1343900F6E64D /* Commands */ = {
+			isa = PBXGroup;
+			children = (
+				8448C7E91CE1340500F6E64D /* commands.h */,
+				8448C7EA1CE1341C00F6E64D /* test_commands.h */,
+				8448C7EB1CE1342700F6E64D /* misc_commands.h */,
+				8448C7EE1CE1346700F6E64D /* users_commands.h */,
+				8448C7EC1CE1342E00F6E64D /* stop_commands.h */,
+			);
+			name = Commands;
+			sourceTree = "<group>";
+		};
+		8490322B1CD956F6000605EA /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				8490322D1CD95CCA000605EA /* cJSON.h */,
+				8490322C1CD95CCA000605EA /* cJSON.c */,
+				84457F761CD3D098005EFA4F /* libcurl.tbd */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		84457F651CD3C403005EFA4F /* chatbot */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 84457F6D1CD3C403005EFA4F /* Build configuration list for PBXNativeTarget "chatbot" */;
+			buildPhases = (
+				84457F621CD3C403005EFA4F /* Sources */,
+				84457F631CD3C403005EFA4F /* Frameworks */,
+				84457F641CD3C403005EFA4F /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = chatbot;
+			productName = chatbot;
+			productReference = 84457F661CD3C403005EFA4F /* chatbot */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		84457F5E1CD3C403005EFA4F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = NobodyNada;
+				TargetAttributes = {
+					84457F651CD3C403005EFA4F = {
+						CreatedOnToolsVersion = 7.3;
+					};
+				};
+			};
+			buildConfigurationList = 84457F611CD3C403005EFA4F /* Build configuration list for PBXProject "chatbot" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 84457F5D1CD3C403005EFA4F;
+			productRefGroup = 84457F671CD3C403005EFA4F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				84457F651CD3C403005EFA4F /* chatbot */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		84457F621CD3C403005EFA4F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84457F751CD3C7C3005EFA4F /* Client.c in Sources */,
+				84BD4F331CDABD2C00D31751 /* RunningCommand.c in Sources */,
+				8490322E1CD95CCA000605EA /* cJSON.c in Sources */,
+				849032371CDA6163000605EA /* ChatUser.c in Sources */,
+				84457F721CD3C700005EFA4F /* ChatRoom.c in Sources */,
+				849032341CDA6150000605EA /* ChatMessage.c in Sources */,
+				84457F6A1CD3C403005EFA4F /* main.c in Sources */,
+				84BD4F391CDBE6DC00D31751 /* ChatBot.c in Sources */,
+				849032311CD9AB7F000605EA /* Command.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		84457F6B1CD3C403005EFA4F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		84457F6C1CD3C403005EFA4F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		84457F6E1CD3C403005EFA4F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					/usr/local/opt/openssl/include,
+				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		84457F6F1CD3C403005EFA4F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					/usr/local/opt/openssl/include,
+				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		84457F611CD3C403005EFA4F /* Build configuration list for PBXProject "chatbot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84457F6B1CD3C403005EFA4F /* Debug */,
+				84457F6C1CD3C403005EFA4F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		84457F6D1CD3C403005EFA4F /* Build configuration list for PBXNativeTarget "chatbot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84457F6E1CD3C403005EFA4F /* Debug */,
+				84457F6F1CD3C403005EFA4F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 84457F5E1CD3C403005EFA4F /* Project object */;
+}
