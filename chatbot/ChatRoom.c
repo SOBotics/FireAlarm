@@ -109,10 +109,14 @@ void refreshUsers(ChatRoom *r) {
     cJSON_Delete(json);
 }
 
+void webSocketRecieved(WebSocket *socket, char *data, size_t len);
+
 void enterChatRoom(ChatRoom *room) {
     printf("Joining chat room %d...\n", room->roomID);
     pthread_mutex_lock(&room->clientLock);
     room->lastUpdateTimestamp = connectClientToRoom(room->client, room->roomID);
+    
+    
     pthread_mutex_unlock(&room->clientLock);
     refreshUsers(room);
     room->lastEventTime = time(NULL);
@@ -292,6 +296,10 @@ ChatMessage *processChatEvent(ChatRoom *r, cJSON *event) {
     return NULL;
 }
 
+void webSocketRecieved(WebSocket *socket, char *data, size_t len) {
+    printf("Websocket recieved: %s\n", cJSON_Print(cJSON_Parse(data)));
+}
+
 ChatMessage **processChatRoomEvents(ChatRoom *room) {
     //Calculate the time interval between chat room polls.
     time_t timeDifference = time(NULL) - room->lastEventTime;
@@ -302,7 +310,7 @@ ChatMessage **processChatRoomEvents(ChatRoom *room) {
     struct pollfd fd;
     fd.fd = STDIN_FILENO;
     fd.events = POLLIN;
-    int stdinAvailable = poll(&fd, 1, interval);
+    int stdinAvailable = poll(&fd, 1, 0);
     
     if (stdinAvailable == -1) {
         fprintf(stderr, "Failed to poll stdin!\n");

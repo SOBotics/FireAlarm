@@ -12,8 +12,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "WebSocket.h"
-
 void checkCurlError(CURLcode code, const char *func, const char *file, int line) {
     if (code) {
         fprintf(stderr, "CURL error: %d\nfile: %s\nline: %d\nfunction: %s\n", code, file, line, func);
@@ -71,7 +69,7 @@ Client *createClient(const char *host, const char *cookiefile) {
     //Configure CURL
     
     //Uncomment this to pass all requests through mitmproxy, for debugging.
-    //checkCURL(curl_easy_setopt(curl, CURLOPT_PROXY, "https://127.0.0.1:8080"));
+    checkCURL(curl_easy_setopt(curl, CURLOPT_PROXY, "https://127.0.0.1:8080"));
     
 #ifdef DEBUG
     //checkCURL(curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, curlDebug));
@@ -277,6 +275,42 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
     }
 }
 
+WebSocket *createWebSocketWithClient(Client *client) {
+    WebSocket *s = malloc(sizeof(WebSocket));
+    
+    s->openCallback = NULL;
+    s->recieveCallback = NULL;
+    s->ws = NULL;
+    s->user = NULL;
+    s->client = client;
+    s->isSetUp = 0;
+    
+    return s;
+}
+
+void connectWebSocket(WebSocket *socket, const char *host, const char *path) {
+    Client *c = socket->client;
+    addWebsocket(c, socket);
+    struct lws *ws = lws_client_connect(
+                                        c->wsContext,
+                                        host,
+                                        80,
+                                        0,
+                                        path,
+                                        host,
+                                        NULL,
+                                        NULL,
+                                        -1
+                                        );
+    
+    
+    
+    if (ws == NULL) {
+        fputs("Failed to create websocket!\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+}
+
 WebSocket *webSocketWithLWS(Client *c, struct lws *ws) {
     for (int i = 0; i < c->socketCount; i++) {
         if (c->sockets[i]->ws == ws) {
@@ -329,6 +363,9 @@ int websocketCallback(struct lws *ws,
         case LWS_CALLBACK_CLOSED:
             puts("Connection closed.");
             break;
+        case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
+            puts("Connection error");
+            break;
         default:
             break;
     }
@@ -336,6 +373,7 @@ int websocketCallback(struct lws *ws,
 }
 
 void setupWebsocketContext(Client *c) {
+    puts("Starting libwebsockets...");
     struct lws_context_creation_info info;
     struct lws_protocols *protocols = malloc(sizeof(struct lws_protocols) * 3);
     
@@ -386,6 +424,7 @@ void setupWebsocketContext(Client *c) {
         exit(EXIT_FAILURE);
     }
     
+    //lws_set_proxy(c->wsContext, "localhost:8080");
 }
 
 void serviceWebsockets(Client *client) {

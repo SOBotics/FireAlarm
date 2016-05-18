@@ -15,6 +15,7 @@
 
 typedef struct _WebSocket WebSocket;
 
+
 //Pass this to the CURL callback.
 typedef struct _OutBuffer {
     size_t size;
@@ -42,6 +43,25 @@ void serviceWebsockets(Client *client);
 void addWebsocket(Client *client, WebSocket *ws);
 void checkCurlError(CURLcode code, const char *func, const char *file, int line);
 unsigned sendDataOnWebsocket(struct lws *socket, void *data, size_t len);
+
+
+
+
+typedef void (*WebSocketOpenCallback)(struct _WebSocket *ws);
+typedef void (*WebSocketRecieveCallback)(struct _WebSocket *ws, char *data, size_t len);
+
+
+typedef struct _WebSocket {
+    Client *client;
+    struct lws *ws;
+    void *user;
+    unsigned char isSetUp;
+    WebSocketOpenCallback openCallback;
+    WebSocketRecieveCallback recieveCallback;
+}WebSocket;
+
+WebSocket *createWebSocketWithClient(Client *client);
+void connectWebSocket(WebSocket *socket, const char *host, const char *path);
 
 
 #endif /* Client_h */

@@ -31,11 +31,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "chatbot/Client.c"
-            timestampString = "485287308.029482"
+            timestampString = "485295331.762804"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "46"
-            endingLineNumber = "46"
+            startingLineNumber = "44"
+            endingLineNumber = "44"
             landmarkName = "curlDebug()"
             landmarkType = "7">
          </BreakpointContent>
@@ -47,12 +47,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "chatbot/main.c"
-            timestampString = "485290803.142744"
+            timestampString = "485295331.762804"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "38"
-            endingLineNumber = "38"
+            startingLineNumber = "37"
+            endingLineNumber = "37"
             landmarkName = "testWebSocketRecieve()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "chatbot/Client.c"
+            timestampString = "485302463.032172"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "367"
+            endingLineNumber = "367"
+            landmarkName = "websocketCallback()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

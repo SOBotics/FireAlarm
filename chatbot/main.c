@@ -19,7 +19,6 @@
 #include "ChatBot.h"
 #include "cJSON.h"
 #include "commands.h"
-#include "WebSocket.h"
 
 void unrecognizedCommand(RunningCommand *c, void *ctx) {
     ChatBot *bot = ctx;
@@ -90,7 +89,7 @@ int main(int argc, const char * argv[]) {
             memset(env_pass, 0, strlen(env_pass));
         }
     }
-    ChatRoom *room = createChatRoom(client, 41570);
+    ChatRoom *room = createChatRoom(client, 68414);
     
     enterChatRoom(room);
     Command *commands[] = {
@@ -108,11 +107,10 @@ int main(int argc, const char * argv[]) {
     };
     ChatBot *bot = createChatBot(room, commands);
     
-    WebSocket *socket = createWebSocketWithClient(client);
-    addWebsocket(client, socket);
-    socket->openCallback = testWebSocketOpened;
-    socket->recieveCallback = testWebSocketRecieve;
-    connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
+    //WebSocket *socket = createWebSocketWithClient(client);
+    //socket->openCallback = testWebSocketOpened;
+    //socket->recieveCallback = testWebSocketRecieve;
+    //connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
     
     puts("Started.");
     
