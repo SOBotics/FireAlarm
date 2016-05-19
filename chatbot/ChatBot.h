@@ -13,6 +13,8 @@
 #include "ChatRoom.h"
 #include "Command.h"
 #include "RunningCommand.h"
+#include "Filter.h"
+#include "Post.h"
 
 typedef enum {
     ACTION_NONE = 0,
@@ -26,10 +28,16 @@ typedef struct _ChatBot {
     RunningCommand **runningCommands;
     size_t runningCommandCount;
     pthread_mutex_t runningCommandsLock;
+    pthread_mutex_t detectorLock;
     StopAction stopAction;
+    char *apiFilter;
+    Filter **filters;
+    unsigned filterCount;
 }ChatBot;
 
-ChatBot *createChatBot(ChatRoom *room, Command **commands);
+ChatBot *createChatBot(ChatRoom *room, Command **commands, Filter **filters);
 StopAction runChatBot(ChatBot *chatbot);
+Post *getPostByID(ChatBot *bot, unsigned long postID);
+void checkPost(ChatBot *bot, Post *post);
 
 #endif /* ChatBot_h */

@@ -19,6 +19,7 @@
 #include "ChatBot.h"
 #include "cJSON.h"
 #include "commands.h"
+#include "Filter.h"
 
 void unrecognizedCommand(RunningCommand *c, void *ctx) {
     ChatBot *bot = ctx;
@@ -28,14 +29,16 @@ void unrecognizedCommand(RunningCommand *c, void *ctx) {
     free(str);
 }
 
-void testWebSocketOpened(WebSocket *ws) {
-    puts("Test web socket opened");
+void webSocektOpened(WebSocket *ws) {
+    puts("Websocket opened");
     sendDataOnWebsocket(ws->ws, "155-questions-active", 0);
 }
 
-void testWebSocketRecieve(WebSocket *ws, char *data, size_t len) {
-    cJSON *json = cJSON_Parse(data);
-    puts(cJSON_Print(cJSON_Parse(cJSON_GetObjectItem(json, "data")->valuestring)));
+void wsRecieved(WebSocket *ws, char *data, size_t len) {
+    //cJSON *json = cJSON_Parse(data);
+    //puts(cJSON_Print(cJSON_Parse(cJSON_GetObjectItem(json, "data")->valuestring)));
+    //ChatBot *bot = (ChatBot*)ws->user;
+    
 }
 
 int main(int argc, const char * argv[]) {
@@ -92,6 +95,13 @@ int main(int argc, const char * argv[]) {
     ChatRoom *room = createChatRoom(client, 68414);
     
     enterChatRoom(room);
+    
+    
+    Filter *filters[] = {
+        createFilter("test filter", ".*", FILTER_REGEX),
+        NULL
+    };
+    
     Command *commands[] = {
         createCommand("I can put anything I want here; the first command runs when no other commands match", unrecognizedCommand),
         createCommand("test1", test1Callback),
@@ -103,14 +113,17 @@ int main(int argc, const char * argv[]) {
         createCommand("stop", stopBot),
         createCommand("reboot", rebootBot),
         createCommand("kill", forceStopBot),
+        createCommand("check post *", checkPostCallback),
         NULL
     };
-    ChatBot *bot = createChatBot(room, commands);
+    ChatBot *bot = createChatBot(room, commands, filters);
     
-    //WebSocket *socket = createWebSocketWithClient(client);
-    //socket->openCallback = testWebSocketOpened;
-    //socket->recieveCallback = testWebSocketRecieve;
-    //connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
+    
+    WebSocket *socket = createWebSocketWithClient(client);
+    socket->user = bot;
+    socket->openCallback = webSocektOpened;
+    socket->recieveCallback = wsRecieved;
+    connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
     
     puts("Started.");
     

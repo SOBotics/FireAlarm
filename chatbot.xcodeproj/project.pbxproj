@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8400860C1CED28A800B46C8B /* Filter.c in Sources */ = {isa = PBXBuildFile; fileRef = 8400860A1CED28A800B46C8B /* Filter.c */; };
+		840086101CED306500B46C8B /* Post.c in Sources */ = {isa = PBXBuildFile; fileRef = 8400860F1CED2F2000B46C8B /* Post.c */; };
+		840086121CED356A00B46C8B /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 840086111CED356A00B46C8B /* libz.tbd */; };
 		84457F6A1CD3C403005EFA4F /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F691CD3C403005EFA4F /* main.c */; };
 		84457F721CD3C700005EFA4F /* ChatRoom.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F701CD3C700005EFA4F /* ChatRoom.c */; };
 		84457F751CD3C7C3005EFA4F /* Client.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F731CD3C7C3005EFA4F /* Client.c */; };
@@ -33,6 +36,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8400860A1CED28A800B46C8B /* Filter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Filter.c; sourceTree = "<group>"; };
+		8400860B1CED28A800B46C8B /* Filter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Filter.h; sourceTree = "<group>"; };
+		8400860D1CED2E3300B46C8B /* post_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = post_commands.h; sourceTree = "<group>"; };
+		8400860E1CED2F1500B46C8B /* Post.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Post.h; sourceTree = "<group>"; };
+		8400860F1CED2F2000B46C8B /* Post.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Post.c; sourceTree = "<group>"; };
+		840086111CED356A00B46C8B /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		84457F661CD3C403005EFA4F /* chatbot */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = chatbot; sourceTree = BUILT_PRODUCTS_DIR; };
 		84457F691CD3C403005EFA4F /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = main.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		84457F701CD3C700005EFA4F /* ChatRoom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = ChatRoom.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
@@ -65,6 +74,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				840086121CED356A00B46C8B /* libz.tbd in Frameworks */,
 				845D93B71CEC223500DCC224 /* libwebsockets.6.dylib in Frameworks */,
 				84457F771CD3D098005EFA4F /* libcurl.tbd in Frameworks */,
 			);
@@ -96,12 +106,16 @@
 				8448C7ED1CE1343900F6E64D /* Commands */,
 				84457F741CD3C7C3005EFA4F /* Client.h */,
 				84457F731CD3C7C3005EFA4F /* Client.c */,
+				8400860B1CED28A800B46C8B /* Filter.h */,
+				8400860A1CED28A800B46C8B /* Filter.c */,
 				84457F711CD3C700005EFA4F /* ChatRoom.h */,
 				84457F701CD3C700005EFA4F /* ChatRoom.c */,
 				849032331CDA6150000605EA /* ChatMessage.h */,
 				849032321CDA6150000605EA /* ChatMessage.c */,
 				849032361CDA6163000605EA /* ChatUser.h */,
 				849032351CDA6163000605EA /* ChatUser.c */,
+				8400860E1CED2F1500B46C8B /* Post.h */,
+				8400860F1CED2F2000B46C8B /* Post.c */,
 				84BD4F381CDBE6DC00D31751 /* ChatBot.h */,
 				84BD4F371CDBE6DC00D31751 /* ChatBot.c */,
 				849032301CD9AB7F000605EA /* Command.h */,
@@ -118,6 +132,7 @@
 			children = (
 				8448C7E91CE1340500F6E64D /* commands.h */,
 				8448C7EA1CE1341C00F6E64D /* test_commands.h */,
+				8400860D1CED2E3300B46C8B /* post_commands.h */,
 				8448C7EB1CE1342700F6E64D /* misc_commands.h */,
 				8448C7EE1CE1346700F6E64D /* users_commands.h */,
 				8448C7EC1CE1342E00F6E64D /* stop_commands.h */,
@@ -131,6 +146,7 @@
 				8490322D1CD95CCA000605EA /* cJSON.h */,
 				8490322C1CD95CCA000605EA /* cJSON.c */,
 				84457F761CD3D098005EFA4F /* libcurl.tbd */,
+				840086111CED356A00B46C8B /* libz.tbd */,
 				845D93B61CEC223500DCC224 /* libwebsockets.6.dylib */,
 			);
 			name = Libraries;
@@ -198,6 +214,8 @@
 				849032371CDA6163000605EA /* ChatUser.c in Sources */,
 				84457F721CD3C700005EFA4F /* ChatRoom.c in Sources */,
 				849032341CDA6150000605EA /* ChatMessage.c in Sources */,
+				8400860C1CED28A800B46C8B /* Filter.c in Sources */,
+				840086101CED306500B46C8B /* Post.c in Sources */,
 				84457F6A1CD3C403005EFA4F /* main.c in Sources */,
 				84BD4F391CDBE6DC00D31751 /* ChatBot.c in Sources */,
 				849032311CD9AB7F000605EA /* Command.c in Sources */,

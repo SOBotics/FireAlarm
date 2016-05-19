@@ -16,6 +16,7 @@ void test1Callback(RunningCommand *command, void *ctx) {
 }
 
 void testVarCallback(RunningCommand *command, void *ctx) {
+    puts("testVarCallback");
     for (int i = 0; i < command->argc; i++) {
         puts(command->argv[i]);
     }
