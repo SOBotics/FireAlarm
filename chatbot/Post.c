@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-Post *createPost(const char *title, const char *body, unsigned long postID, unsigned long userID) {
+Post *createPost(const char *title, const char *body, unsigned long postID, unsigned char isAnswer, unsigned long userID) {
     Post *p = malloc(sizeof(Post));
     p->title = malloc(strlen(title) + 1);
     strcpy(p->title, title);
@@ -19,6 +19,7 @@ Post *createPost(const char *title, const char *body, unsigned long postID, unsi
     strcpy(p->body, body);
     
     p->postID = postID;
+    p->isAnswer = isAnswer;
     p->userID = userID;
     
     return p;

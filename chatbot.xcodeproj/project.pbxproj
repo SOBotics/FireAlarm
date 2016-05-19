@@ -10,11 +10,11 @@
 		8400860C1CED28A800B46C8B /* Filter.c in Sources */ = {isa = PBXBuildFile; fileRef = 8400860A1CED28A800B46C8B /* Filter.c */; };
 		840086101CED306500B46C8B /* Post.c in Sources */ = {isa = PBXBuildFile; fileRef = 8400860F1CED2F2000B46C8B /* Post.c */; };
 		840086121CED356A00B46C8B /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 840086111CED356A00B46C8B /* libz.tbd */; };
-		84457F6A1CD3C403005EFA4F /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F691CD3C403005EFA4F /* main.c */; };
 		84457F721CD3C700005EFA4F /* ChatRoom.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F701CD3C700005EFA4F /* ChatRoom.c */; };
 		84457F751CD3C7C3005EFA4F /* Client.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F731CD3C7C3005EFA4F /* Client.c */; };
 		84457F771CD3D098005EFA4F /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84457F761CD3D098005EFA4F /* libcurl.tbd */; };
 		845D93B71CEC223500DCC224 /* libwebsockets.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 845D93B61CEC223500DCC224 /* libwebsockets.6.dylib */; };
+		8487ECF71CEE6ADB00A1FA64 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F691CD3C403005EFA4F /* main.c */; };
 		8490322E1CD95CCA000605EA /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 8490322C1CD95CCA000605EA /* cJSON.c */; };
 		849032311CD9AB7F000605EA /* Command.c in Sources */ = {isa = PBXBuildFile; fileRef = 8490322F1CD9AB7F000605EA /* Command.c */; };
 		849032341CDA6150000605EA /* ChatMessage.c in Sources */ = {isa = PBXBuildFile; fileRef = 849032321CDA6150000605EA /* ChatMessage.c */; };
@@ -216,7 +216,7 @@
 				849032341CDA6150000605EA /* ChatMessage.c in Sources */,
 				8400860C1CED28A800B46C8B /* Filter.c in Sources */,
 				840086101CED306500B46C8B /* Post.c in Sources */,
-				84457F6A1CD3C403005EFA4F /* main.c in Sources */,
+				8487ECF71CEE6ADB00A1FA64 /* main.c in Sources */,
 				84BD4F391CDBE6DC00D31751 /* ChatBot.c in Sources */,
 				849032311CD9AB7F000605EA /* Command.c in Sources */,
 			);

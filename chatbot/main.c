@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <pwd.h>
+#include <sys/stat.h>
 
 #include "Client.h"
 #include "ChatRoom.h"
@@ -47,6 +48,85 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     cJSON_Delete(json);
 }
 
+Filter **loadFilters() {
+    puts("Loading filters...");
+    FILE *file = fopen("filters.json", "r");
+    if (!file) {
+        puts("Could not read from ~/.chatbot/filters.json.  Creating a skeleton filter list.");
+        Filter **filters = malloc(sizeof(Filter*) * 2);
+        filters[0] = createFilter(
+                                  "Example filter",
+                                  "Regular expression to test against ^",   //^ is so this doesn't match anything
+                                  FILTER_REGEX,
+                                  0,
+                                  0
+                                  );
+        
+        filters[1] = NULL;
+        return filters;
+    }
+    
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+    
+    char *buf = malloc(size+1);
+    fread(buf, size, 1, file);
+    buf[size] = 0;
+    
+    fclose(file);
+    
+    cJSON *json = cJSON_Parse(buf);
+    
+    unsigned filterCount = cJSON_GetArraySize(json);
+    Filter **filters = malloc(sizeof(Filter*) * (filterCount + 1));
+    
+    for (int i = 0; i < filterCount; i++) {
+        cJSON *filter = cJSON_GetArrayItem(json, i);
+        const char *desc = cJSON_GetObjectItem(filter, "description")->valuestring;
+        const char *expr = cJSON_GetObjectItem(filter, "expression")->valuestring;
+        FilterType type = cJSON_GetObjectItem(filter, "type")->valueint;
+        unsigned truePositives = cJSON_GetObjectItem(filter, "truePositives")->valueint;
+        unsigned falsePositives = cJSON_GetObjectItem(filter, "falsePositives")->valueint;
+        filters[i] = createFilter(desc, expr, type, truePositives, falsePositives);
+    }
+    filters[filterCount] = NULL;
+    
+    cJSON_Delete(json);
+    
+    return filters;
+}
+
+void saveFilters(Filter **filters) {
+    puts("Saving filters...");
+    cJSON *json = cJSON_CreateArray();
+    Filter *filter;
+    for (int i = 0; (filter = filters[i]); i++) {
+        cJSON *object = cJSON_CreateObject();
+        
+        cJSON_AddItemToObject(object, "description", cJSON_CreateString(filter->desc));
+        cJSON_AddItemToObject(object, "expression", cJSON_CreateString(filter->filter));
+        cJSON_AddItemToObject(object, "type", cJSON_CreateNumber(filter->type));
+        cJSON_AddItemToObject(object, "truePositives", cJSON_CreateNumber(filter->truePositives));
+        cJSON_AddItemToObject(object, "falsePositives", cJSON_CreateNumber(filter->falsePositives));
+        
+        cJSON_AddItemToArray(json, object);
+    }
+    
+    
+    char *str = cJSON_Print(json);
+    
+    FILE *file = fopen("filters.json", "w");
+    if (!file) {
+        fputs("Failed to open filter file!", stderr);
+        return;
+    }
+    
+    fwrite(str, strlen(str), 1, file);
+    
+    fclose(file);
+}
+
 int main(int argc, const char * argv[]) {
     // insert code here...
     puts("Starting...");
@@ -59,23 +139,29 @@ int main(int argc, const char * argv[]) {
     }
     
     
-    //Determine where to save cookies.
-    //Get the user's home directory.
+    //Get the chatbot directory path.
     //http://stackoverflow.com/a/26696759/3476191
     const char *homedir;
     if ((homedir = getenv("HOME")) == NULL) {
         homedir = getpwuid(getuid())->pw_dir;
     }
-    //Append the cookie location.
-    const char *cookieName = "/.chatbot_cookies";
-    char cookiePath[strlen(homedir) + strlen(cookieName) + 1];
-    cookiePath[0] = 0;
-    strcpy(cookiePath, homedir);
-    strcat(cookiePath, cookieName);
+    //Append the directory location.
+    const char *dirName = "/.chatbot";
+    char dirPath[strlen(homedir) + strlen(dirName) + 1];
+    dirPath[0] = 0;
+    strcpy(dirPath, homedir);
+    strcat(dirPath, dirName);
     char resolvedPath[PATH_MAX];
-    realpath(cookiePath, resolvedPath);
+    realpath(dirPath, resolvedPath);
     
-    Client *client = createClient("stackoverflow.com", cookiePath);
+    struct stat st;
+    if (stat(resolvedPath, &st) == -1) {
+        mkdir(resolvedPath, 0700);
+    }
+    
+    chdir(resolvedPath);
+    
+    Client *client = createClient("stackoverflow.com", "cookies");
     if (!client->isLoggedIn) {
         char *env_email, *env_pass;
         if (
@@ -103,10 +189,7 @@ int main(int argc, const char * argv[]) {
     enterChatRoom(room);
     
     
-    Filter *filters[] = {
-        createFilter("test filter", ".*", FILTER_REGEX),
-        NULL
-    };
+    Filter **filters = loadFilters();
     
     Command *commands[] = {
         createCommand("I can put anything I want here; the first command runs when no other commands match", unrecognizedCommand),
@@ -147,6 +230,8 @@ int main(int argc, const char * argv[]) {
     }
     
     curl_easy_cleanup(client->curl);
+    
+    saveFilters(filters);
     
     return 0;
 }

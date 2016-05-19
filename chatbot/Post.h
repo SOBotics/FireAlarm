@@ -13,10 +13,11 @@ typedef struct {
     char *title;
     char *body;
     unsigned long postID;
+    unsigned char isAnswer;
     unsigned long userID;
 }Post;
 
-Post *createPost(const char *title, const char *body, unsigned long postID, unsigned long userID);
+Post *createPost(const char *title, const char *body, unsigned long postID, unsigned char isAnswer, unsigned long userID);
 void deletePost(Post *p);
 
 #endif /* Post_h */

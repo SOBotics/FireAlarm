@@ -123,6 +123,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     
     if (cJSON_GetObjectItem(json, "error_id")) {
         cJSON_Delete(json);
+        puts("Error fetching post!");
         return NULL;
     }
     
@@ -134,11 +135,13 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     
     //puts(cJSON_Print(postJSON));
     
+    
     char *title = cJSON_GetObjectItem(postJSON, "title")->valuestring;
     char *body = cJSON_GetObjectItem(postJSON, "body")->valuestring;
+    char *type = cJSON_GetObjectItem(postJSON, "post_type")->valuestring;
     unsigned userID = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "user_id")->valueint;
     
-    Post *p = createPost(title, body, postID, userID);
+    Post *p = createPost(title, body, postID, strcmp(type, "answer") == 0, userID);
     
     cJSON_Delete(json);
     return p;
@@ -146,28 +149,34 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
 
 void checkPost(ChatBot *bot, Post *post) {
     unsigned char match = 0;
+    char *messageBuf = malloc(sizeof(char));
+    *messageBuf = 0;
     for (int i = 0; i < bot->filterCount; i++) {
         unsigned start, end;
         if (postMatchesFilter(post, bot->filters[i], &start, &end)) {
-            char *text = malloc(end-start + 1);
-            memcpy(text, post->body + start, end - start);
-            text[end - start] = 0;
-            const unsigned size = end - start + 64;
-            char message[size];
             
-            snprintf(message, size,
-                    "Filter \"%s\" matches at position: %d-%d \"%s\"",
-                   bot->filters[i]->desc, start, end, text);
+            const char *desc = bot->filters[i]->desc;
+            messageBuf = realloc(messageBuf, strlen(messageBuf) + strlen(desc) + 1);
             
-            postMessage(bot->room, message);
+            snprintf(messageBuf + strlen(messageBuf), strlen(desc) + 16,
+                    "%s%s ", desc, (i < bot->filterCount - 1 ? "," : ":"));
             
-            free(text);
             match = 1;
         }
     }
-    if (!match) {
-        printf("No match");
+    if (match) {
+        const size_t maxMessage = strlen(messageBuf) + 256;
+        char *message = malloc(maxMessage);
+        snprintf(message, maxMessage,
+                 "%s[%s](http://stackoverflow.com/%s/%lu)",
+                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID);
+        
+        postMessage(bot->room, message);
+        
+        free(message);
     }
+    
+    free(messageBuf);
 }
 
 StopAction runChatBot(ChatBot *c) {

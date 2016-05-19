@@ -8,12 +8,16 @@
 
 #include "Filter.h"
 
-Filter *createFilter(const char *desc, const char *filter, FilterType type) {
+Filter *createFilter(const char *desc, const char *filter, FilterType type, unsigned truePositives, unsigned falsePositives) {
     Filter *f = malloc(sizeof(Filter));
     f->desc = malloc(strlen(desc) + 1);
     strcpy(f->desc, desc);
     f->filter = malloc(strlen(filter) + 1);
     strcpy(f->filter, filter);
+    
+    f->type = type;
+    f->truePositives = truePositives;
+    f->falsePositives = falsePositives;
     
     int error;
     if ((error = regcomp(&f->regex, f->filter, REG_BASIC))) {
