@@ -35,10 +35,16 @@ void webSocektOpened(WebSocket *ws) {
 }
 
 void wsRecieved(WebSocket *ws, char *data, size_t len) {
-    //cJSON *json = cJSON_Parse(data);
-    //puts(cJSON_Print(cJSON_Parse(cJSON_GetObjectItem(json, "data")->valuestring)));
-    //ChatBot *bot = (ChatBot*)ws->user;
-    
+    cJSON *json = cJSON_Parse(data);
+    cJSON *post = cJSON_Parse(cJSON_GetObjectItem(json, "data")->valuestring);
+    if (strcmp(cJSON_GetObjectItem(post, "apiSiteParameter")->valuestring, "stackoverflow")) {
+        //if this isn't SO
+        cJSON_Delete(json);
+        return;
+    }
+    ChatBot *bot = (ChatBot*)ws->user;
+    checkPost(bot, getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint));
+    cJSON_Delete(json);
 }
 
 int main(int argc, const char * argv[]) {

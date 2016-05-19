@@ -152,8 +152,15 @@ void checkPost(ChatBot *bot, Post *post) {
             char *text = malloc(end-start + 1);
             memcpy(text, post->body + start, end - start);
             text[end - start] = 0;
-            printf("Filter \"%s\" matches at position: %d-%d \"%s\"\n",
+            const unsigned size = end - start + 64;
+            char message[size];
+            
+            snprintf(message, size,
+                    "Filter \"%s\" matches at position: %d-%d \"%s\"",
                    bot->filters[i]->desc, start, end, text);
+            
+            postMessage(bot->room, message);
+            
             free(text);
             match = 1;
         }
