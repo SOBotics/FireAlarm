@@ -29,4 +29,35 @@ void checkPostCallback(RunningCommand *command, void *ctx) {
     pthread_mutex_unlock(&bot->detectorLock);
 }
 
+static void confirm(RunningCommand *command, void *ctx, unsigned char confirm) {
+    ChatBot *bot = ctx;
+    Post *post;
+    if (bot->latestReports[0] == NULL) {
+        postReply(bot->room, "I don't have any reports available.", command->message);
+        return;
+    }
+    if (command->message->replyID == 0) {
+        post = bot->latestReports[0]->post;
+    }
+    else {
+        Report *report = reportWithMessage(bot, command->message->replyID);
+        if (report) {
+            post = report->post;
+        }
+        else {
+            postReply(bot->room, "That report isn't available.", command->message);
+            return;
+        }
+    }
+    confirmPost(bot, post, confirm);
+}
+
+void truePositive(RunningCommand *command, void *ctx) {
+    confirm(command, ctx, 1);
+}
+
+void falsePositive(RunningCommand *command, void *ctx) {
+    confirm(command, ctx, 0);
+}
+
 #endif /* post_commands_h */

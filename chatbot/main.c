@@ -44,7 +44,11 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
         return;
     }
     ChatBot *bot = (ChatBot*)ws->user;
-    checkPost(bot, getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint));
+    Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
+    if (p != NULL) {
+        printf("Got a null post: %d\n", cJSON_GetObjectItem(post, "id")->valueint);
+        checkPost(bot, p);
+    }
     cJSON_Delete(json);
 }
 
@@ -203,6 +207,8 @@ int main(int argc, const char * argv[]) {
         createCommand("reboot", rebootBot),
         createCommand("kill", forceStopBot),
         createCommand("check post *", checkPostCallback),
+        createCommand("tp", truePositive),
+        createCommand("fp", falsePositive),
         NULL
     };
     ChatBot *bot = createChatBot(room, commands, filters);

@@ -10,11 +10,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-ChatMessage *createChatMessage(const char *text, unsigned long messageID, ChatUser *user) {
+ChatMessage *createChatMessage(const char *text, unsigned long messageID, unsigned long replyID, ChatUser *user) {
     ChatMessage *m = malloc(sizeof(ChatMessage));
     m->content = malloc(strlen(text) + 1);
     strcpy(m->content, text);
     m->id = messageID;
+    m->replyID = replyID;
     m->user = user;
     return m;
 }

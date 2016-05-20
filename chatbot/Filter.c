@@ -43,8 +43,8 @@ static unsigned char matchRegexFilter(Post *post, Filter *f, unsigned *outStart,
         fprintf(stderr, "Error executing regex %s: %s\n", f->filter, msg);
         exit(EXIT_FAILURE);
     }
-    *outStart = (unsigned)match.rm_so;
-    *outEnd = (unsigned)match.rm_eo;
+    if (outStart) *outStart = (unsigned)match.rm_so;
+    if (outEnd) *outEnd = (unsigned)match.rm_eo;
     return 1;
 }
 

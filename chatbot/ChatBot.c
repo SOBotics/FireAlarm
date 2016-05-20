@@ -14,6 +14,8 @@
 #include "cJSON.h"
 #include <zlib.h>
 
+#define REPORT_HEADER "Potentially bad post"
+
 ChatBot *createChatBot(ChatRoom *room, Command **commands, Filter **filters) {
     ChatBot *c = malloc(sizeof(ChatBot));
     c->room = room;
@@ -28,9 +30,15 @@ ChatBot *createChatBot(ChatRoom *room, Command **commands, Filter **filters) {
     c->filters = NULL;
     c->filterCount = 0;
     
+    c->reportsWaiting = -1;
+    
     while (*(filters++)) {
         c->filters = realloc(c->filters, ++c->filterCount * sizeof(Filter*));
         c->filters[c->filterCount-1] = *(filters - 1);
+    }
+    
+    for (int i = 0; i < REPORT_MEMORY; i++) {
+        c->latestReports[i] = NULL;
     }
     
     return c;
@@ -55,22 +63,46 @@ void runCommand(ChatBot *bot, ChatMessage *message, char *command) {
     pthread_mutex_unlock(&bot->runningCommandsLock);
 }
 
+void prepareCommand(ChatBot *bot, ChatMessage *message, char *messageText) {
+    char *command = strchr(messageText, ' ');
+    if (command) {
+        while (*(++command) == ' ');
+        if (*command && bot->stopAction == ACTION_NONE) {
+            runCommand(bot, message, command);
+            return;
+        }
+    }
+}
+
+Report *reportWithMessage(ChatBot *bot, unsigned long messageID) {
+    for (int i = 0; i < REPORT_MEMORY; i++) {
+        if (bot->latestReports[i]) {
+            if (messageID == bot->latestReports[i]->messageID) {
+                return bot->latestReports[i];
+            }
+        }
+    }
+    return NULL;
+}
+
 void processMessage(ChatBot *bot, ChatMessage *message) {
     char *messageText = malloc(strlen(message->content) + 1);
     strcpy(messageText, message->content);
     if (strstr(messageText, "@Bot") == messageText) {
         //messageText starts with "@Bot"
-        char *command = strchr(messageText, ' ');
-        if (command) {
-            while (*(++command) == ' ');
-            if (*command && bot->stopAction == ACTION_NONE) {
-                runCommand(bot, message, command);
-                free(messageText);
-                return;
-            }
-        }
+        prepareCommand(bot, message, messageText);
+        
     }
-    deleteChatMessage(message);
+    else if (bot->reportsWaiting != -1 && strstr(messageText, REPORT_HEADER)) {
+        bot->latestReports[bot->reportsWaiting--]->messageID = message->id;
+        deleteChatMessage(message);
+    }
+    else if (message->replyID && reportWithMessage(bot, message->replyID)) {
+        prepareCommand(bot, message, messageText);
+    }
+    else {
+        deleteChatMessage(message);
+    }
     free(messageText);
 }
 
@@ -87,8 +119,8 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     
     if (bot->apiFilter == NULL) {
         checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
-                         "api.stackexchange.com/2.2/filters/create?include=post.title;post.body;question.tags&unsafe=false"
-                         ));
+                                   "api.stackexchange.com/2.2/filters/create?include=post.title;post.body;question.tags&unsafe=false"
+                                   ));
         checkCURL(curl_easy_perform(curl));
         
         cJSON *json = cJSON_Parse(buffer.data);
@@ -159,7 +191,7 @@ void checkPost(ChatBot *bot, Post *post) {
             messageBuf = realloc(messageBuf, strlen(messageBuf) + strlen(desc) + 1);
             
             snprintf(messageBuf + strlen(messageBuf), strlen(desc) + 16,
-                    "%s%s ", desc, (i < bot->filterCount - 1 ? "," : ":"));
+                     "%s%s", desc, (i < bot->filterCount - 1 ? ", " : ""));
             
             match = 1;
         }
@@ -168,15 +200,45 @@ void checkPost(ChatBot *bot, Post *post) {
         const size_t maxMessage = strlen(messageBuf) + 256;
         char *message = malloc(maxMessage);
         snprintf(message, maxMessage,
-                 "%s[%s](http://stackoverflow.com/%s/%lu)",
+                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu)",
                  messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID);
         
         postMessage(bot->room, message);
         
+        if (bot->latestReports[REPORT_MEMORY-1]) {
+            free(bot->latestReports[REPORT_MEMORY-1]->post);
+            free(bot->latestReports[REPORT_MEMORY-1]);
+        }
+        int i = REPORT_MEMORY;
+        while(--i) {
+            bot->latestReports[i] = bot->latestReports[i-1];
+        }
+        Report *report = malloc(sizeof(Report));
+        report->post = post;
+        bot->latestReports[0] = report;
+        bot->reportsWaiting++;
         free(message);
+    }
+    else {
+        free(post);
     }
     
     free(messageBuf);
+}
+
+void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed) {
+    for (int i = 0; i < bot->filterCount; i++) {
+        Filter *filter = bot->filters[i];
+        if (postMatchesFilter(post, filter, NULL, NULL)) {
+            if (confirmed) {
+                filter->truePositives++;
+            }
+            else {
+                filter->falsePositives++;
+            }
+            printf("%s true positive count of %s.\n", confirmed ? "Increased" : "Decreased", filter->desc);
+        }
+    }
 }
 
 StopAction runChatBot(ChatBot *c) {

@@ -284,7 +284,10 @@ ChatMessage *processChatEvent(ChatRoom *r, cJSON *event) {
     if (eventType == 1 || eventType == 2) {
         //A user posted or edited.
         const char *content = cJSON_GetObjectItem(event, "content")->valuestring;
-        ChatMessage *m = createChatMessage(content, cJSON_GetObjectItem(event, "message_id")->valueint, user);
+        unsigned messageID = cJSON_GetObjectItem(event, "message_id")->valueint;
+        cJSON *parent = cJSON_GetObjectItem(event, "parent_id");
+        unsigned replyID = parent ? parent->valueint : 0;
+        ChatMessage *m = createChatMessage(content, messageID, replyID, user);
         printf(
                "%s: %s\n",
                user->name,
@@ -321,7 +324,7 @@ ChatMessage **processChatRoomEvents(ChatRoom *room) {
         char stdinBuf[maxStdinMessageSize];
         fgets(stdinBuf, maxStdinMessageSize, stdin);
         stdinBuf[strlen(stdinBuf) - 1] = 0; //remove the newline
-        ChatMessage *message = createChatMessage(stdinBuf, 0, room->users[0]);
+        ChatMessage *message = createChatMessage(stdinBuf, 0, 0, room->users[0]);
         messageBuffer[0] = message;
         messageBuffer[1] = NULL;
         return messageBuffer;
