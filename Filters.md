@@ -29,6 +29,7 @@ List of filters I plan to implement, sorted by percentage of posts matching thes
 - "where can i find" 11%
 - "sell" 11%
 - "sorry" 10%
+- "algo" 10%
 - "homework" 10%
 - "topic" 10%
 - "help me" 10%
@@ -62,3 +63,23 @@ List of filters I plan to implement, sorted by percentage of posts matching thes
 - "can" 7%
 - "will" 7%
 - "person" 7%
+
+To convert this list into JSON readable by the program, put the list in a file called `filters.txt`, and run this command:
+    
+    awk -F \" -f awkscript filters.txt > filters.json
+
+with `awkscript` containing the following:
+
+    { PERCENT_INDEX=index($3,"%") }
+    { PERCENTAGE = substr($3, 2, PERCENT_INDEX - 2) }
+    BEGIN { print "\[" }
+    NR > 1 { print "," }
+    { printf "{\"description\": \"%s\",", $2}
+    { printf "\"expression\": \"%s\",", $2}
+    { printf "\"type\": 0," }
+    { printf "\"truePositives\": %s,", PERCENTAGE }
+    { printf "\"falsePositives\": 0" }
+    { printf "}" }
+    END {print "\]" }
+    
+This will generate a file called `filters.json` that can be read by the chatbot.  The chatbot will look for this file in `~/.chatbot/`.
