@@ -29,6 +29,7 @@ List of filters I plan to implement, sorted by percentage of posts matching thes
 - "where can i find" 11%
 - "sell" 11%
 - "sorry" 10%
+- "algo" 10%
 - "homework" 10%
 - "topic" 10%
 - "help me" 10%
