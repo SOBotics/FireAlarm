@@ -15,6 +15,8 @@
 #include <zlib.h>
 
 #define REPORT_HEADER "Potentially bad post"
+#define API_KEY "HNA2dbrFtyTZxeHN6rThNg(("
+#define THRESHOLD 1000
 
 ChatBot *createChatBot(ChatRoom *room, Command **commands, Filter **filters) {
     ChatBot *c = malloc(sizeof(ChatBot));
@@ -119,7 +121,8 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     
     if (bot->apiFilter == NULL) {
         checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
-                                   "api.stackexchange.com/2.2/filters/create?include=post.title;post.body;question.tags&unsafe=false"
+                                   "api.stackexchange.com/2.2/filters/create"
+                                   "?include=post.title;post.body;question.tags;user.user_id;&unsafe=false&key="API_KEY
                                    ));
         checkCURL(curl_easy_perform(curl));
         
@@ -136,7 +139,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     unsigned max = 256;
     char request[max];
     snprintf(request, max,
-             "https://api.stackexchange.com/posts/%lu?site=stackoverflow&filter=%s",
+             "https://api.stackexchange.com/posts/%lu?site=stackoverflow&filter=%s&key="API_KEY,
              postID, bot->apiFilter
              );
     curl_easy_setopt(curl, CURLOPT_URL, request);
@@ -180,7 +183,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
 }
 
 void checkPost(ChatBot *bot, Post *post) {
-    unsigned char match = 0;
+    unsigned likelyhood = 0;
     char *messageBuf = malloc(sizeof(char));
     *messageBuf = 0;
     for (int i = 0; i < bot->filterCount; i++) {
@@ -191,17 +194,19 @@ void checkPost(ChatBot *bot, Post *post) {
             messageBuf = realloc(messageBuf, strlen(messageBuf) + strlen(desc) + 1);
             
             snprintf(messageBuf + strlen(messageBuf), strlen(desc) + 16,
-                     "%s%s", desc, (i < bot->filterCount - 1 ? ", " : ""));
+                     "%s%s", (likelyhood ? ", " : ""), desc);
+            //If this not the first match, start it with a comma and space.
             
-            match = 1;
+            const float truePositives = bot->filters[i]->truePositives;
+            likelyhood += (truePositives / truePositives + bot->filters[i]->falsePositives) * 1000;
         }
     }
-    if (match) {
+    if (likelyhood > THRESHOLD) {
         const size_t maxMessage = strlen(messageBuf) + 256;
         char *message = malloc(maxMessage);
         snprintf(message, maxMessage,
-                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu)",
-                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID);
+                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelyhood %d)",
+                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelyhood);
         
         postMessage(bot->room, message);
         

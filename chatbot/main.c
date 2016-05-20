@@ -46,8 +46,10 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     ChatBot *bot = (ChatBot*)ws->user;
     Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
     if (p != NULL) {
-        printf("Got a null post: %d\n", cJSON_GetObjectItem(post, "id")->valueint);
         checkPost(bot, p);
+    }
+    else {
+        printf("Got a null post: %d\n", cJSON_GetObjectItem(post, "id")->valueint);
     }
     cJSON_Delete(json);
 }
