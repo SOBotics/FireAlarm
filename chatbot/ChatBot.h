@@ -15,8 +15,9 @@
 #include "RunningCommand.h"
 #include "Filter.h"
 #include "Post.h"
+#include "cJSON.h"
 
-#define REPORT_MEMORY 8
+#define REPORT_MEMORY 100
 
 typedef enum {
     ACTION_NONE = 0,
@@ -27,6 +28,7 @@ typedef enum {
 typedef struct {
     Post *post;
     unsigned long messageID;
+    int confirmation;  //-1: not confirmed, 0: false positive, 1: true positive
 }Report;
 
 typedef struct _ChatBot {
@@ -42,9 +44,10 @@ typedef struct _ChatBot {
     unsigned filterCount;
     Report *latestReports[REPORT_MEMORY];   //index 0 is the most recent report, 1 is the second most, etc.
     int reportsWaiting; //The amount of reports that have not yet been assigned a message ID.
+    int reportsUntilAnalysis;   //The number of reports left until the bot analyzes them to auto-generate filters.
 }ChatBot;
 
-ChatBot *createChatBot(ChatRoom *room, Command **commands, Filter **filters);
+ChatBot *createChatBot(ChatRoom *room, Command **commands, cJSON *latestReports, Filter **filters);
 StopAction runChatBot(ChatBot *chatbot);
 Post *getPostByID(ChatBot *bot, unsigned long postID);
 void checkPost(ChatBot *bot, Post *post);   //This function is responsible for freeing post.

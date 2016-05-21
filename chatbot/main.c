@@ -22,6 +22,8 @@
 #include "commands.h"
 #include "Filter.h"
 
+#define SAVE_INTERVAL 60
+
 void unrecognizedCommand(RunningCommand *c, void *ctx) {
     ChatBot *bot = ctx;
     char *str;
@@ -46,15 +48,10 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     ChatBot *bot = (ChatBot*)ws->user;
     Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
     if (p != NULL) {
-<<<<<<< HEAD
         checkPost(bot, p);
     }
     else {
         printf("Got a null post: %d\n", cJSON_GetObjectItem(post, "id")->valueint);
-=======
-        printf("Got a null post: %d\n", cJSON_GetObjectItem(post, "id")->valueint);
-        checkPost(bot, p);
->>>>>>> c11f75c02365f88de6957030f4b088d43d83b830
     }
     cJSON_Delete(json);
 }
@@ -88,6 +85,7 @@ Filter **loadFilters() {
     fclose(file);
     
     cJSON *json = cJSON_Parse(buf);
+    free(buf);
     
     unsigned filterCount = cJSON_GetArraySize(json);
     Filter **filters = malloc(sizeof(Filter*) * (filterCount + 1));
@@ -126,10 +124,75 @@ void saveFilters(Filter **filters) {
     
     
     char *str = cJSON_Print(json);
+    cJSON_Delete(json);
     
     FILE *file = fopen("filters.json", "w");
     if (!file) {
         fputs("Failed to open filter file!", stderr);
+        return;
+    }
+    
+    fwrite(str, strlen(str), 1, file);
+    
+    fclose(file);
+}
+
+cJSON *loadReports() {
+    puts("Loading recent reports...");
+    FILE *file = fopen("reports.json", "r");
+    
+    if (!file) {
+        return NULL;
+    }
+    
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+    
+    char *buf = malloc(size+1);
+    fread(buf, size, 1, file);
+    buf[size] = 0;
+    
+    fclose(file);
+    
+    cJSON *json = cJSON_Parse(buf);
+    free(buf);
+    
+    return json;
+}
+
+void saveReports(Report *reports[], int reportsUntilAnalysis) {
+    puts("Saving recent reports...");
+    cJSON *container = cJSON_CreateObject();
+    cJSON *json = cJSON_CreateArray();
+    
+    for (int i = 0; i < REPORT_MEMORY; i++) {
+        if (reports[i] == NULL) {
+            cJSON_AddItemToArray(json, cJSON_CreateNull());
+            continue;
+        }
+        cJSON *item = cJSON_CreateObject();
+        cJSON_AddItemToObject(item, "messageID", cJSON_CreateNumber(reports[i]->messageID));
+        
+        Post *post = reports[i]->post;
+        cJSON_AddItemToObject(item, "postID", cJSON_CreateNumber(post->postID));
+        cJSON_AddItemToObject(item, "title", cJSON_CreateString(post->title));
+        cJSON_AddItemToObject(item, "body", cJSON_CreateString(post->body));
+        cJSON_AddItemToObject(item, "userID", cJSON_CreateNumber(post->userID));
+        cJSON_AddItemToObject(item, "isAnswer", cJSON_CreateBool(post->isAnswer));
+        
+        cJSON_AddItemToArray(json, item);
+    }
+    
+    cJSON_AddItemToObject(container, "latestReports", json);
+    cJSON_AddItemToObject(container, "reportsUntilAnalysis", cJSON_CreateNumber(reportsUntilAnalysis));
+    
+    char *str = cJSON_Print(container);
+    cJSON_Delete(json);
+    
+    FILE *file = fopen("reports.json", "w");
+    if (!file) {
+        fputs("Failed to open reports file!", stderr);
         return;
     }
     
@@ -218,7 +281,7 @@ int main(int argc, const char * argv[]) {
         createCommand("fp", falsePositive),
         NULL
     };
-    ChatBot *bot = createChatBot(room, commands, filters);
+    ChatBot *bot = createChatBot(room, commands, loadReports(), filters);
     
     
     WebSocket *socket = createWebSocketWithClient(client);
@@ -229,7 +292,8 @@ int main(int argc, const char * argv[]) {
     
     puts("Started.");
     
-    
+    unsigned char reboot = 0;
+    time_t saveTime = time(NULL) + SAVE_INTERVAL;
     for (;;) {
         serviceWebsockets(client);
         StopAction action = runChatBot(bot);
@@ -237,14 +301,24 @@ int main(int argc, const char * argv[]) {
             break;
         }
         else if (action == ACTION_REBOOT) {
-            curl_easy_cleanup(client->curl);
-            execv(argv[0], (char*const*)argv);  //Load this program into the current process.
-        }                                       //This will cause the bot to restart.
+            reboot = 1;
+            break;
+        }
+        if (time(NULL) > saveTime) {
+            saveFilters(filters);
+            saveReports(bot->latestReports, bot->reportsUntilAnalysis);
+            saveTime = time(NULL) + SAVE_INTERVAL;
+        }
     }
     
     curl_easy_cleanup(client->curl);
     
     saveFilters(filters);
+    saveReports(bot->latestReports, bot->reportsUntilAnalysis);
+    
+    if (reboot) {
+        execv(argv[0], (char*const*)argv);  //Reload the program.
+    }
     
     return 0;
 }

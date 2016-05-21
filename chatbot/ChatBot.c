@@ -18,7 +18,57 @@
 #define API_KEY "HNA2dbrFtyTZxeHN6rThNg(("
 #define THRESHOLD 1000
 
-ChatBot *createChatBot(ChatRoom *room, Command **commands, Filter **filters) {
+static void loadNullReports(Report **reports) {
+    for (int i = 0; i < REPORT_MEMORY; i++) {
+        reports[i] = NULL;
+    }
+}
+
+static Report **parseReports(ChatBot *bot, cJSON *json) {
+    Report **reports = malloc(REPORT_MEMORY * sizeof(reports));
+    bot->reportsUntilAnalysis = REPORT_MEMORY;
+    if (json == NULL) {
+        loadNullReports(reports);
+        return reports;
+    }
+    
+    cJSON *array = cJSON_GetObjectItem(json, "latestReports");
+    
+    if (cJSON_GetArraySize(array) != REPORT_MEMORY) {
+        fputs("Report file doesn't have enough reports!  Ignoring report file.\n", stderr);
+        loadNullReports(reports);
+        cJSON_Delete(array);
+        return reports;
+    }
+    
+    bot->reportsUntilAnalysis = cJSON_GetObjectItem(json, "reportsUntilAnalysis")->valueint;
+    
+    for (int i = 0; i < REPORT_MEMORY; i++) {
+        cJSON *data = cJSON_GetArrayItem(array, i);
+        if (data->type == cJSON_NULL) {
+            reports[i] = NULL;
+            continue;
+        }
+        
+        unsigned long messageID = cJSON_GetObjectItem(data, "messageID")->valueint;
+        unsigned long postID = cJSON_GetObjectItem(data, "postID")->valueint;
+        unsigned long userID = cJSON_GetObjectItem(data, "userID")->valueint;
+        unsigned char isAnswer = cJSON_GetObjectItem(data, "isAnswer")->type == cJSON_True;
+        const char *title = cJSON_GetObjectItem(data, "title")->valuestring;
+        const char *body = cJSON_GetObjectItem(data, "body")->valuestring;
+        
+        Report *report = malloc(sizeof(Report));
+        
+        report->messageID = messageID;
+        report->post = createPost(title, body, postID, isAnswer, userID);
+        
+        reports[i] = report;
+    }
+    
+    return reports;
+}
+
+ChatBot *createChatBot(ChatRoom *room, Command **commands, cJSON *latestReports, Filter **filters) {
     ChatBot *c = malloc(sizeof(ChatBot));
     c->room = room;
     c->commands = commands;
@@ -39,9 +89,11 @@ ChatBot *createChatBot(ChatRoom *room, Command **commands, Filter **filters) {
         c->filters[c->filterCount-1] = *(filters - 1);
     }
     
+    Report **reports = parseReports(c, latestReports);
     for (int i = 0; i < REPORT_MEMORY; i++) {
-        c->latestReports[i] = NULL;
+        c->latestReports[i] = reports[i];
     }
+    free(reports);
     
     return c;
 }
@@ -183,7 +235,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
 }
 
 void checkPost(ChatBot *bot, Post *post) {
-    unsigned likelyhood = 0;
+    unsigned likelihood = 0;
     char *messageBuf = malloc(sizeof(char));
     *messageBuf = 0;
     for (int i = 0; i < bot->filterCount; i++) {
@@ -194,19 +246,19 @@ void checkPost(ChatBot *bot, Post *post) {
             messageBuf = realloc(messageBuf, strlen(messageBuf) + strlen(desc) + 1);
             
             snprintf(messageBuf + strlen(messageBuf), strlen(desc) + 16,
-                     "%s%s", (likelyhood ? ", " : ""), desc);
+                     "%s%s", (likelihood ? ", " : ""), desc);
             //If this not the first match, start it with a comma and space.
             
             const float truePositives = bot->filters[i]->truePositives;
-            likelyhood += (truePositives / truePositives + bot->filters[i]->falsePositives) * 1000;
+            likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
         }
     }
-    if (likelyhood > THRESHOLD) {
+    if (likelihood > THRESHOLD) {
         const size_t maxMessage = strlen(messageBuf) + 256;
         char *message = malloc(maxMessage);
         snprintf(message, maxMessage,
-                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelyhood %d)",
-                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelyhood);
+                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d)",
+                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood);
         
         postMessage(bot->room, message);
         
@@ -222,6 +274,11 @@ void checkPost(ChatBot *bot, Post *post) {
         report->post = post;
         bot->latestReports[0] = report;
         bot->reportsWaiting++;
+        bot->reportsUntilAnalysis--;
+        if (bot->reportsUntilAnalysis == 0) {
+            postMessage(bot->room, "@NobodyNada Time to analyze reports!");
+            bot->reportsUntilAnalysis = REPORT_MEMORY;
+        }
         free(message);
     }
     else {
@@ -241,7 +298,7 @@ void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed) {
             else {
                 filter->falsePositives++;
             }
-            printf("%s true positive count of %s.\n", confirmed ? "Increased" : "Decreased", filter->desc);
+            printf("Increased %s positive count of %s.\n", confirmed ? "true" : "false", filter->desc);
         }
     }
 }
