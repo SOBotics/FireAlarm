@@ -37,11 +37,13 @@ static void confirm(RunningCommand *command, void *ctx, unsigned char confirm) {
         return;
     }
     if (command->message->replyID == 0) {
+        bot->latestReports[0]->confirmation = confirm;
         post = bot->latestReports[0]->post;
     }
     else {
         Report *report = reportWithMessage(bot, command->message->replyID);
         if (report) {
+            report->confirmation = confirm;
             post = report->post;
         }
         else {

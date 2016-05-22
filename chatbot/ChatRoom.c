@@ -299,10 +299,6 @@ ChatMessage *processChatEvent(ChatRoom *r, cJSON *event) {
     return NULL;
 }
 
-void webSocketRecieved(WebSocket *socket, char *data, size_t len) {
-    printf("Websocket recieved: %s\n", cJSON_Print(cJSON_Parse(data)));
-}
-
 ChatMessage **processChatRoomEvents(ChatRoom *room) {
     //Calculate the time interval between chat room polls.
     time_t timeDifference = time(NULL) - room->lastEventTime;

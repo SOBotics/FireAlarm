@@ -43,6 +43,7 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     if (strcmp(cJSON_GetObjectItem(post, "apiSiteParameter")->valuestring, "stackoverflow")) {
         //if this isn't SO
         cJSON_Delete(json);
+        cJSON_Delete(post);
         return;
     }
     ChatBot *bot = (ChatBot*)ws->user;
@@ -54,6 +55,7 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
         printf("Got a null post: %d\n", cJSON_GetObjectItem(post, "id")->valueint);
     }
     cJSON_Delete(json);
+    cJSON_Delete(post);
 }
 
 Filter **loadFilters() {
@@ -106,11 +108,11 @@ Filter **loadFilters() {
     return filters;
 }
 
-void saveFilters(Filter **filters) {
+void saveFilters(Filter **filters, unsigned filterCount) {
     puts("Saving filters...");
     cJSON *json = cJSON_CreateArray();
-    Filter *filter;
-    for (int i = 0; (filter = filters[i]); i++) {
+    for (int i = 0; i < filterCount; i++) {
+        Filter *filter = filters[i];
         cJSON *object = cJSON_CreateObject();
         
         cJSON_AddItemToObject(object, "description", cJSON_CreateString(filter->desc));
@@ -135,6 +137,8 @@ void saveFilters(Filter **filters) {
     fwrite(str, strlen(str), 1, file);
     
     fclose(file);
+    
+    free(str);
 }
 
 cJSON *loadReports() {
@@ -173,6 +177,7 @@ void saveReports(Report *reports[], int reportsUntilAnalysis) {
         }
         cJSON *item = cJSON_CreateObject();
         cJSON_AddItemToObject(item, "messageID", cJSON_CreateNumber(reports[i]->messageID));
+        cJSON_AddItemToObject(item, "confirmation", cJSON_CreateNumber(reports[i]->confirmation));
         
         Post *post = reports[i]->post;
         cJSON_AddItemToObject(item, "postID", cJSON_CreateNumber(post->postID));
@@ -188,7 +193,7 @@ void saveReports(Report *reports[], int reportsUntilAnalysis) {
     cJSON_AddItemToObject(container, "reportsUntilAnalysis", cJSON_CreateNumber(reportsUntilAnalysis));
     
     char *str = cJSON_Print(container);
-    cJSON_Delete(json);
+    cJSON_Delete(container);
     
     FILE *file = fopen("reports.json", "w");
     if (!file) {
@@ -199,6 +204,7 @@ void saveReports(Report *reports[], int reportsUntilAnalysis) {
     fwrite(str, strlen(str), 1, file);
     
     fclose(file);
+    free(str);
 }
 
 int main(int argc, const char * argv[]) {
@@ -305,7 +311,7 @@ int main(int argc, const char * argv[]) {
             break;
         }
         if (time(NULL) > saveTime) {
-            saveFilters(filters);
+            saveFilters(bot->filters, bot->filterCount);
             saveReports(bot->latestReports, bot->reportsUntilAnalysis);
             saveTime = time(NULL) + SAVE_INTERVAL;
         }
@@ -313,7 +319,7 @@ int main(int argc, const char * argv[]) {
     
     curl_easy_cleanup(client->curl);
     
-    saveFilters(filters);
+    saveFilters(bot->filters, bot->filterCount);
     saveReports(bot->latestReports, bot->reportsUntilAnalysis);
     
     if (reboot) {

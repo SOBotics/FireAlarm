@@ -51,6 +51,7 @@ void listPingable(RunningCommand *command, void *ctx) {
                  userID
                  );
     }
+    cJSON_Delete(json);
     postMessage(bot->room, messageString);
 }
 

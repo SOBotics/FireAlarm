@@ -101,6 +101,7 @@ Client *createClient(const char *host, const char *cookiefile) {
     //check if we are currently logged in by seeing if stackexchange.com/logout redirects
     checkCURL(curl_easy_setopt(curl, CURLOPT_URL, "https://stackexchange.com/users/logout"));
     checkCURL(curl_easy_perform(curl));
+    free(buf.data);
     
     long http_code = 0;
     checkCURL(curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code));

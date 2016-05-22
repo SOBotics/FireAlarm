@@ -13,6 +13,7 @@
 #include "ChatMessage.h"
 #include "cJSON.h"
 #include <zlib.h>
+#include <ctype.h>
 
 #define REPORT_HEADER "Potentially bad post"
 #define API_KEY "HNA2dbrFtyTZxeHN6rThNg(("
@@ -21,6 +22,135 @@
 static void loadNullReports(Report **reports) {
     for (int i = 0; i < REPORT_MEMORY; i++) {
         reports[i] = NULL;
+    }
+}
+
+typedef struct {
+    char *text;
+    unsigned trueOccurences;
+    unsigned falseOccurences;
+}Word;
+
+void analyzeReports(ChatBot *bot) {
+    puts("Analyzing reports...");
+    Report **reports = bot->latestReports;
+    //First, string together all of the true and false positive posts.
+    size_t trueLen = 0;
+    size_t falseLen = 0;
+    char *truePositives = NULL;
+    char *falsePositives = NULL;
+    for (int i = 0; i < REPORT_MEMORY; i++) {
+        Report *report = reports[i];
+        if (!report || report->confirmation == -1) {
+            continue;
+        }
+        const char *body = report->post->body;
+        if (report->confirmation) {
+            trueLen += strlen(body) + 1;
+            truePositives = realloc(truePositives, trueLen + 1);
+            strcat(truePositives, " ");
+            strcat(truePositives, body);
+        }
+        else {
+            falseLen += strlen(body) + 1;
+            falsePositives = realloc(falsePositives, falseLen + 1);
+            strcat(falsePositives, " ");
+            strcat(falsePositives, body);
+        }
+    }
+    
+    //Now, count word frequency.
+    Word *words = NULL;
+    size_t wordCount = 0;
+    unsigned char inWord = 0;
+    
+    const unsigned maxWordLength = 256;
+    char currentWord[maxWordLength];
+    size_t currentWordLen = 0;
+    
+    char *pos = truePositives;
+    for (signed char searchingTruePositives = 1; searchingTruePositives > -1; searchingTruePositives--) {
+        while (*pos) {
+            if (inWord) {
+                if (isalpha(*pos)) {
+                    currentWord[currentWordLen++] = tolower(*pos);
+                }
+                else {  //we're at the end of a word!
+                    currentWord[currentWordLen] = 0;
+                    unsigned char foundWord = 0;
+                    //check if this word is in the list
+                    for (int i = 0; i < wordCount; i++) {
+                        if (!strcmp(words[i].text, currentWord)) {
+                            //this word is in the list.
+                            //increment it's count
+                            if (searchingTruePositives) {
+                                words[i].trueOccurences++;
+                            }
+                            else {
+                                words[i].falseOccurences++;
+                            }
+                            foundWord = 1;
+                        }
+                    }
+                    if (!foundWord) {
+                        words = realloc(words, ++wordCount * sizeof(Word));
+                        words[wordCount-1].text = malloc(currentWordLen + 1);
+                        strcpy(words[wordCount-1].text, currentWord);
+                        words[wordCount-1].trueOccurences = searchingTruePositives;
+                        words[wordCount-1].falseOccurences = !searchingTruePositives;
+                    }
+                    currentWordLen = 0;
+                    inWord = 0;
+                }
+            }
+            else {
+                switch (*pos) {
+                    case '<':   //skip HTML tags
+                        if (strstr(pos, "<pre><code>") == pos) {
+                            pos = strstr(pos, "</code></pre>");
+                            break;  //Completely skip over code.
+                        }
+                        pos = strchr(pos, '>');
+                        break;
+                    default:
+                        if (isalpha(*pos)) {
+                            inWord = 1;
+                            currentWordLen = 1;
+                            currentWord[0] = tolower(*pos);
+                        }
+                        break;
+                }
+            }
+            pos++;
+        }
+        pos = falsePositives;
+    }
+    free(truePositives);
+    free(falsePositives);
+    
+    puts("Filter additions:");
+    puts("            Word    TP rate      TPs     FPs\n");
+    for (unsigned i = 0; i < wordCount; i++) {
+        Word word = words[i];
+        unsigned trueOccurences = word.trueOccurences;
+        unsigned falseOccurences = word.falseOccurences;
+        float totalOccurences = trueOccurences + falseOccurences;
+        float trueRate = trueOccurences / totalOccurences;
+        const char *text = word.text;
+        if (totalOccurences > 5 && trueRate > 0.7) {
+            unsigned char matchesExistingFilter = 0;
+            for (int i = 0; i < bot->filterCount; i++) {
+                if (strstr(text, bot->filters[i]->filter)) {
+                    matchesExistingFilter = 1;
+                }
+            }
+            if (!matchesExistingFilter) {
+                Filter *newFilter = createFilter(text, text, 0, trueOccurences, falseOccurences);
+                bot->filters = realloc(bot->filters, ++bot->filterCount * sizeof(Filter*));
+                bot->filters[bot->filterCount - 1] = newFilter;
+                printf("%16s\t%4f\t%4d\t%4d\n", text, trueRate, trueOccurences, falseOccurences);
+            }
+        }
     }
 }
 
@@ -37,7 +167,7 @@ static Report **parseReports(ChatBot *bot, cJSON *json) {
     if (cJSON_GetArraySize(array) != REPORT_MEMORY) {
         fputs("Report file doesn't have enough reports!  Ignoring report file.\n", stderr);
         loadNullReports(reports);
-        cJSON_Delete(array);
+        cJSON_Delete(json);
         return reports;
     }
     
@@ -54,6 +184,7 @@ static Report **parseReports(ChatBot *bot, cJSON *json) {
         unsigned long postID = cJSON_GetObjectItem(data, "postID")->valueint;
         unsigned long userID = cJSON_GetObjectItem(data, "userID")->valueint;
         unsigned char isAnswer = cJSON_GetObjectItem(data, "isAnswer")->type == cJSON_True;
+        int confirmation = cJSON_GetObjectItem(data, "confirmation")->valueint;
         const char *title = cJSON_GetObjectItem(data, "title")->valuestring;
         const char *body = cJSON_GetObjectItem(data, "body")->valuestring;
         
@@ -61,10 +192,12 @@ static Report **parseReports(ChatBot *bot, cJSON *json) {
         
         report->messageID = messageID;
         report->post = createPost(title, body, postID, isAnswer, userID);
+        report->confirmation = confirmation;;
         
         reports[i] = report;
     }
     
+    cJSON_Delete(json);
     return reports;
 }
 
@@ -183,7 +316,10 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
         buffer.data = NULL;
         
         cJSON *items = cJSON_GetObjectItem(json, "items");
-        bot->apiFilter = cJSON_GetObjectItem(cJSON_GetArrayItem(items, 0), "filter")->valuestring;
+        char *filter = cJSON_GetObjectItem(cJSON_GetArrayItem(items, 0), "filter")->valuestring;
+        bot->apiFilter = malloc(strlen(filter) + 1);
+        strcpy(bot->apiFilter, filter);
+        cJSON_Delete(json);
     }
     
     
@@ -243,7 +379,7 @@ void checkPost(ChatBot *bot, Post *post) {
         if (postMatchesFilter(post, bot->filters[i], &start, &end)) {
             
             const char *desc = bot->filters[i]->desc;
-            messageBuf = realloc(messageBuf, strlen(messageBuf) + strlen(desc) + 1);
+            messageBuf = realloc(messageBuf, strlen(messageBuf) + strlen(desc) + 16);
             
             snprintf(messageBuf + strlen(messageBuf), strlen(desc) + 16,
                      "%s%s", (likelihood ? ", " : ""), desc);
@@ -272,17 +408,18 @@ void checkPost(ChatBot *bot, Post *post) {
         }
         Report *report = malloc(sizeof(Report));
         report->post = post;
+        report->confirmation = -1;
         bot->latestReports[0] = report;
         bot->reportsWaiting++;
         bot->reportsUntilAnalysis--;
         if (bot->reportsUntilAnalysis == 0) {
-            postMessage(bot->room, "@NobodyNada Time to analyze reports!");
             bot->reportsUntilAnalysis = REPORT_MEMORY;
+            analyzeReports(bot);
         }
         free(message);
     }
     else {
-        free(post);
+        deletePost(post);
     }
     
     free(messageBuf);
