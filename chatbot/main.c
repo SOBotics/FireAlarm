@@ -287,6 +287,7 @@ int main(int argc, const char * argv[]) {
         createCommand("fp", falsePositive),
         createCommand("t", truePositive),
         createCommand("f", falsePositive),
+        createCommand("help", help),
         NULL
     };
     ChatBot *bot = createChatBot(room, commands, loadReports(), filters);
