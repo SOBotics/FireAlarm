@@ -67,7 +67,7 @@ void listCommands(RunningCommand *command, void *ctx) {
 void help (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    postReply (bot->room, "I am a bot which detects questions that need Closing whenever they are posted or edited.", command->message);
+    postReply (bot->room, "I am a bot which detects questions that need closing whenever they are posted or edited.", command->message);
     return;
 }
 
