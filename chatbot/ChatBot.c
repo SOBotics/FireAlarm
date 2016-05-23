@@ -15,7 +15,7 @@
 #include <zlib.h>
 #include <ctype.h>
 
-#define REPORT_HEADER "Potentially bad post"
+#define REPORT_HEADER "Potentially bad question"
 #define API_KEY "HNA2dbrFtyTZxeHN6rThNg(("
 #define THRESHOLD 1000
 
