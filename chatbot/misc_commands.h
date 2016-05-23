@@ -71,4 +71,11 @@ void help (RunningCommand *command, void *ctx)
     return;
 }
 
+void aliveCheck (RunningCommand *command, void *ctx) 
+{
+    ChatBot *bot = ctx;
+    postReply (bot->room, "Why did you think I was dead?", command->message);
+    return;
+}
+
 #endif /* misc_commands_h */
