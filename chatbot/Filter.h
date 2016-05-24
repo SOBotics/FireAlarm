@@ -16,7 +16,8 @@
 #include "Post.h"
 
 typedef enum {
-    FILTER_REGEX = 0
+    FILTER_TEXT = 0,
+    FILTER_REGEX = 1
 }FilterType;
 
 typedef struct {

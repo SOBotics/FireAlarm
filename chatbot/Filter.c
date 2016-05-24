@@ -50,9 +50,16 @@ static unsigned char matchRegexFilter(Post *post, Filter *f, unsigned *outStart,
 
 unsigned char postMatchesFilter(Post *post, Filter *filter, unsigned *outStart, unsigned *outEnd) {
     switch (filter->type) {
+        case FILTER_TEXT:
+            ;char *start = strstr(post->body, filter->filter);
+            if (start) {
+                if (outStart) *outStart = (unsigned)(start - post->body);
+                if (outEnd) *outEnd = (unsigned)((start - post->body) + strlen(filter->filter));
+                return 1;
+            }
+            return 0;
         case FILTER_REGEX:
             return matchRegexFilter(post, filter, outStart, outEnd);
-            break;
         default:
             fprintf(stderr, "Invalid filter type %d\n", filter->type);
             exit(EXIT_FAILURE);

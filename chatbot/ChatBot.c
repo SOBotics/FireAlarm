@@ -144,7 +144,7 @@ void analyzeReports(ChatBot *bot) {
                     matchesExistingFilter = 1;
                 }
             }
-            if (!matchesExistingFilter) {
+            if (!matchesExistingFilter && strlen(text) > 2) {
                 Filter *newFilter = createFilter(text, text, 0, trueOccurences, falseOccurences);
                 bot->filters = realloc(bot->filters, ++bot->filterCount * sizeof(Filter*));
                 bot->filters[bot->filterCount - 1] = newFilter;
@@ -275,7 +275,7 @@ Report *reportWithMessage(ChatBot *bot, unsigned long messageID) {
 void processMessage(ChatBot *bot, ChatMessage *message) {
     char *messageText = malloc(strlen(message->content) + 1);
     strcpy(messageText, message->content);
-    if (strstr(messageText, "@Bot") == messageText) {
+    if (strstr(messageText, "@Fire") == messageText) {
         //messageText starts with "@Bot"
         prepareCommand(bot, message, messageText);
         
