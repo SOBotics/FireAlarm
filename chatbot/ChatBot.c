@@ -275,7 +275,7 @@ Report *reportWithMessage(ChatBot *bot, unsigned long messageID) {
 void processMessage(ChatBot *bot, ChatMessage *message) {
     char *messageText = malloc(strlen(message->content) + 1);
     strcpy(messageText, message->content);
-    if ((strstr(messageText, "@Fire") == messageText) || (strstr(messageText, "@FireAlarm") == messageText)) {
+    if (strstr(messageText, "@Fir") == messageText) {
         //messageText starts with "@Bot"
         prepareCommand(bot, message, messageText);
         
