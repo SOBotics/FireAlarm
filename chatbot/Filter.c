@@ -20,7 +20,7 @@ Filter *createFilter(const char *desc, const char *filter, FilterType type, unsi
     f->falsePositives = falsePositives;
     
     int error;
-    if ((error = regcomp(&f->regex, f->filter, REG_BASIC))) {
+    if ((error = regcomp(&f->regex, f->filter, REG_ICASE))) {
         const unsigned max = 1024;
         char msg[max];
         regerror(error, &f->regex, msg, max);

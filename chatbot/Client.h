@@ -10,6 +10,7 @@
 #define Client_h
 
 #include <stdio.h>
+#include <pthread.h>
 #include <curl/curl.h>
 #include <libwebsockets.h>
 

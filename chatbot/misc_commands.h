@@ -78,7 +78,7 @@ void aliveCheck (RunningCommand *command, void *ctx)
     return;
 }
 
-void commandList (RunningCommand *command, voit *ctx)
+void commandList (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     postReply (bot->room, "To see a complete list of commands, visit [this page](https://github.com/NobodyNada/chatbot/wiki/Commands).", command->message);

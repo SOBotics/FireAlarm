@@ -12,7 +12,6 @@
 #include "test_commands.h"
 #include "misc_commands.h"
 #include "stop_commands.h"
-#include "users_commands.h"
 #include "post_commands.h"
 
 #endif /* commands_h */
