@@ -69,7 +69,7 @@ Client *createClient(const char *host, const char *cookiefile) {
     //Configure CURL
     
     //Uncomment this to pass all requests through mitmproxy, for debugging.
-    //checkCURL(curl_easy_setopt(curl, CURLOPT_PROXY, "https://127.0.0.1:8080"));
+    checkCURL(curl_easy_setopt(curl, CURLOPT_PROXY, "https://127.0.0.1:8080"));
     
 #ifdef DEBUG
     //checkCURL(curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, curlDebug));
@@ -245,15 +245,23 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
                  );
         checkCURL(curl_easy_setopt(curl, CURLOPT_URL, postBuffer));
         postBuffer[0] = 0;
+        checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
+        checkCURL(curl_easy_perform(curl));
         
+        free(client->fkey);
+        getFkey(client, buffer.data);
+        
+        free(buffer.data);
+        buffer.data = NULL;
         
         char *escapedEmail = curl_easy_escape(curl, email, (int)strlen(email));
         char *escapedPassword = curl_easy_escape(curl, password, (int)strlen(password));
         snprintf(postBuffer,
                  maxPostLength - 1,
-                 "email=%s&password=%s",
+                 "email=%s&password=%s&fkey=%s",
                  escapedEmail,
-                 escapedPassword
+                 escapedPassword,
+                 client->fkey
                  );
         
         //Overwrite the password with zeroes.

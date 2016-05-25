@@ -309,7 +309,7 @@ ChatMessage **processChatRoomEvents(ChatRoom *room) {
     struct pollfd fd;
     fd.fd = STDIN_FILENO;
     fd.events = POLLIN;
-    int stdinAvailable = poll(&fd, 1, 0);
+    int stdinAvailable = poll(&fd, 1, interval);
     
     if (stdinAvailable == -1) {
         fprintf(stderr, "Failed to poll stdin!\n");
