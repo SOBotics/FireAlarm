@@ -53,7 +53,6 @@
 		8448C7EA1CE1341C00F6E64D /* test_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = test_commands.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		8448C7EB1CE1342700F6E64D /* misc_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = misc_commands.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		8448C7EC1CE1342E00F6E64D /* stop_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = stop_commands.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		8448C7EE1CE1346700F6E64D /* users_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = users_commands.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		845D93B61CEC223500DCC224 /* libwebsockets.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libwebsockets.6.dylib; path = /usr/local/Cellar/libwebsockets/1.6.2/lib/libwebsockets.6.dylib; sourceTree = "<absolute>"; };
 		8490322C1CD95CCA000605EA /* cJSON.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON.c; sourceTree = "<group>"; };
 		8490322D1CD95CCA000605EA /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
@@ -134,7 +133,6 @@
 				8448C7EA1CE1341C00F6E64D /* test_commands.h */,
 				8400860D1CED2E3300B46C8B /* post_commands.h */,
 				8448C7EB1CE1342700F6E64D /* misc_commands.h */,
-				8448C7EE1CE1346700F6E64D /* users_commands.h */,
 				8448C7EC1CE1342E00F6E64D /* stop_commands.h */,
 			);
 			name = Commands;
