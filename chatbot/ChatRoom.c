@@ -197,7 +197,7 @@ void postReply(ChatRoom *r, const char *text, ChatMessage *message) {
 }
 
 void handleQueuedMessages(ChatRoom *r) {
-    if (time(NULL) - r->lastPostTimestamp < 5) {
+    if (time(NULL) - r->lastPostTimestamp < 3) {
         return;
     }
     pthread_mutex_lock(&r->pendingMessageLock);
