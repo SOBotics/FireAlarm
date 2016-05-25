@@ -29,12 +29,12 @@ void checkPostCallback(RunningCommand *command, void *ctx) {
     pthread_mutex_unlock(&bot->detectorLock);
 }
 
-static void confirm(RunningCommand *command, void *ctx, unsigned char confirm) {
+unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) {
     ChatBot *bot = ctx;
     Post *post;
     if (bot->latestReports[0] == NULL) {
         postReply(bot->room, "I don't have any reports available.", command->message);
-        return;
+        return 1;
     }
     if (command->message->replyID == 0) {
         bot->latestReports[0]->confirmation = confirm;
@@ -48,10 +48,11 @@ static void confirm(RunningCommand *command, void *ctx, unsigned char confirm) {
         }
         else {
             postReply(bot->room, "That report isn't available.", command->message);
-            return;
+            return 1;
         }
     }
     confirmPost(bot, post, confirm);
+    return 0;
 }
 
 void truePositive(RunningCommand *command, void *ctx) {
@@ -67,9 +68,13 @@ void falsePositive(RunningCommand *command, void *ctx) {
 void truePositiveRespond (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    unsigned int check;
     
-    confirm (command, ctx, 1);
-    postReply (bot->room, "The report has been successfully been recorded as True Positive.", command->message);
+    check = confirm (command, ctx, 1);
+    
+    if (check == 0)
+        postReply (bot->room, "The report has been successfully been recorded as True Positive.", command->message);
+        
     return;
 }
 
@@ -78,9 +83,13 @@ void truePositiveRespond (RunningCommand *command, void *ctx)
 void falsePositiveRespond (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    unsigned int check;
     
-    confirm (command, ctx, 0);
-    postReply (bot->room, "The report has been successfully been recorded as False Positive", command->message);
+    check = confirm (command, ctx, 0);
+    
+    if (check == 0)
+     postReply (bot->room, "The report has been successfully been recorded as False Positive", command->message);
+   
     return;
 }
 
