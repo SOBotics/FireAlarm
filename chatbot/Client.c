@@ -237,7 +237,7 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
         //Log into host.
         //Make a buffer for POST data.
         const size_t maxPostLength = 256;
-        char postBuffer[maxPostLength] = {0};
+        char postBuffer[maxPostLength];
         
         snprintf(postBuffer, maxPostLength,
                  "https://%s/users/login",

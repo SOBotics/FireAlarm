@@ -345,7 +345,7 @@ ChatMessage **processChatRoomEvents(ChatRoom *room) {
              postBuffer, maxRequestLength,
              "fkey=%s&%s=%lu",
              room->client->fkey, roomIDBuffer, room->lastUpdateTimestamp);
-    char urlBuffer[maxRequestLength] = {0};
+    char urlBuffer[maxRequestLength];
     snprintf(
              urlBuffer, maxRequestLength,
              "chat.%s/events",

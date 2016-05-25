@@ -6,6 +6,7 @@
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <curl/curl.h>
@@ -14,6 +15,7 @@
 #include <string.h>
 #include <pwd.h>
 #include <sys/stat.h>
+#include <limits.h>
 
 #include "Client.h"
 #include "ChatRoom.h"
@@ -250,9 +252,10 @@ int main(int argc, const char * argv[]) {
             ) {
             //Get the email from the user
             printf("Email address: ");
-            char email[_PASSWORD_LEN];
-            fgets(email, _PASSWORD_LEN, stdin);
-            email[_PASSWORD_LEN-1] = 0;   //make sure it's null terminated
+            const unsigned maxEmailLen = 128;
+            char email[maxEmailLen];
+            fgets(email, maxEmailLen, stdin);
+            email[maxEmailLen-1] = 0;   //make sure it's null terminated
             
             char *password = getpass("Password: ");
             loginWithEmailAndPassword(client, email, password);
@@ -278,7 +281,6 @@ int main(int argc, const char * argv[]) {
         createCommand("test1 * test3", testArgCallback),
         createCommand("test2 test3", test2Callback),
         createCommand("running commands", listCommands),
-        createCommand("pingable users", listPingable),
         createCommand("stop", stopBot),
         createCommand("reboot", rebootBot),
         createCommand("kill", forceStopBot),
@@ -287,8 +289,14 @@ int main(int argc, const char * argv[]) {
         createCommand("fp", falsePositive),
         createCommand("t", truePositive),
         createCommand("f", falsePositive),
+        createCommand("TP", truePositive),
+        createCommand("FP", falsePositive),
+        createCommand("T", truePositive),
+        createCommand("F", falsePositive),
         createCommand("help", help),
         createCommand("alive", aliveCheck),
+        createCommand("commands", commandList),
+        createCommand("command", commandList),
         NULL
     };
     ChatBot *bot = createChatBot(room, commands, loadReports(), filters);
