@@ -276,7 +276,7 @@ void processMessage(ChatBot *bot, ChatMessage *message) {
     char *messageText = malloc(strlen(message->content) + 1);
     strcpy(messageText, message->content);
     if (strstr(messageText, "@Fir") == messageText) {
-        //messageText starts with "@Bot"
+        //detects message containg @Fir
         prepareCommand(bot, message, messageText);
         
     }
