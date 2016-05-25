@@ -313,7 +313,7 @@ int main(int argc, const char * argv[]) {
     connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
     
     puts("Started.");
-    PostMessage (bot->room, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started.");
+    postMessage (bot->room, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started.");
     
     unsigned char reboot = 0;
     time_t saveTime = time(NULL) + SAVE_INTERVAL;

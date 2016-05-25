@@ -69,7 +69,7 @@ void truePositiveRespond (RunningCommand *command, void *ctx)
     ChatBot *bot = ctx;
     
     confirm (command, ctx, 1);
-    PostReply (bot->room, "The report has been successfully been recorded as True Positive.", command->message);
+    postReply (bot->room, "The report has been successfully been recorded as True Positive.", command->message);
     return;
 }
 
@@ -80,7 +80,7 @@ void falsePositiveRespond (RunningCommand *command, void *ctx)
     ChatBot *bot = ctx;
     
     confirm (command, ctx, 0);
-    PostReply (bot->room, "The report has been successfully been recorded as False Positive", command->message);
+    postReply (bot->room, "The report has been successfully been recorded as False Positive", command->message);
     return;
 }
 
