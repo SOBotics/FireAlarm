@@ -62,4 +62,26 @@ void falsePositive(RunningCommand *command, void *ctx) {
     confirm(command, ctx, 0);
 }
 
+/* Marks report as true positive and responds to user confirming that the feedback is recorded */
+
+void truePositiveRespond (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    confirm (command, ctx, 1);
+    PostReply (bot->room, "The report has been successfully been recorded as True Positive.", command->message);
+    return;
+}
+
+/* Marks report a false positive and responds to user confirming that the feedback is recorded */
+
+void falsePositiveRespond (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    confirm (command, ctx, 0);
+    PostReply (bot->room, "The report has been successfully been recorded as False Positive", command->message);
+    return;
+}
+
 #endif /* post_commands_h */
