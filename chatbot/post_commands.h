@@ -47,7 +47,7 @@ unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) 
             post = report->post;
         }
         else {
-            postReply(bot->room, "That report isn't available.", command->message);
+            postReply(bot->room, "That isn't a report.", command->message);
             return 1;
         }
     }
