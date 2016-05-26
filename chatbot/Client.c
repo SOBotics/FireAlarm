@@ -289,6 +289,7 @@ WebSocket *createWebSocketWithClient(Client *client) {
     
     s->openCallback = NULL;
     s->recieveCallback = NULL;
+    s->closeCallback = NULL;
     s->ws = NULL;
     s->user = NULL;
     s->client = client;
@@ -371,6 +372,9 @@ int websocketCallback(struct lws *ws,
             break;
         case LWS_CALLBACK_CLOSED:
             puts("Connection closed.");
+            if (socket->closeCallback != NULL) {
+                socket->closeCallback(socket);
+            }
             break;
         case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
             puts("Connection error");

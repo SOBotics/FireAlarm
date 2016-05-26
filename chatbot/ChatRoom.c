@@ -391,3 +391,31 @@ ChatMessage **processChatRoomEvents(ChatRoom *room) {
     
     return messageBuffer;
 }
+
+void leaveRoom(ChatRoom *r) {
+    pthread_mutex_lock(&r->clientLock);
+    
+    const unsigned size = 256;
+    char postBuffer[size];
+    snprintf(postBuffer, size,
+             "fkey=%s",
+             r->client->fkey
+             );
+    checkCURL(curl_easy_setopt(r->client->curl, CURLOPT_COPYPOSTFIELDS, postBuffer));
+    snprintf(postBuffer, size,
+             "chat.%s/chats/leave/%d",
+             r->client->host, r->roomID
+             );
+    checkCURL(curl_easy_setopt(r->client->curl, CURLOPT_URL, postBuffer));
+    
+    OutBuffer buf;
+    buf.data = NULL;
+    checkCURL(curl_easy_setopt(r->client->curl, CURLOPT_WRITEDATA, &buf));
+    
+    checkCURL(curl_easy_perform(r->client->curl));
+    
+    free(buf.data);
+    
+    
+    pthread_mutex_unlock(&r->clientLock);
+}

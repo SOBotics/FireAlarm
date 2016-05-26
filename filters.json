@@ -5,6 +5,12 @@
 		"truePositives":	50,
 		"falsePositives":	0
 	}, {
+		"description":	"short body",
+		"expression":	"",
+		"type":	2,
+		"truePositives":	26,
+		"falsePositives":	0
+	}, {
 		"description":	"plz",
 		"expression":	"plz",
 		"type":	0,
@@ -104,7 +110,7 @@
 		"description":	"the best",
 		"expression":	"the best",
 		"type":	0,
-		"truePositives":	12,
+		"truePositives":	14,
 		"falsePositives":	1
 	}, {
 		"description":	"happy",
@@ -123,7 +129,7 @@
 		"expression":	"syntax",
 		"type":	0,
 		"truePositives":	11,
-		"falsePositives":	3
+		"falsePositives":	4
 	}, {
 		"description":	"sell",
 		"expression":	"sell",
@@ -242,14 +248,14 @@
 		"description":	"good",
 		"expression":	"good",
 		"type":	0,
-		"truePositives":	15,
-		"falsePositives":	1
+		"truePositives":	16,
+		"falsePositives":	5
 	}, {
 		"description":	"print",
 		"expression":	"print",
 		"type":	0,
-		"truePositives":	13,
-		"falsePositives":	14
+		"truePositives":	14,
+		"falsePositives":	15
 	}, {
 		"description":	"cable",
 		"expression":	"cable",
@@ -278,7 +284,7 @@
 		"description":	"possible",
 		"expression":	"possible",
 		"type":	0,
-		"truePositives":	12,
+		"truePositives":	14,
 		"falsePositives":	2
 	}, {
 		"description":	"keyboard",
@@ -308,8 +314,8 @@
 		"description":	"help",
 		"expression":	"help",
 		"type":	0,
-		"truePositives":	35,
-		"falsePositives":	11
+		"truePositives":	37,
+		"falsePositives":	12
 	}, {
 		"description":	"i need",
 		"expression":	"i need",
@@ -320,8 +326,8 @@
 		"description":	"exam",
 		"expression":	"exam",
 		"type":	0,
-		"truePositives":	16,
-		"falsePositives":	22
+		"truePositives":	19,
+		"falsePositives":	26
 	}, {
 		"description":	"how to",
 		"expression":	"how to",
@@ -332,14 +338,14 @@
 		"description":	"can",
 		"expression":	"can",
 		"type":	0,
-		"truePositives":	42,
-		"falsePositives":	33
+		"truePositives":	44,
+		"falsePositives":	36
 	}, {
 		"description":	"will",
 		"expression":	"will",
 		"type":	0,
 		"truePositives":	19,
-		"falsePositives":	13
+		"falsePositives":	16
 	}, {
 		"description":	"person",
 		"expression":	"person",
@@ -350,32 +356,32 @@
 		"description":	"trying",
 		"expression":	"trying",
 		"type":	0,
-		"truePositives":	12,
-		"falsePositives":	3
+		"truePositives":	14,
+		"falsePositives":	7
 	}, {
 		"description":	"know",
 		"expression":	"know",
 		"type":	0,
-		"truePositives":	13,
-		"falsePositives":	4
+		"truePositives":	14,
+		"falsePositives":	6
 	}, {
 		"description":	"there",
 		"expression":	"there",
 		"type":	0,
-		"truePositives":	11,
-		"falsePositives":	5
+		"truePositives":	15,
+		"falsePositives":	8
 	}, {
 		"description":	"way",
 		"expression":	"way",
 		"type":	0,
-		"truePositives":	12,
-		"falsePositives":	5
+		"truePositives":	13,
+		"falsePositives":	9
 	}, {
 		"description":	"object",
 		"expression":	"object",
 		"type":	0,
-		"truePositives":	10,
-		"falsePositives":	2
+		"truePositives":	11,
+		"falsePositives":	4
 	}, {
 		"description":	"created",
 		"expression":	"created",
@@ -398,20 +404,20 @@
 		"description":	"doing",
 		"expression":	"doing",
 		"type":	0,
-		"truePositives":	5,
+		"truePositives":	7,
 		"falsePositives":	1
 	}, {
 		"description":	"problem",
 		"expression":	"problem",
 		"type":	0,
-		"truePositives":	7,
+		"truePositives":	8,
 		"falsePositives":	3
 	}, {
 		"description":	"want",
 		"expression":	"want",
 		"type":	0,
-		"truePositives":	13,
-		"falsePositives":	6
+		"truePositives":	16,
+		"falsePositives":	8
 	}, {
 		"description":	"bold",
 		"expression":	"bold",
@@ -422,8 +428,8 @@
 		"description":	"error",
 		"expression":	"error",
 		"type":	0,
-		"truePositives":	11,
-		"falsePositives":	4
+		"truePositives":	12,
+		"falsePositives":	7
 	}, {
 		"description":	"build",
 		"expression":	"build",
@@ -440,7 +446,7 @@
 		"description":	"each",
 		"expression":	"each",
 		"type":	0,
-		"truePositives":	8,
+		"truePositives":	10,
 		"falsePositives":	3
 	}, {
 		"description":	"php",
@@ -470,12 +476,78 @@
 		"description":	"case",
 		"expression":	"case",
 		"type":	0,
-		"truePositives":	11,
+		"truePositives":	12,
 		"falsePositives":	2
 	}, {
 		"description":	"output",
 		"expression":	"output",
 		"type":	0,
-		"truePositives":	7,
+		"truePositives":	9,
 		"falsePositives":	2
+	}, {
+		"description":	"not",
+		"expression":	"not",
+		"type":	0,
+		"truePositives":	21,
+		"falsePositives":	13
+	}, {
+		"description":	"only",
+		"expression":	"only",
+		"type":	0,
+		"truePositives":	6,
+		"falsePositives":	2
+	}, {
+		"description":	"using",
+		"expression":	"using",
+		"type":	0,
+		"truePositives":	15,
+		"falsePositives":	9
+	}, {
+		"description":	"exception",
+		"expression":	"exception",
+		"type":	0,
+		"truePositives":	6,
+		"falsePositives":	2
+	}, {
+		"description":	"without",
+		"expression":	"without",
+		"type":	0,
+		"truePositives":	6,
+		"falsePositives":	2
+	}, {
+		"description":	"any",
+		"expression":	"any",
+		"type":	0,
+		"truePositives":	15,
+		"falsePositives":	4
+	}, {
+		"description":	"does",
+		"expression":	"does",
+		"type":	0,
+		"truePositives":	6,
+		"falsePositives":	4
+	}, {
+		"description":	"could",
+		"expression":	"could",
+		"type":	0,
+		"truePositives":	5,
+		"falsePositives":	2
+	}, {
+		"description":	"seem",
+		"expression":	"seem",
+		"type":	0,
+		"truePositives":	9,
+		"falsePositives":	1
+	}, {
+		"description":	"would",
+		"expression":	"would",
+		"type":	0,
+		"truePositives":	9,
+		"falsePositives":	3
+	}, {
+		"description":	"char",
+		"expression":	"char",
+		"type":	0,
+		"truePositives":	7,
+		"falsePositives":	3
 	}]

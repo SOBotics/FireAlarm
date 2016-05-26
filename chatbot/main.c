@@ -110,6 +110,10 @@ Filter **loadFilters() {
     return filters;
 }
 
+void wsClosed(WebSocket *socket) {
+    postMessage(((ChatBot*)(socket->user))->room, "Websocket disconnected!  Run @FireAlarm reboot to reconnect.");
+}
+
 void saveFilters(Filter **filters, unsigned filterCount) {
     puts("Saving filters...");
     cJSON *json = cJSON_CreateArray();
@@ -310,6 +314,7 @@ int main(int argc, const char * argv[]) {
     socket->user = bot;
     socket->openCallback = webSocektOpened;
     socket->recieveCallback = wsRecieved;
+    socket->closeCallback = wsClosed;
     connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
     
     puts("Started.");
@@ -334,10 +339,14 @@ int main(int argc, const char * argv[]) {
         }
     }
     
-    curl_easy_cleanup(client->curl);
+    leaveRoom(bot->room);
     
     saveFilters(bot->filters, bot->filterCount);
     saveReports(bot->latestReports, bot->reportsUntilAnalysis);
+    
+    
+    
+    curl_easy_cleanup(client->curl);
     
     if (reboot) {
         execv(argv[0], (char*const*)argv);  //Reload the program.

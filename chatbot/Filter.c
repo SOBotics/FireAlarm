@@ -20,7 +20,7 @@ Filter *createFilter(const char *desc, const char *filter, FilterType type, unsi
     f->falsePositives = falsePositives;
     
     int error;
-    if ((error = regcomp(&f->regex, f->filter, REG_ICASE))) {
+    if (type == FILTER_REGEX && (error = regcomp(&f->regex, f->filter, REG_ICASE))) {
         const unsigned max = 1024;
         char msg[max];
         regerror(error, &f->regex, msg, max);
@@ -60,6 +60,8 @@ unsigned char postMatchesFilter(Post *post, Filter *filter, unsigned *outStart, 
             return 0;
         case FILTER_REGEX:
             return matchRegexFilter(post, filter, outStart, outEnd);
+        case FILTER_SHORTBODY:
+            return strlen(post->body) < 100;
         default:
             fprintf(stderr, "Invalid filter type %d\n", filter->type);
             exit(EXIT_FAILURE);

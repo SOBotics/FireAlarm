@@ -35,5 +35,6 @@ ChatMessage **processChatRoomEvents(ChatRoom *room);    //Returns a NULL-termina
 ChatUser *getUserByID(ChatRoom *r, unsigned long id);
 void postMessage(ChatRoom *r, const char *text);
 void postReply(ChatRoom *r, const char *text, ChatMessage *message);
+void leaveRoom(ChatRoom *r);
 
 #endif /* ChatRoom_h */

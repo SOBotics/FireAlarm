@@ -49,6 +49,7 @@ unsigned sendDataOnWebsocket(struct lws *socket, void *data, size_t len);
 
 
 typedef void (*WebSocketOpenCallback)(struct _WebSocket *ws);
+typedef void (*WebSocketClosedCallback)(struct _WebSocket *ws);
 typedef void (*WebSocketRecieveCallback)(struct _WebSocket *ws, char *data, size_t len);
 
 
@@ -59,6 +60,7 @@ typedef struct _WebSocket {
     unsigned char isSetUp;
     WebSocketOpenCallback openCallback;
     WebSocketRecieveCallback recieveCallback;
+    WebSocketClosedCallback closeCallback;
 }WebSocket;
 
 WebSocket *createWebSocketWithClient(Client *client);
