@@ -29,7 +29,7 @@
 void unrecognizedCommand(RunningCommand *c, void *ctx) {
     ChatBot *bot = ctx;
     char *str;
-    asprintf(&str, "Unrecognized command \"%s\"", c->message->content);
+    asprintf(&str, "Unrecognized command \"%s\".", c->message->content);
     postReply(bot->room, str, c->message);
     free(str);
 }
@@ -111,7 +111,7 @@ Filter **loadFilters() {
 }
 
 void wsClosed(WebSocket *socket) {
-    postMessage(((ChatBot*)(socket->user))->room, "Websocket disconnected!  Run @FireAlarm reboot to reconnect.");
+    postMessage(((ChatBot*)(socket->user))->room, "Websocket disconnected! Reboot the bot to reconnect websocket.");
 }
 
 void saveFilters(Filter **filters, unsigned filterCount) {
