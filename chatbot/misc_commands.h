@@ -85,4 +85,43 @@ void commandList (RunningCommand *command, void *ctx)
     return;
 }
 
+void statistics (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    char message [200];
+    unsigned int i = 0;
+    unsigned int truePositives = 0;
+    unsigned int falsePositives = 0;
+    unsigned int unConfirmed = 0;
+    int check = 2;
+    
+    Report **reports = bot->latestReports;
+    
+    for (; i < 100; ++i)
+    {
+        Report *report = reports [i];
+        check = report->confirmation;
+        
+        if (check == 0)
+        {
+            falsePositives ++;
+        }
+        else if (check == 1)
+        {
+            truePositives ++;
+        }
+        else
+        {
+            unconfirmed ++;
+        }
+    }
+    
+    sprintf (message, "Statistics of last 100 reports: %d True Positives    %d False Positives    %d Un-Confirmed", 
+             truePositives, falsePositives, unConfirmed);
+             
+    postReply (bot->room, message, command->message);
+    
+    return;
+}
+
 #endif /* misc_commands_h */
