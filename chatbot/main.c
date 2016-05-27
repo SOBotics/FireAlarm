@@ -305,8 +305,7 @@ int main(int argc, const char * argv[]) {
         createCommand("TPR", truePositiveRespond),
         createCommand("fpr", falsePositiveRespond),
         createCommand("FPR", falsePositiveRespond),
-        createCommand("stats", statistics),
-        createCommand("statistics", statistics),
+        createCommand("stats *", statistics),
         NULL
     };
     ChatBot *bot = createChatBot(room, commands, loadReports(), filters);
