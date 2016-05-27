@@ -468,3 +468,56 @@ StopAction runChatBot(ChatBot *c) {
     
     return ACTION_NONE;
 }
+
+void testPost (ChatBot *bot, Post *post, RunningCommand *command)
+{
+    unsigned int likelihood = 0;
+    char *messageBuf = malloc (sizeof (char));
+    
+    *messageBuf = 0;
+    
+    for (int i = 0; i < bot->filterCount; i++) {
+        unsigned start, end;
+        if (postMatchesFilter(post, bot->filters[i], &start, &end)) {
+            
+            const char *desc = bot->filters[i]->desc;
+            messageBuf = realloc(messageBuf, strlen(messageBuf) + strlen(desc) + 16);
+            
+            snprintf(messageBuf + strlen(messageBuf), strlen(desc) + 16,
+                     "%s%s", (likelihood ? ", " : ""), desc);
+            //If this not the first match, start it with a comma and space.
+            
+            const float truePositives = bot->filters[i]->truePositives;
+            likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
+        }
+    }
+    
+    if (likelihood >= THRESHOLD)
+    {
+        const size_t maxMessage = strlen(messageBuf) + 256;
+        char *message = malloc (maxMessage);
+        
+        sprintf (message, "Yes, that post crosses the threshold which currently is %d. The post's likelihood is %d.",
+                 THRESHOLD, likelihood);
+                 
+        postReply (bot->room, message, command->message);
+        
+        free (message);
+    }
+    else if (likelihood < THRESHOLD)
+    {
+        const size_t maxMessage = strlen (messageBuf) + 256;
+        char *message = malloc (maxMessage);
+        
+        sprintf (message, "No, that post doesn't cross the threshold which currently is %d. The post's likelihood is %d",
+                 THRESHOLD, likelihood);
+                 
+        postReply (bot->room, message, command->message);
+        
+        free (message);
+    }
+    
+    free (messageBuf);
+    
+    return;
+}
