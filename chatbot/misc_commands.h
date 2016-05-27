@@ -85,7 +85,7 @@ void commandList (RunningCommand *command, void *ctx)
     return;
 }
 
-void statistics (RunningCommand *command, void *ctx)
+unsigned int statistics (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     char message [200];
@@ -94,10 +94,31 @@ void statistics (RunningCommand *command, void *ctx)
     unsigned int falsePositives = 0;
     unsigned int unConfirmed = 0;
     int check = 2;
+    int numStats = strtol (command->argv [0], NULL, 5);
     
     Report **reports = bot->latestReports;
     
-    for (; i < 100; ++i)
+    /* Checking for errors */
+    
+    if (numStats <= 0)
+    {
+        postReply (bot->room, "Please enter a number bigger than 0.", command->message);
+        return 1;
+    }
+    else if (numStats > 100)
+    {
+        postReply (bot->room, "Please enter a number smaller than 100.", command->message);
+        return 1;
+    }
+    else if (bot->latestReports [0] == NULL)
+    {
+        postReply (bot->room, "There are no reports available.");
+        return 1;
+    }
+    
+    /* Calculating the number of truePositives, falsePositives, and unconfirmed reports */
+    
+    for (; i < numStats; ++i)
     {
         Report *report = reports [i];
         check = report->confirmation;
@@ -116,12 +137,12 @@ void statistics (RunningCommand *command, void *ctx)
         }
     }
     
-    sprintf (message, "Statistics of last 100 reports: %d True Positives    %d False Positives    %d Un-Confirmed", 
-             truePositives, falsePositives, unConfirmed);
+    sprintf (message, "Statistics of last %d reports: %d True Positives    %d False Positives    %d Un-Confirmed", 
+             numStats, truePositives, falsePositives, unConfirmed);
              
     postReply (bot->room, message, command->message);
     
-    return;
+    return 0;
 }
 
 #endif /* misc_commands_h */
