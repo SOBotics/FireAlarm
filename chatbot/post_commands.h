@@ -15,15 +15,28 @@
 void checkPostCallback(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
     long postID = strtol(command->argv[0], NULL, 10);
+    int check;
+    
     if (postID <= 0) {
         postReply(bot->room, "Please enter a number greater than 0.", command->message);
         return;
     }
+    
     Post *post = getPostByID(bot, postID);
+    
     if (post == NULL) {
         postReply(bot->room, "Please enter the ID of a valid post.", command->message);
         return;
     }
+    
+    check = recentlyReported (postID, bot);
+    
+    if (check == 1)
+    {
+        postReply (bot->room, "The post was already reported recently.", command->message);
+        return;
+    }
+    
     pthread_mutex_lock(&bot->detectorLock);
     checkPost(bot, post, command);
     pthread_mutex_unlock(&bot->detectorLock);
