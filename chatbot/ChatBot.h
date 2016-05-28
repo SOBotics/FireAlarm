@@ -16,6 +16,7 @@
 #include "Filter.h"
 #include "Post.h"
 #include "cJSON.h"
+#include "misc_functions.h"
 
 #define REPORT_MEMORY 100
 
