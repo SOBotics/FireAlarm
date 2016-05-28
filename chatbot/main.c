@@ -307,6 +307,8 @@ int main(int argc, const char * argv[]) {
         createCommand("fr", falsePositiveRespond),
         createCommand("cp *", checkPostCallback),
         createCommand("pinfo *", postInfo),
+        createCommand("change threshold *", changeThreshold),
+        createCommand("check threshold *", checkThreshold),
         NULL
     };
     ChatBot *bot = createChatBot(room, commands, loadReports(), filters);
