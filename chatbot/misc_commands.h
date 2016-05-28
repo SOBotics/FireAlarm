@@ -85,4 +85,35 @@ void commandList (RunningCommand *command, void *ctx)
     return;
 }
 
+void changeThreshold (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    long newThreshold = strtol (command->argv [0], NULL, 5);
+    
+    if (newThreshold > 10000)
+    {
+        postReply (bot->room, "Please enter a threshold smaller than 10000.", command->message);
+        return;
+    }
+    else if (newThreshold < 100)
+    {
+        postReply (bot->room, "Please enter a threshold bigger than 100.", command->message);
+        return;
+    }
+    
+    THRESHOLD = newThreshold;
+    return;
+}
+
+void checkThreshold (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    char message [256];
+    
+    sprintf (message, "The current threshold is %ld.", THRESHOLD);
+    
+    postReply (bot->room, message, command->message);
+    return;
+}
+
 #endif /* misc_commands_h */
