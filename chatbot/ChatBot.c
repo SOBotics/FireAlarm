@@ -371,7 +371,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     return p;
 }
 
-void checkPost(ChatBot *bot, Post *post, RunningCommand *command) {
+unsigned int checkPost(ChatBot *bot, Post *post) {
     unsigned likelihood = 0;
     char *messageBuf = malloc(sizeof(char));
     *messageBuf = 0;
@@ -418,13 +418,14 @@ void checkPost(ChatBot *bot, Post *post, RunningCommand *command) {
             analyzeReports(bot);
         }
         free(message);
+        free (messageBuf);
+        return 0;
     }
     else {
-        postReply (bot->room, "That post does not match the filters, and thus isn't reported", command->message);
         deletePost(post);
+        free (messageBuf);
+        return 1;
     }
-    
-    free(messageBuf);
 }
 
 void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed) {
