@@ -246,4 +246,66 @@ void printLatestReports (RunningCommand *command, void *ctx)
     return;
 }
 
+void postInfo (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    int postID = strtol (command->argv [0], NULL, 10);
+    char message [512];
+    char link [256];
+    char status [25];
+    
+    if (postID <= 0)
+    {
+        postReply (bot->room, "Please enter a number greater than 0.", command->message);
+        return;
+    }
+    
+    Post *post = getPostByID(bot, postID);
+    
+    if (post == NULL)
+    {
+        postReply (bot->room, "Please enter the ID of a valid post.", command->message);
+        return;
+    }
+    
+    Report **reports = bot->latestReports;
+    unsigned int i = 0;
+    int copyPostID = 0;
+    
+    for (; i < REPORT_MEMORY; ++i)
+    {
+        Reoprt *report = reports [i];
+        
+        copyPostID = report->postID;
+        
+        if (copyPostID == postID)
+        {
+            if (report->confirmation == 1)
+            {
+                strcpy (status, "True Positive");
+            }
+            else if (report->confirmation == 0)
+            {
+                strcpy (status, "False Positive");
+            }
+            else
+            {
+                strcpy (status, "Unconfirmed");
+            }
+            
+            sprintf (link, "http://stackoverflow.com/%s/%lu", post->isAnswer ? "a" : "q", postID);
+            
+            sprintf (message, "[Your Post](%s) was reported recently. It's current status is %s.",
+                     link, status);
+                     
+            postReply (bot->room, message, command->message);
+            return;
+        }
+    }
+    
+    postReply (bot->room, "Your post was not reported recently.", command->message);
+    
+    return;
+}
+
 #endif /* post_commands_h */
