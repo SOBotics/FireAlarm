@@ -277,6 +277,7 @@ void processMessage(ChatBot *bot, ChatMessage *message) {
     strcpy(messageText, message->content);
     if (strstr(messageText, "@Fir") == messageText) {
         //detects message containg @Fir
+        lowercase (*messageText);
         prepareCommand(bot, message, messageText);
         
     }
