@@ -25,7 +25,7 @@ void checkPostCallback(RunningCommand *command, void *ctx) {
         return;
     }
     pthread_mutex_lock(&bot->detectorLock);
-    checkPost(bot, post);
+    checkPost(bot, post, command);
     pthread_mutex_unlock(&bot->detectorLock);
 }
 
@@ -151,32 +151,6 @@ unsigned int statistics (RunningCommand *command, void *ctx)
     postReply (bot->room, message, command->message);
     
     return 0;
-}
-
-void testPostCallback (RunningCommand *command, void *ctx)
-{
-    ChatBot *bot = ctx;
-    long postID = strtol(command->argv[0], NULL, 10);
-    
-    if (postID <= 0)
-    {
-        postReply (bot->room, "Please enter a number bigger than 0", command->message);
-        return;
-    }
-    
-    Post *post = getPostByID(bot, postID);
-    
-    if (post == NULL)
-    {
-        postReply (bot->room, "Please enter the ID of a valid post.", command->message);
-        return;
-    }
-    
-    pthread_mutex_lock (&bot->detectorLock);
-    testPost (bot, post, command);
-    pthread_mutex_unlock (&bot->detectorLock);
-    
-    return;
 }
 
 void printLatestReports (RunningCommand *command, void *ctx)
