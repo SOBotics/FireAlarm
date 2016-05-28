@@ -8,6 +8,7 @@
 
 #ifndef post_commands_h
 #define post_commands_h
+#define MAX_LATEST_REPORTS 10
 
 #include <stdlib.h>
 #include <limits.h>
@@ -128,7 +129,9 @@ unsigned int statistics (RunningCommand *command, void *ctx)
     }
     else if (numStats > REPORT_MEMORY)
     {
-        postReply (bot->room, "Please enter a number smaller than 100.", command->message);
+        sprintf (message, "Please enetr a number smaller than %d.", (REPORT_MEMORY + 1));
+        
+        postReply (bot->room, message, command->message);
         return 1;
     }
     else if (bot->latestReports [0] == NULL)
@@ -157,9 +160,9 @@ unsigned int statistics (RunningCommand *command, void *ctx)
             unconfirmed ++;
         }
     }
-    
-    sprintf (message, "Statistics of last %d reports: %d True Positives    %d False Positives    %d Un-Confirmed", 
-             numStats, truePositives, falsePositives, unConfirmed);
+             
+    sprintf (message, "Out of the last %d reports, %d are true positives, %d are false positives, and %d are unconfirmed.",
+             numStats, truePositives, falsePositives, unconfirmed);
              
     postReply (bot->room, message, command->message);
     
@@ -181,9 +184,11 @@ void printLatestReports (RunningCommand *command, void *ctx)
         postReply (bot->room, "Please enter a number greater than 0.", command->message);
         return;
     }
-    else if (numReports > 10)
+    else if (numReports > MAX_LATEST_REPORTS)
     {
-        postReply (bot->room, "Please enter a number smaller than 11.", command->message);
+        sprintf (message, "Please enter a number smaller than %d.", (MAX_LATEST_REPORTS + 1)
+        
+        postReply (bot->room, message, command->message);
         return;
     }
     
