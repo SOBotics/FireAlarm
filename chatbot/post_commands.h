@@ -179,4 +179,97 @@ void testPostCallback (RunningCommand *command, void *ctx)
     return;
 }
 
+void printLatestReports (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    int numReports = strtol (command->argv [0], NULL, 3);
+    const size_t maxLineSize = 256;
+    char message [256];
+    unsigned int i;
+    long postid;
+    char postTitle [127];
+    
+    if (numReports <= 0)
+    {
+        postReply (bot->room, "Please enter a number greater than 0.", command->message);
+        return;
+    }
+    else if (numReports > 10)
+    {
+        postReply (bot->room, "Please enter a number smaller than 11.", command->message);
+        return;
+    }
+    
+    Report **reports = bot->latestReports;
+    
+    if (bot->latestReports [0] == NULL)
+    {
+        postReply (bot->room, "There are no reports available.", command->message);
+        return;
+    }
+    
+    char *messageString = malloc(maxLineSize * (bot->runningCommandCount + 2));
+    
+    strcpy(messageString,
+           "          Stats         |"
+           "                                 Link                                 \n"
+           "    ---------------------"
+           "----------------------------------------------------------------------\n"
+           );
+           
+    sprintf (message, "The latest %d reports are: ", numReports);
+    
+    postReply (bot->room, message, command->message);
+    postMessage (bot->room, messageString);
+    
+    for (i = 0; i < numReports; i ++)
+    {
+        Report *report = reports [i];
+        
+        if (report->confirmation == 1)
+        {
+            Post *post = report->post;
+            
+            strcpy (postTitle, post->title);
+            
+            sprintf (messageString,
+             "     True Positive     |"
+             "  [%s](http://stackoverflow.com/%s/%lu)                                 ",
+             postTitle, post->isAnswer ? "a" : "q", post->postID);
+             
+            postMessage (bot->room, messageString);
+        }
+        else if (report->confirmation == 0)
+        {
+            Post *post = report->post;
+            
+            strcpy (postTitle, post->title);
+            
+            sprintf (messageString,
+             "    False Positive     |"
+             "  [%s](http://stackoverflow.com/%s/%lu)                                 ",
+             postTitle, post->isAnswer ? "a" : "q", post->postID);
+             
+            postMessage (bot->room, messageString);
+        }
+        else
+        {
+            Post *post = report->post;
+            
+            strcpy (postTitle, post->title);
+            
+            sprintf (messageString,
+             "      Unconfirmed      |"
+             "  [%s](http://stackoverflow.com/%s/%lu)                                 ",
+             postTitle, post->isAnswer ? "a" : "q", post->postID);
+             
+            postMessage (bot->room, messageString);
+        }
+    }
+    
+    free (messageString);
+    
+    return;
+}
+
 #endif /* post_commands_h */
