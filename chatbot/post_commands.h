@@ -39,8 +39,15 @@ void checkPostCallback(RunningCommand *command, void *ctx) {
     }
     
     pthread_mutex_lock(&bot->detectorLock);
-    checkPost(bot, post, command);
+    check = checkPost(bot, post);
     pthread_mutex_unlock(&bot->detectorLock);
+    
+    if (check == 1)
+    {
+        postReply (bot->room, "The post did not match the filters, and thus now isn't reported.", command->message);
+    }
+    
+    return;
 }
 
 unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) {
