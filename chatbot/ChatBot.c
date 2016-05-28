@@ -371,7 +371,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     return p;
 }
 
-void checkPost(ChatBot *bot, Post *post) {
+void checkPost(ChatBot *bot, Post *post, RunningCommand *command) {
     unsigned likelihood = 0;
     char *messageBuf = malloc(sizeof(char));
     *messageBuf = 0;
@@ -420,6 +420,7 @@ void checkPost(ChatBot *bot, Post *post) {
         free(message);
     }
     else {
+        postReply (bot->room, "That post does not match the filters, and thus isn't reported", command->message);
         deletePost(post);
     }
     
