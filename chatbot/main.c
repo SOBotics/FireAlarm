@@ -306,7 +306,6 @@ int main(int argc, const char * argv[]) {
         createCommand("fpr", falsePositiveRespond),
         createCommand("FPR", falsePositiveRespond),
         createCommand("stats *", statistics),
-        createCommand("test post *", testPostCallback),
         createCommand("recent reports *", printLatestReports),
         createCommand("latest reports *", printLatestReports),
         NULL
