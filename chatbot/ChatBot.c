@@ -523,3 +523,26 @@ void testPost (ChatBot *bot, Post *post, RunningCommand *command)
     
     return;
 }
+
+int recentlyReported (int postID, Chatbot *bot)
+{
+    Report **reports = bot->latestReports;
+    unsigned int i = 0;
+    
+    if (reports [0] == NULL)
+    {
+        return -1;
+    }
+    
+    for (; i < REPORT_MEMORY; ++ i)
+    {
+        Post **post = reports [i]->post;
+        
+        if (post->postID == postID)
+        {
+            return 1;
+        }
+    }
+    
+    return 0;
+}
