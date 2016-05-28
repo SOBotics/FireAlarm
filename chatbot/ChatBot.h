@@ -51,7 +51,7 @@ typedef struct _ChatBot {
 ChatBot *createChatBot(ChatRoom *room, Command **commands, cJSON *latestReports, Filter **filters);
 StopAction runChatBot(ChatBot *chatbot);
 Post *getPostByID(ChatBot *bot, unsigned long postID);
-void checkPost(ChatBot *bot, Post *post);   //This function is responsible for freeing post.
+unsigned int checkPost(ChatBot *bot, Post *post);   //This function is responsible for freeing post.
 void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed);
 Report *reportWithMessage(ChatBot *bot, unsigned long messageID);
 
