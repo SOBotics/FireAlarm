@@ -113,7 +113,7 @@ unsigned int statistics (RunningCommand *command, void *ctx)
         postReply (bot->room, "Please enter a number bigger than 0.", command->message);
         return 1;
     }
-    else if (numStats > 100)
+    else if (numStats > REPORT_MEMORY)
     {
         postReply (bot->room, "Please enter a number smaller than 100.", command->message);
         return 1;
