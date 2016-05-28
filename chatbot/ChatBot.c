@@ -17,7 +17,9 @@
 
 #define REPORT_HEADER "Potentially bad question"
 #define API_KEY "HNA2dbrFtyTZxeHN6rThNg(("
-#define THRESHOLD 1000
+//#define THRESHOLD 1000
+
+int THRESHOLD = 1000;
 
 static void loadNullReports(Report **reports) {
     for (int i = 0; i < REPORT_MEMORY; i++) {
