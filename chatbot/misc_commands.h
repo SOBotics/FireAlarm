@@ -67,7 +67,7 @@ void listCommands(RunningCommand *command, void *ctx) {
 void help (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    postReply (bot->room, "[I am a bot](https://github.com/NobodyNada/chatbot) which detects questions that need closing whenever they are posted or edited. ", command->message);
+    postReply (bot->room, "I'm  [Fire Alarm](https://github.com/NobodyNada/chatbot), a bot which detects questions that need closing whenever they are posted or edited. [My command list is available here.](https://github.com/NobodyNada/chatbot/wiki/Commands)", command->message);
     return;
 }
 
