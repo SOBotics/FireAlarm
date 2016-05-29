@@ -207,13 +207,15 @@ void printLatestReports (RunningCommand *command, void *ctx)
         return;
     }
     
-    char *messageString = malloc(maxLineSize * (bot->runningCommandCount + 2));
+    char *messageString = malloc(maxLineSize * (bot->runningCommandCount + 3));
     
     strcpy(messageString,
            "          Stats         |"
-           "                                 Link                                 \n"
-           "    ---------------------"
-           "----------------------------------------------------------------------\n"
+           "                                 Link                                  |"
+           "       Likelihood        \n"
+           "-------------------------"
+           "-----------------------------------------------------------------------"
+           "--------------------------\n"
            );
            
     sprintf (message, "The latest %d reports are: ", numReports);
@@ -233,8 +235,9 @@ void printLatestReports (RunningCommand *command, void *ctx)
             
             sprintf (messageString,
              "     True Positive     |"
-             "  [%s](http://stackoverflow.com/%s/%lu)                                 ",
-             postTitle, post->isAnswer ? "a" : "q", post->postID);
+             "  [%s](http://stackoverflow.com/%s/%lu)                                 "
+             "          %d            \n",
+             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood);
              
             postMessage (bot->room, messageString);
         }
@@ -246,8 +249,9 @@ void printLatestReports (RunningCommand *command, void *ctx)
             
             sprintf (messageString,
              "    False Positive     |"
-             "  [%s](http://stackoverflow.com/%s/%lu)                                 ",
-             postTitle, post->isAnswer ? "a" : "q", post->postID);
+             "  [%s](http://stackoverflow.com/%s/%lu)                                 "
+             "          %d            \n",
+             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood);
              
             postMessage (bot->room, messageString);
         }
@@ -259,8 +263,9 @@ void printLatestReports (RunningCommand *command, void *ctx)
             
             sprintf (messageString,
              "      Unconfirmed      |"
-             "  [%s](http://stackoverflow.com/%s/%lu)                                 ",
-             postTitle, post->isAnswer ? "a" : "q", post->postID);
+             "  [%s](http://stackoverflow.com/%s/%lu)                                 |"
+             "          %d            \n",
+             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood);
              
             postMessage (bot->room, messageString);
         }
