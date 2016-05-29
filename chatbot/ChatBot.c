@@ -412,6 +412,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         Report *report = malloc(sizeof(Report));
         report->post = post;
         report->confirmation = -1;
+        report->likelihood = likelihood;
         bot->latestReports[0] = report;
         bot->reportsWaiting++;
         bot->reportsUntilAnalysis--;
