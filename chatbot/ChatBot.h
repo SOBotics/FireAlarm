@@ -50,7 +50,7 @@ typedef struct _ChatBot {
     int reportsUntilAnalysis;   //The number of reports left until the bot analyzes them to auto-generate filters.
 }ChatBot;
 
-ChatBot *createChatBot(ChatRoom *room, Command **commands, cJSON *latestReports, Filter **filters);
+ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **commands, cJSON *latestReports, Filter **filters);
 StopAction runChatBot(ChatBot *chatbot);
 Post *getPostByID(ChatBot *bot, unsigned long postID);
 unsigned int checkPost(ChatBot *bot, Post *post);   //This function is responsible for freeing post.
