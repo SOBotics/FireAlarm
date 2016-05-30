@@ -180,6 +180,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     int numReports = strtol (command->argv [0], NULL, 3);
+    char typePrinted [16] = strtol (command->argv [1], NULL, 16);
     const size_t maxLineSize = 256;
     char message [256];
     unsigned int i;
@@ -208,7 +209,10 @@ void printLatestReports (RunningCommand *command, void *ctx)
         return;
     }
     
-    char *messageString = malloc(maxLineSize * (bot->runningCommandCount + 3));
+    char *messageString = malloc(maxLineSize * (bot->runningCommandCount + 5));
+    
+    if (typePrinted == NULL || strcmp (typePrinted, " ") == 0)
+    {
     
     strcpy(messageString,
            "          Stats         |"
@@ -278,6 +282,227 @@ void printLatestReports (RunningCommand *command, void *ctx)
              postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
              
             postMessage (bot->room, messageString);
+        }
+    }
+    
+    }
+    else if (strcmp (typePrinted, "true") == 0 || strcmp (typePrinted, "true positive") == 0)
+    {
+        Report **trueReports;
+        
+        unsigned int j = 0;
+        unsigned int totalTrue = 0;
+        unsigned int check = 0;
+        
+        for (i = 0; i < REPORT_MEMORY; ++i)
+        {
+            if (reports [i]->confirmation == 1)
+            {
+                trueReports [j] = reports [i];
+                j ++;
+                totalTrue ++;
+            }
+        }
+        
+        strcpy(messageString,
+           "          Stats         |"
+           "                                 Link                                  |"
+           "       Likelihood       |"
+           "       Message ID        \n"
+           "-------------------------"
+           "-----------------------------------------------------------------------"
+           "-------------------------"
+           "-------------------------\n"
+           );
+           
+        if (totalTrue < numReports)
+        {
+            sprintf (message, "There are only %d true positive reports available. They are: ", totalTrue);
+            postReply (bot->room, message, command->message);
+        }
+        else
+        {
+            sprintf (message, "The latest %d reports are: ", numReports);
+            postReply (bot->room, message, command->message);
+        }
+        
+        if (numReports > totalTrue)
+            check = totalTrue;
+        else
+            check = numReports;
+            
+        postMessage (bot->room, messageString);
+        
+        for (i = 0; i < check; i ++)
+        {
+        Report *report = trueReports [i];
+        
+        sprintf (reportLink, 
+                 "[%d](http:/chat.stackoverflow.com/transcript/message/%d#%d)",
+                 report->messageID, report->messageID, report->messageID);
+        
+        if (report->confirmation == 1)
+        {
+            Post *post = report->post;
+            
+            strcpy (postTitle, post->title);
+            
+            sprintf (messageString,
+             "     True Positive     |"
+             "  [%s](http://stackoverflow.com/%s/%lu)                                 "
+             "          %d           |"
+             "        %s              \n",
+             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
+             
+            postMessage (bot->room, messageString);
+        }
+        
+        }
+    }
+    else if (strcmp (typePrinted, "false") == 0 || strcmp (typePrinted, "false positive") == 0)
+    {
+        Report **trueReports;
+        
+        unsigned int j = 0;
+        unsigned int totalTrue = 0;
+        unsigned int check = 0;
+        
+        for (i = 0; i < REPORT_MEMORY; ++i)
+        {
+            if (reports [i]->confirmation == 1)
+            {
+                trueReports [j] = reports [i];
+                j ++;
+                totalTrue ++;
+            }
+        }
+        
+        strcpy(messageString,
+           "          Stats         |"
+           "                                 Link                                  |"
+           "       Likelihood       |"
+           "       Message ID        \n"
+           "-------------------------"
+           "-----------------------------------------------------------------------"
+           "-------------------------"
+           "-------------------------\n"
+           );
+           
+        if (totalTrue < numReports)
+        {
+            sprintf (message, "There are only %d false positive reports available. They are: ", totalTrue);
+            postReply (bot->room, message, command->message);
+        }
+        else
+        {
+            sprintf (message, "The latest %d reports are: ", numReports);
+            postReply (bot->room, message, command->message);
+        }
+        
+        if (numReports > totalTrue)
+            check = totalTrue;
+        else
+            check = numReports;
+            
+        postMessage (bot->room, messageString);
+        
+        for (i = 0; i < check; i ++)
+        {
+        Report *report = trueReports [i];
+        
+        sprintf (reportLink, 
+                 "[%d](http:/chat.stackoverflow.com/transcript/message/%d#%d)",
+                 report->messageID, report->messageID, report->messageID);
+        
+        if (report->confirmation == 1)
+        {
+            Post *post = report->post;
+            
+            strcpy (postTitle, post->title);
+            
+            sprintf (messageString,
+             "    False Positive     |"
+             "  [%s](http://stackoverflow.com/%s/%lu)                                 "
+             "          %d           |"
+             "        %s              \n",
+             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
+             
+            postMessage (bot->room, messageString);
+        }
+        
+        }
+    }
+    else if (strcmp (typePrinted, "unconfirmed") == 0 || strcmp (typePrinted, "unknown") == 0)
+    {
+         Report **trueReports;
+        
+        unsigned int j = 0;
+        unsigned int totalTrue = 0;
+        unsigned int check = 0;
+        
+        for (i = 0; i < REPORT_MEMORY; ++i)
+        {
+            if (reports [i]->confirmation != 1 && reports [i]->confirmation != 0)
+            {
+                trueReports [j] = reports [i];
+                j ++;
+                totalTrue ++;
+            }
+        }
+        
+        strcpy(messageString,
+           "          Stats         |"
+           "                                 Link                                  |"
+           "       Likelihood       |"
+           "       Message ID        \n"
+           "-------------------------"
+           "-----------------------------------------------------------------------"
+           "-------------------------"
+           "-------------------------\n"
+           );
+           
+        if (totalTrue < numReports)
+        {
+            sprintf (message, "There are only %d unconfirmed reports available. They are: ", totalTrue);
+            postReply (bot->room, message, command->message);
+        }
+        else
+        {
+            sprintf (message, "The latest %d reports are: ", numReports);
+            postReply (bot->room, message, command->message);
+        }
+        
+        if (numReports > totalTrue)
+            check = totalTrue;
+        else
+            check = numReports;
+            
+        postMessage (bot->room, messageString);
+        
+        for (i = 0; i < check; i ++)
+        {
+        Report *report = trueReports [i];
+        
+        sprintf (reportLink, 
+                 "[%d](http:/chat.stackoverflow.com/transcript/message/%d#%d)",
+                 report->messageID, report->messageID, report->messageID);
+        
+        if (report->confirmation != 1 && report->confirmation [i] != 0)
+        {
+            Post *post = report->post;
+            
+            strcpy (postTitle, post->title);
+            
+            sprintf (messageString,
+             "     Unconfirmed       |"
+             "  [%s](http://stackoverflow.com/%s/%lu)                                 "
+             "          %d           |"
+             "        %s              \n",
+             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
+             
+            postMessage (bot->room, messageString);
+        }
+        
         }
     }
     
