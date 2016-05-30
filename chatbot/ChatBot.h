@@ -35,6 +35,7 @@ typedef struct {
 
 typedef struct _ChatBot {
     ChatRoom *room;
+    ChatRoom *roomPostTrue;
     Command **commands;
     RunningCommand **runningCommands;
     size_t runningCommandCount;
