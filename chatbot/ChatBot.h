@@ -56,5 +56,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID);
 unsigned int checkPost(ChatBot *bot, Post *post);   //This function is responsible for freeing post.
 void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed);
 Report *reportWithMessage(ChatBot *bot, unsigned long messageID);
+void testPost (ChatBot *bot, Post *post, RunningCommand *command);
+int recentlyReported (int postID, ChatBot *bot);
 
 #endif /* ChatBot_h */
