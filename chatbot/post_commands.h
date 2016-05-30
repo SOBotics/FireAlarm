@@ -53,10 +53,13 @@ void checkPostCallback(RunningCommand *command, void *ctx) {
 unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) {
     ChatBot *bot = ctx;
     Post *post;
+    char messageString [256];
+    
     if (bot->latestReports[0] == NULL) {
         postReply(bot->room, "I don't have any reports available.", command->message);
         return 1;
     }
+    
     if (command->message->replyID == 0) {
         bot->latestReports[0]->confirmation = confirm;
         post = bot->latestReports[0]->post;
@@ -72,7 +75,15 @@ unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) 
             return 1;
         }
     }
+    
     confirmPost(bot, post, confirm);
+    
+    if (confirm == 1)
+    {
+        sprintf (messageString, "**Bad Post:** [%s](http://stackoverflow.com/%s/%lu)", post->title, post->isAnswer ? "a" : "q", post->postID);
+        postMessage (bot->roomPostTrue, messageString);
+    }
+    
     return 0;
 }
 
