@@ -203,9 +203,10 @@ static Report **parseReports(ChatBot *bot, cJSON *json) {
     return reports;
 }
 
-ChatBot *createChatBot(ChatRoom *room, Command **commands, cJSON *latestReports, Filter **filters) {
+ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **commands, cJSON *latestReports, Filter **filters) {
     ChatBot *c = malloc(sizeof(ChatBot));
     c->room = room;
+    c->roomPostTrue = roomPostTrue;
     c->commands = commands;
     c->runningCommands = NULL;
     c->apiFilter = NULL;
