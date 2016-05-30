@@ -54,6 +54,8 @@ unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) 
     ChatBot *bot = ctx;
     Post *post;
     char messageString [256];
+    char type [32];
+    char type2 [32];
     
     if (bot->latestReports[0] == NULL) {
         postReply(bot->room, "I don't have any reports available.", command->message);
@@ -61,12 +63,47 @@ unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) 
     }
     
     if (command->message->replyID == 0) {
+        if ((bot->latestReports [0]->confirmation == 0 || bot->latestReports [0]->confirmation == 1) &&
+            bot->latestReports [0]->confirmation != confirm)
+        {
+            if (confirm == 0)
+            {
+                strcpy (type, "true positive");
+                strcpy (type2, "false positive");
+            }
+            else if (confirm == 1)
+            {
+                strcpy (type, "false positive");
+                strcpy (type2, "true positive");
+            }
+                
+            sprintf (messageString, "The report is now marked as %s. For your information, earlier the post was marked as %s. To change the feedback, just respond to the report again.", type2, type);
+        }
+        
         bot->latestReports[0]->confirmation = confirm;
         post = bot->latestReports[0]->post;
     }
     else {
         Report *report = reportWithMessage(bot, command->message->replyID);
+        
         if (report) {
+            if ((report->confirmation == 0 || report->confirmation == 1) &&
+            report->confirmation != confirm)
+            {
+            if (confirm == 0)
+            {
+                strcpy (type, "true positive");
+                strcpy (type2, "false positive");
+            }
+            else if (confirm == 1)
+            {
+                strcpy (type, "false positive");
+                strcpy (type2, "true positive");
+            }
+                
+            sprintf (messageString, "The report is now marked as %s. For your information, earlier the post was marked as %s. To change the feedback, just respond to the report again.", type2, type);
+            }
+            
             report->confirmation = confirm;
             post = report->post;
         }
