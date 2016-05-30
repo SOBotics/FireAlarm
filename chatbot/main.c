@@ -402,9 +402,38 @@ int main(int argc, const char * argv[]) {
             memset(env_pass, 0, strlen(env_pass));
         }
     }
-    ChatRoom *room = createChatRoom(client, 68414);
+    
+    ChatRoom *roomPostTrue = createChatRoom (client, 773); //773 is room number of LQPHQ
+    
+    Client *client = createClient("stackoverflow.com", "cookies");
+    if (!client->isLoggedIn) {
+        char *env_email, *env_pass;
+        if (
+            (env_email = getenv("ChatBotEmail")) == NULL ||
+            (env_pass = getenv("ChatBotPass")) == NULL
+            ) {
+            //Get the email from the user
+            printf("Email address: ");
+            const unsigned maxEmailLen = 128;
+            char email[maxEmailLen];
+            fgets(email, maxEmailLen, stdin);
+            email[maxEmailLen-1] = 0;   //make sure it's null terminated
+            
+            char *password = getpass("Password: ");
+            loginWithEmailAndPassword(client, email, password);
+            //overwrite the password so it doesn't stay in memory
+            memset(password, 0, strlen(password));
+        }
+        else {
+            loginWithEmailAndPassword(client, env_email, env_pass);
+            memset(env_pass, 0, strlen(env_pass));
+        }
+    }
+    
+    ChatRoom *room = createChatRoom(client, 68414); // 68414 is room number of SOCVR Testing Facility
     
     enterChatRoom(room);
+    enterChatRoom (roomPostTrue);
     
     
     Filter **filters = loadFilters();
@@ -443,7 +472,7 @@ int main(int argc, const char * argv[]) {
         createCommand("test post *", testPostCallback),
         NULL
     };
-    ChatBot *bot = createChatBot(room, commands, loadReports(), filters);
+    ChatBot *bot = createChatBot(room, roomPostTrue, commands, loadReports(), filters);
     
     
     WebSocket *socket = createWebSocketWithClient(client);
