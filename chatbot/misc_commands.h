@@ -92,12 +92,12 @@ void statistics (RunningCommand *command, void *ctx)
     unsigned int i = 0;
     unsigned int truePositives = 0;
     unsigned int falsePositives = 0;
-    unsigned int unConfirmed = 0;
+    unsigned int unconfirmed = 0;
     int check = 2;
     
     Report **reports = bot->latestReports;
     
-    for (; i < 100; ++i)
+    for (; i < REPORT_MEMORY; ++i)
     {
         Report *report = reports [i];
         check = report->confirmation;
@@ -116,8 +116,8 @@ void statistics (RunningCommand *command, void *ctx)
         }
     }
     
-    sprintf (message, "Statistics of last 100 reports: %d True Positives    %d False Positives    %d Un-Confirmed", 
-             truePositives, falsePositives, unConfirmed);
+    snprintf (message, 200, "Out of last %d reports, %d were true positives, %d were false positives, and %d have not been confirmed.",
+             REPORT_MEMORY, truePositives, falsePositives, unconfirmed);
              
     postReply (bot->room, message, command->message);
     
