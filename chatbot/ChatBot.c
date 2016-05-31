@@ -17,7 +17,9 @@
 
 #define REPORT_HEADER "Potentially bad question"
 #define API_KEY "HNA2dbrFtyTZxeHN6rThNg(("
-#define THRESHOLD 1000
+//#define THRESHOLD 1000
+
+long THRESHOLD = 1000;
 
 static void loadNullReports(Report **reports) {
     for (int i = 0; i < REPORT_MEMORY; i++) {
@@ -201,9 +203,10 @@ static Report **parseReports(ChatBot *bot, cJSON *json) {
     return reports;
 }
 
-ChatBot *createChatBot(ChatRoom *room, Command **commands, cJSON *latestReports, Filter **filters) {
+ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **commands, cJSON *latestReports, Filter **filters) {
     ChatBot *c = malloc(sizeof(ChatBot));
     c->room = room;
+    c->roomPostTrue = roomPostTrue;
     c->commands = commands;
     c->runningCommands = NULL;
     c->apiFilter = NULL;
@@ -277,6 +280,7 @@ void processMessage(ChatBot *bot, ChatMessage *message) {
     strcpy(messageText, message->content);
     if (strstr(messageText, "@Fir") == messageText) {
         //detects message containg @Fir
+        lowercase (*messageText);
         prepareCommand(bot, message, messageText);
         
     }
@@ -370,7 +374,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     return p;
 }
 
-void checkPost(ChatBot *bot, Post *post) {
+unsigned int checkPost(ChatBot *bot, Post *post) {
     unsigned likelihood = 0;
     char *messageBuf = malloc(sizeof(char));
     *messageBuf = 0;
@@ -409,6 +413,7 @@ void checkPost(ChatBot *bot, Post *post) {
         Report *report = malloc(sizeof(Report));
         report->post = post;
         report->confirmation = -1;
+        report->likelihood = likelihood;
         bot->latestReports[0] = report;
         bot->reportsWaiting++;
         bot->reportsUntilAnalysis--;
@@ -417,12 +422,14 @@ void checkPost(ChatBot *bot, Post *post) {
             analyzeReports(bot);
         }
         free(message);
+        free (messageBuf);
+        return 0;
     }
     else {
         deletePost(post);
+        free (messageBuf);
+        return 1;
     }
-    
-    free(messageBuf);
 }
 
 void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed) {
@@ -467,4 +474,80 @@ StopAction runChatBot(ChatBot *c) {
     }
     
     return ACTION_NONE;
+}
+
+void testPost (ChatBot *bot, Post *post, RunningCommand *command)
+{
+    unsigned int likelihood = 0;
+    char *messageBuf = malloc (sizeof (char));
+    
+    *messageBuf = 0;
+    
+    for (int i = 0; i < bot->filterCount; i++) {
+        unsigned start, end;
+        if (postMatchesFilter(post, bot->filters[i], &start, &end)) {
+            
+            const char *desc = bot->filters[i]->desc;
+            messageBuf = realloc(messageBuf, strlen(messageBuf) + strlen(desc) + 16);
+            
+            snprintf(messageBuf + strlen(messageBuf), strlen(desc) + 16,
+                     "%s%s", (likelihood ? ", " : ""), desc);
+            //If this not the first match, start it with a comma and space.
+            
+            const float truePositives = bot->filters[i]->truePositives;
+            likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
+        }
+    }
+    
+    if (likelihood >= THRESHOLD)
+    {
+        const size_t maxMessage = strlen(messageBuf) + 256;
+        char *message = malloc (maxMessage);
+        
+        sprintf (message, "Yes, that post crosses the threshold which currently is %d. The post's likelihood is %d.",
+                 THRESHOLD, likelihood);
+                 
+        postReply (bot->room, message, command->message);
+        
+        free (message);
+    }
+    else if (likelihood < THRESHOLD)
+    {
+        const size_t maxMessage = strlen (messageBuf) + 256;
+        char *message = malloc (maxMessage);
+        
+        sprintf (message, "No, that post doesn't cross the threshold which currently is %d. The post's likelihood is %d",
+                 THRESHOLD, likelihood);
+                 
+        postReply (bot->room, message, command->message);
+        
+        free (message);
+    }
+    
+    free (messageBuf);
+    
+    return;
+}
+
+int recentlyReported (int postID, Chatbot *bot)
+{
+    Report **reports = bot->latestReports;
+    unsigned int i = 0;
+    
+    if (reports [0] == NULL)
+    {
+        return -1;
+    }
+    
+    for (; i < REPORT_MEMORY; ++ i)
+    {
+        Post **post = reports [i]->post;
+        
+        if (post->postID == postID)
+        {
+            return 1;
+        }
+    }
+    
+    return 0;
 }

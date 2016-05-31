@@ -1,2 +1,2 @@
 all:
-	gcc chatbot/*.c -lcurl -lwebsockets -lpthread -lm -o firealarm -std=c99
+	gcc chatbot/*.c -lcurl -lwebsockets -lpthread -lm -o firealarm

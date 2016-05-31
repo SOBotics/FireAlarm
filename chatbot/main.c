@@ -26,12 +26,143 @@
 
 #define SAVE_INTERVAL 60
 
-void unrecognizedCommand(RunningCommand *c, void *ctx) {
+void unrecognizedCommand(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
     char *str;
-    asprintf(&str, "Unrecognized command \"%s\".", c->message->content);
-    postReply(bot->room, str, c->message);
+    char *message;
+    char messageString [256];
+    char subString [127];
+    
+    asprintf (&str, "%s", command->message->content);
+    asprintf(&message, "Unrecognized command `%s`.", command->message->content);
+    sprintf (subString, "%s Did you want to type in", message);
+    
+    if (strstr (str, "to") == str || strstr (str, "tl") == str || strstr (str "t[") == str || strstr (str, "t{") == str)
+    {
+        sprintf (messageString, "%s `tp`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "fo") == str || strstr (str, "fl") == str || strstr (str "f[") == str || strstr (str, "f{") == str)
+    {
+        sprintf (messageString, "%s `fp`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "rp") == str || strstr (str, "yp") == str)
+    {
+        sprintf (messageString, "%s `tp`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "gp") == str || strstr (str, "dp") == str || strstr (str, "vp") == str)
+    {
+        sprintf (messageString, "%s `fp`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "che") == str || strstr (str, "ch ost") == str)
+    {
+        sprintf (messageString, "%s `check post`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "tes") == str || strstr (str, "te ost") == str)
+    {
+        sprintf (messageString, "%s `test post`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "run") == str || strstr (str, "ru and") == str)
+    {
+        sprintf (messageString, "%s `running commands`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "stat") == str || strstr (str, "sta") == str)
+    {
+        sprintf (messageString, "%s `stats`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "rec") == str || strstr (str, "lat") == str)
+    {
+        sprintf (messageString, "%s `recent reports` or `latest reports`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "stp") == str || strstr (str, "st p") == str || strstr (str, sto) == str)
+    {
+        sprintf (messageString, "%s `stop`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "ki") == str)
+    {
+        sprintf (messageString, "%s `kill`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "reb") == str || strstr (str, "re o") || strstr (str, "re t") == str)
+    {
+        sprintf (messageString, "%s `reboot`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "hel") == str || strstr (str, "hep") || strstr (str, "he p") == str)
+    {
+        sprintf (messageString, "%s `help`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "ali") == str)
+    {
+        sprintf (messageString, "%s `alive`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strstr (str, "com") == str)
+    {
+        sprintf (messageString, "%s `commands` or `command`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+        
+    postReply(bot->room, message, command->message);
+    
     free(str);
+    free (message);
+    return;
 }
 
 void webSocektOpened(WebSocket *ws) {
@@ -271,9 +402,38 @@ int main(int argc, const char * argv[]) {
             memset(env_pass, 0, strlen(env_pass));
         }
     }
-    ChatRoom *room = createChatRoom(client, 68414);
+    
+    ChatRoom *roomPostTrue = createChatRoom (client, 773); //773 is room number of LQPHQ
+    
+    Client *client = createClient("stackoverflow.com", "cookies");
+    if (!client->isLoggedIn) {
+        char *env_email, *env_pass;
+        if (
+            (env_email = getenv("ChatBotEmail")) == NULL ||
+            (env_pass = getenv("ChatBotPass")) == NULL
+            ) {
+            //Get the email from the user
+            printf("Email address: ");
+            const unsigned maxEmailLen = 128;
+            char email[maxEmailLen];
+            fgets(email, maxEmailLen, stdin);
+            email[maxEmailLen-1] = 0;   //make sure it's null terminated
+            
+            char *password = getpass("Password: ");
+            loginWithEmailAndPassword(client, email, password);
+            //overwrite the password so it doesn't stay in memory
+            memset(password, 0, strlen(password));
+        }
+        else {
+            loginWithEmailAndPassword(client, env_email, env_pass);
+            memset(env_pass, 0, strlen(env_pass));
+        }
+    }
+    
+    ChatRoom *room = createChatRoom(client, 68414); // 68414 is room number of SOCVR Testing Facility
     
     enterChatRoom(room);
+    enterChatRoom (roomPostTrue);
     
     
     Filter **filters = loadFilters();
@@ -293,23 +453,26 @@ int main(int argc, const char * argv[]) {
         createCommand("fp", falsePositive),
         createCommand("t", truePositive),
         createCommand("f", falsePositive),
-        createCommand("TP", truePositive),
-        createCommand("FP", falsePositive),
-        createCommand("T", truePositive),
-        createCommand("F", falsePositive),
         createCommand("help", help),
         createCommand("alive", aliveCheck),
         createCommand("commands", commandList),
         createCommand("command", commandList),
         createCommand("tpr", truePositiveRespond),
-        createCommand("TPR", truePositiveRespond),
         createCommand("fpr", falsePositiveRespond),
-        createCommand("FPR", falsePositiveRespond),
-        createCommand("stats", statistics),
-        createCommand("statistics", statistics),
+        createCommand("stats *", statistics),
+        createCommand("recent reports *", printLatestReports),
+        createCommand("latest reports *", printLatestReports),
+        createCommand("post info *", postInfo),
+        createCommand("tr", truePositiveRespond),
+        createCommand("fr", falsePositiveRespond),
+        createCommand("cp *", checkPostCallback),
+        createCommand("pinfo *", postInfo),
+        createCommand("change threshold *", changeThreshold),
+        createCommand("check threshold *", checkThreshold),
+        createCommand("test post *", testPostCallback),
         NULL
     };
-    ChatBot *bot = createChatBot(room, commands, loadReports(), filters);
+    ChatBot *bot = createChatBot(room, roomPostTrue, commands, loadReports(), filters);
     
     
     WebSocket *socket = createWebSocketWithClient(client);

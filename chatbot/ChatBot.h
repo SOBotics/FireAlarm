@@ -16,6 +16,7 @@
 #include "Filter.h"
 #include "Post.h"
 #include "cJSON.h"
+#include "misc_functions.h"
 
 #define REPORT_MEMORY 100
 
@@ -29,10 +30,12 @@ typedef struct {
     Post *post;
     unsigned long messageID;
     int confirmation;  //-1: not confirmed, 0: false positive, 1: true positive
+    unsigned long likelihood;
 }Report;
 
 typedef struct _ChatBot {
     ChatRoom *room;
+    ChatRoom *roomPostTrue;
     Command **commands;
     RunningCommand **runningCommands;
     size_t runningCommandCount;
@@ -47,11 +50,13 @@ typedef struct _ChatBot {
     int reportsUntilAnalysis;   //The number of reports left until the bot analyzes them to auto-generate filters.
 }ChatBot;
 
-ChatBot *createChatBot(ChatRoom *room, Command **commands, cJSON *latestReports, Filter **filters);
+ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **commands, cJSON *latestReports, Filter **filters);
 StopAction runChatBot(ChatBot *chatbot);
 Post *getPostByID(ChatBot *bot, unsigned long postID);
-void checkPost(ChatBot *bot, Post *post);   //This function is responsible for freeing post.
+unsigned int checkPost(ChatBot *bot, Post *post);   //This function is responsible for freeing post.
 void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed);
 Report *reportWithMessage(ChatBot *bot, unsigned long messageID);
+void testPost (ChatBot *bot, Post *post, RunningCommand *command);
+int recentlyReported (int postID, ChatBot *bot);
 
 #endif /* ChatBot_h */
