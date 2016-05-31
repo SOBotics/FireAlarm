@@ -37,7 +37,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
     asprintf(&message, "Unrecognized command `%s`.", command->message->content);
     sprintf (subString, "%s Did you want to type in", message);
     
-    if (strstr (str, "to") == str || strstr (str, "tl") == str || strstr (str "t[") == str || strstr (str, "t{") == str)
+    if (strstr (str, "to") == str || strstr (str, "tl") == str || strstr (str, "t[") == str || strstr (str, "t{") == str)
     {
         sprintf (messageString, "%s `tp`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -45,7 +45,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "fo") == str || strstr (str, "fl") == str || strstr (str "f[") == str || strstr (str, "f{") == str)
+    else if (strstr (str, "fo") == str || strstr (str, "fl") == str || strstr (str, "f[") == str || strstr (str, "f{") == str)
     {
         sprintf (messageString, "%s `fp`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -109,7 +109,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "stp") == str || strstr (str, "st p") == str || strstr (str, sto) == str)
+    else if (strstr (str, "stp") == str || strstr (str, "st p") == str)
     {
         sprintf (messageString, "%s `stop`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -404,31 +404,6 @@ int main(int argc, const char * argv[]) {
     }
     
     ChatRoom *roomPostTrue = createChatRoom (client, 773); //773 is room number of LQPHQ
-    
-    Client *client = createClient("stackoverflow.com", "cookies");
-    if (!client->isLoggedIn) {
-        char *env_email, *env_pass;
-        if (
-            (env_email = getenv("ChatBotEmail")) == NULL ||
-            (env_pass = getenv("ChatBotPass")) == NULL
-            ) {
-            //Get the email from the user
-            printf("Email address: ");
-            const unsigned maxEmailLen = 128;
-            char email[maxEmailLen];
-            fgets(email, maxEmailLen, stdin);
-            email[maxEmailLen-1] = 0;   //make sure it's null terminated
-            
-            char *password = getpass("Password: ");
-            loginWithEmailAndPassword(client, email, password);
-            //overwrite the password so it doesn't stay in memory
-            memset(password, 0, strlen(password));
-        }
-        else {
-            loginWithEmailAndPassword(client, env_email, env_pass);
-            memset(env_pass, 0, strlen(env_pass));
-        }
-    }
     
     ChatRoom *room = createChatRoom(client, 68414); // 68414 is room number of SOCVR Testing Facility
     

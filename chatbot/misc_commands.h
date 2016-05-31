@@ -88,16 +88,9 @@ void commandList (RunningCommand *command, void *ctx)
 void changeThreshold (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    char message [200];
-    unsigned int i = 0;
-    unsigned int truePositives = 0;
-    unsigned int falsePositives = 0;
-    unsigned int unconfirmed = 0;
-    int check = 2;
+    long newThreshold = strtol (command->argv [0], NULL, 5);
     
-    Report **reports = bot->latestReports;
-    
-    for (; i < REPORT_MEMORY; ++i)
+    if (newThreshold > 10000)
     {
         postReply (bot->room, "Please enter a threshold smaller than 10000.", command->message);
         return;
@@ -108,10 +101,16 @@ void changeThreshold (RunningCommand *command, void *ctx)
         return;
     }
     
-    snprintf (message, 200, "Out of last %d reports, %d were true positives, %d were false positives, and %d have not been confirmed.",
-             REPORT_MEMORY, truePositives, falsePositives, unconfirmed);
-             
-    postReply (bot->room, message, command->message);
+    THRESHOLD = newThreshold;
+    return;
+}
+
+void checkThreshold (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    char message [256];
+    
+    sprintf (message, "The current threshold is %ld.", THRESHOLD);
     
     postReply (bot->room, message, command->message);
     return;

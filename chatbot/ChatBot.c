@@ -14,6 +14,7 @@
 #include "cJSON.h"
 #include <zlib.h>
 #include <ctype.h>
+#include "misc_functions.h"
 
 #define REPORT_HEADER "Potentially bad question"
 #define API_KEY "HNA2dbrFtyTZxeHN6rThNg(("
@@ -280,7 +281,7 @@ void processMessage(ChatBot *bot, ChatMessage *message) {
     strcpy(messageText, message->content);
     if (strstr(messageText, "@Fir") == messageText) {
         //detects message containg @Fir
-        lowercase (*messageText);
+        lowercase(messageText);
         prepareCommand(bot, message, messageText);
         
     }
@@ -504,7 +505,7 @@ void testPost (ChatBot *bot, Post *post, RunningCommand *command)
         const size_t maxMessage = strlen(messageBuf) + 256;
         char *message = malloc (maxMessage);
         
-        sprintf (message, "Yes, that post crosses the threshold which currently is %d. The post's likelihood is %d.",
+        sprintf (message, "Yes, that post crosses the threshold which currently is %ldd. The post's likelihood is %d.",
                  THRESHOLD, likelihood);
                  
         postReply (bot->room, message, command->message);
@@ -516,7 +517,7 @@ void testPost (ChatBot *bot, Post *post, RunningCommand *command)
         const size_t maxMessage = strlen (messageBuf) + 256;
         char *message = malloc (maxMessage);
         
-        sprintf (message, "No, that post doesn't cross the threshold which currently is %d. The post's likelihood is %d",
+        sprintf (message, "No, that post doesn't cross the threshold which currently is %ld. The post's likelihood is %d",
                  THRESHOLD, likelihood);
                  
         postReply (bot->room, message, command->message);
@@ -529,7 +530,7 @@ void testPost (ChatBot *bot, Post *post, RunningCommand *command)
     return;
 }
 
-int recentlyReported (int postID, Chatbot *bot)
+int recentlyReported (long postID, ChatBot *bot)
 {
     Report **reports = bot->latestReports;
     unsigned int i = 0;
@@ -541,7 +542,7 @@ int recentlyReported (int postID, Chatbot *bot)
     
     for (; i < REPORT_MEMORY; ++ i)
     {
-        Post **post = reports [i]->post;
+        Post *post = reports [i]->post;
         
         if (post->postID == postID)
         {

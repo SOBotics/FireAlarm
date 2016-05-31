@@ -16,7 +16,8 @@
 #include "Filter.h"
 #include "Post.h"
 #include "cJSON.h"
-#include "misc_functions.h"
+
+extern long THRESHOLD;
 
 #define REPORT_MEMORY 100
 
@@ -57,6 +58,6 @@ unsigned int checkPost(ChatBot *bot, Post *post);   //This function is responsib
 void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed);
 Report *reportWithMessage(ChatBot *bot, unsigned long messageID);
 void testPost (ChatBot *bot, Post *post, RunningCommand *command);
-int recentlyReported (int postID, ChatBot *bot);
+int recentlyReported (long postID, ChatBot *bot);
 
 #endif /* ChatBot_h */

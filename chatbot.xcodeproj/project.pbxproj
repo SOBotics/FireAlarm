@@ -21,6 +21,7 @@
 		849032371CDA6163000605EA /* ChatUser.c in Sources */ = {isa = PBXBuildFile; fileRef = 849032351CDA6163000605EA /* ChatUser.c */; };
 		84BD4F331CDABD2C00D31751 /* RunningCommand.c in Sources */ = {isa = PBXBuildFile; fileRef = 84BD4F311CDABD2C00D31751 /* RunningCommand.c */; };
 		84BD4F391CDBE6DC00D31751 /* ChatBot.c in Sources */ = {isa = PBXBuildFile; fileRef = 84BD4F371CDBE6DC00D31751 /* ChatBot.c */; };
+		84ED037B1CFE20A20092F0FE /* misc_functions.c in Sources */ = {isa = PBXBuildFile; fileRef = 84ED03781CFE203A0092F0FE /* misc_functions.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -66,6 +67,8 @@
 		84BD4F321CDABD2C00D31751 /* RunningCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = RunningCommand.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		84BD4F371CDBE6DC00D31751 /* ChatBot.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = ChatBot.c; sourceTree = "<group>"; };
 		84BD4F381CDBE6DC00D31751 /* ChatBot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ChatBot.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		84ED03781CFE203A0092F0FE /* misc_functions.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = misc_functions.c; sourceTree = "<group>"; };
+		84ED03791CFE20510092F0FE /* misc_functions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = misc_functions.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +124,8 @@
 				8490322F1CD9AB7F000605EA /* Command.c */,
 				84BD4F321CDABD2C00D31751 /* RunningCommand.h */,
 				84BD4F311CDABD2C00D31751 /* RunningCommand.c */,
+				84ED03791CFE20510092F0FE /* misc_functions.h */,
+				84ED03781CFE203A0092F0FE /* misc_functions.c */,
 				8490322B1CD956F6000605EA /* Libraries */,
 			);
 			path = chatbot;
@@ -206,6 +211,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84ED037B1CFE20A20092F0FE /* misc_functions.c in Sources */,
 				84457F751CD3C7C3005EFA4F /* Client.c in Sources */,
 				84BD4F331CDABD2C00D31751 /* RunningCommand.c in Sources */,
 				8490322E1CD95CCA000605EA /* cJSON.c in Sources */,

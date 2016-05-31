@@ -162,16 +162,16 @@ void falsePositiveRespond (RunningCommand *command, void *ctx)
     return;
 }
 
-unsigned int statistics (RunningCommand *command, void *ctx)
+void statistics (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     char message [200];
     unsigned int i = 0;
     unsigned int truePositives = 0;
     unsigned int falsePositives = 0;
-    unsigned int unConfirmed = 0;
+    unsigned int unconfirmed = 0;
     int check = 2;
-    int numStats = strtol (command->argv [0], NULL, 5);
+    int numStats = (int)strtol (command->argv [0], NULL, 5);
     
     Report **reports = bot->latestReports;
     
@@ -180,19 +180,16 @@ unsigned int statistics (RunningCommand *command, void *ctx)
     if (numStats <= 0)
     {
         postReply (bot->room, "Please enter a number bigger than 0.", command->message);
-        return 1;
     }
     else if (numStats > REPORT_MEMORY)
     {
         sprintf (message, "Please enter a number smaller than %d.", (REPORT_MEMORY + 1));
         
         postReply (bot->room, message, command->message);
-        return 1;
     }
     else if (bot->latestReports [0] == NULL)
     {
-        postReply (bot->room, "There are no reports available.");
-        return 1;
+        postReply (bot->room, "There are no reports available.", command->message);
     }
     
     /* Calculating the number of truePositives, falsePositives, and unconfirmed reports */
@@ -221,18 +218,16 @@ unsigned int statistics (RunningCommand *command, void *ctx)
              
     postReply (bot->room, message, command->message);
     
-    return 0;
 }
 
 void printLatestReports (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    int numReports = strtol (command->argv [0], NULL, 3);
-    char typePrinted [16] = strtol (command->argv [1], NULL, 16);
+    int numReports = (int)strtol (command->argv [0], NULL, 10);
+    const char *typePrinted = command->argv[1];
     const size_t maxLineSize = 256;
     char message [256];
     unsigned int i;
-    long postid;
     char postTitle [127];
     char reportLink [256];
     
@@ -243,7 +238,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
     }
     else if (numReports > MAX_LATEST_REPORTS)
     {
-        sprintf (message, "Please enter a number smaller than %d.", (MAX_LATEST_REPORTS + 1)
+        sprintf (message, "Please enter a number smaller than %d.", (MAX_LATEST_REPORTS + 1));
         
         postReply (bot->room, message, command->message);
         return;
@@ -283,7 +278,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
         Report *report = reports [i];
         
         sprintf (reportLink, 
-                 "[%d](http:/chat.stackoverflow.com/transcript/message/%d#%d)",
+                 "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
                  report->messageID, report->messageID, report->messageID);
         
         if (report->confirmation == 1)
@@ -295,7 +290,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
             sprintf (messageString,
              "     True Positive     |"
              "  [%s](http://stackoverflow.com/%s/%lu)                                 "
-             "          %d           |"
+             "          %lu           |"
              "        %s              \n",
              postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
              
@@ -310,7 +305,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
             sprintf (messageString,
              "    False Positive     |"
              "  [%s](http://stackoverflow.com/%s/%lu)                                 "
-             "          %d           |"
+             "          %lu           |"
              "        %s              \n",
              postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
              
@@ -325,7 +320,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
             sprintf (messageString,
              "      Unconfirmed      |"
              "  [%s](http://stackoverflow.com/%s/%lu)                                 |"
-             "          %d           |"
+             "          %lu           |"
              "        %s              \n",
              postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
              
@@ -386,7 +381,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
         Report *report = trueReports [i];
         
         sprintf (reportLink, 
-                 "[%d](http:/chat.stackoverflow.com/transcript/message/%d#%d)",
+                 "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
                  report->messageID, report->messageID, report->messageID);
         
         if (report->confirmation == 1)
@@ -398,7 +393,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
             sprintf (messageString,
              "     True Positive     |"
              "  [%s](http://stackoverflow.com/%s/%lu)                                 "
-             "          %d           |"
+             "          %lu           |"
              "        %s              \n",
              postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
              
@@ -459,7 +454,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
         Report *report = trueReports [i];
         
         sprintf (reportLink, 
-                 "[%d](http:/chat.stackoverflow.com/transcript/message/%d#%d)",
+                 "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
                  report->messageID, report->messageID, report->messageID);
         
         if (report->confirmation == 1)
@@ -471,7 +466,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
             sprintf (messageString,
              "    False Positive     |"
              "  [%s](http://stackoverflow.com/%s/%lu)                                 "
-             "          %d           |"
+             "          %lu           |"
              "        %s              \n",
              postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
              
@@ -532,10 +527,10 @@ void printLatestReports (RunningCommand *command, void *ctx)
         Report *report = trueReports [i];
         
         sprintf (reportLink, 
-                 "[%d](http:/chat.stackoverflow.com/transcript/message/%d#%d)",
+                 "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
                  report->messageID, report->messageID, report->messageID);
         
-        if (report->confirmation != 1 && report->confirmation [i] != 0)
+        if (report->confirmation != 1 && report->confirmation != 0)
         {
             Post *post = report->post;
             
@@ -544,7 +539,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
             sprintf (messageString,
              "     Unconfirmed       |"
              "  [%s](http://stackoverflow.com/%s/%lu)                                 "
-             "          %d           |"
+             "          %lu           |"
              "        %s              \n",
              postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
              
@@ -562,7 +557,7 @@ void printLatestReports (RunningCommand *command, void *ctx)
 void postInfo (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    int postID = strtol (command->argv [0], NULL, 10);
+    long postID = strtol (command->argv [0], NULL, 10);
     char message [512];
     char link [256];
     char status [25];
@@ -583,13 +578,13 @@ void postInfo (RunningCommand *command, void *ctx)
     
     Report **reports = bot->latestReports;
     unsigned int i = 0;
-    int copyPostID = 0;
+    long copyPostID = 0;
     
     for (; i < REPORT_MEMORY; ++i)
     {
-        Reoprt *report = reports [i];
+        Report *report = reports [i];
         
-        copyPostID = report->postID;
+        copyPostID = report->post->postID;
         
         if (copyPostID == postID)
         {
