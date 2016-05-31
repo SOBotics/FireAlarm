@@ -118,7 +118,8 @@ unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) 
     if (confirm == 1)
     {
         sprintf (messageString, "**Bad Post:** [%s](http://stackoverflow.com/%s/%lu)", post->title, post->isAnswer ? "a" : "q", post->postID);
-        postMessage (bot->roomPostTrue, messageString);
+        //postMessage (bot->roomPostTrue, messageString);
+        //not going to post to LQPHQ until the bot is more accurate
     }
     
     return 0;
