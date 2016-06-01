@@ -403,12 +403,12 @@ int main(int argc, const char * argv[]) {
         }
     }
     
-    ChatRoom *roomPostTrue = createChatRoom (client, 773); //773 is room number of LQPHQ
+    //ChatRoom *roomPostTrue = createChatRoom (client, 773); //773 is room number of LQPHQ
     
     ChatRoom *room = createChatRoom(client, 68414); // 68414 is room number of SOCVR Testing Facility
     
     enterChatRoom(room);
-    enterChatRoom (roomPostTrue);
+    //enterChatRoom (roomPostTrue);
     
     
     Filter **filters = loadFilters();
@@ -434,7 +434,7 @@ int main(int argc, const char * argv[]) {
         createCommand("command", commandList),
         createCommand("tpr", truePositiveRespond),
         createCommand("fpr", falsePositiveRespond),
-        createCommand("stats *", statistics),
+        createCommand("stats ...", statistics),
         createCommand("recent reports *", printLatestReports),
         createCommand("latest reports *", printLatestReports),
         createCommand("post info *", postInfo),
@@ -447,7 +447,7 @@ int main(int argc, const char * argv[]) {
         createCommand("test post *", testPostCallback),
         NULL
     };
-    ChatBot *bot = createChatBot(room, roomPostTrue, commands, loadReports(), filters);
+    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters);
     
     
     WebSocket *socket = createWebSocketWithClient(client);

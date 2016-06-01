@@ -221,6 +221,11 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
     buffer.data = NULL;
     
     authLink = strstr(authLink, "<a");
+    if (authLink == NULL) {
+        fputs("Failed to log in!\n", stderr);
+        remove("cookies");
+        exit(EXIT_FAILURE);
+    }
     authLink = strchr(authLink, '"') + 1;
     *(strchr(authLink, '"')) = 0;
     

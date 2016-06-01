@@ -279,9 +279,9 @@ Report *reportWithMessage(ChatBot *bot, unsigned long messageID) {
 void processMessage(ChatBot *bot, ChatMessage *message) {
     char *messageText = malloc(strlen(message->content) + 1);
     strcpy(messageText, message->content);
-    if (strstr(messageText, "@Fir") == messageText) {
+    lowercase(messageText);
+    if (strstr(messageText, "@fir") == messageText) {
         //detects message containg @Fir
-        lowercase(messageText);
         prepareCommand(bot, message, messageText);
         
     }

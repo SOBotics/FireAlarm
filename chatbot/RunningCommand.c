@@ -38,16 +38,6 @@ void *commandThread(void *arg) {
         char *token;
         int j;
         for (j = 0; (token = strsep(&name, " ")); j++) {
-            if (j == command->argc) {
-                match = 0;
-                break;
-            }
-            if (strcmp("*", token) == 0) {  //if we hit an argument, add it to the list.
-                argumentList = realloc(argumentList, ++argListSize * sizeof(char*));
-                argumentList[argListSize-1] = malloc(strlen(command->argv[j]) + 1);
-                strcpy(argumentList[argListSize-1], command->argv[j]);
-                continue;
-            }
             if (strcmp("...", token) == 0) {
                 //if everything else is arguments, add them to the argument list.
                 for (; j < command->argc; j++) {
@@ -56,6 +46,17 @@ void *commandThread(void *arg) {
                     strcpy(argumentList[argListSize-1], command->argv[j]);
                 }
                 break;
+            }
+            if (j == command->argc) {
+                match = 0;
+                break;
+            }
+            
+            if (strcmp("*", token) == 0) {  //if we hit an argument, add it to the list.
+                argumentList = realloc(argumentList, ++argListSize * sizeof(char*));
+                argumentList[argListSize-1] = malloc(strlen(command->argv[j]) + 1);
+                strcpy(argumentList[argListSize-1], command->argv[j]);
+                continue;
             }
             if (strcmp(command->argv[j], token)) {
                 match = 0;

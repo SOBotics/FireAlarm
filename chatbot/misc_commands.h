@@ -88,7 +88,7 @@ void commandList (RunningCommand *command, void *ctx)
 void changeThreshold (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    long newThreshold = strtol (command->argv [0], NULL, 5);
+    long newThreshold = strtol (command->argv [0], NULL, 10);
     
     if (newThreshold > 10000)
     {

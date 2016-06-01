@@ -13,6 +13,7 @@ void lowercase (char *str)
     while (*str)
     {
         *str = tolower(*str);
+        str++;
     }
     
     return;

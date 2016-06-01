@@ -76,7 +76,7 @@ unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) 
                 strcpy (type, "false positive");
                 strcpy (type2, "true positive");
             }
-                
+            
             sprintf (messageString, "The report is now marked as %s. For your information, earlier the post was marked as %s. To change the feedback, just respond to the report again.", type2, type);
         }
         
@@ -88,20 +88,20 @@ unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) 
         
         if (report) {
             if ((report->confirmation == 0 || report->confirmation == 1) &&
-            report->confirmation != confirm)
+                report->confirmation != confirm)
             {
-            if (confirm == 0)
-            {
-                strcpy (type, "true positive");
-                strcpy (type2, "false positive");
-            }
-            else if (confirm == 1)
-            {
-                strcpy (type, "false positive");
-                strcpy (type2, "true positive");
-            }
+                if (confirm == 0)
+                {
+                    strcpy (type, "true positive");
+                    strcpy (type2, "false positive");
+                }
+                else if (confirm == 1)
+                {
+                    strcpy (type, "false positive");
+                    strcpy (type2, "true positive");
+                }
                 
-            sprintf (messageString, "The report is now marked as %s. For your information, earlier the post was marked as %s. To change the feedback, just respond to the report again.", type2, type);
+                sprintf (messageString, "The report is now marked as %s. For your information, earlier the post was marked as %s. To change the feedback, just respond to the report again.", type2, type);
             }
             
             report->confirmation = confirm;
@@ -144,7 +144,7 @@ void truePositiveRespond (RunningCommand *command, void *ctx)
     
     if (check == 0)
         postReply (bot->room, "The report has been successfully been recorded as True Positive.", command->message);
-        
+    
     return;
 }
 
@@ -158,8 +158,8 @@ void falsePositiveRespond (RunningCommand *command, void *ctx)
     check = confirm (command, ctx, 0);
     
     if (check == 0)
-     postReply (bot->room, "The report has been successfully been recorded as False Positive", command->message);
-   
+        postReply (bot->room, "The report has been successfully been recorded as False Positive", command->message);
+    
     return;
 }
 
@@ -172,7 +172,17 @@ void statistics (RunningCommand *command, void *ctx)
     unsigned int falsePositives = 0;
     unsigned int unconfirmed = 0;
     int check = 2;
-    int numStats = (int)strtol (command->argv [0], NULL, 5);
+    int numStats;
+    if (command->argc == 1) {
+        numStats = (int)strtol (command->argv [0], NULL, 10);
+    }
+    else if (command->argc == 0) {
+        numStats = REPORT_MEMORY;
+    }
+    else {
+        postReply(bot->room, "Usage: @FireAlarm stats [number of reports]", command->message);
+        return;
+    }
     
     Report **reports = bot->latestReports;
     
@@ -213,10 +223,10 @@ void statistics (RunningCommand *command, void *ctx)
             unconfirmed ++;
         }
     }
-             
+    
     sprintf (message, "Out of the last %d reports, %d are true positives, %d are false positives, and %d are unconfirmed.",
              numStats, truePositives, falsePositives, unconfirmed);
-             
+    
     postReply (bot->room, message, command->message);
     
 }
@@ -257,78 +267,78 @@ void printLatestReports (RunningCommand *command, void *ctx)
     
     if (typePrinted == NULL || strcmp (typePrinted, " ") == 0)
     {
-    
-    strcpy(messageString,
-           "          Stats         |"
-           "                                 Link                                  |"
-           "       Likelihood       |"
-           "       Message ID        \n"
-           "-------------------------"
-           "-----------------------------------------------------------------------"
-           "-------------------------"
-           "-------------------------\n"
-           );
-           
-    sprintf (message, "The latest %d reports are: ", numReports);
-    
-    postReply (bot->room, message, command->message);
-    postMessage (bot->room, messageString);
-    
-    for (i = 0; i < numReports; i ++)
-    {
-        Report *report = reports [i];
         
-        sprintf (reportLink, 
-                 "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
-                 report->messageID, report->messageID, report->messageID);
+        strcpy(messageString,
+               "          Stats         |"
+               "                                 Link                                  |"
+               "       Likelihood       |"
+               "       Message ID        \n"
+               "-------------------------"
+               "-----------------------------------------------------------------------"
+               "-------------------------"
+               "-------------------------\n"
+               );
         
-        if (report->confirmation == 1)
+        sprintf (message, "The latest %d reports are: ", numReports);
+        
+        postReply (bot->room, message, command->message);
+        postMessage (bot->room, messageString);
+        
+        for (i = 0; i < numReports; i ++)
         {
-            Post *post = report->post;
+            Report *report = reports [i];
             
-            strcpy (postTitle, post->title);
+            sprintf (reportLink,
+                     "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
+                     report->messageID, report->messageID, report->messageID);
             
-            sprintf (messageString,
-             "     True Positive     |"
-             "  [%s](http://stackoverflow.com/%s/%lu)                                 "
-             "          %lu           |"
-             "        %s              \n",
-             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
-             
-            postMessage (bot->room, messageString);
+            if (report->confirmation == 1)
+            {
+                Post *post = report->post;
+                
+                strcpy (postTitle, post->title);
+                
+                sprintf (messageString,
+                         "     True Positive     |"
+                         "  [%s](http://stackoverflow.com/%s/%lu)                                 "
+                         "          %lu           |"
+                         "        %s              \n",
+                         postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
+                
+                postMessage (bot->room, messageString);
+            }
+            else if (report->confirmation == 0)
+            {
+                Post *post = report->post;
+                
+                strcpy (postTitle, post->title);
+                
+                sprintf (messageString,
+                         "    False Positive     |"
+                         "  [%s](http://stackoverflow.com/%s/%lu)                                 "
+                         "          %lu           |"
+                         "        %s              \n",
+                         postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
+                
+                postMessage (bot->room, messageString);
+            }
+            else
+            {
+                Post *post = report->post;
+                
+                strcpy (postTitle, post->title);
+                
+                sprintf (messageString,
+                         "      Unconfirmed      |"
+                         "  [%s](http://stackoverflow.com/%s/%lu)                                 |"
+                         "          %lu           |"
+                         "        %s              \n",
+                         postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
+                
+                postMessage (bot->room, messageString);
+            }
         }
-        else if (report->confirmation == 0)
-        {
-            Post *post = report->post;
-            
-            strcpy (postTitle, post->title);
-            
-            sprintf (messageString,
-             "    False Positive     |"
-             "  [%s](http://stackoverflow.com/%s/%lu)                                 "
-             "          %lu           |"
-             "        %s              \n",
-             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
-             
-            postMessage (bot->room, messageString);
-        }
-        else
-        {
-            Post *post = report->post;
-            
-            strcpy (postTitle, post->title);
-            
-            sprintf (messageString,
-             "      Unconfirmed      |"
-             "  [%s](http://stackoverflow.com/%s/%lu)                                 |"
-             "          %lu           |"
-             "        %s              \n",
-             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
-             
-            postMessage (bot->room, messageString);
-        }
-    }
-    
+        
     }
     else if (strcmp (typePrinted, "true") == 0 || strcmp (typePrinted, "true positive") == 0)
     {
@@ -349,16 +359,16 @@ void printLatestReports (RunningCommand *command, void *ctx)
         }
         
         strcpy(messageString,
-           "          Stats         |"
-           "                                 Link                                  |"
-           "       Likelihood       |"
-           "       Message ID        \n"
-           "-------------------------"
-           "-----------------------------------------------------------------------"
-           "-------------------------"
-           "-------------------------\n"
-           );
-           
+               "          Stats         |"
+               "                                 Link                                  |"
+               "       Likelihood       |"
+               "       Message ID        \n"
+               "-------------------------"
+               "-----------------------------------------------------------------------"
+               "-------------------------"
+               "-------------------------\n"
+               );
+        
         if (totalTrue < numReports)
         {
             sprintf (message, "There are only %d true positive reports available. They are: ", totalTrue);
@@ -374,33 +384,33 @@ void printLatestReports (RunningCommand *command, void *ctx)
             check = totalTrue;
         else
             check = numReports;
-            
+        
         postMessage (bot->room, messageString);
         
         for (i = 0; i < check; i ++)
         {
-        Report *report = trueReports [i];
-        
-        sprintf (reportLink, 
-                 "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
-                 report->messageID, report->messageID, report->messageID);
-        
-        if (report->confirmation == 1)
-        {
-            Post *post = report->post;
+            Report *report = trueReports [i];
             
-            strcpy (postTitle, post->title);
+            sprintf (reportLink,
+                     "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
+                     report->messageID, report->messageID, report->messageID);
             
-            sprintf (messageString,
-             "     True Positive     |"
-             "  [%s](http://stackoverflow.com/%s/%lu)                                 "
-             "          %lu           |"
-             "        %s              \n",
-             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
-             
-            postMessage (bot->room, messageString);
-        }
-        
+            if (report->confirmation == 1)
+            {
+                Post *post = report->post;
+                
+                strcpy (postTitle, post->title);
+                
+                sprintf (messageString,
+                         "     True Positive     |"
+                         "  [%s](http://stackoverflow.com/%s/%lu)                                 "
+                         "          %lu           |"
+                         "        %s              \n",
+                         postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
+                
+                postMessage (bot->room, messageString);
+            }
+            
         }
     }
     else if (strcmp (typePrinted, "false") == 0 || strcmp (typePrinted, "false positive") == 0)
@@ -422,16 +432,16 @@ void printLatestReports (RunningCommand *command, void *ctx)
         }
         
         strcpy(messageString,
-           "          Stats         |"
-           "                                 Link                                  |"
-           "       Likelihood       |"
-           "       Message ID        \n"
-           "-------------------------"
-           "-----------------------------------------------------------------------"
-           "-------------------------"
-           "-------------------------\n"
-           );
-           
+               "          Stats         |"
+               "                                 Link                                  |"
+               "       Likelihood       |"
+               "       Message ID        \n"
+               "-------------------------"
+               "-----------------------------------------------------------------------"
+               "-------------------------"
+               "-------------------------\n"
+               );
+        
         if (totalTrue < numReports)
         {
             sprintf (message, "There are only %d false positive reports available. They are: ", totalTrue);
@@ -447,38 +457,38 @@ void printLatestReports (RunningCommand *command, void *ctx)
             check = totalTrue;
         else
             check = numReports;
-            
+        
         postMessage (bot->room, messageString);
         
         for (i = 0; i < check; i ++)
         {
-        Report *report = trueReports [i];
-        
-        sprintf (reportLink, 
-                 "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
-                 report->messageID, report->messageID, report->messageID);
-        
-        if (report->confirmation == 1)
-        {
-            Post *post = report->post;
+            Report *report = trueReports [i];
             
-            strcpy (postTitle, post->title);
+            sprintf (reportLink,
+                     "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
+                     report->messageID, report->messageID, report->messageID);
             
-            sprintf (messageString,
-             "    False Positive     |"
-             "  [%s](http://stackoverflow.com/%s/%lu)                                 "
-             "          %lu           |"
-             "        %s              \n",
-             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
-             
-            postMessage (bot->room, messageString);
-        }
-        
+            if (report->confirmation == 1)
+            {
+                Post *post = report->post;
+                
+                strcpy (postTitle, post->title);
+                
+                sprintf (messageString,
+                         "    False Positive     |"
+                         "  [%s](http://stackoverflow.com/%s/%lu)                                 "
+                         "          %lu           |"
+                         "        %s              \n",
+                         postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
+                
+                postMessage (bot->room, messageString);
+            }
+            
         }
     }
     else if (strcmp (typePrinted, "unconfirmed") == 0 || strcmp (typePrinted, "unknown") == 0)
     {
-         Report **trueReports;
+        Report **trueReports;
         
         unsigned int j = 0;
         unsigned int totalTrue = 0;
@@ -495,16 +505,16 @@ void printLatestReports (RunningCommand *command, void *ctx)
         }
         
         strcpy(messageString,
-           "          Stats         |"
-           "                                 Link                                  |"
-           "       Likelihood       |"
-           "       Message ID        \n"
-           "-------------------------"
-           "-----------------------------------------------------------------------"
-           "-------------------------"
-           "-------------------------\n"
-           );
-           
+               "          Stats         |"
+               "                                 Link                                  |"
+               "       Likelihood       |"
+               "       Message ID        \n"
+               "-------------------------"
+               "-----------------------------------------------------------------------"
+               "-------------------------"
+               "-------------------------\n"
+               );
+        
         if (totalTrue < numReports)
         {
             sprintf (message, "There are only %d unconfirmed reports available. They are: ", totalTrue);
@@ -520,33 +530,33 @@ void printLatestReports (RunningCommand *command, void *ctx)
             check = totalTrue;
         else
             check = numReports;
-            
+        
         postMessage (bot->room, messageString);
         
         for (i = 0; i < check; i ++)
         {
-        Report *report = trueReports [i];
-        
-        sprintf (reportLink, 
-                 "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
-                 report->messageID, report->messageID, report->messageID);
-        
-        if (report->confirmation != 1 && report->confirmation != 0)
-        {
-            Post *post = report->post;
+            Report *report = trueReports [i];
             
-            strcpy (postTitle, post->title);
+            sprintf (reportLink,
+                     "[%lu](http:/chat.stackoverflow.com/transcript/message/%lu#%lu)",
+                     report->messageID, report->messageID, report->messageID);
             
-            sprintf (messageString,
-             "     Unconfirmed       |"
-             "  [%s](http://stackoverflow.com/%s/%lu)                                 "
-             "          %lu           |"
-             "        %s              \n",
-             postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
-             
-            postMessage (bot->room, messageString);
-        }
-        
+            if (report->confirmation != 1 && report->confirmation != 0)
+            {
+                Post *post = report->post;
+                
+                strcpy (postTitle, post->title);
+                
+                sprintf (messageString,
+                         "     Unconfirmed       |"
+                         "  [%s](http://stackoverflow.com/%s/%lu)                                 "
+                         "          %lu           |"
+                         "        %s              \n",
+                         postTitle, post->isAnswer ? "a" : "q", post->postID, report->likelihood, reportLink);
+                
+                postMessage (bot->room, messageString);
+            }
+            
         }
     }
     
@@ -606,7 +616,7 @@ void postInfo (RunningCommand *command, void *ctx)
             
             sprintf (message, "[Your Post](%s) was reported recently. It's current status is %s.",
                      link, status);
-                     
+            
             postReply (bot->room, message, command->message);
             return;
         }
@@ -619,28 +629,28 @@ void postInfo (RunningCommand *command, void *ctx)
 
 void testPostCallback (RunningCommand *command, void *ctx)
 {
-     ChatBot *bot = ctx;
-     long postID = strtol(command->argv[0], NULL, 10);
-     
-     if (postID <= 0)
-     {
-         postReply (bot->room, "Please enter a number bigger than 0", command->message);
-         return;
-     }
-     
-     Post *post = getPostByID(bot, postID);
-     
-     if (post == NULL)
-     {
-         postReply (bot->room, "Please enter the ID of a valid post.", command->message);
-         return;
-     }
-     
-     pthread_mutex_lock (&bot->detectorLock);
-     testPost (bot, post, command);
-     pthread_mutex_unlock (&bot->detectorLock);
-     
-     return;
+    ChatBot *bot = ctx;
+    long postID = strtol(command->argv[0], NULL, 10);
+    
+    if (postID <= 0)
+    {
+        postReply (bot->room, "Please enter a number bigger than 0", command->message);
+        return;
+    }
+    
+    Post *post = getPostByID(bot, postID);
+    
+    if (post == NULL)
+    {
+        postReply (bot->room, "Please enter the ID of a valid post.", command->message);
+        return;
+    }
+    
+    pthread_mutex_lock (&bot->detectorLock);
+    testPost (bot, post, command);
+    pthread_mutex_unlock (&bot->detectorLock);
+    
+    return;
 }
 
 #endif /* post_commands_h */
