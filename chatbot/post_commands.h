@@ -30,21 +30,13 @@ void checkPostCallback(RunningCommand *command, void *ctx) {
         return;
     }
     
-    check = recentlyReported (postID, bot);
-    
-    if (check == 1)
-    {
-        postReply (bot->room, "The post was already reported recently.", command->message);
-        return;
-    }
-    
     pthread_mutex_lock(&bot->detectorLock);
     check = checkPost(bot, post);
     pthread_mutex_unlock(&bot->detectorLock);
     
     if (check == 1)
     {
-        postReply (bot->room, "The post did not match the filters, and thus now isn't reported.", command->message);
+        postReply (bot->room, "The post did not match the filters.", command->message);
     }
     
     return;
@@ -235,7 +227,13 @@ void printLatestReports (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     int numReports = (int)strtol (command->argv [0], NULL, 10);
-    const char *typePrinted = command->argv[1];
+    const char *typePrinted;
+    if (command->argc > 1) {
+        typePrinted = command->argv[1];
+    }
+    else {
+        typePrinted = NULL;
+    }
     const size_t maxLineSize = 256;
     char message [256];
     unsigned int i;

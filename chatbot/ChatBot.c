@@ -49,14 +49,24 @@ void analyzeReports(ChatBot *bot) {
         }
         const char *body = report->post->body;
         if (report->confirmation) {
-            trueLen += strlen(body) + 1;
-            truePositives = realloc(truePositives, trueLen + 1);
+            trueLen += strlen(body) + 2;
+            if (truePositives) {
+                truePositives = realloc(truePositives, trueLen);
+            }
+            else {
+                truePositives = calloc(1, trueLen);   //calloc zero-fills
+            }
             strcat(truePositives, " ");
             strcat(truePositives, body);
         }
         else {
-            falseLen += strlen(body) + 1;
-            falsePositives = realloc(falsePositives, falseLen + 1);
+            falseLen += strlen(body) + 2;
+            if (falsePositives) {
+                falsePositives = realloc(falsePositives, falseLen);
+            }
+            else {
+                falsePositives = calloc(1, falseLen);   //calloc zero-fills
+            }
             strcat(falsePositives, " ");
             strcat(falsePositives, body);
         }
@@ -506,7 +516,7 @@ void testPost (ChatBot *bot, Post *post, RunningCommand *command)
         
         sprintf (message, "Yes, that post crosses the threshold which currently is %ldd. The post's likelihood is %d.",
                  THRESHOLD, likelihood);
-                 
+        
         postReply (bot->room, message, command->message);
         
         free (message);
@@ -518,7 +528,7 @@ void testPost (ChatBot *bot, Post *post, RunningCommand *command)
         
         sprintf (message, "No, that post doesn't cross the threshold which currently is %ld. The post's likelihood is %d",
                  THRESHOLD, likelihood);
-                 
+        
         postReply (bot->room, message, command->message);
         
         free (message);
