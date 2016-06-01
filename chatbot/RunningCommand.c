@@ -58,7 +58,7 @@ void *commandThread(void *arg) {
                 strcpy(argumentList[argListSize-1], command->argv[j]);
                 continue;
             }
-            if (strcmp(command->argv[j], token)) {
+            if (strcasecmp(command->argv[j], token)) {
                 match = 0;
                 break;
             }

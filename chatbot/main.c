@@ -37,7 +37,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
     asprintf(&message, "Unrecognized command `%s`.", command->message->content);
     sprintf (subString, "%s Did you want to type in", message);
     
-    if (strstr (str, "to") == str || strstr (str, "tl") == str || strstr (str, "t[") == str || strstr (str, "t{") == str)
+    if (strcasestr (str, "to") == str || strcasestr (str, "tl") == str || strcasestr (str, "t[") == str || strcasestr (str, "t{") == str)
     {
         sprintf (messageString, "%s `tp`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -45,7 +45,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "fo") == str || strstr (str, "fl") == str || strstr (str, "f[") == str || strstr (str, "f{") == str)
+    else if (strcasestr (str, "fo") == str || strcasestr (str, "fl") == str || strcasestr (str, "f[") == str || strcasestr (str, "f{") == str)
     {
         sprintf (messageString, "%s `fp`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -53,7 +53,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "rp") == str || strstr (str, "yp") == str)
+    else if (strcasestr (str, "rp") == str || strcasestr (str, "yp") == str)
     {
         sprintf (messageString, "%s `tp`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -61,7 +61,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "gp") == str || strstr (str, "dp") == str || strstr (str, "vp") == str)
+    else if (strcasestr (str, "gp") == str || strcasestr (str, "dp") == str || strcasestr (str, "vp") == str)
     {
         sprintf (messageString, "%s `fp`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -69,7 +69,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "che") == str || strstr (str, "ch ost") == str)
+    else if (strcasestr (str, "che") == str || strcasestr (str, "ch ost") == str)
     {
         sprintf (messageString, "%s `check post`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -77,7 +77,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "tes") == str || strstr (str, "te ost") == str)
+    else if (strcasestr (str, "tes") == str || strcasestr (str, "te ost") == str)
     {
         sprintf (messageString, "%s `test post`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -85,7 +85,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "run") == str || strstr (str, "ru and") == str)
+    else if (strcasestr (str, "run") == str || strcasestr (str, "ru and") == str)
     {
         sprintf (messageString, "%s `running commands`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -93,7 +93,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "stat") == str || strstr (str, "sta") == str)
+    else if (strcasestr (str, "stat") == str || strcasestr (str, "sta") == str)
     {
         sprintf (messageString, "%s `stats`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -101,7 +101,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "rec") == str || strstr (str, "lat") == str)
+    else if (strcasestr (str, "rec") == str || strcasestr (str, "lat") == str)
     {
         sprintf (messageString, "%s `recent reports` or `latest reports`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -109,7 +109,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "stp") == str || strstr (str, "st p") == str)
+    else if (strcasestr (str, "stp") == str || strcasestr (str, "st p") == str)
     {
         sprintf (messageString, "%s `stop`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -117,7 +117,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "ki") == str)
+    else if (strcasestr (str, "ki") == str)
     {
         sprintf (messageString, "%s `kill`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -125,7 +125,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "reb") == str || strstr (str, "re o") || strstr (str, "re t") == str)
+    else if (strcasestr (str, "reb") == str || strcasestr (str, "re o") || strcasestr (str, "re t") == str)
     {
         sprintf (messageString, "%s `reboot`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -133,7 +133,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "hel") == str || strstr (str, "hep") || strstr (str, "he p") == str)
+    else if (strcasestr (str, "hel") == str || strcasestr (str, "hep") || strcasestr (str, "he p") == str)
     {
         sprintf (messageString, "%s `help`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -141,7 +141,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "ali") == str)
+    else if (strcasestr (str, "ali") == str)
     {
         sprintf (messageString, "%s `alive`?", subString);
         postReply (bot->room, messageString, command->message);
@@ -149,7 +149,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
-    else if (strstr (str, "com") == str)
+    else if (strcasestr (str, "com") == str)
     {
         sprintf (messageString, "%s `commands` or `command`?", subString);
         postReply (bot->room, messageString, command->message);

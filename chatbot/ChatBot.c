@@ -279,8 +279,7 @@ Report *reportWithMessage(ChatBot *bot, unsigned long messageID) {
 void processMessage(ChatBot *bot, ChatMessage *message) {
     char *messageText = malloc(strlen(message->content) + 1);
     strcpy(messageText, message->content);
-    lowercase(messageText);
-    if (strstr(messageText, "@fir") == messageText) {
+    if (strcasestr(messageText, "@fir") == messageText) {
         //detects message containg @Fir
         prepareCommand(bot, message, messageText);
         
