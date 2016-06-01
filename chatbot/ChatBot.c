@@ -153,8 +153,9 @@ void analyzeReports(ChatBot *bot) {
         if (totalOccurences > 5 && trueRate > 0.7) {
             unsigned char matchesExistingFilter = 0;
             for (int i = 0; i < bot->filterCount; i++) {
-                if (strstr(text, bot->filters[i]->filter)) {
+                if (strstr(bot->filters[i]->filter, text)) {
                     matchesExistingFilter = 1;
+                    break;
                 }
             }
             if (!matchesExistingFilter && strlen(text) > 2) {
@@ -165,6 +166,7 @@ void analyzeReports(ChatBot *bot) {
             }
         }
     }
+    
 }
 
 static Report **parseReports(ChatBot *bot, cJSON *json) {
