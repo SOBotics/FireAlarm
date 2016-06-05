@@ -405,7 +405,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
             likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
         }
     }
-    if (likelihood > THRESHOLD) {
+    if (likelihood > THRESHOLD && (recentlyReported (post->postID, bot) == 0)) {
         const size_t maxMessage = strlen(messageBuf) + 256;
         char *message = malloc(maxMessage);
         snprintf(message, maxMessage,
