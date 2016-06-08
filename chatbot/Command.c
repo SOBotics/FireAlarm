@@ -10,9 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-Command *createCommand(char *name, void (*callback)(RunningCommand *, void *ctx)) {
+Command *createCommand(char *name, int isPrivileged, void (*callback)(RunningCommand *, void *ctx)) {
     Command *c = malloc(sizeof(Command));
     c->name = name;
     c->callback = callback;
+    c->isPrivileged;
     return c;
 }
