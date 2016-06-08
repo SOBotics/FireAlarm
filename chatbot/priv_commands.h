@@ -19,7 +19,7 @@ void makeUserPriv (RunningCommand *command, void *ctx)
     
     PrivUsers **users = bot->privUsers;
     
-    users [bot->numOfPrivUsers + 1]->userID = userID;
+    users [bot->numOfPrivUsers]->userID = userID;
     
     bot->numOfPrivUsers ++;
     
