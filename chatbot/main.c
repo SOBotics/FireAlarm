@@ -241,6 +241,81 @@ Filter **loadFilters() {
     return filters;
 }
 
+PrivUsers **loadPrivUsers ()
+{
+    puts ("Loading Privileged Users...");
+    FILE *file = fopen ("privUsers.json", "r");
+    
+    if (!file)
+    {
+        puts ("privUsers.json does not exist. Creating skeleton file...");
+        PrivUsers **users = malloc(sizeof(Filter*) * 3);
+        
+        users [0] = createPrivUsers (3476191);   // User ID of NobodyNada
+        users [1] = createPrivUsers (5735775);   // User ID of Ashish Ahuja
+        users [2] = NULL;
+        return users;
+    }
+    
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+    
+    char *buf = malloc(size+1);
+    fread(buf, size, 1, file);
+    buf[size] = 0;
+    
+    cJSON *json = cJSON_Parse(buf);
+    free(buf);
+    
+    unsigned privUsersCount = cJSON_GetArraySize(json);
+    PrivUsers **users = malloc(sizeof(PrivUsers*) * (privUsersCount + 1));
+    
+    for (int i = 0; i < privUsersCount; i ++)
+    {
+        cJSON *user = cJSON_GetArrayItem(json, i);
+        
+        long userID = cJSON_GetObjectItem (user, "user_id")->valueint;
+        users [i] = createPrivusers (userID);
+    }
+    filters[filterCount] = NULL;
+    
+    return users;
+}
+
+void savePrivUsers (PrivUsers **users, unsigned privUsersCount)
+{
+    puts ("Saving Privileged users...");
+    cJSON *json = cJSON_CreateArray();
+    
+    for (int i = 0; i < privUsersCount; i ++)
+    {
+        PrivUsers *user = users [i];
+        cJSON *object = cJSON_CreateObject();
+        cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (user->userID));
+        
+        cJSON_AddItemToArray(json, object);
+    }
+    
+    char *str = cJSON_Print(json);
+    cJSON_Delete(json);
+    
+    FILE *file = fopen ("privUsers.json", "w");
+    
+    if (!file)
+    {
+        fputs ("Failed to open privUsers.json!", stderr);
+        return;
+    }
+    
+    fwrite(str, strlen(str), 1, file);
+    
+    fclose (file);
+    free (str);
+    
+    return;
+}
+
 void wsClosed(WebSocket *socket) {
     postMessage(((ChatBot*)(socket->user))->room, "Websocket disconnected! Reboot the bot to reconnect websocket.");
 }
@@ -412,6 +487,7 @@ int main(int argc, const char * argv[]) {
     
     
     Filter **filters = loadFilters();
+    PrivUsers **users = loadPrivUsers();
     
     Command *commands[] = {
         createCommand("I can put anything I want here; the first command runs when no other commands match", unrecognizedCommand),
@@ -447,7 +523,7 @@ int main(int argc, const char * argv[]) {
         createCommand("test post *", testPostCallback),
         NULL
     };
-    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters);
+    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users);
     
     
     WebSocket *socket = createWebSocketWithClient(client);
@@ -482,6 +558,7 @@ int main(int argc, const char * argv[]) {
     leaveRoom(bot->room);
     
     saveFilters(bot->filters, bot->filterCount);
+    savePrivUsers(bot->privUsers, bot->numOfPrivUsers);
     saveReports(bot->latestReports, bot->reportsUntilAnalysis);
     
     
