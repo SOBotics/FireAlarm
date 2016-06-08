@@ -14,6 +14,7 @@
 
 typedef struct _Command {
     char *name;
+    int isPrivileged;   // 1 if the command is privileged, 0 if not
     void (*callback)(RunningCommand *, void *);
 }Command;
 
