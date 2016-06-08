@@ -216,7 +216,7 @@ static Report **parseReports(ChatBot *bot, cJSON *json) {
     return reports;
 }
 
-ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **commands, cJSON *latestReports, Filter **filters) {
+ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **commands, cJSON *latestReports, Filter **filters, PrivUsers **users) {
     ChatBot *c = malloc(sizeof(ChatBot));
     c->room = room;
     c->roomPostTrue = roomPostTrue;
@@ -230,12 +230,19 @@ ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **command
     
     c->filters = NULL;
     c->filterCount = 0;
+    c->numOfPrivUsers = 0;
+    c->privUsers = NULL;
     
     c->reportsWaiting = -1;
     
     while (*(filters++)) {
         c->filters = realloc(c->filters, ++c->filterCount * sizeof(Filter*));
         c->filters[c->filterCount-1] = *(filters - 1);
+    }
+    
+    while (*(users++)) {
+        c->privUsers = realloc(c->privUsers, ++c->numOfPrivUsers * sizeof(PrivUsers*));
+        c->privUsers[c->numOfPrivUsers-1] = *(users - 1);
     }
     
     Report **reports = parseReports(c, latestReports);
