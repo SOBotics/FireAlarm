@@ -31,3 +31,41 @@ PrivUsers *createPrivUsers (long userID)
     
     return pu;
 }
+
+unsigned userPrivCheck (ChatBot *bot, long userID)
+{
+    PrivUsers **users = bot->privUsers;
+    
+    for (int i = 0; i < bot->numOfPrivUsers; i ++)
+    {
+        if (users[i]->userID == userID)
+        {
+            return 1;
+        }
+    }
+    
+    return 0;
+}
+
+unsigned commandPriv (RunningCommand *commands)
+{
+    if (commands->command->isPrivileged == 1)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot, long userID)
+{
+    if (commandPriv (command))
+    {
+        if (!userPrivCheck (userID))
+        {
+            postReply (bot->room, "You nned to be privileged to run that command.", command->message);
+            return 1;
+        }
+    }
+    
+    return 0;
+}
