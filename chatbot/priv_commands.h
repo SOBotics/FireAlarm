@@ -6,7 +6,7 @@
 // Copyright © 2016 Ashish Ahuja. All rights reserved.
 //
 
-void makeUserPriv (RunningCommand *command, void *ctx)
+void addUserPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
@@ -19,8 +19,12 @@ void makeUserPriv (RunningCommand *command, void *ctx)
     
     if (checkPrivUsers (bot, userID)
     {
-        postReply (bot->room, "The user is already privileged.", command->message);\
+        postReply (bot->room, "The user is already privileged.", command->message);
         return;
+    }
+    if (userID <= 0)
+    {
+        postReply (bot->room, "Please enter a valid User ID.", command->message);
     }
     
     PrivUsers **users = bot->privUsers;
@@ -29,5 +33,11 @@ void makeUserPriv (RunningCommand *command, void *ctx)
     
     bot->numOfPrivUsers ++;
     
+    postReply (bot->room, "The user is now privileged.");
+    
+    printf ("User ID %d added to privilege list.", userID);
+    
     return;
 }
+
+
