@@ -19,4 +19,10 @@ typedef struct {
     long privUserId;
 }PrivUsers;
 
+unsigned int checkPrivUser (ChatBot *bot, long userID);
+PrivUsers *createPrivUsers (long userID);
+unsigned userPrivCheck (ChatBot *bot, long userID);
+unsigned commandPriv (RunningCommand *commands);
+unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot);
+
 #endif /* Privileges.h */
