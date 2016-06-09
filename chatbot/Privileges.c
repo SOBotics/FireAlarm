@@ -56,13 +56,15 @@ unsigned commandPriv (RunningCommand *commands)
     return 0;
 }
 
-unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot, long userID)
+unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot)
 {
+    long userID = command->message->user->userID;
+    
     if (commandPriv (command))
     {
         if (!userPrivCheck (userID))
         {
-            postReply (bot->room, "You nned to be privileged to run that command.", command->message);
+            postReply (bot->room, "You need to be privileged to run that command.", command->message);
             return 1;
         }
     }
