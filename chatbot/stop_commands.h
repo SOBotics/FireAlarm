@@ -13,17 +13,36 @@
 
 void stopBot(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     postReply(bot->room, "Shutting down...", command->message);
     bot->stopAction = ACTION_STOP;
 }
 
 void rebootBot(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     postReply(bot->room, "Rebooting...", command->message);
     bot->stopAction = ACTION_REBOOT;
 }
 
 void forceStopBot(RunningCommand *command, void *ctx) {
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     abort();
 }
 
