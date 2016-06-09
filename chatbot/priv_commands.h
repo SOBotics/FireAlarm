@@ -9,6 +9,12 @@
 void makeUserPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     long userID = (long) strtol(command->argv[0], NULL, 10);
     
     if (checkPrivUsers (bot, userID)
