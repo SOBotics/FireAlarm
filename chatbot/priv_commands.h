@@ -143,3 +143,26 @@ void isPrivileged (RunningCommand *command, void *ctx)
     
     return;
 }
+
+void printPrivUser (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
+    char message [35];
+    
+    postReply (bot->room, "The privileged users are: ", command->message);
+    PrivUsers **users = bot->privUsers;
+    
+    for (int i = 0; i < bot->numOfPrivUsers; i ++)
+    {
+        sprintf (message, "%s (user id %ld)", users [i]->username, users[i]->userID);
+        postMessage (bot->room, message);
+    }
+    
+    return;
+}
