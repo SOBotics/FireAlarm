@@ -23,6 +23,7 @@
 #include "cJSON.h"
 #include "commands.h"
 #include "Filter.h"
+#include "Privileges.h"
 
 #define SAVE_INTERVAL 60
 
