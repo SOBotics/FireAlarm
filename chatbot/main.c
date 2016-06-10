@@ -251,8 +251,8 @@ PrivUsers **loadPrivUsers ()
         puts ("privUsers.json does not exist. Creating skeleton file...");
         PrivUsers **users = malloc(sizeof(Filter*) * 3);
         
-        users [0] = createPrivUsers (3476191);   // User ID of NobodyNada
-        users [1] = createPrivUsers (5735775);   // User ID of Ashish Ahuja
+        users [0] = createPrivUsers (3476191, "NobodyNada");   // User ID of NobodyNada
+        users [1] = createPrivUsers (5735775, "Ashish Ahuja ツ");   // User ID of Ashish Ahuja
         users [2] = NULL;
         return users;
     }
@@ -276,7 +276,8 @@ PrivUsers **loadPrivUsers ()
         cJSON *user = cJSON_GetArrayItem(json, i);
         
         long userID = cJSON_GetObjectItem (user, "user_id")->valueint;
-        users [i] = createPrivusers (userID);
+        char *username = cJSON_GetObjectItem (user, "user_name")->valuestring;
+        users [i] = createPrivusers (userID, username);
     }
     filters[filterCount] = NULL;
     
@@ -293,6 +294,7 @@ void savePrivUsers (PrivUsers **users, unsigned privUsersCount)
         PrivUsers *user = users [i];
         cJSON *object = cJSON_CreateObject();
         cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (user->userID));
+        cJSON_AddItemToObject (object, "user_name", cJSON_CreateString (user->username));
         
         cJSON_AddItemToArray(json, object);
     }
