@@ -23,11 +23,12 @@ unsigned int checkPrivUser (ChatBot *bot, long userID)
     return 0;
 }
 
-PrivUsers *createPrivUsers (long userID)
+PrivUsers *createPrivUsers (long userID, char *name)
 {
     PrivUsers *pu = malloc (sizeof (PrivUsers));
     
     pu->userID = userID;
+    pu->username = name;
     
     return pu;
 }
