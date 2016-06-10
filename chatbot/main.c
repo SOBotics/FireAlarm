@@ -525,6 +525,7 @@ int main(int argc, const char * argv[]) {
         createCommand("unprivilege user *", 1, removeUserPriv),
         createCommand("priv user *", 1, addUserPriv),
         createCommand("unpriv user *", 1, removeUserPriv),
+        createCommand("is privileged ...", 0, isPrivileged),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users);
