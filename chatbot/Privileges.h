@@ -16,7 +16,8 @@
 #include "cJSON.h"
 
 typedef struct {
-    long privUserId;
+    long userId;
+    char *username;
 }PrivUsers;
 
 unsigned int checkPrivUser (ChatBot *bot, long userID);
