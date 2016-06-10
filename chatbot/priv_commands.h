@@ -91,4 +91,55 @@ void removeUserPriv (RunningCommand *command, void *ctx)
     return;
 }
 
-
+void isPrivileged (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
+    int userID;
+    int check;
+    
+    if (command->argc == 1)
+    {
+        userID = (int)strtol (command->argv [0], NULL, 10);
+    }
+    else if (command->argc == 0)
+    {
+        userID = command->message->user->userID;
+        check = 1;
+    }
+    else
+    {
+        postReply(bot->room, "**Usage:** @FireAlarm is privileged [user id]", command->message);
+        return;
+    }
+    
+    if (userPrivCheck (bot, userID))
+    {
+        if (check)
+        {
+            postReply (bot->room, "Yes, you're a privileged user.", command->message);
+        }
+        else
+        {
+            postReply (bot->room, "Yes, that user is privileged.", command->message);
+        }
+    }
+    else
+    {
+        if (check)
+        {
+            postReply (bot->room, "No, you're not a privileged user.", command->message);
+        }
+        else
+        {
+            postReply (bot->room, "No, that user is not privileged.", command->message);
+        }
+    }
+    
+    return;
+}
