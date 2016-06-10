@@ -157,6 +157,31 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
+    else if (strcasestr (str, "pri us") == str)
+    {
+        sprintf (messageString, "%s `privilege user`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strcasestr (str, "is priv") == str)
+    {
+        sprintf (messageString, "%s `is privileged`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strcasestr (str, "unp us") == str)
+    {
+        sprintf (messageString, "%s `unprivilege user`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    
         
     postReply(bot->room, message, command->message);
     
