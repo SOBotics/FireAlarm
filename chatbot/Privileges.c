@@ -8,21 +8,6 @@
 
 #include "Privileges.h"
 
-unsigned int checkPrivUser (ChatBot *bot, long userID)
-{
-    unsigned int i;
-    PrivUsers **users = bot->privUsers;
-    
-    for (i = 0; i < bot->numOfPrivUsers; i ++)
-    {
-        if (users->userID == userID)
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
-
 PrivUsers *createPrivUsers (long userID, char *name, int privLevel)
 {
     PrivUsers *pu = malloc (sizeof (PrivUsers));
@@ -42,7 +27,14 @@ unsigned userPrivCheck (ChatBot *bot, long userID)
     {
         if (users[i]->userID == userID)
         {
-            return 1;
+            if (users[i]->privLevel == 1)
+            {
+                return 1;
+            }
+            else if (users[i]->privLevel == 2)
+            {
+                return 2;
+            }
         }
     }
     
@@ -55,20 +47,47 @@ unsigned commandPriv (RunningCommand *commands)
     {
         return 1;
     }
+    else if (commands->command->isPrivileged == 2)
+    {
+        return 2;
+    }
+    
     return 0;
+}
+
+PrivUsers *getPrivUserByID (ChatBot *bot, long userID)
+{
+    PrivUsers *users = malloc (sizeof (PrivUsers));
+    PrivUser **privUsers = bot->privUsers;
+    
+    for (int i = 0; i < bot->numOfPrivUsers; i ++)
+    {
+        if (privUsers[i]->userID == userID)
+        {
+            users->userID = privUsers[i]->userID;
+            users->username = privUsers[i]->username;
+            users->privLevel = privUsers[i]->privLevel;
+            return users;
+        }
+    }
 }
 
 unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot)
 {
     long userID = command->message->user->userID;
+    PrivUsers *user = getPrivUserByID (userID);
+    int isPrivileged = userPrivCheck (userID);
+    int commandPriv = userPrivCheck (bot, userID);
     
-    if (commandPriv (command))
+    if (commandPriv == 1 && isPrivilged == 0)
     {
-        if (!userPrivCheck (userID))
-        {
-            postReply (bot->room, "You need to be privileged to run that command.", command->message);
-            return 1;
-        }
+        postReply (bot->room, "You need to be a member or a bot owner to run that command.", command->message);
+        return 1;
+    }
+    else if (commandPriv == 2 && isPrivileged != 2)
+    {
+        postReply (bot->room, "You need to be a bot owner to run that command.", command->message);
+        return 1;
     }
     
     return 0;
