@@ -9,3 +9,4 @@
 #include <stdio.h>
 
 void lowercase (char *str);
+char *getUsernameByID (chatBot *bot, long userID);
