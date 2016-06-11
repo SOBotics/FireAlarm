@@ -16,12 +16,34 @@ void addUserPriv (RunningCommand *command, void *ctx)
     }
     
     long userID = (long) strtol(command->argv[0], NULL, 10);
+    char privType [20] = command->argv [1];
+    int groupType;
     
-    if (checkPrivUsers (bot, userID)
+    if (strcmp (privType, "bot owner") != 0 && strcmp (privType, "member") != 0)
     {
-        postReply (bot->room, "The user is already privileged.", command->message);
+        postReply (bot->room, "**Usage:** privilege user [user id] [group]", command->message);
         return;
     }
+    if (strcmp (privType, "bot owner") == 0)
+    {
+        groupType = 0;
+    }
+    else if (strcmp (privType, "member") == 0)
+    {
+        groupType = 1;
+    }
+    
+    if (groupType == 1 && (userPrivCheck (bot, userID) != 0))
+    {
+        postReply (bot->room, "The user is already a member.", command->message);
+        return;
+    }
+    else if (groupType == 2 && (userPrivCheck (bot, userID) == 2))
+    {
+        postReply (bot->room, "The user is already a bot owner.", command->message);
+        return;
+    }
+    
     if (userID <= 0)
     {
         postReply (bot->room, "Please enter a valid User ID.", command->message);
@@ -31,10 +53,23 @@ void addUserPriv (RunningCommand *command, void *ctx)
     PrivUsers **users = bot->privUsers;
     
     users [bot->numOfPrivUsers]->userID = userID;
+    users [bot->numOfPrivUsers]->username = getUsernameByID (userID);
+    users [bot->numOfPrivUsers]->privLevel = groupType;
     
     bot->numOfPrivUsers ++;
     
-    postReply (bot->room, "The user is now privileged.", command->message);
+    char *messageString;
+    
+    if (groupType == 1)
+    {
+        asprintf (&messageString, "The user is now a member.");
+    }
+    else if (groupType == 2)
+    {
+        asprintf (&messageString, "The user is now a bot owner.");
+    }
+    
+    postReply (bot->room, messageString, command->message);
     
     printf ("User ID %d added to privilege list.", userID);
     
