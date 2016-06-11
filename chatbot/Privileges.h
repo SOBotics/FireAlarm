@@ -2,8 +2,8 @@
 // Privileges.h
 // chatbot
 //
-// Created on 8/06/2016
-// Copyright © 2016 Ashish Ahuja. All rights reserved.
+// Created by Ashish Ahuja on 8/06/2016
+// Copyright © 2016 Ashish Ahuja (Fortunate-MAN). All rights reserved.
 //
 
 #ifndef Client_h
