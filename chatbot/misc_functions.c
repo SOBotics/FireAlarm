@@ -2,8 +2,8 @@
 //  misc_functions.c
 //  chatbot
 //
-//  Created on 28/5/16.
-//  Copyright © 2016 Ashish Ahuja. All rights reserved.
+//  Created by Ashish Ahuja on 28/5/16.
+//  Copyright © 2016 Ashish Ahuja (Fortunate-MAN). All rights reserved.
 //
 
 #include <ctype.h>
