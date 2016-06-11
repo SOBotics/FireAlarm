@@ -153,15 +153,26 @@ void isPrivileged (RunningCommand *command, void *ctx)
         return;
     }
     
-    if (userPrivCheck (bot, userID))
+    if (userPrivCheck (bot, userID) == 1)
     {
         if (check)
         {
-            postReply (bot->room, "Yes, you're a privileged user.", command->message);
+            postReply (bot->room, "Yes, you're a member.", command->message);
         }
         else
         {
-            postReply (bot->room, "Yes, that user is privileged.", command->message);
+            postReply (bot->room, "Yes, that user is a member.", command->message);
+        }
+    }
+    else if (userPrivCheck (bot, userID) == 2)
+    {
+        if (check)
+        {
+            postReply (bot->room, "Yes, you're a bot owner.", command->message);
+        }
+        else
+        {
+            postReply (bot->room, "Yes, that user is a bot owner.", command->message);
         }
     }
     else
@@ -188,16 +199,37 @@ void printPrivUser (RunningCommand *command, void *ctx)
         return;
     }
     
-    char message [35];
-    
     postReply (bot->room, "The privileged users are: ", command->message);
     PrivUsers **users = bot->privUsers;
     
+    char *messageStringMembers = malloc (sizeof (64 * bot->numOfPrivUsers));
+    char *messageStringOwners = malloc (sizeof (64 * bot->numOfPrivUsers));
+    char *messageString = malloc (sizeof ((64 * bot->numOfPrivUsers) + 50));
+    
     for (int i = 0; i < bot->numOfPrivUsers; i ++)
     {
-        sprintf (message, "%s (user id %ld)", users [i]->username, users[i]->userID);
-        postMessage (bot->room, message);
+        if (users [i]->privLevel == 1)
+        {
+            snprintf (messageStringMembers + strlen (messageStringMembers), 63,
+                      "%s (user ID %ld)\n", users [i]->username, users [i]->userID);
+        }
+        else if (users [i]->privLevel == 1)
+        {
+            snprintf (messageStringOwners + strlen (messageStringOwners), 63,
+                      "%s (user ID %ld)\n", users [i]->username, users [i]->userID);
+        }
     }
+    
+    sprintf (messageString, "Members:\n");
+    sprintf (messageString + strlen (messageString), "%s\n", messageStringMembers);
+    sprintf (messageString + strlen (messageString), "Bot Owners:\n");
+    sprintf (messageString + strlen (messageString), "%s\n", messageStringOwners);
+    
+    postMessage (bot->room, messageString);
+    
+    free (messageString);
+    free (messageStringMembers);
+    free (messageStringOwners);
     
     return;
 }
