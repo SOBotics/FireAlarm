@@ -21,6 +21,12 @@ typedef struct {
     int privLevel;  // 1 if member, 2 if bot owner.
 }PrivUsers;
 
+typedef struct {
+    long userID;
+    char *username;
+    int groupType;  // 0 if user wants to join membeers, 1 if user wants to join bot owners.
+}PrivRequest;
+
 unsigned int checkPrivUser (ChatBot *bot, long userID);
 PrivUsers *createPrivUsers (long userID, char *username, int privLevel);
 unsigned userPrivCheck (ChatBot *bot, long userID);
