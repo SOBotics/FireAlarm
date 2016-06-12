@@ -19,6 +19,17 @@ PrivUsers *createPrivUsers (long userID, char *name, int privLevel)
     return pu;
 }
 
+PrivRequest *createPrivRequest (long userID, char *name, int groupType)
+{
+    PrivRequest *pr = malloc (sizeof (PrivRequest));
+    
+    pr->userID = userID;
+    pu->username = name;
+    pu->groupType = groupType;
+    
+    return pr;
+}
+
 unsigned userPrivCheck (ChatBot *bot, long userID)
 {
     PrivUsers **users = bot->privUsers;
