@@ -556,7 +556,7 @@ int main(int argc, const char * argv[]) {
         createCommand("priv user * *", 2, addUserPriv),
         createCommand("unpriv user *", 2, removeUserPriv),
         createCommand("is privileged ...", 0, isPrivileged),
-        createCommand("membership", 0, printPrivUser),
+        createCommand("membership ...", 0, printPrivUser),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users);
