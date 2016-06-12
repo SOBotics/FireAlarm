@@ -199,6 +199,20 @@ void printPrivUser (RunningCommand *command, void *ctx)
         return;
     }
     
+    int check;
+    
+    if (command->argc == 1)
+    {
+        if (strcmp (command->argv [0], "bot owner") == 0)
+        {
+            check = 1;
+        }
+        else if (strcmp (command->argv [0], "member") == 0)
+        {
+            check = 2;
+        }
+    }
+    
     postReply (bot->room, "The privileged users are: ", command->message);
     PrivUsers **users = bot->privUsers;
     
@@ -220,10 +234,23 @@ void printPrivUser (RunningCommand *command, void *ctx)
         }
     }
     
-    sprintf (messageString, "Members:\n");
-    sprintf (messageString + strlen (messageString), "%s\n", messageStringMembers);
-    sprintf (messageString + strlen (messageString), "Bot Owners:\n");
-    sprintf (messageString + strlen (messageString), "%s\n", messageStringOwners);
+    if (check != 2 && check != 1)
+    {
+        sprintf (messageString, "Members:\n");
+        sprintf (messageString + strlen (messageString), "%s\n", messageStringMembers);
+        sprintf (messageString + strlen (messageString), "Bot Owners:\n");
+        sprintf (messageString + strlen (messageString), "%s\n", messageStringOwners);
+    }
+    else if (check == 2)
+    {
+        sprintf (messageString, "Members:\n");
+        sprintf (messageString + strlen (messageString), "%s\n", messageStringMembers);
+    }
+    else if (check == 1)
+    {
+        sprintf (messageString, "Bot Owners:\n");
+        sprintf (messageString + strlen (messageString). "%s\n", messageStringOwners);
+    }
     
     postMessage (bot->room, messageString);
     
