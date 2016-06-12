@@ -267,6 +267,53 @@ Filter **loadFilters() {
     return filters;
 }
 
+PrivRequest **loadPrivRequest ()
+{
+    puts ("Loading Privilege Requests...");
+    FILE *file = fopen ("privRequest.json", "r");
+    
+    if (!file)
+    {
+        puts ("privRequest.json does not exist. Returning NULL...");
+        return NULL;
+    }
+    
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+    
+    char *buf = malloc(size+1);
+    fread(buf, size, 1, file);
+    buf[size] = 0;
+    
+    cJSON *json = cJSON_Parse (buf);
+    free (buf);
+    
+    unsigned total = cJSON_GetArraySize(json);
+    PrivRequest **requests = malloc (sizeof (PrivRequest*) * (total + 1));
+    
+    for (int i = 0; i < total; i ++)
+    {
+        cJSON *request = cJSON_GetArrayItem(json, i);
+        
+        long userID = cJSON_GetObjectItem (request, "user_id")->valueint;
+        char *username = cJSON_GetObjectItem (request, "user_name")->valuestring;
+        int groupType = cJSON_GetObjectItem (request, "group_type")->valueint;
+        
+        requests [i] = createPrivRequest (userID, username, groupType);
+    }
+    
+    if (total < 1)
+    {
+        cJSON_Delete (json);
+        return NULL;
+    }
+    
+    cJSON_Delete (json);
+    
+    return requests;
+}
+
 PrivUsers **loadPrivUsers ()
 {
     puts ("Loading Privileged Users...");
@@ -306,7 +353,7 @@ PrivUsers **loadPrivUsers ()
         int privLevel = cJSON_GetObjectItem (user, "priv_level")->valueint;
         users [i] = createPrivusers (userID, username, privLevel);
     }
-    filters[filterCount] = NULL;
+    users [privUsersCount] = NULL;
     
     return users;
 }
