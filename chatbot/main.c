@@ -314,6 +314,41 @@ PrivRequest **loadPrivRequest ()
     return requests;
 }
 
+void savePrivRequest (PrivRequest **requests, unsigned totalRequests)
+{
+    puts ("Saving Privilege Requests...");
+    FILE *file = fopen ("privRequest.json", "w");
+    
+    if (!file)
+    {
+        fputs ("privRequest.json does not exist. Aborting function...", stderr);
+        fclose (file);
+        return;
+    }
+    
+    for (int i = 0; i < totalRequests; i ++)
+    {
+        PrivRequest *request = requests [i];
+        cJSON *object = cJSON_CreateObject();
+        
+        cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (request->userID));
+        cJSON_AddItemToObject (object, "user_name", cJSON_CreateString (request->username));
+        cJSON_AddItemToObject (object, "groupType", cJSON_CreateNumber (request->groupType));
+        
+        cJSON_AddItemToArray(json, object);
+    }
+    
+    char *str = cJSON_Print(json);
+    cJSON_Delete(json);
+    
+    fwrite(str, strlen(str), 1, file);
+    
+    fclose (file);
+    free (str);
+    
+    return;
+}
+
 PrivUsers **loadPrivUsers ()
 {
     puts ("Loading Privileged Users...");
