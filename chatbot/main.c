@@ -600,6 +600,7 @@ int main(int argc, const char * argv[]) {
     
     Filter **filters = loadFilters();
     PrivUsers **users = loadPrivUsers();
+    PrivRequest **requests = loadPrivRequests();
     
     Command *commands[] = {
         createCommand("I can put anything I want here; the first command runs when no other commands match", 0, unrecognizedCommand),
@@ -641,7 +642,7 @@ int main(int argc, const char * argv[]) {
         createCommand("membership ...", 0, printPrivUser),
         NULL
     };
-    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users);
+    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests);
     
     
     WebSocket *socket = createWebSocketWithClient(client);
@@ -651,7 +652,7 @@ int main(int argc, const char * argv[]) {
     socket->closeCallback = wsClosed;
     connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
     
-    puts("Started.");
+    puts("Fire Alarm started.");
     postMessage (bot->room, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started.");
     
     unsigned char reboot = 0;
@@ -678,8 +679,7 @@ int main(int argc, const char * argv[]) {
     saveFilters(bot->filters, bot->filterCount);
     savePrivUsers(bot->privUsers, bot->numOfPrivUsers);
     saveReports(bot->latestReports, bot->reportsUntilAnalysis);
-    
-    
+    savePrivRequests(bot->privRequests, bot->totalPrivRequests);
     
     curl_easy_cleanup(client->curl);
     
