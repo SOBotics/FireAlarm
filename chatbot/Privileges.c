@@ -24,8 +24,8 @@ PrivRequest *createPrivRequest (long userID, char *name, int groupType)
     PrivRequest *pr = malloc (sizeof (PrivRequest));
     
     pr->userID = userID;
-    pu->username = name;
-    pu->groupType = groupType;
+    pr->username = name;
+    pr->groupType = groupType;
     
     return pr;
 }
