@@ -126,6 +126,105 @@ void removeUserPriv (RunningCommand *command, void *ctx)
     return;
 }
 
+void requestPriv (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command,bot))
+    {
+        return;
+    }
+    
+    if (command->argc == 0)
+    {
+        postReply (bot->room, "**Usage:** `@FireAlarm request privilege [group name]`", command->message);
+        return;
+    }
+    
+    char *groupType = command->argv [0];
+    
+    bot->privRequests [totalPrivRequests - 1] = createPrivRequest (command->message->user->userID, command->message->user->username, groupType);
+
+    bot->totalPrivRequests ++;
+    
+    return;
+}
+
+void approvePrivRequest (RunningCommand *command, void *ctx)
+{
+    Chatbot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
+    if (command->argc == 0)
+    {
+        postReply (bot->room, "**Usage:** `@FireAlarm approve privilege request [request number]`", command->message);
+        return;
+    }
+    
+    unsigned priv_number = (int) strtol(command->argv [0], NULL, 10);
+    
+    if (!privRequestExist (bot, priv_number))
+    {
+        postReply (bot->room, "There is not request by that number.", command->message);
+        return;
+    }
+    
+    PrivRequest **requests = bot->privRequests;
+    PrivUsers **users = bot->privUsers;
+    
+    users [numOfPrivUsers] = createPrivUsers (requests[priv_number - 1]->userID, requests [priv_number - 1]->username, requests [priv_number - 1]->groupType + 1);
+    bot->numOfPrivUsers ++;
+    
+    
+    char *message;
+    
+    asprintf (&message, "Privilege request number %d has been approved. ", priv_number);
+    postReply (bot->room, message, command->message);
+    
+    free (message);
+    
+    return;
+}
+
+void deletePrivrequest (ChatBot *bot, unsigned priv_number)
+{
+    privRequest **requests = bot->privRequests;
+    
+    int check = 0;
+    
+    for (int i = 0; i < bot->totalprivRequests; i ++)
+    {
+        if (i == priv_number - 1)
+        {
+            check = i;
+        }
+    }
+    
+    for (i = check; i < bot->totalPrivRequests; i ++)
+    {
+        requests [i] = requests [i + 1];
+    }
+    
+    requests [bot->totalPrivRequests] = NULL;
+    
+    bot->totalPrivRequests --;
+    
+    return;
+}
+
+unsigned privRequestExist (ChatBot *bot, unsigned priv_number)
+{
+    if (bot->totalPrivRequests < priv_number)
+    {
+        return 0;
+    }
+    return 1;
+}
+
 void isPrivileged (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
