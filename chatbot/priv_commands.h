@@ -190,41 +190,6 @@ void approvePrivRequest (RunningCommand *command, void *ctx)
     return;
 }
 
-void deletePrivrequest (ChatBot *bot, unsigned priv_number)
-{
-    privRequest **requests = bot->privRequests;
-    
-    int check = 0;
-    
-    for (int i = 0; i < bot->totalprivRequests; i ++)
-    {
-        if (i == priv_number - 1)
-        {
-            check = i;
-        }
-    }
-    
-    for (i = check; i < bot->totalPrivRequests; i ++)
-    {
-        requests [i] = requests [i + 1];
-    }
-    
-    requests [bot->totalPrivRequests] = NULL;
-    
-    bot->totalPrivRequests --;
-    
-    return;
-}
-
-unsigned privRequestExist (ChatBot *bot, unsigned priv_number)
-{
-    if (bot->totalPrivRequests < priv_number)
-    {
-        return 0;
-    }
-    return 1;
-}
-
 void isPrivileged (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
