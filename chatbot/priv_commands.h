@@ -185,10 +185,14 @@ void approvePrivRequest (RunningCommand *command, void *ctx)
     asprintf (&message, "Privilege request number %d has been approved. ", priv_number);
     postReply (bot->room, message, command->message);
     
+    deletePrivRequest (bot, priv_number);
+    
     free (message);
     
     return;
 }
+
+
 
 void isPrivileged (RunningCommand *command, void *ctx)
 {
