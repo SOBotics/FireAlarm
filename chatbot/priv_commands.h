@@ -169,7 +169,7 @@ void approvePrivRequest (RunningCommand *command, void *ctx)
     
     if (!privRequestExist (bot, priv_number))
     {
-        postReply (bot->room, "There is not request by that number.", command->message);
+        postReply (bot->room, "There is no request by that number.", command->message);
         return;
     }
     
@@ -177,12 +177,14 @@ void approvePrivRequest (RunningCommand *command, void *ctx)
     PrivUsers **users = bot->privUsers;
     
     users [numOfPrivUsers] = createPrivUsers (requests[priv_number - 1]->userID, requests [priv_number - 1]->username, requests [priv_number - 1]->groupType + 1);
+    char *username = requests [priv_number - 1]->username;
     bot->numOfPrivUsers ++;
     
     
     char *message;
     
-    asprintf (&message, "Privilege request number %d has been approved. ", priv_number);
+    asprintf (&message, "Privilege request number %d has been approved. (cc @%s)", priv_number, username);
+    free (username);
     postReply (bot->room, message, command->message);
     
     deletePrivRequest (bot, priv_number);
@@ -192,7 +194,44 @@ void approvePrivRequest (RunningCommand *command, void *ctx)
     return;
 }
 
-
+void rejectPrivRequest (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
+    if (command->argc == 0)
+    {
+        postReply (bot->room, "**Usage:** `@FireAlarm reject privilege request [request number]`", command->message);
+        return;
+    }
+    
+    unsigned priv_number = (int) strtol(command->argv [0], NULL, 10);
+    
+    if (!privRequestExist (bot, priv_number))
+    {
+        postReply (bot->room, "There is no request by that number.", command->message);
+        return;
+    }
+    
+    PrivRequest **requests = bot->privRequests;
+    
+    char *message;
+    char *username = requests [priv_number - 1]->username;
+    
+    asprintf (&message, "Privilege request number %d has been rejected. (cc @%s)", priv_number, username);
+    free (username);
+    postReply (bot->room, message, command->message);
+    
+    deletePrivRequest (bot, priv_number);
+    
+    free (message);
+    
+    return;
+}
 
 void isPrivileged (RunningCommand *command, void *ctx)
 {
