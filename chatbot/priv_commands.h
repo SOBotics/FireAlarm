@@ -233,6 +233,54 @@ void rejectPrivRequest (RunningCommand *command, void *ctx)
     return;
 }
 
+void printPrivRequests (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
+    char *message = malloc (sizeof (bot->totalPrivRequests * 100 + 200));
+    
+    postReply (bot->room, "The current privilege requests are: ", command->message);
+    
+    sprintf (message, 
+             "    Request Num   |     Username    |     Privilege Request Type    \n"
+             "--------------------------------------------------------------------"
+             );
+             
+    char *messageString = malloc (sizeof (200));
+    char groupType [30];
+    PrivRequest **requests = bot->privRequests;
+             
+    for (int i = 0; i < bot->totalPrivRequests; i ++)
+    {
+        if (requests [i]->groupType == 0)
+        {
+            strcpy (groupType, "Member");
+        }
+        else if (requests [i]->groupType == 1)
+        {
+            strcpy (groupType, "Bot Owner");
+        }
+        
+        sprintf (messageString, 
+                 "       %d         |  %s             |        %s                     \n",
+                 i + 1, requests [i]->username, groupType);
+                 
+        sprintf (message + strlen (message), "%s", messageString);
+    }
+    
+    postMessage (bot->room, message);
+    
+    free (message);
+    free (messageString);
+    
+    return;
+}
+
 void isPrivileged (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
