@@ -345,6 +345,13 @@ void isPrivileged (RunningCommand *command, void *ctx)
     return;
 }
 
+void amiPrivileged (RunningCommand *command, void *ctx)
+{
+    command->argc = 0;
+    isPrivileged (command, ctx);
+    return;
+}
+
 void printPrivUser (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
