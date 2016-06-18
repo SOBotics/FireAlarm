@@ -201,6 +201,7 @@ void statistics (RunningCommand *command, void *ctx)
     unsigned int truePositives = 0;
     unsigned int falsePositives = 0;
     unsigned int unconfirmed = 0;
+    int accuracy = 0;
     int check = 2;
     int numStats;
     if (command->argc == 1) {
@@ -254,11 +255,14 @@ void statistics (RunningCommand *command, void *ctx)
         }
     }
     
-    sprintf (message, "Out of the last %d reports, %d are true positives, %d are false positives, and %d are unconfirmed.",
-             numStats, truePositives, falsePositives, unconfirmed);
+    accuracy = (truePositives/REPORT_MEMORY) * 100;
+    
+    sprintf (message, "Out of the last %d reports, %d are true positives, %d are false positives, and %d are unconfirmed. The accuracy rate is %d.",
+             numStats, truePositives, falsePositives, unconfirmed, accuracy);
     
     postReply (bot->room, message, command->message);
     
+    return;
 }
 
 void printLatestReports (RunningCommand *command, void *ctx)
