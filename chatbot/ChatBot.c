@@ -358,12 +358,23 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     pthread_mutex_unlock(&bot->room->clientLock);
     
     cJSON *json = cJSON_Parse(buffer.data);
+    
     free(buffer.data);
     
-    if (cJSON_GetObjectItem(json, "error_id")) {
-        cJSON_Delete(json);
+    if (!json || cJSON_GetObjectItem(json, "error_id")) {
+        if (json) {
+            cJSON_Delete(json);
+        }
         puts("Error fetching post!");
         return NULL;
+    }
+    
+    cJSON *backoff;
+    if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
+        char *str;
+        asprintf(&str, "Recieved backoff: %d", backoff->valueint);
+        postMessage(bot->room, str);
+        free(str);
     }
     
     cJSON *postJSON = cJSON_GetArrayItem(cJSON_GetObjectItem(json, "items"), 0);
