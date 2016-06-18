@@ -15,6 +15,12 @@
 
 void checkPostCallback(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     long postID = strtol(command->argv[0], NULL, 10);
     int check;
     
@@ -118,10 +124,24 @@ unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) 
 }
 
 void truePositive(RunningCommand *command, void *ctx) {
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     confirm(command, ctx, 1);
 }
 
 void falsePositive(RunningCommand *command, void *ctx) {
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     confirm(command, ctx, 0);
 }
 
@@ -130,6 +150,12 @@ void falsePositive(RunningCommand *command, void *ctx) {
 void truePositiveRespond (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     unsigned int check;
     
     check = confirm (command, ctx, 1);
@@ -145,6 +171,12 @@ void truePositiveRespond (RunningCommand *command, void *ctx)
 void falsePositiveRespond (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     unsigned int check;
     
     check = confirm (command, ctx, 0);
@@ -158,11 +190,18 @@ void falsePositiveRespond (RunningCommand *command, void *ctx)
 void statistics (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     char message [200];
     unsigned int i = 0;
     unsigned int truePositives = 0;
     unsigned int falsePositives = 0;
     unsigned int unconfirmed = 0;
+    int accuracy = 0;
     int check = 2;
     int numStats;
     if (command->argc == 1) {
@@ -216,16 +255,25 @@ void statistics (RunningCommand *command, void *ctx)
         }
     }
     
-    sprintf (message, "Out of the last %d reports, %d are true positives, %d are false positives, and %d are unconfirmed.",
-             numStats, truePositives, falsePositives, unconfirmed);
+    accuracy = (truePositives/REPORT_MEMORY) * 100;
+    
+    sprintf (message, "Out of the last %d reports, %d are true positives, %d are false positives, and %d are unconfirmed. The accuracy rate is %d.",
+             numStats, truePositives, falsePositives, unconfirmed, accuracy);
     
     postReply (bot->room, message, command->message);
     
+    return;
 }
 
 void printLatestReports (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     int numReports = (int)strtol (command->argv [0], NULL, 10);
     const char *typePrinted;
     if (command->argc > 1) {
@@ -296,6 +344,12 @@ void printLatestReports (RunningCommand *command, void *ctx)
 void postInfo (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     long postID = strtol (command->argv [0], NULL, 10);
     char message [512];
     char link [256];
@@ -358,6 +412,12 @@ void postInfo (RunningCommand *command, void *ctx)
 void testPostCallback (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     long postID = strtol(command->argv[0], NULL, 10);
     
     if (postID <= 0)

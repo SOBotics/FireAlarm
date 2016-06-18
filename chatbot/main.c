@@ -23,6 +23,7 @@
 #include "cJSON.h"
 #include "commands.h"
 #include "Filter.h"
+#include "Privileges.h"
 
 #define SAVE_INTERVAL 60
 
@@ -157,6 +158,31 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }
+    else if (strcasestr (str, "pri us") == str)
+    {
+        sprintf (messageString, "%s `privilege user`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strcasestr (str, "is priv") == str)
+    {
+        sprintf (messageString, "%s `is privileged`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    else if (strcasestr (str, "unp us") == str)
+    {
+        sprintf (messageString, "%s `unprivilege user`?", subString);
+        postReply (bot->room, messageString, command->message);
+        free (str);
+        free (message);
+        return;
+    }
+    
         
     postReply(bot->room, message, command->message);
     
@@ -239,6 +265,167 @@ Filter **loadFilters() {
     cJSON_Delete(json);
     
     return filters;
+}
+
+PrivRequest **loadPrivRequest ()
+{
+    puts ("Loading Privilege Requests...");
+    FILE *file = fopen ("privRequest.json", "r");
+    
+    if (!file)
+    {
+        puts ("privRequest.json does not exist. Returning NULL...");
+        return NULL;
+    }
+    
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+    
+    char *buf = malloc(size+1);
+    fread(buf, size, 1, file);
+    buf[size] = 0;
+    
+    cJSON *json = cJSON_Parse (buf);
+    free (buf);
+    
+    unsigned total = cJSON_GetArraySize(json);
+    PrivRequest **requests = malloc (sizeof (PrivRequest*) * (total + 1));
+    
+    for (int i = 0; i < total; i ++)
+    {
+        cJSON *request = cJSON_GetArrayItem(json, i);
+        
+        long userID = cJSON_GetObjectItem (request, "user_id")->valueint;
+        char *username = cJSON_GetObjectItem (request, "user_name")->valuestring;
+        int groupType = cJSON_GetObjectItem (request, "group_type")->valueint;
+        
+        requests [i] = createPrivRequest (userID, username, groupType);
+    }
+    
+    if (total < 1)
+    {
+        cJSON_Delete (json);
+        return NULL;
+    }
+    
+    cJSON_Delete (json);
+    
+    return requests;
+}
+
+void savePrivRequest (PrivRequest **requests, unsigned totalRequests)
+{
+    puts ("Saving Privilege Requests...");
+    FILE *file = fopen ("privRequest.json", "w");
+    
+    if (!file)
+    {
+        fputs ("privRequest.json does not exist. Aborting function...", stderr);
+        fclose (file);
+        return;
+    }
+    
+    for (int i = 0; i < totalRequests; i ++)
+    {
+        PrivRequest *request = requests [i];
+        cJSON *object = cJSON_CreateObject();
+        
+        cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (request->userID));
+        cJSON_AddItemToObject (object, "user_name", cJSON_CreateString (request->username));
+        cJSON_AddItemToObject (object, "groupType", cJSON_CreateNumber (request->groupType));
+        
+        cJSON_AddItemToArray(json, object);
+    }
+    
+    char *str = cJSON_Print(json);
+    cJSON_Delete(json);
+    
+    fwrite(str, strlen(str), 1, file);
+    
+    fclose (file);
+    free (str);
+    
+    return;
+}
+
+PrivUsers **loadPrivUsers ()
+{
+    puts ("Loading Privileged Users...");
+    FILE *file = fopen ("privUsers.json", "r");
+    
+    if (!file)
+    {
+        puts ("privUsers.json does not exist. Creating skeleton file...");
+        PrivUsers **users = malloc(sizeof(Filter*) * 3);
+        
+        users [0] = createPrivUsers (3476191, "NobodyNada", 2);        // User ID of NobodyNada
+        users [1] = createPrivUsers (5735775, "Ashish Ahuja ツ", 2);   // User ID of Ashish Ahuja
+        users [2] = NULL;
+        return users;
+    }
+    
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+    
+    char *buf = malloc(size+1);
+    fread(buf, size, 1, file);
+    buf[size] = 0;
+    
+    cJSON *json = cJSON_Parse(buf);
+    free(buf);
+    
+    unsigned privUsersCount = cJSON_GetArraySize(json);
+    PrivUsers **users = malloc(sizeof(PrivUsers*) * (privUsersCount + 1));
+    
+    for (int i = 0; i < privUsersCount; i ++)
+    {
+        cJSON *user = cJSON_GetArrayItem(json, i);
+        
+        long userID = cJSON_GetObjectItem (user, "user_id")->valueint;
+        char *username = cJSON_GetObjectItem (user, "user_name")->valuestring;
+        int privLevel = cJSON_GetObjectItem (user, "priv_level")->valueint;
+        users [i] = createPrivusers (userID, username, privLevel);
+    }
+    users [privUsersCount] = NULL;
+    
+    return users;
+}
+
+void savePrivUsers (PrivUsers **users, unsigned privUsersCount)
+{
+    puts ("Saving Privileged users...");
+    cJSON *json = cJSON_CreateArray();
+    
+    for (int i = 0; i < privUsersCount; i ++)
+    {
+        PrivUsers *user = users [i];
+        cJSON *object = cJSON_CreateObject();
+        cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (user->userID));
+        cJSON_AddItemToObject (object, "user_name", cJSON_CreateString (user->username));
+        CJSON_AddItemToObject (object, "priv_level", cJSON_CreateNumber (user->privLevel));
+        
+        cJSON_AddItemToArray(json, object);
+    }
+    
+    char *str = cJSON_Print(json);
+    cJSON_Delete(json);
+    
+    FILE *file = fopen ("privUsers.json", "w");
+    
+    if (!file)
+    {
+        fputs ("Failed to open privUsers.json!", stderr);
+        return;
+    }
+    
+    fwrite(str, strlen(str), 1, file);
+    
+    fclose (file);
+    free (str);
+    
+    return;
 }
 
 void wsClosed(WebSocket *socket) {
@@ -412,42 +599,59 @@ int main(int argc, const char * argv[]) {
     
     
     Filter **filters = loadFilters();
+    PrivUsers **users = loadPrivUsers();
+    PrivRequest **requests = loadPrivRequests();
     
     Command *commands[] = {
-        createCommand("I can put anything I want here; the first command runs when no other commands match", unrecognizedCommand),
-        createCommand("test1", test1Callback),
-        createCommand("test1 test2 ...", testVarCallback),
-        createCommand("test1 * test3", testArgCallback),
-        createCommand("test2 test3", test2Callback),
-        createCommand("running commands", listCommands),
-        createCommand("stop", stopBot),
-        createCommand("reboot", rebootBot),
-        createCommand("kill", forceStopBot),
-        createCommand("check post *", checkPostCallback),
-        createCommand("tp", truePositive),
-        createCommand("fp", falsePositive),
-        createCommand("t", truePositive),
-        createCommand("f", falsePositive),
-        createCommand("help", help),
-        createCommand("alive", aliveCheck),
-        createCommand("commands", commandList),
-        createCommand("command", commandList),
-        createCommand("tpr", truePositiveRespond),
-        createCommand("fpr", falsePositiveRespond),
-        createCommand("stats ...", statistics),
-        createCommand("recent reports *", printLatestReports),
-        createCommand("latest reports *", printLatestReports),
-        createCommand("post info *", postInfo),
-        createCommand("tr", truePositiveRespond),
-        createCommand("fr", falsePositiveRespond),
-        createCommand("cp *", checkPostCallback),
-        createCommand("pinfo *", postInfo),
-        createCommand("change threshold *", changeThreshold),
-        createCommand("check threshold *", checkThreshold),
-        createCommand("test post *", testPostCallback),
+        createCommand("I can put anything I want here; the first command runs when no other commands match", 0, unrecognizedCommand),
+        createCommand("test1", 0, test1Callback),
+        createCommand("test1 test2 ...", 0, testVarCallback),
+        createCommand("test1 * test3", 0, testArgCallback),
+        createCommand("test2 test3", 0, test2Callback),
+        createCommand("running commands", 0, listCommands),
+        createCommand("stop", 2, stopBot),
+        createCommand("reboot", 1, rebootBot),
+        createCommand("kill", 2, forceStopBot),
+        createCommand("check post *", 0, checkPostCallback),
+        createCommand("tp", 1, truePositive),
+        createCommand("fp", 1, falsePositive),
+        createCommand("t", 1, truePositive),
+        createCommand("f", 1, falsePositive),
+        createCommand("help", 0, help),
+        createCommand("alive", 0, aliveCheck),
+        createCommand("commands", 0, commandList),
+        createCommand("command", 0, commandList),
+        createCommand("tpr", 1, truePositiveRespond),
+        createCommand("fpr", 1, falsePositiveRespond),
+        createCommand("stats ...", 0, statistics),
+        createCommand("recent reports *", 0, printLatestReports),
+        createCommand("latest reports *", 0, printLatestReports),
+        createCommand("post info *", 0, postInfo),
+        createCommand("tr", 1, truePositiveRespond),
+        createCommand("fr", 1, falsePositiveRespond),
+        createCommand("cp *", 0, checkPostCallback),
+        createCommand("pinfo *", 0, postInfo),
+        createCommand("change threshold *", 2, changeThreshold),
+        createCommand("check threshold *", 0, checkThreshold),
+        createCommand("test post *", 0, testPostCallback),
+        createCommand("privilege user * *", 2, addUserPriv),
+        createCommand("unprivilege user *", 2, removeUserPriv),
+        createCommand("priv user * *", 2, addUserPriv),
+        createCommand("unpriv user *", 2, removeUserPriv),
+        createCommand("is privileged ...", 0, isPrivileged),
+        createCommand("membership ...", 0, printPrivUser),
+        createCommand("request privileges *", 0, requestPriv),
+        createCommand("request priv *", 0, requestPriv),
+        createCommand("approve privilege request *", 2, approvePrivRequest),
+        createCommand("approve priv request *", 2, approvePrivRequest),
+        createCommand("reject privilege request *", 2, rejectPrivRequest),
+        createCommand("reject priv request *", 2, rejectPrivRequest),
+        createCommand("pending privilege requests", 0, printPrivRequests),
+        createCommand("pending priv requests", 0, printPrivRequests),
+        createCommand("amiprivileged", 0, amiPrivileged),
         NULL
     };
-    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters);
+    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests);
     
     
     WebSocket *socket = createWebSocketWithClient(client);
@@ -457,7 +661,7 @@ int main(int argc, const char * argv[]) {
     socket->closeCallback = wsClosed;
     connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
     
-    puts("Started.");
+    puts("Fire Alarm started.");
     postMessage (bot->room, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started.");
     
     unsigned char reboot = 0;
@@ -482,9 +686,9 @@ int main(int argc, const char * argv[]) {
     leaveRoom(bot->room);
     
     saveFilters(bot->filters, bot->filterCount);
+    savePrivUsers(bot->privUsers, bot->numOfPrivUsers);
     saveReports(bot->latestReports, bot->reportsUntilAnalysis);
-    
-    
+    savePrivRequests(bot->privRequests, bot->totalPrivRequests);
     
     curl_easy_cleanup(client->curl);
     

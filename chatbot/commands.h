@@ -13,5 +13,6 @@
 #include "misc_commands.h"
 #include "stop_commands.h"
 #include "post_commands.h"
+#include "priv_commands.h"
 
 #endif /* commands_h */

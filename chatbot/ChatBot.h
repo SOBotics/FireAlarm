@@ -46,12 +46,16 @@ typedef struct _ChatBot {
     char *apiFilter;
     Filter **filters;
     unsigned filterCount;
+    PrivUsers **privUsers;
+    unsigned numOfPrivUsers;
+    PrivRequest **privRequests;
+    unsigned totalPrivRequests;
     Report *latestReports[REPORT_MEMORY];   //index 0 is the most recent report, 1 is the second most, etc.
     int reportsWaiting; //The amount of reports that have not yet been assigned a message ID.
     int reportsUntilAnalysis;   //The number of reports left until the bot analyzes them to auto-generate filters.
 }ChatBot;
 
-ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **commands, cJSON *latestReports, Filter **filters);
+ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **commands, cJSON *latestReports, Filter **filters, PrivUsers **users);
 StopAction runChatBot(ChatBot *chatbot);
 Post *getPostByID(ChatBot *bot, unsigned long postID);
 unsigned int checkPost(ChatBot *bot, Post *post);   //This function is responsible for freeing post.

@@ -14,9 +14,10 @@
 
 typedef struct _Command {
     char *name;
+    int isPrivileged;   // 1 if the command is privileged, 0 if not
     void (*callback)(RunningCommand *, void *);
 }Command;
 
-Command *createCommand(char *name, void (*callback)(RunningCommand *, void *));
+Command *createCommand(char *name, int isPrivileged, void (*callback)(RunningCommand *, void *));
 
 #endif /* Command_h */

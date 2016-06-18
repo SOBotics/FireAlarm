@@ -11,6 +11,12 @@
 
 void listCommands(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     postReply(bot->room, "Running commands:", command->message);
     const size_t maxLineSize = 256;
     pthread_mutex_lock(&bot->runningCommandsLock);
@@ -67,6 +73,12 @@ void listCommands(RunningCommand *command, void *ctx) {
 void help (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     postReply (bot->room, "I'm  [Fire Alarm](https://github.com/NobodyNada/chatbot), a bot which detects questions that need closing whenever they are posted or edited. [My command list is available here.](https://github.com/NobodyNada/chatbot/wiki/Commands)", command->message);
     return;
 }
@@ -74,6 +86,12 @@ void help (RunningCommand *command, void *ctx)
 void aliveCheck (RunningCommand *command, void *ctx) 
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     postReply (bot->room, "Why did you think I was dead?", command->message);
     return;
 }
@@ -81,6 +99,12 @@ void aliveCheck (RunningCommand *command, void *ctx)
 void commandList (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     postReply (bot->room, "To see a complete list of commands, visit [this page](https://github.com/NobodyNada/chatbot/wiki/Commands).", command->message);
     return;
 }
@@ -88,6 +112,12 @@ void commandList (RunningCommand *command, void *ctx)
 void changeThreshold (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     long newThreshold = strtol (command->argv [0], NULL, 10);
     
     if (newThreshold > 10000)
@@ -108,6 +138,12 @@ void changeThreshold (RunningCommand *command, void *ctx)
 void checkThreshold (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
     char message [256];
     
     sprintf (message, "The current threshold is %ld.", THRESHOLD);
