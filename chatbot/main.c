@@ -502,6 +502,8 @@ void saveReports(Report *reports[], int reportsUntilAnalysis) {
         cJSON *item = cJSON_CreateObject();
         cJSON_AddItemToObject(item, "messageID", cJSON_CreateNumber(reports[i]->messageID));
         cJSON_AddItemToObject(item, "confirmation", cJSON_CreateNumber(reports[i]->confirmation));
+        cJSON_AddItemToObject (item, "likelihood", cJSON_CreateNumber (reports [i]->likelihood));
+        cJSON_AddItemToObject (item, "body_length", cJSON_CreateNumber (reports [i]->bodyLength));
         
         Post *post = reports[i]->post;
         cJSON_AddItemToObject(item, "postID", cJSON_CreateNumber(post->postID));
