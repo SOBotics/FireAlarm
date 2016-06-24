@@ -144,7 +144,18 @@ void requestPriv (RunningCommand *command, void *ctx)
         return;
     }
     
-    char *groupType = command->argv [0];
+    char *group = command->argv [0];
+    
+    int groupType = -1;
+    
+    if (strcmp (group, "members") == 0 || strcmp (group, "member") == 0)
+    {
+        grouptype = 0;
+    }
+    else if (strcmp (group, "bot owner") == 0 || strcmp (group, "bot owners") == 0)
+    {
+        groupType = 1;
+    }
     
     bot->privRequests [bot->totalPrivRequests - 1] = createPrivRequest (
                                                                         command->message->user->userID,
