@@ -306,7 +306,23 @@ WebSocket *createWebSocketWithClient(Client *client) {
 void connectWebSocket(WebSocket *socket, const char *host, const char *path) {
     Client *c = socket->client;
     addWebsocket(c, socket);
-    struct lws *ws = lws_client_connect(
+    
+    struct lws_client_connect_info info;
+    memset(&info, 0, sizeof(info));
+    
+    info.context = c->wsContext;
+    info.address = host;
+    info.port = 80;
+    info.ssl_connection = 0;
+    info.path = path;
+    info.host = host;
+    info.origin = NULL;
+    info.protocol = NULL;
+    
+    struct lws *ws = lws_client_connect_via_info(&info);
+    
+    /*
+     struct lws *ws = lws_client_connect(
                                         c->wsContext,
                                         host,
                                         80,
@@ -317,6 +333,7 @@ void connectWebSocket(WebSocket *socket, const char *host, const char *path) {
                                         NULL,
                                         -1
                                         );
+     */
     
     
     
@@ -402,7 +419,7 @@ void setupWebsocketContext(Client *c) {
     info.extensions = NULL;
     info.ssl_cert_filepath = NULL;
     info.ssl_private_key_filepath = NULL;
-    info.extensions = lws_get_internal_extensions();
+    //info.extensions = lws_get_internal_extensions();
     info.gid = -1;
     info.uid = -1;
     info.options = 0;

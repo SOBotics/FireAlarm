@@ -13,7 +13,6 @@
 		84457F721CD3C700005EFA4F /* ChatRoom.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F701CD3C700005EFA4F /* ChatRoom.c */; };
 		84457F751CD3C7C3005EFA4F /* Client.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F731CD3C7C3005EFA4F /* Client.c */; };
 		84457F771CD3D098005EFA4F /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84457F761CD3D098005EFA4F /* libcurl.tbd */; };
-		845D93B71CEC223500DCC224 /* libwebsockets.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 845D93B61CEC223500DCC224 /* libwebsockets.6.dylib */; };
 		8487ECF71CEE6ADB00A1FA64 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 84457F691CD3C403005EFA4F /* main.c */; };
 		8490322E1CD95CCA000605EA /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 8490322C1CD95CCA000605EA /* cJSON.c */; };
 		849032311CD9AB7F000605EA /* Command.c in Sources */ = {isa = PBXBuildFile; fileRef = 8490322F1CD9AB7F000605EA /* Command.c */; };
@@ -23,6 +22,7 @@
 		84BD4F331CDABD2C00D31751 /* RunningCommand.c in Sources */ = {isa = PBXBuildFile; fileRef = 84BD4F311CDABD2C00D31751 /* RunningCommand.c */; };
 		84BD4F391CDBE6DC00D31751 /* ChatBot.c in Sources */ = {isa = PBXBuildFile; fileRef = 84BD4F371CDBE6DC00D31751 /* ChatBot.c */; };
 		84ED037B1CFE20A20092F0FE /* misc_functions.c in Sources */ = {isa = PBXBuildFile; fileRef = 84ED03781CFE203A0092F0FE /* misc_functions.c */; };
+		ABFAF5421D1D7BDF005F2E85 /* libwebsockets.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ABFAF5411D1D7BDF005F2E85 /* libwebsockets.8.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -73,6 +73,7 @@
 		84BD4F381CDBE6DC00D31751 /* ChatBot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ChatBot.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		84ED03781CFE203A0092F0FE /* misc_functions.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = misc_functions.c; sourceTree = "<group>"; };
 		84ED03791CFE20510092F0FE /* misc_functions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = misc_functions.h; sourceTree = "<group>"; };
+		ABFAF5411D1D7BDF005F2E85 /* libwebsockets.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libwebsockets.8.dylib; path = ../../../../../usr/local/Cellar/libwebsockets/2.0.2/lib/libwebsockets.8.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,8 +81,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABFAF5421D1D7BDF005F2E85 /* libwebsockets.8.dylib in Frameworks */,
 				840086121CED356A00B46C8B /* libz.tbd in Frameworks */,
-				845D93B71CEC223500DCC224 /* libwebsockets.6.dylib in Frameworks */,
 				84457F771CD3D098005EFA4F /* libcurl.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -92,6 +93,7 @@
 		84457F5D1CD3C403005EFA4F = {
 			isa = PBXGroup;
 			children = (
+				ABFAF5411D1D7BDF005F2E85 /* libwebsockets.8.dylib */,
 				84457F681CD3C403005EFA4F /* chatbot */,
 				84457F671CD3C403005EFA4F /* Products */,
 			);
@@ -330,7 +332,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/usr/local/Cellar/libwebsockets/1.6.2/lib,
+					/usr/local/Cellar/libwebsockets/2.0.2/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -346,7 +348,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/usr/local/Cellar/libwebsockets/1.6.2/lib,
+					/usr/local/Cellar/libwebsockets/2.0.2/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

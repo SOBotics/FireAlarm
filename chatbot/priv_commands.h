@@ -41,7 +41,7 @@ void addUserPriv (RunningCommand *command, void *ctx)
         postReply (bot->room, "The user is already a member.", command->message);
         return;
     }
-    else if (groupType == 2 && (userPrivCheck (bot, userID) == 2))
+    else if (groupType == 2 && (checkPrivUser (bot, userID) == 2))
     {
         postReply (bot->room, "The user is already a bot owner.", command->message);
         return;
@@ -297,7 +297,7 @@ void isPrivileged (RunningCommand *command, void *ctx)
         return;
     }
     
-    int userID;
+    unsigned long userID;
     int check = 0;
     
     if (command->argc == 1)
@@ -315,7 +315,7 @@ void isPrivileged (RunningCommand *command, void *ctx)
         return;
     }
     
-    if (userPrivCheck (bot, userID) == 1)
+    if (checkPrivUser (bot, userID) == 1)
     {
         if (check)
         {
@@ -326,7 +326,7 @@ void isPrivileged (RunningCommand *command, void *ctx)
             postReply (bot->room, "Yes, that user is a member.", command->message);
         }
     }
-    else if (userPrivCheck (bot, userID) == 2)
+    else if (checkPrivUser (bot, userID) == 2)
     {
         if (check)
         {

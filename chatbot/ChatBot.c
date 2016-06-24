@@ -446,7 +446,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
     
     if (strlen (post->body) < 200)
     {
-        bodyLength = strlen (post->body);
+        bodyLength = (unsigned)strlen (post->body);
     }
     
     if (likelihood > THRESHOLD && (recentlyReported (post->postID, bot) == 0)) {

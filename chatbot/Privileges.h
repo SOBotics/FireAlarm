@@ -33,7 +33,7 @@ typedef struct _PrivRequest {
 unsigned int checkPrivUser (ChatBot *bot, long userID);
 PrivUser *createPrivUser (long userID, char *username, int privLevel);
 PrivRequest *createPrivRequest (long userID, char *name, int groupType);
-unsigned userPrivCheck (ChatBot *bot, long userID);
+unsigned checkPrivUser (ChatBot *bot, long userID);
 unsigned commandPriv (RunningCommand *commands);
 unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot);
 unsigned privRequestExist (ChatBot *bot, unsigned priv_number);

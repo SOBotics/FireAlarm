@@ -90,11 +90,11 @@ unsigned checkPrivUser (ChatBot *bot, long userID)
 
 unsigned commandPriv (RunningCommand *commands)
 {
-    if (commands->command->isPrivileged == 1)
+    if (commands->command->privileges == 1)
     {
         return 1;
     }
-    else if (commands->command->isPrivileged == 2)
+    else if (commands->command->privileges == 2)
     {
         return 2;
     }
