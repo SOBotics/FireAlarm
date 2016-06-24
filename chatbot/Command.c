@@ -14,6 +14,6 @@ Command *createCommand(char *name, int isPrivileged, void (*callback)(RunningCom
     Command *c = malloc(sizeof(Command));
     c->name = name;
     c->callback = callback;
-    c->isPrivileged;
+    c->isPrivileged = isPrivileged;
     return c;
 }

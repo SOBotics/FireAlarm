@@ -10,10 +10,11 @@
 #define ChatRoom_h
 
 #include <stdio.h>
-#include "Client.h"
 #include "ChatMessage.h"
 #include "ChatUser.h"
 #include "Command.h"
+
+typedef struct _Client Client;
 
 typedef struct _ChatRoom {
     Client *client;

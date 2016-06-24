@@ -17,6 +17,9 @@
 #include "Post.h"
 #include "cJSON.h"
 
+typedef struct _PrivUser PrivUser;
+typedef struct _PrivRequest PrivRequest;
+
 extern long THRESHOLD;
 
 #define REPORT_MEMORY 100
@@ -46,7 +49,7 @@ typedef struct _ChatBot {
     char *apiFilter;
     Filter **filters;
     unsigned filterCount;
-    PrivUsers **privUsers;
+    PrivUser **privUsers;
     unsigned numOfPrivUsers;
     PrivRequest **privRequests;
     unsigned totalPrivRequests;
@@ -55,7 +58,15 @@ typedef struct _ChatBot {
     int reportsUntilAnalysis;   //The number of reports left until the bot analyzes them to auto-generate filters.
 }ChatBot;
 
-ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **commands, cJSON *latestReports, Filter **filters, PrivUsers **users);
+ChatBot *createChatBot(
+                       ChatRoom *room,
+                       ChatRoom *roomPostTrue,
+                       Command **commands,
+                       cJSON *latestReports,
+                       Filter **filters,
+                       PrivUser **users,
+                       PrivRequest **requests
+                       );
 StopAction runChatBot(ChatBot *chatbot);
 Post *getPostByID(ChatBot *bot, unsigned long postID);
 unsigned int checkPost(ChatBot *bot, Post *post);   //This function is responsible for freeing post.

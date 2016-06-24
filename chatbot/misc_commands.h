@@ -9,6 +9,10 @@
 #ifndef misc_commands_h
 #define misc_commands_h
 
+#include "Privileges.h"
+
+
+
 void listCommands(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
     

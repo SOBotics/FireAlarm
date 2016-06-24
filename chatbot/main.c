@@ -17,13 +17,14 @@
 #include <sys/stat.h>
 #include <limits.h>
 
-#include "Client.h"
+#include "Privileges.h"
 #include "ChatRoom.h"
 #include "ChatBot.h"
 #include "cJSON.h"
 #include "commands.h"
 #include "Filter.h"
-#include "Privileges.h"
+#undef Client_h
+#include "Client.h"
 
 #define SAVE_INTERVAL 60
 
@@ -267,7 +268,7 @@ Filter **loadFilters() {
     return filters;
 }
 
-PrivRequest **loadPrivRequest ()
+PrivRequest **loadPrivRequests ()
 {
     puts ("Loading Privilege Requests...");
     FILE *file = fopen ("privRequest.json", "r");
@@ -314,17 +315,12 @@ PrivRequest **loadPrivRequest ()
     return requests;
 }
 
-void savePrivRequest (PrivRequest **requests, unsigned totalRequests)
+void savePrivRequests (PrivRequest **requests, unsigned totalRequests)
 {
     puts ("Saving Privilege Requests...");
     FILE *file = fopen ("privRequest.json", "w");
     
-    if (!file)
-    {
-        fputs ("privRequest.json does not exist. Aborting function...", stderr);
-        fclose (file);
-        return;
-    }
+    cJSON *json = cJSON_CreateArray();
     
     for (int i = 0; i < totalRequests; i ++)
     {
@@ -349,7 +345,7 @@ void savePrivRequest (PrivRequest **requests, unsigned totalRequests)
     return;
 }
 
-PrivUsers **loadPrivUsers ()
+PrivUser **loadPrivUsers ()
 {
     puts ("Loading Privileged Users...");
     FILE *file = fopen ("privUsers.json", "r");
@@ -357,10 +353,10 @@ PrivUsers **loadPrivUsers ()
     if (!file)
     {
         puts ("privUsers.json does not exist. Creating skeleton file...");
-        PrivUsers **users = malloc(sizeof(Filter*) * 3);
+        PrivUser **users = malloc(sizeof(Filter*) * 3);
         
-        users [0] = createPrivUsers (3476191, "NobodyNada", 2);        // User ID of NobodyNada
-        users [1] = createPrivUsers (5735775, "Ashish Ahuja ツ", 2);   // User ID of Ashish Ahuja
+        users [0] = createPrivUser (3476191, "NobodyNada", 2);        // User ID of NobodyNada
+        users [1] = createPrivUser (5735775, "Ashish Ahuja ツ", 2);   // User ID of Ashish Ahuja
         users [2] = NULL;
         return users;
     }
@@ -377,7 +373,7 @@ PrivUsers **loadPrivUsers ()
     free(buf);
     
     unsigned privUsersCount = cJSON_GetArraySize(json);
-    PrivUsers **users = malloc(sizeof(PrivUsers*) * (privUsersCount + 1));
+    PrivUser **users = malloc(sizeof(PrivUser*) * (privUsersCount + 1));
     
     for (int i = 0; i < privUsersCount; i ++)
     {
@@ -386,25 +382,25 @@ PrivUsers **loadPrivUsers ()
         long userID = cJSON_GetObjectItem (user, "user_id")->valueint;
         char *username = cJSON_GetObjectItem (user, "user_name")->valuestring;
         int privLevel = cJSON_GetObjectItem (user, "priv_level")->valueint;
-        users [i] = createPrivusers (userID, username, privLevel);
+        users [i] = createPrivUser (userID, username, privLevel);
     }
     users [privUsersCount] = NULL;
     
     return users;
 }
 
-void savePrivUsers (PrivUsers **users, unsigned privUsersCount)
+void savePrivUsers (PrivUser **users, unsigned privUsersCount)
 {
     puts ("Saving Privileged users...");
     cJSON *json = cJSON_CreateArray();
     
     for (int i = 0; i < privUsersCount; i ++)
     {
-        PrivUsers *user = users [i];
+        PrivUser *user = users [i];
         cJSON *object = cJSON_CreateObject();
         cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (user->userID));
         cJSON_AddItemToObject (object, "user_name", cJSON_CreateString (user->username));
-        CJSON_AddItemToObject (object, "priv_level", cJSON_CreateNumber (user->privLevel));
+        cJSON_AddItemToObject (object, "priv_level", cJSON_CreateNumber (user->privLevel));
         
         cJSON_AddItemToArray(json, object);
     }
@@ -599,7 +595,7 @@ int main(int argc, const char * argv[]) {
     
     
     Filter **filters = loadFilters();
-    PrivUsers **users = loadPrivUsers();
+    PrivUser **users = loadPrivUsers();
     PrivRequest **requests = loadPrivRequests();
     
     Command *commands[] = {

@@ -6,6 +6,9 @@
 // Copyright © 2016 Ashish Ahuja. All rights reserved.
 //
 
+#include "Privileges.h"
+#include "misc_functions.h"
+
 void addUserPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
@@ -16,7 +19,7 @@ void addUserPriv (RunningCommand *command, void *ctx)
     }
     
     long userID = (long) strtol(command->argv[0], NULL, 10);
-    char privType [20] = command->argv [1];
+    char *privType = command->argv [1];
     int groupType;
     
     if (strcmp (privType, "bot owner") != 0 && strcmp (privType, "member") != 0)
@@ -33,7 +36,7 @@ void addUserPriv (RunningCommand *command, void *ctx)
         groupType = 1;
     }
     
-    if (groupType == 1 && (userPrivCheck (bot, userID) != 0))
+    if (groupType == 1 && (checkPrivUser (bot, userID) != 0))
     {
         postReply (bot->room, "The user is already a member.", command->message);
         return;
@@ -50,10 +53,10 @@ void addUserPriv (RunningCommand *command, void *ctx)
         return;
     }
     
-    PrivUsers **users = bot->privUsers;
+    PrivUser **users = bot->privUsers;
     
     users [bot->numOfPrivUsers]->userID = userID;
-    users [bot->numOfPrivUsers]->username = getUsernameByID (userID);
+    users [bot->numOfPrivUsers]->username = getUsernameByID (bot, userID);
     users [bot->numOfPrivUsers]->privLevel = groupType;
     
     bot->numOfPrivUsers ++;
@@ -71,7 +74,7 @@ void addUserPriv (RunningCommand *command, void *ctx)
     
     postReply (bot->room, messageString, command->message);
     
-    printf ("User ID %d added to privilege list.", userID);
+    printf ("User ID %ld added to privilege list.", userID);
     
     return;
 }
@@ -87,7 +90,7 @@ void removeUserPriv (RunningCommand *command, void *ctx)
     
     long userID = (long) strtol(command->argv[0], NULL, 10);
     
-    if (!checkPrivUsers (bot, userID))
+    if (!checkPrivUser (bot, userID))
     {
         postReply (bot->room, "The user is not privileged already.", command->message);
         return;
@@ -98,7 +101,7 @@ void removeUserPriv (RunningCommand *command, void *ctx)
         return;
     }
     
-    PrivUsers **users = bot->privUsers;
+    PrivUser **users = bot->privUsers;
     int check;
     
     for (int i = 0; i < bot->numOfPrivUsers; i ++)
@@ -110,18 +113,18 @@ void removeUserPriv (RunningCommand *command, void *ctx)
         }
     }
     
-    for (i = check; i < bot->numOfPrivUsers; i ++)
+    for (int i = check; i < bot->numOfPrivUsers; i ++)
     {
         users [i] = users [i + 1];
     }
     
-    users [numOfPrivUsers] = NULL;
+    users [bot->numOfPrivUsers] = NULL;
     
     bot->numOfPrivUsers --;
     
     postReply (bot->room, "The user has been removed from the privilege list.", command->message);
     
-    printf ("User ID %d removed from privilege list.", userID);
+    printf ("User ID %ld removed from privilege list.", userID);
     
     return;
 }
@@ -143,7 +146,11 @@ void requestPriv (RunningCommand *command, void *ctx)
     
     char *groupType = command->argv [0];
     
-    bot->privRequests [totalPrivRequests - 1] = createPrivRequest (command->message->user->userID, command->message->user->username, groupType);
+    bot->privRequests [bot->totalPrivRequests - 1] = createPrivRequest (
+                                                                        command->message->user->userID,
+                                                                        command->message->user->name,
+                                                                        groupType
+                                                                        );
 
     bot->totalPrivRequests ++;
     
@@ -152,7 +159,7 @@ void requestPriv (RunningCommand *command, void *ctx)
 
 void approvePrivRequest (RunningCommand *command, void *ctx)
 {
-    Chatbot *bot = ctx;
+    ChatBot *bot = ctx;
     
     if (commandPrivCheck (command, bot))
     {
@@ -174,9 +181,9 @@ void approvePrivRequest (RunningCommand *command, void *ctx)
     }
     
     PrivRequest **requests = bot->privRequests;
-    PrivUsers **users = bot->privUsers;
+    PrivUser **users = bot->privUsers;
     
-    users [numOfPrivUsers] = createPrivUsers (requests[priv_number - 1]->userID, requests [priv_number - 1]->username, requests [priv_number - 1]->groupType + 1);
+    users [bot->numOfPrivUsers] = createPrivUser (requests[priv_number - 1]->userID, requests [priv_number - 1]->username, requests [priv_number - 1]->groupType + 1);
     char *username = requests [priv_number - 1]->username;
     bot->numOfPrivUsers ++;
     
@@ -291,7 +298,7 @@ void isPrivileged (RunningCommand *command, void *ctx)
     }
     
     int userID;
-    int check;
+    int check = 0;
     
     if (command->argc == 1)
     {
@@ -361,7 +368,7 @@ void printPrivUser (RunningCommand *command, void *ctx)
         return;
     }
     
-    int check;
+    int check = 0;
     
     if (command->argc == 1)
     {
@@ -376,7 +383,7 @@ void printPrivUser (RunningCommand *command, void *ctx)
     }
     
     postReply (bot->room, "The privileged users are: ", command->message);
-    PrivUsers **users = bot->privUsers;
+    PrivUser **users = bot->privUsers;
     
     char *messageStringMembers = malloc (sizeof (64 * bot->numOfPrivUsers));
     char *messageStringOwners = malloc (sizeof (64 * bot->numOfPrivUsers));
@@ -411,7 +418,7 @@ void printPrivUser (RunningCommand *command, void *ctx)
     else if (check == 1)
     {
         sprintf (messageString, "Bot Owners:\n");
-        sprintf (messageString + strlen (messageString). "%s\n", messageStringOwners);
+        sprintf (messageString + strlen (messageString), "%s\n", messageStringOwners);
     }
     
     postMessage (bot->room, messageString);

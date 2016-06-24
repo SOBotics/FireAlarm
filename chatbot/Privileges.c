@@ -7,10 +7,11 @@
 //
 
 #include "Privileges.h"
+#include "ChatBot.h"
 
-PrivUsers *createPrivUsers (long userID, char *name, int privLevel)
+PrivUser *createPrivUser (long userID, char *name, int privLevel)
 {
-    PrivUsers *pu = malloc (sizeof (PrivUsers));
+    PrivUser *pu = malloc (sizeof (PrivUser));
     
     pu->userID = userID;
     pu->username = name;
@@ -30,13 +31,13 @@ PrivRequest *createPrivRequest (long userID, char *name, int groupType)
     return pr;
 }
 
-void deletePrivrequest (ChatBot *bot, unsigned priv_number)
+void deletePrivRequest (ChatBot *bot, unsigned priv_number)
 {
-    privRequest **requests = bot->privRequests;
+    PrivRequest **requests = bot->privRequests;
     
     int check = 0;
     
-    for (int i = 0; i < bot->totalprivRequests; i ++)
+    for (int i = 0; i < bot->totalPrivRequests; i ++)
     {
         if (i == priv_number - 1)
         {
@@ -44,7 +45,7 @@ void deletePrivrequest (ChatBot *bot, unsigned priv_number)
         }
     }
     
-    for (i = check; i < bot->totalPrivRequests; i ++)
+    for (int i = check; i < bot->totalPrivRequests; i ++)
     {
         requests [i] = requests [i + 1];
     }
@@ -65,9 +66,9 @@ unsigned privRequestExist (ChatBot *bot, unsigned priv_number)
     return 1;
 }
 
-unsigned userPrivCheck (ChatBot *bot, long userID)
+unsigned checkPrivUser (ChatBot *bot, long userID)
 {
-    PrivUsers **users = bot->privUsers;
+    PrivUser **users = bot->privUsers;
     
     for (int i = 0; i < bot->numOfPrivUsers; i ++)
     {
@@ -101,31 +102,27 @@ unsigned commandPriv (RunningCommand *commands)
     return 0;
 }
 
-PrivUsers *getPrivUserByID (ChatBot *bot, long userID)
+PrivUser *getPrivUserByID (ChatBot *bot, long userID)
 {
-    PrivUsers *users = malloc (sizeof (PrivUsers));
     PrivUser **privUsers = bot->privUsers;
     
     for (int i = 0; i < bot->numOfPrivUsers; i ++)
     {
         if (privUsers[i]->userID == userID)
         {
-            users->userID = privUsers[i]->userID;
-            users->username = privUsers[i]->username;
-            users->privLevel = privUsers[i]->privLevel;
-            return users;
+            return privUsers[i];
         }
     }
+    return NULL;
 }
 
 unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot)
 {
     long userID = command->message->user->userID;
-    PrivUsers *user = getPrivUserByID (userID);
-    int isPrivileged = userPrivCheck (userID);
-    int commandPriv = userPrivCheck (bot, userID);
+    int isPrivileged = checkPrivUser (bot, userID);
+    int commandPriv = checkPrivUser (bot, userID);
     
-    if (commandPriv == 1 && isPrivilged == 0)
+    if (commandPriv == 1 && isPrivileged == 0)
     {
         postReply (bot->room, "You need to be a member or a bot owner to run that command.", command->message);
         return 1;

@@ -6,15 +6,18 @@
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
-#include "ChatBot.h"
+#include <curl/curl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include "ChatMessage.h"
-#include "cJSON.h"
 #include <zlib.h>
 #include <ctype.h>
+
+#include "ChatBot.h"
+#include "ChatMessage.h"
+#include "cJSON.h"
 #include "misc_functions.h"
+#include "Client.h"
 
 #define REPORT_HEADER "Potentially bad question"
 #define API_KEY "HNA2dbrFtyTZxeHN6rThNg(("
@@ -216,7 +219,15 @@ static Report **parseReports(ChatBot *bot, cJSON *json) {
     return reports;
 }
 
-ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **commands, cJSON *latestReports, Filter **filters, PrivUsers **users, PrivRequest **requests) {
+ChatBot *createChatBot(
+                       ChatRoom *room,
+                       ChatRoom *roomPostTrue,
+                       Command **commands,
+                       cJSON *latestReports,
+                       Filter **filters,
+                       PrivUser **users,
+                       PrivRequest **requests
+                       ) {
     ChatBot *c = malloc(sizeof(ChatBot));
     c->room = room;
     c->roomPostTrue = roomPostTrue;
@@ -232,7 +243,7 @@ ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **command
     c->filterCount = 0;
     c->numOfPrivUsers = 0;
     c->privUsers = NULL;
-    c->privRequest = NULL;
+    c->privRequests = NULL;
     c->totalPrivRequests = 0;
     
     c->reportsWaiting = -1;
@@ -245,11 +256,11 @@ ChatBot *createChatBot(ChatRoom *room, ChatRoom *roomPostTrue, Command **command
     while (*(requests++))
     {
         c->privRequests = realloc (c->privRequests, ++c->totalPrivRequests * sizeof (PrivRequest*));
-        c->privRequests[c->totalPrivRequests-1] = *(privRequests -1);
+        c->privRequests[c->totalPrivRequests-1] = *(c->privRequests -1);
     }
     
     while (*(users++)) {
-        c->privUsers = realloc(c->privUsers, ++c->numOfPrivUsers * sizeof(PrivUsers*));
+        c->privUsers = realloc(c->privUsers, ++c->numOfPrivUsers * sizeof(PrivUser*));
         c->privUsers[c->numOfPrivUsers-1] = *(users - 1);
     }
     

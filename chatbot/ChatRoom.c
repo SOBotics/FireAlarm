@@ -14,6 +14,7 @@
 #include <curl/curl.h>
 #include <string.h>
 #include "cJSON.h"
+#include "Client.h"
 
 typedef enum {
     MessagePosted = 1,

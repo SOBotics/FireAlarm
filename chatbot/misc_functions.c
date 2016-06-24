@@ -8,6 +8,10 @@
 
 #include <ctype.h>
 
+#include <curl/curl.h>
+#include "Client.h"
+#include "ChatBot.h"
+
 void lowercase (char *str)
 {
     while (*str)
@@ -54,11 +58,13 @@ char *getUsernameByID (ChatBot *bot, long userID)
         if (user_id == userID)
         {
             const char *username = cJSON_GetArrayItem(item, 1)->valuestring;
+            char *result = malloc(strlen(username) + 1);
+            strcpy(result, username);
             cJSON_Delete (json);
-            return username;
+            return result;
         }
     }
     
     cJSON_Delete (json);
-    return 1;
+    return NULL;
 }

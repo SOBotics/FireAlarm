@@ -6,6 +6,9 @@
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
+#include <string.h>
+#include <stdlib.h>
+
 #include "Filter.h"
 
 Filter *createFilter(const char *desc, const char *filter, FilterType type, unsigned truePositives, unsigned falsePositives) {

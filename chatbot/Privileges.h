@@ -15,22 +15,28 @@
 
 #include "cJSON.h"
 
-typedef struct {
-    long userId;
+typedef struct _ChatBot ChatBot;
+typedef struct _RunningCommand RunningCommand;
+
+typedef struct _PrivUser {
+    long userID;
     char *username;
     int privLevel;  // 1 if member, 2 if bot owner.
-}PrivUsers;
+}PrivUser;
 
-typedef struct {
+typedef struct _PrivRequest {
     long userID;
     char *username;
     int groupType;  // 0 if user wants to join membeers, 1 if user wants to join bot owners.
 }PrivRequest;
 
 unsigned int checkPrivUser (ChatBot *bot, long userID);
-PrivUsers *createPrivUsers (long userID, char *username, int privLevel);
+PrivUser *createPrivUser (long userID, char *username, int privLevel);
+PrivRequest *createPrivRequest (long userID, char *name, int groupType);
 unsigned userPrivCheck (ChatBot *bot, long userID);
 unsigned commandPriv (RunningCommand *commands);
 unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot);
+unsigned privRequestExist (ChatBot *bot, unsigned priv_number);
+void deletePrivRequest (ChatBot *bot, unsigned priv_number);
 
 #endif /* Privileges.h */
