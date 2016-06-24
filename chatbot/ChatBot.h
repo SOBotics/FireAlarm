@@ -34,7 +34,8 @@ typedef struct {
     Post *post;
     unsigned long messageID;
     int confirmation;  //-1: not confirmed, 0: false positive, 1: true positive
-    unsigned long likelihood;
+    unsigned likelihood;
+    unsigned bodyLength;
 }Report;
 
 typedef struct _ChatBot {

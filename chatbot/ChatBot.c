@@ -425,6 +425,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
 
 unsigned int checkPost(ChatBot *bot, Post *post) {
     unsigned likelihood = 0;
+    unsigned bodyLength = 1;
     char *messageBuf = malloc(sizeof(char));
     *messageBuf = 0;
     for (int i = 0; i < bot->filterCount; i++) {
@@ -442,6 +443,12 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
             likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
         }
     }
+    
+    if (strlen (post->body) < 200)
+    {
+        bodyLength = strlen (post->body);
+    }
+    
     if (likelihood > THRESHOLD && (recentlyReported (post->postID, bot) == 0)) {
         const size_t maxMessage = strlen(messageBuf) + 256;
         char *message = malloc(maxMessage);
@@ -472,6 +479,37 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         }
         free(message);
         free (messageBuf);
+        return 0;
+    }
+    else if (bodyLength != 1 && (recentlyReported (post->postID, bot) == 0))
+    {
+        const size_t maxMessage = 256;
+        char *message = malloc(maxMessage);
+        snprintf (message, maxMessage,
+                  REPORT_HEADER " : [%s](http://stackoverflow.com/%s/%lu) (body length %d)",
+                  post->title, post->isAnswer ? "a" : "q", post->postID, bodyLength);
+                  
+        postMessage (bot->room, message);
+        
+        if (bot->latestReports[REPORT_MEMORY-1]) {
+            free(bot->latestReports[REPORT_MEMORY-1]->post);
+            free(bot->latestReports[REPORT_MEMORY-1]);
+        }
+        
+        int i = REPORT_MEMORY;
+        
+        while(--i) {
+            bot->latestReports[i] = bot->latestReports[i-1];
+        }
+        
+        Report *report = malloc (sizeof(Report));
+        
+        report->post = post;
+        report->confirmation = -1;
+        report->likelihood = 0;
+        report->bodyLength = bodyLength;
+        bot->latestReports[0] = report;
+        free (message);
         return 0;
     }
     else {
