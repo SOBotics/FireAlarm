@@ -8,7 +8,7 @@
 
 #include "Modes.h"
 
-void changeModeOff (ChatBot *bot, int modeType)
+void disableMode (ChatBot *bot, int modeType)
 {
     Modes *modes = bot->modes;
     
@@ -30,6 +30,35 @@ void changeModeOff (ChatBot *bot, int modeType)
     else if (modeType == MODE_MESSAGE)
     {
         modes->messagePost = 0;
+        return;
+    }
+    
+    fprintf (stderr, "Invalid mode type %d.", modeType);
+    return;
+}
+
+void enableMode (ChatBot *bot, int modeType)
+{
+    Modes *modes = bot->modes;
+    
+    if (modeType == MODE_REPORTING)
+    {
+        modes->reportMode = 1;
+        return;
+    }
+    else if (modeType == MODE_KEYWORD)
+    {
+        modes->keyowrdFilter = 1;
+        return;
+    }
+    else if (modeType == MODE_LENGTH)
+    {
+        modes->lengthFilter = 1;
+        return;
+    }
+    else if (modeType == MODE_MESSAGE)
+    {
+        modes->messagePost = 1;
         return;
     }
     
