@@ -600,6 +600,7 @@ int main(int argc, const char * argv[]) {
     Filter **filters = loadFilters();
     PrivUser **users = loadPrivUsers();
     PrivRequest **requests = loadPrivRequests();
+    Modes *modes = createMode (1, 1, 1, 1);
     
     Command *commands[] = {
         createCommand("I can put anything I want here; the first command runs when no other commands match", 0, unrecognizedCommand),
@@ -650,7 +651,7 @@ int main(int argc, const char * argv[]) {
         createCommand("amiprivileged", 0, amiPrivileged),
         NULL
     };
-    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, NULL);
+    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, mode);
     
     
     WebSocket *socket = createWebSocketWithClient(client);
