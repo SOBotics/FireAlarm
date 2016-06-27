@@ -27,6 +27,7 @@
 #include "Client.h"
 
 #define SAVE_INTERVAL 60
+long postMessage = 1;
 
 void unrecognizedCommand(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
