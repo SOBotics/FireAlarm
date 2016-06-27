@@ -153,4 +153,58 @@ void changeMode (RunningCommand *command, void *ctx)
     return;
 }
 
+void printCurrentMode (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
+    char *currentMode = malloc (sizeof (100));
+    
+    Modes *modes = bot->modes;
+    
+    if (!modes->reportMode)
+    {
+        sprintf (currentMode, "Reporting is off, ");
+    }
+    else if (modes->reportMode)
+    {
+        sprintf (currentMode, "Reporting is on, ");
+    }
+    
+    if (!modes->keywordFilter)
+    {
+        sprintf (currentMode + strlen (currentMode), "the keyword filter is off, ");
+    }
+    else if (modes->keyowrdFilter)
+    {
+        sprintf (currentMode + strlen (currentMode), "the keyword filter is on, ");
+    }
+    
+    if (!modes->lengthFilter)
+    {
+        sprintf (currentMode + strlen (currentMode), "the length filter is off, ");
+    }
+    else if (modes->lengthFilter)
+    {
+        sprintf (currentMode + strlen (currentMode), "the length filter on, ");
+    }
+    
+    if (!modes->messagePost)
+    {
+        sprintf (currentMode + strlen (currentMode), "and posting messages is off.");
+    }
+    else if (modes->messagePost)
+    {
+        sprintf (currentMode + strlen (currentMode), "and posting messages is on");
+    }
+    
+    postReply (bot->roon, currentMode, command->message);
+    free (currentMode);
+    
+    return;
+}
+
 #endif /* mode_commands.h */
