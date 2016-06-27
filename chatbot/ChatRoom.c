@@ -157,6 +157,12 @@ typedef struct _PendingMessage {
 }PendingMessage;
 
 void postMessage(ChatRoom *r, const char *text) {
+    
+    if (!postMessage)
+    {
+        return;
+    }
+    
     //queue the message to avoid throttling
     pthread_mutex_lock(&r->pendingMessageLock);
     
@@ -180,6 +186,12 @@ void postMessage(ChatRoom *r, const char *text) {
 }
 
 void postReply(ChatRoom *r, const char *text, ChatMessage *message) {
+    
+    if (!postMessage)
+    {
+        return;
+    }
+    
     const size_t bufSize = strlen(text) + 16;
     char buf[bufSize];
     if (message->user->userID) {
