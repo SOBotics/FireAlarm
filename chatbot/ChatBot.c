@@ -226,7 +226,8 @@ ChatBot *createChatBot(
                        cJSON *latestReports,
                        Filter **filters,
                        PrivUser **users,
-                       PrivRequest **requests
+                       PrivRequest **requests,
+                       Modes *modes
                        ) {
     ChatBot *c = malloc(sizeof(ChatBot));
     c->room = room;
@@ -235,6 +236,7 @@ ChatBot *createChatBot(
     c->runningCommands = NULL;
     c->apiFilter = NULL;
     c->runningCommandCount = 0;
+    c->modes = modes;
     c->stopAction = ACTION_NONE;
     pthread_mutex_init(&c->runningCommandsLock, NULL);
     pthread_mutex_init(&c->detectorLock, NULL);
@@ -424,10 +426,19 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
 }
 
 unsigned int checkPost(ChatBot *bot, Post *post) {
+    
+    if (!bot->modes->reportMode)
+    {
+        return;
+    }
+    
     unsigned likelihood = 0;
     unsigned bodyLength = 1;
     char *messageBuf = malloc(sizeof(char));
     *messageBuf = 0;
+    
+    if (bot->modes->keywordFilter)
+    {
     for (int i = 0; i < bot->filterCount; i++) {
         unsigned start, end;
         if (postMatchesFilter(post, bot->filters[i], &start, &end)) {
@@ -443,10 +454,14 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
             likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
         }
     }
+    }
     
-    if (strlen (post->body) < 200)
+    if (bot->modes->lengthFilter)
     {
-        bodyLength = (unsigned)strlen (post->body);
+        if (strlen (post->body) < 200)
+        {
+            bodyLength = (unsigned)strlen (post->body);
+        }
     }
     
     if (likelihood > THRESHOLD && (recentlyReported (post->postID, bot) == 0)) {
