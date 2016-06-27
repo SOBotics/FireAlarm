@@ -65,3 +65,15 @@ void enableMode (ChatBot *bot, int modeType)
     fprintf (stderr, "Invalid mode type %d.", modeType);
     return;
 }
+
+Modes *createMode (int reportMode, int keywordFilter, int lengthFilter, int messagePost)
+{
+    Modes *mode;
+    
+    mode->reportMode = reportMode;
+    mode->keywordFilter = keywordFilter;
+    mode->lengthFilter = lengthFilter;
+    mode->messagePost = messagePost;
+    
+    return mode;
+}
