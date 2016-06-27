@@ -193,7 +193,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
     return;
 }
 
-void webSocektOpened(WebSocket *ws) {
+void webSocketOpened(WebSocket *ws) {
     puts("Websocket opened");
     sendDataOnWebsocket(ws->ws, "155-questions-active", 0);
 }
@@ -650,7 +650,7 @@ int main(int argc, const char * argv[]) {
         createCommand("amiprivileged", 0, amiPrivileged),
         NULL
     };
-    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests);
+    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, NULL);
     
     
     WebSocket *socket = createWebSocketWithClient(client);
