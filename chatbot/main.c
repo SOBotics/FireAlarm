@@ -649,6 +649,8 @@ int main(int argc, const char * argv[]) {
         createCommand("pending privilege requests", 0, printPrivRequests),
         createCommand("pending priv requests", 0, printPrivRequests),
         createCommand("amiprivileged", 0, amiPrivileged),
+        createCommand("mode * * ...", 2, changeMode),
+        createCommand("check mode", 0, printCurrentMode),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, mode);
