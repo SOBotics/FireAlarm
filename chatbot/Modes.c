@@ -29,7 +29,7 @@ void disableMode (ChatBot *bot, int modeType)
     }
     else if (modeType == MODE_MESSAGE)
     {
-        modes->messagePost = 0;
+        messagePost = 0;
         return;
     }
     
@@ -58,7 +58,7 @@ void enableMode (ChatBot *bot, int modeType)
     }
     else if (modeType == MODE_MESSAGE)
     {
-        modes->messagePost = 1;
+        messagePost = 1;
         return;
     }
     
