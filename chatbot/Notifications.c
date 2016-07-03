@@ -17,3 +17,17 @@ Notify *createNotification (int type, long userID)
     
     return n;
 }
+
+void deleteNotificaton (ChatBot *bot, Notify *notify)
+{
+    Notify *n = bot->notify;
+    
+    for (int i = bot->totalNotifications -1; i < bot->totalNotifications; i ++)
+    {
+        n[i] = n[i + 1];
+    }
+    
+    bot->totalNotifications --;
+    
+    return;
+}
