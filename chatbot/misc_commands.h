@@ -173,4 +173,23 @@ void optIn (RunningCommand *command, void *ctx)
     return;
 }
 
+void notifyMe (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
+    Notify **notify = bot->notify;
+    
+    notify[bot->totalNotifications - 1] = createNotification (1, command->message->user->userID);
+    bot->totalNotifications ++;
+    
+    postReply (bot->room, "Notify submission successful. You will now be notified for reports.", command->message);
+    
+    return;
+}
+
 #endif /* misc_commands_h */
