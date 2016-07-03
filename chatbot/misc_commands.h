@@ -11,8 +11,6 @@
 
 #include "Privileges.h"
 
-
-
 void listCommands(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
     
@@ -153,6 +151,25 @@ void checkThreshold (RunningCommand *command, void *ctx)
     sprintf (message, "The current threshold is %ld.", THRESHOLD);
     
     postReply (bot->room, message, command->message);
+    return;
+}
+
+void optIn (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
+    Notify **notify = bot->notify;
+    
+    notify[bot->totalNotifications - 1] = createNotification (0, command->message->user->userID);
+    bot->totalNotifications ++;
+    
+    postReply (bot->room, "Opt-in successful. You will now be pinged for reports.", command->message);
+    
     return;
 }
 
