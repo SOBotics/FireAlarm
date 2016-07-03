@@ -20,7 +20,7 @@ Notify *createNotification (int type, long userID)
 
 void deleteNotificaton (ChatBot *bot, Notify *notify)
 {
-    Notify *n = bot->notify;
+    Notify **n = bot->notify;
     
     for (int i = bot->totalNotifications -1; i < bot->totalNotifications; i ++)
     {
@@ -30,4 +30,19 @@ void deleteNotificaton (ChatBot *bot, Notify *notify)
     bot->totalNotifications --;
     
     return;
+}
+
+Notify *getNotificationByID (ChatBot *bot, long userID)
+{
+    Notify **notify = bot->notify;
+    
+    for (int i = 0; i < bot->totalNotifications; i ++)
+    {
+        if (notify [i]->userID == userID)
+        {
+            return notify [i];
+        }
+    }
+    
+    return NULL;
 }
