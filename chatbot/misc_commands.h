@@ -192,4 +192,30 @@ void notifyMe (RunningCommand *command, void *ctx)
     return;
 }
 
+void optOut (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
+    long userID = command->message->user->userID;
+    
+    Notify *notify = getNotificationByID (bot, userID);
+    
+    if (notify == NULL)
+    {
+        postReply (bot->room, "You are already opted out.", command->message);
+        return;
+    }
+    
+    deleteNotification (bot, notify);
+    
+    postReply (bot->room, "Opt-out successful. You will now not be pinged for reports.");
+    
+    return;
+}
+
 #endif /* misc_commands_h */
