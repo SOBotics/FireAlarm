@@ -218,4 +218,30 @@ void optOut (RunningCommand *command, void *ctx)
     return;
 }
 
+void unnotifyMe (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    if (commandPrivCheck (command, bot))
+    {
+        return;
+    }
+    
+    long userID = command->message->user->userID;
+    
+    Notify *notify = getNotificationByID (bot, userID);
+    
+    if (notify == NULL || notify->type == 0)
+    {
+        postReply (bot->room, "You are already not notified.", command->message);
+        return;
+    }
+    
+    deleteNotification (bot, notify);
+    
+    postReply (bot->room, "You will now not be notified for any reports.");
+    
+    return;
+}
+
 #endif /* misc_commands_h */
