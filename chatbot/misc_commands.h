@@ -205,7 +205,7 @@ void optOut (RunningCommand *command, void *ctx)
     
     Notify *notify = getNotificationByID (bot, userID);
     
-    if (notify == NULL)
+    if (notify == NULL || notify->type == 1)
     {
         postReply (bot->room, "You are already opted out.", command->message);
         return;
