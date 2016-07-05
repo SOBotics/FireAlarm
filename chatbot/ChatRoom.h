@@ -34,6 +34,7 @@ void enterChatRoom(ChatRoom *room);
 ChatMessage **processChatRoomEvents(ChatRoom *room);    //Returns a NULL-terminated list of chat messages.
                                                         //The list must be freed when done.
 ChatUser *getUserByID(ChatRoom *r, unsigned long id);
+char *getUsernameByID (ChatBot *bot, long userID);
 void postMessage(ChatRoom *r, const char *text);
 void postReply(ChatRoom *r, const char *text, ChatMessage *message);
 void leaveRoom(ChatRoom *r);
