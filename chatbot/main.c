@@ -678,6 +678,7 @@ int main(int argc, const char * argv[]) {
     PrivUser **users = loadPrivUsers();
     PrivRequest **requests = loadPrivRequests();
     Modes *modes = createMode (1, 1, 1, 1);
+    Notify **notify = loadNotifications ();
     
     Command *commands[] = {
         createCommand("I can put anything I want here; the first command runs when no other commands match", 0, unrecognizedCommand),
@@ -730,7 +731,7 @@ int main(int argc, const char * argv[]) {
         createCommand("check mode", 0, printCurrentMode),
         NULL
     };
-    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, mode);
+    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, mode, notify);
     
     
     WebSocket *socket = createWebSocketWithClient(client);
@@ -768,6 +769,7 @@ int main(int argc, const char * argv[]) {
     savePrivUsers(bot->privUsers, bot->numOfPrivUsers);
     saveReports(bot->latestReports, bot->reportsUntilAnalysis);
     savePrivRequests(bot->privRequests, bot->totalPrivRequests);
+    saveNotifications (bot->notify, bot->totalNotifications);
     
     curl_easy_cleanup(client->curl);
     
