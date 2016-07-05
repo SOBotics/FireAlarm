@@ -55,6 +55,8 @@ typedef struct _ChatBot {
     PrivRequest **privRequests;
     unsigned totalPrivRequests;
     Modes *modes;
+    Notify **notify;
+    unsigned totalNotifications;
     Report *latestReports[REPORT_MEMORY];   //index 0 is the most recent report, 1 is the second most, etc.
     int reportsWaiting; //The amount of reports that have not yet been assigned a message ID.
     int reportsUntilAnalysis;   //The number of reports left until the bot analyzes them to auto-generate filters.
@@ -67,7 +69,9 @@ ChatBot *createChatBot(
                        cJSON *latestReports,
                        Filter **filters,
                        PrivUser **users,
-                       PrivRequest **requests
+                       PrivRequest **requests,
+                       Modes *modes,
+                       Notify *notify
                        );
 StopAction runChatBot(ChatBot *chatbot);
 Post *getPostByID(ChatBot *bot, unsigned long postID);
