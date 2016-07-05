@@ -468,8 +468,8 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         const size_t maxMessage = strlen(messageBuf) + 256;
         char *message = malloc(maxMessage);
         snprintf(message, maxMessage,
-                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d)",
-                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood);
+                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) (%s)",
+                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, getNotificationString (bot));
         
         postMessage(bot->room, message);
         
@@ -501,8 +501,8 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         const size_t maxMessage = 256;
         char *message = malloc(maxMessage);
         snprintf (message, maxMessage,
-                  REPORT_HEADER " : [%s](http://stackoverflow.com/%s/%lu) (body length %d)",
-                  post->title, post->isAnswer ? "a" : "q", post->postID, bodyLength);
+                  REPORT_HEADER " : [%s](http://stackoverflow.com/%s/%lu) (body length %d) (%s)",
+                  post->title, post->isAnswer ? "a" : "q", post->postID, bodyLength, getNotificationString (bot));
                   
         postMessage (bot->room, message);
         
