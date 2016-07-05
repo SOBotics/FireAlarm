@@ -364,6 +364,35 @@ Notify **loadNotifications ()
     return notify;
 }
 
+void saveNotifications (Notify **notify, unsigned totalNotifications)
+{
+    puts ("Saving Notifications...");
+    FILE *file = fopen ("notifications.json", "w");
+    
+    cJSON *json = cJSON_CreateArray();
+    
+    for (int i = 0; i < totalNotifications; i ++)
+    {
+        Notify *n = notify [i];
+        cJSON *object = cJSON_CreateObject();
+        
+        cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (n->userID));
+        cJSON_AddItemToObject (object, "type", cJSON_CreateNumber (n->type));
+        
+        cJSON_AddItemToArray(json, object);
+    }
+    
+    char *str = cJSON_Print(json);
+    cJSON_Delete(json);
+    
+    fwrite(str, strlen(str), 1, file);
+    
+    fclose (file);
+    free (str);
+    
+    return;
+}
+
 void savePrivRequests (PrivRequest **requests, unsigned totalRequests)
 {
     puts ("Saving Privilege Requests...");
