@@ -46,3 +46,35 @@ Notify *getNotificationByID (ChatBot *bot, long userID)
     
     return NULL;
 }
+
+char *getNotificationString (ChatBot *bot)
+{
+    char *str = malloc (sizeof (50));
+    
+    Notfy **notify = bot->notify;
+    
+    for (int i = 0; i < bot->totalNotifications; i ++)
+    {
+        if (notify [i]->type == 1)
+        {
+            char *username = getUsernameByID (bot, notify [i]->userID);
+            
+            sprintf (str + strlen (str), "@");
+            sprintf (str + strlen (str), username);
+            sprintf (str + strlen (str), " ");
+        }
+        else if (notify [i]->type == 0)
+        {
+            if (isUserInRoom (bot->room, notify [i]->userID))
+            {
+                char *username = getUsernameByID (bot, notify [i]->userID);
+                
+                sprintf (str + strlen (str), "@");
+                sprintf (str + strlen (str), username);
+                sprintf (str + strlen (str), " ");
+            }
+        }
+    }
+    
+    return str;
+}
