@@ -227,7 +227,8 @@ ChatBot *createChatBot(
                        Filter **filters,
                        PrivUser **users,
                        PrivRequest **requests,
-                       Modes *modes
+                       Modes *modes,
+                       Notify **notify;
                        ) {
     ChatBot *c = malloc(sizeof(ChatBot));
     c->room = room;
@@ -247,12 +248,20 @@ ChatBot *createChatBot(
     c->privUsers = NULL;
     c->privRequests = NULL;
     c->totalPrivRequests = 0;
+    c->notify = NULL;
+    c->totalNotifications = 0;
     
     c->reportsWaiting = -1;
     
     while (*(filters++)) {
         c->filters = realloc(c->filters, ++c->filterCount * sizeof(Filter*));
         c->filters[c->filterCount-1] = *(filters - 1);
+    }
+    
+    while (*(notify++))
+    {
+        c->notify = realloc (c->notify, ++c->totalNotifications * sizeof (Notify*));
+        c->notify [c->totalNotifications - 1] = *(notify - 1);
     }
     
     while (*(requests++))
