@@ -312,8 +312,56 @@ PrivRequest **loadPrivRequests ()
     }
     
     cJSON_Delete (json);
+    fclose (file);
     
     return requests;
+}
+
+Notify **loadNotifications ()
+{
+    puts ("Loading Notifications...");
+    FILE *file = fopen ("notifications.json", "r");
+    
+    if (!file)
+    {
+        puts ("notifications.json does not exist. Returning NULL...");
+        return NULL;
+    }
+    
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+    
+    char *buf = malloc(size+1);
+    fread(buf, size, 1, file);
+    buf[size] = 0;
+    
+    cJSON *json = cJSON_Parse (buf);
+    free (buf);
+    
+    unsigned total = cJSON_GetArraySize(json);
+    Notify **notify = malloc (sizeof (Notify*) * (total + 1));
+    
+    for (int i = 0; i < total; i ++)
+    {
+        cJSON *n = cJSON_GetArrayItem(json, i);
+        
+        long userID = cJSON_GetObjectItem (request, "user_id")->valueint;
+        int type = cJSON_GetObjectItem (request, "type")->valueint;
+        
+        notify [i] = createNotification (type, userID);
+    }
+    
+    if (total < 1)
+    {
+        cJSON_Delete (json);
+        return NULL;
+    }
+    
+    cJSON_Delete (json);
+    fclose (file);
+    
+    return notify;
 }
 
 void savePrivRequests (PrivRequest **requests, unsigned totalRequests)
