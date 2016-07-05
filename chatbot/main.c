@@ -729,6 +729,10 @@ int main(int argc, const char * argv[]) {
         createCommand("amiprivileged", 0, amiPrivileged),
         createCommand("mode * * ...", 2, changeMode),
         createCommand("check mode", 0, printCurrentMode),
+        createCommand("opt in", 0, optIn),
+        createCommand("opt out", 0, optOut),
+        createCommand("notify me", 0, notifyMe),
+        createCommand("unnotify me", 0, unnotifyMe),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, mode, notify);
