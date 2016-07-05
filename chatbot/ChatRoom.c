@@ -151,6 +151,18 @@ void removeUserByID(ChatRoom *r, unsigned long id) {
     r->users = realloc(r->users, r->userCount * sizeof(ChatUser *));
 }
 
+int isUserInRoom (ChatRoom *r, long userID)
+{
+    if (getUserByID (r, userID) == NULL)
+    {
+        return 0;
+    }
+    else 
+    {
+        return 1;
+    }
+}
+
 char *getUsernameByID (ChatBot *bot, long userID)
 {
     pthread_mutex_lock(&bot->room->clientLock);
