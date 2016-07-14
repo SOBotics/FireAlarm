@@ -6,14 +6,16 @@
 //  Copyright © Fortunate-MAN. All rights reserved.
 //
 
-#ifdef Modes_h
+#ifndef Modes_h
 #define Modes_h
 
+typedef struct _ChatBot ChatBot;
+
 typedef enum {
-    MODE_REPORTING = 0;
-    MODE_KEYWORD = 1;
-    MODE_LENGTH = 2;
-    MODE_MESSAGE = 3;
+    MODE_REPORTING,
+    MODE_KEYWORD,
+    MODE_LENGTH,
+    MODE_MESSAGE,
 }modeType;
 
 typedef struct {
@@ -23,5 +25,9 @@ typedef struct {
     int lengthFilter;
     int messagePost;
 }Modes;
+
+void disableMode (ChatBot *bot, int modeType);
+void enableMode (ChatBot *bot, int modeType);
+Modes *createMode (int reportMode, int keywordFilter, int lengthFilter, int messagePost);
 
 #endif /* Modes.h */

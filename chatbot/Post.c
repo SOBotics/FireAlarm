@@ -7,8 +7,11 @@
 //
 
 #include "Post.h"
+#include "ChatBot.h"
+#include "Client.h"
 #include <string.h>
 #include <stdlib.h>
+#include <curl/curl.h>
 
 Post *createPost(const char *title, const char *body, unsigned long postID, unsigned char isAnswer, unsigned long userID) {
     Post *p = malloc(sizeof(Post));
@@ -45,8 +48,8 @@ int getCloseVotesByID (ChatBot *bot, unsigned long postID)
     unsigned max = 256;
     char request [max];
     
-    snprintf (request, max
-              "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=!5-dm_.B4Dkg%29AM2phiJMbbo4oPnNg.YWfy%2838d",
+    snprintf (request, max,
+              "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=!5-dm_.B4Dkg%%29AM2phiJMbbo4oPnNg.YWfy%%2838d",
               postID);
               
     curl_easy_setopt(curl, CURLOPT_URL, request);
@@ -69,7 +72,7 @@ int getCloseVotesByID (ChatBot *bot, unsigned long postID)
             cJSON_Delete(json);
         }
         puts("Error fetching post!");
-        return NULL;
+        return 0;
     }
     
     cJSON *backoff;
@@ -80,7 +83,7 @@ int getCloseVotesByID (ChatBot *bot, unsigned long postID)
         free(str);
     }
     
-    int cvCount = cJSON_GetObjectItem (postJSON, "close_vote_count")->valueint;
+    int cvCount = cJSON_GetObjectItem (json, "close_vote_count")->valueint;
     
     cJSON_Delete (json);
     

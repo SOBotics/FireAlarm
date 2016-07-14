@@ -7,6 +7,8 @@
 //
 
 #include "Modes.h"
+#include <stdlib.h>
+#include "ChatBot.h"
 
 void disableMode (ChatBot *bot, int modeType)
 {
@@ -19,7 +21,7 @@ void disableMode (ChatBot *bot, int modeType)
     }
     else if (modeType == MODE_KEYWORD)
     {
-        modes->keyowrdFilter = 0;
+        modes->keywordFilter = 0;
         return;
     }
     else if (modeType == MODE_LENGTH)
@@ -29,7 +31,7 @@ void disableMode (ChatBot *bot, int modeType)
     }
     else if (modeType == MODE_MESSAGE)
     {
-        messagePost = 0;
+        modes->messagePost = 0;
         return;
     }
     
@@ -48,7 +50,7 @@ void enableMode (ChatBot *bot, int modeType)
     }
     else if (modeType == MODE_KEYWORD)
     {
-        modes->keyowrdFilter = 1;
+        modes->keywordFilter = 1;
         return;
     }
     else if (modeType == MODE_LENGTH)
@@ -58,7 +60,7 @@ void enableMode (ChatBot *bot, int modeType)
     }
     else if (modeType == MODE_MESSAGE)
     {
-        messagePost = 1;
+        modes->messagePost = 1;
         return;
     }
     
@@ -68,7 +70,7 @@ void enableMode (ChatBot *bot, int modeType)
 
 Modes *createMode (int reportMode, int keywordFilter, int lengthFilter, int messagePost)
 {
-    Modes *mode;
+    Modes *mode = malloc(sizeof(Modes));
     
     mode->reportMode = reportMode;
     mode->keywordFilter = keywordFilter;

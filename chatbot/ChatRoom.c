@@ -7,6 +7,7 @@
 //
 
 #include "ChatRoom.h"
+#include "ChatBot.h"
 #include <stdlib.h>
 #include <time.h>
 #include <poll.h>
@@ -216,10 +217,11 @@ typedef struct _PendingMessage {
 
 void postMessage(ChatRoom *r, const char *text) {
     
-    if (!postMessage)
-    {
-        return;
-    }
+    //if (!postMessage)
+    //{
+    //    return;
+    //}
+    //^^^^^^^^^^^^^^^^^^what's that supposed to do?
     
     //queue the message to avoid throttling
     pthread_mutex_lock(&r->pendingMessageLock);
@@ -245,10 +247,11 @@ void postMessage(ChatRoom *r, const char *text) {
 
 void postReply(ChatRoom *r, const char *text, ChatMessage *message) {
     
-    if (!postMessage)
-    {
-        return;
-    }
+    //if (!postMessage)
+    //{
+    //    return;
+    //}
+    //^^^^^^^^^^^^^^^^^^ huh?
     
     const size_t bufSize = strlen(text) + 16;
     char buf[bufSize];
@@ -311,10 +314,10 @@ void handleQueuedMessages(ChatRoom *r) {
         checkCURL(curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request));
         checkCURL(curl_easy_setopt(curl, CURLOPT_URL, url));
         
-#ifndef DEBUG
+//#ifndef DEBUG
         checkCURL(curl_easy_perform(curl));
         free(buf.data);
-#endif
+//#endif
         
         
         r->lastPostTimestamp = time(NULL);

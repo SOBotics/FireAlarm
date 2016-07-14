@@ -7,6 +7,9 @@
 //
 
 #include "Notifications.h"
+#include <stdlib.h>
+#include <string.h>
+#include "ChatBot.h"
 
 Notify *createNotification (int type, long userID)
 {
@@ -18,7 +21,7 @@ Notify *createNotification (int type, long userID)
     return n;
 }
 
-void deleteNotificaton (ChatBot *bot, Notify *notify)
+void deleteNotification (ChatBot *bot, Notify *notify)
 {
     Notify **n = bot->notify;
     
@@ -51,7 +54,7 @@ char *getNotificationString (ChatBot *bot)
 {
     char *str = malloc (sizeof (50));
     
-    Notfy **notify = bot->notify;
+    Notify **notify = bot->notify;
     
     for (int i = 0; i < bot->totalNotifications; i ++)
     {
@@ -60,7 +63,7 @@ char *getNotificationString (ChatBot *bot)
             char *username = getUsernameByID (bot, notify [i]->userID);
             
             sprintf (str + strlen (str), "@");
-            sprintf (str + strlen (str), username);
+            sprintf (str + strlen (str), "%s", username);
             sprintf (str + strlen (str), " ");
         }
         else if (notify [i]->type == 0)
@@ -70,7 +73,7 @@ char *getNotificationString (ChatBot *bot)
                 char *username = getUsernameByID (bot, notify [i]->userID);
                 
                 sprintf (str + strlen (str), "@");
-                sprintf (str + strlen (str), username);
+                sprintf (str + strlen (str), "%s", username);
                 sprintf (str + strlen (str), " ");
             }
         }

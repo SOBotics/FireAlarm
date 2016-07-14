@@ -150,20 +150,24 @@ void requestPriv (RunningCommand *command, void *ctx)
     
     if (strcmp (group, "members") == 0 || strcmp (group, "member") == 0)
     {
-        grouptype = 0;
+        groupType = 1;
     }
     else if (strcmp (group, "bot owner") == 0 || strcmp (group, "bot owners") == 0)
     {
-        groupType = 1;
+        groupType = 2;
+    }
+    else {
+        postReply(bot->room, "Invalid privlege group name", command->message);
     }
     
+    bot->privRequests = realloc(bot->privRequests, (++bot->totalPrivRequests + 1) * sizeof(PrivRequest*));
     bot->privRequests [bot->totalPrivRequests - 1] = createPrivRequest (
                                                                         command->message->user->userID,
                                                                         command->message->user->name,
                                                                         groupType
                                                                         );
+    bot->privRequests[bot->totalPrivRequests] = NULL;
 
-    bot->totalPrivRequests ++;
     
     return;
 }

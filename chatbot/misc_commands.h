@@ -10,6 +10,7 @@
 #define misc_commands_h
 
 #include "Privileges.h"
+#include "Notifications.h"
 
 void listCommands(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
@@ -213,7 +214,7 @@ void optOut (RunningCommand *command, void *ctx)
     
     deleteNotification (bot, notify);
     
-    postReply (bot->room, "Opt-out successful. You will now not be pinged for reports.");
+    postReply (bot->room, "Opt-out successful. You will now not be pinged for reports.", command->message);
     
     return;
 }
@@ -239,7 +240,7 @@ void unnotifyMe (RunningCommand *command, void *ctx)
     
     deleteNotification (bot, notify);
     
-    postReply (bot->room, "You will now not be notified for any reports.");
+    postReply (bot->room, "You will now not be notified for any reports.", command->message);
     
     return;
 }

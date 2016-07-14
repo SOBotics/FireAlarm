@@ -228,7 +228,7 @@ ChatBot *createChatBot(
                        PrivUser **users,
                        PrivRequest **requests,
                        Modes *modes,
-                       Notify **notify;
+                       Notify **notify
                        ) {
     ChatBot *c = malloc(sizeof(ChatBot));
     c->room = room;
@@ -438,7 +438,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
     
     if (!bot->modes->reportMode)
     {
-        return;
+        return 0;
     }
     
     unsigned likelihood = 0;

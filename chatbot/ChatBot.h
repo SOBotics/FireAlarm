@@ -16,13 +16,15 @@
 #include "Filter.h"
 #include "Post.h"
 #include "cJSON.h"
+#include "Notifications.h"
+#include "Modes.h"
 
 typedef struct _PrivUser PrivUser;
 typedef struct _PrivRequest PrivRequest;
 
 extern long THRESHOLD;
 
-#define REPORT_MEMORY 100
+#define REPORT_MEMORY 1000
 
 typedef enum {
     ACTION_NONE = 0,
@@ -71,7 +73,7 @@ ChatBot *createChatBot(
                        PrivUser **users,
                        PrivRequest **requests,
                        Modes *modes,
-                       Notify *notify
+                       Notify **notify
                        );
 StopAction runChatBot(ChatBot *chatbot);
 Post *getPostByID(ChatBot *bot, unsigned long postID);

@@ -14,6 +14,7 @@
 #include "ChatUser.h"
 #include "Command.h"
 
+typedef struct _ChatBot ChatBot;
 typedef struct _Client Client;
 
 typedef struct _ChatRoom {

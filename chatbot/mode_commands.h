@@ -32,9 +32,10 @@ void changeMode (RunningCommand *command, void *ctx)
     
     char *option = command->argv [0];
     char *group = command->argv [1];
+    char *item = NULL;
     if (check)
     {
-        char *item = command->argv [2];
+        item = command->argv [2];
     }
     
     int enable = 0;
@@ -43,7 +44,7 @@ void changeMode (RunningCommand *command, void *ctx)
     int filter = 0;
     int keywordFilter = 0;
     int lengthFilter = 0;
-    int message;
+    int message = 0;
     
     if (strcmp (option, "enable") == 0)
     {
@@ -143,10 +144,10 @@ void changeMode (RunningCommand *command, void *ctx)
         }
     }
     
-    char *message;
-    asprintf (&message, "`%s` has been %sd successfully.", group, option);
-    postReply (bot->room, message, command->message);
-    free (message);
+    char *toPost;
+    asprintf (&toPost, "`%s` has been %sd successfully.", group, option);
+    postReply (bot->room, toPost, command->message);
+    free (toPost);
     free (group);
     free (item);
     free (option);
@@ -178,7 +179,7 @@ void printCurrentMode (RunningCommand *command, void *ctx)
     {
         sprintf (currentMode + strlen (currentMode), "the keyword filter is off, ");
     }
-    else if (modes->keyowrdFilter)
+    else if (modes->keywordFilter)
     {
         sprintf (currentMode + strlen (currentMode), "the keyword filter is on, ");
     }
@@ -201,7 +202,7 @@ void printCurrentMode (RunningCommand *command, void *ctx)
         sprintf (currentMode + strlen (currentMode), "and posting messages is on");
     }
     
-    postReply (bot->roon, currentMode, command->message);
+    postReply (bot->room, currentMode, command->message);
     free (currentMode);
     
     return;

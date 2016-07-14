@@ -27,7 +27,7 @@
 #include "Client.h"
 
 #define SAVE_INTERVAL 60
-long postMessage = 1;
+//long postMessage = 1;
 
 void unrecognizedCommand(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
@@ -276,8 +276,10 @@ PrivRequest **loadPrivRequests ()
     
     if (!file)
     {
-        puts ("privRequest.json does not exist. Returning NULL...");
-        return NULL;
+        puts ("privRequest.json does not exist. Returning an empty list...");
+        PrivRequest **list = malloc(sizeof(PrivRequest*));
+        *list = NULL;
+        return list;
     }
     
     fseek(file, 0, SEEK_END);
@@ -305,11 +307,7 @@ PrivRequest **loadPrivRequests ()
         requests [i] = createPrivRequest (userID, username, groupType);
     }
     
-    if (total < 1)
-    {
-        cJSON_Delete (json);
-        return NULL;
-    }
+    requests[total] = NULL;
     
     cJSON_Delete (json);
     fclose (file);
@@ -324,8 +322,10 @@ Notify **loadNotifications ()
     
     if (!file)
     {
-        puts ("notifications.json does not exist. Returning NULL...");
-        return NULL;
+        puts ("notifications.json does not exist. Returning an empty list...");
+        Notify **list = malloc(sizeof(Notify*));
+        *list = NULL;
+        return list;
     }
     
     fseek(file, 0, SEEK_END);
@@ -346,17 +346,13 @@ Notify **loadNotifications ()
     {
         cJSON *n = cJSON_GetArrayItem(json, i);
         
-        long userID = cJSON_GetObjectItem (request, "user_id")->valueint;
-        int type = cJSON_GetObjectItem (request, "type")->valueint;
+        long userID = cJSON_GetObjectItem (n, "user_id")->valueint;
+        int type = cJSON_GetObjectItem (n, "type")->valueint;
         
         notify [i] = createNotification (type, userID);
     }
     
-    if (total < 1)
-    {
-        cJSON_Delete (json);
-        return NULL;
-    }
+    notify[total] = NULL;
     
     cJSON_Delete (json);
     fclose (file);
@@ -433,8 +429,8 @@ PrivUser **loadPrivUsers ()
         puts ("privUsers.json does not exist. Creating skeleton file...");
         PrivUser **users = malloc(sizeof(Filter*) * 3);
         
-        users [0] = createPrivUser (3476191, "NobodyNada", 2);        // User ID of NobodyNada
-        users [1] = createPrivUser (5735775, "Ashish Ahuja ツ", 2);   // User ID of Ashish Ahuja
+        users [0] = createPrivUser (3476191, "NobodyNada", 2);
+        users [1] = createPrivUser (5735775, "Ashish Ahuja ツ", 2);
         users [2] = NULL;
         return users;
     }
@@ -735,12 +731,12 @@ int main(int argc, const char * argv[]) {
         createCommand("unnotify me", 0, unnotifyMe),
         NULL
     };
-    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, mode, notify);
+    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify);
     
     
     WebSocket *socket = createWebSocketWithClient(client);
     socket->user = bot;
-    socket->openCallback = webSocektOpened;
+    socket->openCallback = webSocketOpened;
     socket->recieveCallback = wsRecieved;
     socket->closeCallback = wsClosed;
     connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
@@ -774,6 +770,8 @@ int main(int argc, const char * argv[]) {
     saveReports(bot->latestReports, bot->reportsUntilAnalysis);
     savePrivRequests(bot->privRequests, bot->totalPrivRequests);
     saveNotifications (bot->notify, bot->totalNotifications);
+    
+    sleep(5);   //give background threads a bit of time
     
     curl_easy_cleanup(client->curl);
     
