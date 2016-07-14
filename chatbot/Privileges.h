@@ -32,11 +32,14 @@ typedef struct _PrivRequest {
 
 unsigned int checkPrivUser (ChatBot *bot, long userID);
 PrivUser *createPrivUser (long userID, char *username, int privLevel);
+PrivUser *getPrivUserByID (ChatBot *bot, long userID);
 PrivRequest *createPrivRequest (long userID, char *name, int groupType);
 unsigned checkPrivUser (ChatBot *bot, long userID);
 unsigned commandPriv (RunningCommand *commands);
 unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot);
 unsigned privRequestExist (ChatBot *bot, unsigned priv_number);
 void deletePrivRequest (ChatBot *bot, unsigned priv_number);
+char **getPrivilegeGroups();
+unsigned privilegeNamed(char*);
 
 #endif /* Privileges.h */

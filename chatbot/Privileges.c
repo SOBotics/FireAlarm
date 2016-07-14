@@ -113,3 +113,25 @@ unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot)
     
     return 1;
 }
+
+char **getPrivilegeGroups() {
+    static char *groups[] = {
+        "none",
+        "member",
+        "bot owner",
+        NULL
+    };
+    return groups;
+}
+
+unsigned privilegeNamed(char *name) {
+    char **groups = getPrivilegeGroups();
+    unsigned privilege = 1;
+    for (int i = 1; groups[i]; i++) {
+        if (!strcmp(groups[i], name)) {
+            return privilege;
+        }
+        privilege *= 2;
+    }
+    return 0;
+}

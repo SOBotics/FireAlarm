@@ -433,10 +433,10 @@ PrivUser **loadPrivUsers ()
     if (!file)
     {
         puts ("privUsers.json does not exist. Creating skeleton file...");
-        PrivUser **users = malloc(sizeof(Filter*) * 3);
+        PrivUser **users = malloc(sizeof(PrivUser*) * 3);
         
-        users [0] = createPrivUser (3476191, "NobodyNada", 2);
-        users [1] = createPrivUser (5735775, "Ashish Ahuja ツ", 2);
+        users [0] = createPrivUser (3476191, "NobodyNada", 3);
+        users [1] = createPrivUser (5735775, "Ashish Ahuja ツ", 3);
         users [2] = NULL;
         return users;
     }

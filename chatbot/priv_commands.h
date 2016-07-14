@@ -123,36 +123,40 @@ void requestPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
+    unsigned long userID = command->message->user->userID;
+    
     if (command->argc == 0)
     {
         postReply (bot->room, "**Usage:** `@FireAlarm request privilege [group name]`", command->message);
         return;
     }
+    for (int i = 0; i < bot->totalPrivRequests; i++) {
+        if (bot->privRequests[i] && bot->privRequests[i]->userID == userID) {
+            postReply(bot->room,
+                      "You already have a pending privilege request; please wait until that one is approved",
+                      command->message);
+            return;
+        }
+    }
     
     char *group = command->argv [0];
     
-    int groupType = -1;
-    
-    if (strcmp (group, "members") == 0 || strcmp (group, "member") == 0)
-    {
-        groupType = 1;
+    unsigned groupID = privilegeNamed(group);
+    if (!groupID) {
+        postReply(bot->room, "Invalid privilege group", command->message);
     }
-    else if (strcmp (group, "bot owner") == 0 || strcmp (group, "bot owners") == 0)
-    {
-        groupType = 2;
-    }
-    else {
-        postReply(bot->room, "Invalid privlege group name", command->message);
+    if (getPrivUserByID(bot, userID)->privLevel & groupID) {
+        postReply(bot->room, "You already have that privilege", command->message);
     }
     
     bot->privRequests = realloc(bot->privRequests, (++bot->totalPrivRequests + 1) * sizeof(PrivRequest*));
     bot->privRequests [bot->totalPrivRequests - 1] = createPrivRequest (
-                                                                        command->message->user->userID,
+                                                                        userID,
                                                                         command->message->user->name,
-                                                                        groupType
+                                                                        groupID
                                                                         );
     bot->privRequests[bot->totalPrivRequests] = NULL;
-
+    
     
     return;
 }
@@ -176,13 +180,20 @@ void approvePrivRequest (RunningCommand *command, void *ctx)
     }
     
     PrivRequest **requests = bot->privRequests;
+    PrivRequest *request = requests[priv_number - 1];
     PrivUser **users = bot->privUsers;
     
-    users [bot->numOfPrivUsers] = createPrivUser (requests[priv_number - 1]->userID, requests [priv_number - 1]->username, requests [priv_number - 1]->groupType + 1);
+    PrivUser *user = getPrivUserByID(bot, request->userID);
+    if (user) {
+        user->privLevel = request->groupType;
+    }
+    else {
+        bot->privUsers = users = realloc(users, ++bot->numOfPrivUsers);
+        users [bot->numOfPrivUsers - 1] = createPrivUser (request->userID, request->username, request->groupType);
+    }
+    
+    
     char *username = requests [priv_number - 1]->username;
-    bot->numOfPrivUsers ++;
-    
-    
     char *message;
     
     asprintf (&message, "Privilege request number %d has been approved. (cc @%s)", priv_number, username);
@@ -238,15 +249,15 @@ void printPrivRequests (RunningCommand *command, void *ctx)
     
     postReply (bot->room, "The current privilege requests are: ", command->message);
     
-    sprintf (message, 
+    sprintf (message,
              "    Request Num   |     Username    |     Privilege Request Type    \n"
              "--------------------------------------------------------------------"
              );
-             
+    
     char *messageString = malloc (sizeof (200));
     char groupType [30];
     PrivRequest **requests = bot->privRequests;
-             
+    
     for (int i = 0; i < bot->totalPrivRequests; i ++)
     {
         if (requests [i]->groupType == 0)
@@ -258,10 +269,10 @@ void printPrivRequests (RunningCommand *command, void *ctx)
             strcpy (groupType, "Bot Owner");
         }
         
-        sprintf (messageString, 
+        sprintf (messageString,
                  "       %d         |  %s             |        %s                     \n",
                  i + 1, requests [i]->username, groupType);
-                 
+        
         sprintf (message + strlen (message), "%s", messageString);
     }
     
