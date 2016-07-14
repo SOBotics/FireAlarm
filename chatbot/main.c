@@ -259,7 +259,13 @@ Filter **loadFilters() {
         const char *expr = cJSON_GetObjectItem(filter, "expression")->valuestring;
         FilterType type = cJSON_GetObjectItem(filter, "type")->valueint;
         unsigned truePositives = cJSON_GetObjectItem(filter, "truePositives")->valueint;
-        unsigned falsePositives = cJSON_GetObjectItem(filter, "falsePositives")->valueint;
+        int falsePositives = cJSON_GetObjectItem(filter, "falsePositives")->valueint;
+        if (falsePositives == -1) {
+            falsePositives = 25 - truePositives;
+            if (falsePositives < 0) {
+                falsePositives = 0;
+            }
+        }
         filters[i] = createFilter(desc, expr, type, truePositives, falsePositives);
     }
     filters[filterCount] = NULL;
@@ -499,7 +505,7 @@ void savePrivUsers (PrivUser **users, unsigned privUsersCount)
 }
 
 void wsClosed(WebSocket *socket) {
-    postMessage(((ChatBot*)(socket->user))->room, "Websocket disconnected! Reboot the bot to reconnect websocket.");
+    postMessage(((ChatBot*)(socket->user))->room, "Websocket disconnected! Reboot the bot to reconnect the websocket. (cc @NobodyNada)");
 }
 
 void saveFilters(Filter **filters, unsigned filterCount) {
@@ -771,6 +777,7 @@ int main(int argc, const char * argv[]) {
     savePrivRequests(bot->privRequests, bot->totalPrivRequests);
     saveNotifications (bot->notify, bot->totalNotifications);
     
+    puts("Waiting (to allow networking to finish)...");
     sleep(5);   //give background threads a bit of time
     
     curl_easy_cleanup(client->curl);

@@ -448,21 +448,21 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
     
     if (bot->modes->keywordFilter)
     {
-    for (int i = 0; i < bot->filterCount; i++) {
-        unsigned start, end;
-        if (postMatchesFilter(post, bot->filters[i], &start, &end)) {
-            
-            const char *desc = bot->filters[i]->desc;
-            messageBuf = realloc(messageBuf, strlen(messageBuf) + strlen(desc) + 16);
-            
-            snprintf(messageBuf + strlen(messageBuf), strlen(desc) + 16,
-                     "%s%s", (likelihood ? ", " : ""), desc);
-            //If this not the first match, start it with a comma and space.
-            
-            const float truePositives = bot->filters[i]->truePositives;
-            likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
+        for (int i = 0; i < bot->filterCount; i++) {
+            unsigned start, end;
+            if (postMatchesFilter(post, bot->filters[i], &start, &end)) {
+                
+                const char *desc = bot->filters[i]->desc;
+                messageBuf = realloc(messageBuf, strlen(messageBuf) + strlen(desc) + 16);
+                
+                snprintf(messageBuf + strlen(messageBuf), strlen(desc) + 16,
+                         "%s%s", (likelihood ? ", " : ""), desc);
+                //If this not the first match, start it with a comma and space.
+                
+                const float truePositives = bot->filters[i]->truePositives;
+                likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
+            }
         }
-    }
     }
     
     if (bot->modes->lengthFilter)
@@ -512,7 +512,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         snprintf (message, maxMessage,
                   REPORT_HEADER " : [%s](http://stackoverflow.com/%s/%lu) (body length %d) (%s)",
                   post->title, post->isAnswer ? "a" : "q", post->postID, bodyLength, getNotificationString (bot));
-                  
+        
         postMessage (bot->room, message);
         
         if (bot->latestReports[REPORT_MEMORY-1]) {
@@ -560,11 +560,13 @@ void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed) {
 
 StopAction runChatBot(ChatBot *c) {
     ChatMessage **messages = processChatRoomEvents(c->room);
-    ChatMessage *message;
-    for (int i = 0; (message = messages[i]); i++) {
-        processMessage(c, message);
+    if (messages != NULL) {
+        ChatMessage *message;
+        for (int i = 0; (message = messages[i]); i++) {
+            processMessage(c, message);
+        }
+        free(messages);
     }
-    free(messages);
     
     //clean up old commands
     for (int i = 0; i < c->runningCommandCount; i++) {
@@ -643,15 +645,13 @@ void testPost (ChatBot *bot, Post *post, RunningCommand *command)
 int recentlyReported (long postID, ChatBot *bot)
 {
     Report **reports = bot->latestReports;
-    unsigned int i = 0;
     
-    if (reports [0] == NULL)
+    for (unsigned int i = 0; i < REPORT_MEMORY; ++ i)
     {
-        return -1;
-    }
-    
-    for (; i < REPORT_MEMORY; ++ i)
-    {
+        if (reports[i] == NULL) {
+            continue;
+        }
+        
         Post *post = reports [i]->post;
         
         if (post->postID == postID)

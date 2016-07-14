@@ -12,10 +12,6 @@
 void changeMode (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
     
     if (command->argc == 0 || command->argc == 1)
     {
@@ -157,10 +153,6 @@ void changeMode (RunningCommand *command, void *ctx)
 void printCurrentMode (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
     
     char *currentMode = malloc (sizeof (100));
     

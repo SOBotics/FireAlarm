@@ -11,6 +11,7 @@
 
 #include "RunningCommand.h"
 #include "Command.h"
+#include "Privileges.h"
 
 struct CommandThreadInfo {
     RunningCommand *command;
@@ -86,7 +87,9 @@ void *commandThread(void *arg) {
     
     
     //Run the command
-    command->command->callback(command, ctx);
+    if (commandPrivCheck(command, ctx)) {
+        command->command->callback(command, ctx);
+    }
     
     
     //Mark the command as completed so it will be cleaned up later

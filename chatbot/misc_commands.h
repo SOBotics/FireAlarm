@@ -15,11 +15,6 @@
 void listCommands(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
     
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
-    
     postReply(bot->room, "Running commands:", command->message);
     const size_t maxLineSize = 256;
     pthread_mutex_lock(&bot->runningCommandsLock);
@@ -77,11 +72,6 @@ void help (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
-    
     postReply (bot->room, "I'm  [Fire Alarm](https://github.com/NobodyNada/chatbot), a bot which detects questions that need closing whenever they are posted or edited. [My command list is available here.](https://github.com/NobodyNada/chatbot/wiki/Commands)", command->message);
     return;
 }
@@ -89,11 +79,6 @@ void help (RunningCommand *command, void *ctx)
 void aliveCheck (RunningCommand *command, void *ctx) 
 {
     ChatBot *bot = ctx;
-    
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
     
     postReply (bot->room, "Why did you think I was dead?", command->message);
     return;
@@ -103,11 +88,6 @@ void commandList (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
-    
     postReply (bot->room, "To see a complete list of commands, visit [this page](https://github.com/NobodyNada/chatbot/wiki/Commands).", command->message);
     return;
 }
@@ -115,11 +95,6 @@ void commandList (RunningCommand *command, void *ctx)
 void changeThreshold (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
     
     long newThreshold = strtol (command->argv [0], NULL, 10);
     
@@ -142,11 +117,6 @@ void checkThreshold (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
-    
     char message [256];
     
     sprintf (message, "The current threshold is %ld.", THRESHOLD);
@@ -158,11 +128,6 @@ void checkThreshold (RunningCommand *command, void *ctx)
 void optIn (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
     
     Notify **notify = bot->notify;
     
@@ -178,11 +143,6 @@ void notifyMe (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
-    
     Notify **notify = bot->notify;
     
     notify[bot->totalNotifications - 1] = createNotification (1, command->message->user->userID);
@@ -196,11 +156,6 @@ void notifyMe (RunningCommand *command, void *ctx)
 void optOut (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
     
     long userID = command->message->user->userID;
     
@@ -222,11 +177,6 @@ void optOut (RunningCommand *command, void *ctx)
 void unnotifyMe (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
     
     long userID = command->message->user->userID;
     

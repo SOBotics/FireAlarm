@@ -74,32 +74,16 @@ unsigned checkPrivUser (ChatBot *bot, long userID)
     {
         if (users[i]->userID == userID)
         {
-            if (users[i]->privLevel == 1)
-            {
-                return 1;
-            }
-            else if (users[i]->privLevel == 2)
-            {
-                return 2;
-            }
+            return users[i]->privLevel;
         }
     }
     
     return 0;
 }
 
-unsigned commandPriv (RunningCommand *commands)
+unsigned commandPriv (RunningCommand *command)
 {
-    if (commands->command->privileges == 1)
-    {
-        return 1;
-    }
-    else if (commands->command->privileges == 2)
-    {
-        return 2;
-    }
-    
-    return 0;
+    return command->command->privileges;
 }
 
 PrivUser *getPrivUserByID (ChatBot *bot, long userID)
@@ -120,18 +104,12 @@ unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot)
 {
     long userID = command->message->user->userID;
     int isPrivileged = checkPrivUser (bot, userID);
-    int commandPriv = checkPrivUser (bot, userID);
+    int commandPriv = command->command->privileges;
     
-    if (commandPriv == 1 && isPrivileged == 0)
-    {
-        postReply (bot->room, "You need to be a member or a bot owner to run that command.", command->message);
-        return 1;
-    }
-    else if (commandPriv == 2 && isPrivileged != 2)
-    {
-        postReply (bot->room, "You need to be a bot owner to run that command.", command->message);
-        return 1;
+    if ((isPrivileged & commandPriv) != commandPriv) {
+        postReply(bot->room, "You do not have priveleges to run that command", command->message);
+        return 0;
     }
     
-    return 0;
+    return 1;
 }

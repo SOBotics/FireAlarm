@@ -80,6 +80,7 @@
 		AB14F1A01D37072400F39B38 /* Modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Modes.h; sourceTree = "<group>"; };
 		AB14F1A11D37072400F39B38 /* Notifications.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Notifications.c; sourceTree = "<group>"; };
 		AB14F1A21D37072400F39B38 /* Notifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Notifications.h; sourceTree = "<group>"; };
+		AB14F1A51D38095A00F39B38 /* priv_commands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = priv_commands.h; sourceTree = "<group>"; };
 		ABFAF5411D1D7BDF005F2E85 /* libwebsockets.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libwebsockets.8.dylib; path = ../../../../../usr/local/Cellar/libwebsockets/2.0.2/lib/libwebsockets.8.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -160,6 +161,7 @@
 				8448C7EB1CE1342700F6E64D /* misc_commands.h */,
 				AB14F19E1D37072400F39B38 /* mode_commands.h */,
 				8448C7EC1CE1342E00F6E64D /* stop_commands.h */,
+				AB14F1A51D38095A00F39B38 /* priv_commands.h */,
 			);
 			name = Commands;
 			sourceTree = "<group>";

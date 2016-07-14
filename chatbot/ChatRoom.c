@@ -158,7 +158,7 @@ int isUserInRoom (ChatRoom *r, long userID)
     {
         return 0;
     }
-    else 
+    else
     {
         return 1;
     }
@@ -314,10 +314,10 @@ void handleQueuedMessages(ChatRoom *r) {
         checkCURL(curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request));
         checkCURL(curl_easy_setopt(curl, CURLOPT_URL, url));
         
-//#ifndef DEBUG
+        //#ifndef DEBUG
         checkCURL(curl_easy_perform(curl));
         free(buf.data);
-//#endif
+        //#endif
         
         
         r->lastPostTimestamp = time(NULL);
@@ -333,26 +333,33 @@ ChatMessage *processChatEvent(ChatRoom *r, cJSON *event) {
     
     ChatUser *user = NULL;
     
-    if (eventType == 1 || eventType == 2 || eventType == 3) {
-        //A user posted, edited, or entered.  Register him if needed.
-        unsigned long userID = cJSON_GetObjectItem(event, "user_id")->valueint;
-        user = getUserByID(r, userID);
-        
-        if (user == NULL) {
-            const char *username = cJSON_GetObjectItem(event, "user_name")->valuestring;
-            user = createUser(userID, username);
-            addUserToRoom(r, user);
-        }
-    }
-    else if (eventType == 4) {
-        if (cJSON_GetObjectItem(event, "room_id")->valueint == r->roomID) {
-            //A user left.
-            printf("%s left the room.\n", cJSON_GetObjectItem(event, "user_name")->valuestring);
-            removeUserByID(r, cJSON_GetObjectItem(event, "user_id")->valueint);
-        }
-    }
-    else {
-        printf("New event type: %d\n", eventType);
+    switch (eventType) {
+        case MessagePosted:
+        case MessageEdited:
+        case UserEntered:
+            ;
+            //A user posted, edited, or entered.  Register him if needed.
+            unsigned long userID = cJSON_GetObjectItem(event, "user_id")->valueint;
+            user = getUserByID(r, userID);
+            
+            if (user == NULL) {
+                const char *username = cJSON_GetObjectItem(event, "user_name")->valuestring;
+                user = createUser(userID, username);
+                addUserToRoom(r, user);
+            }
+            break;
+        case UserLeft:
+            if (cJSON_GetObjectItem(event, "room_id")->valueint == r->roomID) {
+                //A user left.
+                printf("%s left the room.\n", cJSON_GetObjectItem(event, "user_name")->valuestring);
+                removeUserByID(r, cJSON_GetObjectItem(event, "user_id")->valueint);
+            }
+            break;
+        case UserMentioned:
+        case MessageReply:
+            break;
+        default:
+            printf("New event type: %d\n", eventType);
     }
     
     if (eventType == 1 || eventType == 2) {

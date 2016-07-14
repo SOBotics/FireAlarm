@@ -13,11 +13,6 @@ void addUserPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
-    
     long userID = (long) strtol(command->argv[0], NULL, 10);
     char *privType = command->argv [1];
     int groupType;
@@ -83,11 +78,6 @@ void removeUserPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
-    
     long userID = (long) strtol(command->argv[0], NULL, 10);
     
     if (!checkPrivUser (bot, userID))
@@ -133,11 +123,6 @@ void requestPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    if (commandPrivCheck (command,bot))
-    {
-        return;
-    }
-    
     if (command->argc == 0)
     {
         postReply (bot->room, "**Usage:** `@FireAlarm request privilege [group name]`", command->message);
@@ -175,11 +160,6 @@ void requestPriv (RunningCommand *command, void *ctx)
 void approvePrivRequest (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
     
     if (command->argc == 0)
     {
@@ -220,11 +200,6 @@ void rejectPrivRequest (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
-    
     if (command->argc == 0)
     {
         postReply (bot->room, "**Usage:** `@FireAlarm reject privilege request [request number]`", command->message);
@@ -258,11 +233,6 @@ void rejectPrivRequest (RunningCommand *command, void *ctx)
 void printPrivRequests (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
     
     char *message = malloc (sizeof (bot->totalPrivRequests * 100 + 200));
     
@@ -306,11 +276,6 @@ void printPrivRequests (RunningCommand *command, void *ctx)
 void isPrivileged (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
     
     unsigned long userID;
     int check = 0;
@@ -377,11 +342,6 @@ void amiPrivileged (RunningCommand *command, void *ctx)
 void printPrivUser (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
-    if (commandPrivCheck (command, bot))
-    {
-        return;
-    }
     
     int check = 0;
     
