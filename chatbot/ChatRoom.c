@@ -271,7 +271,7 @@ void postReply(ChatRoom *r, const char *text, ChatMessage *message) {
 }
 
 void handleQueuedMessages(ChatRoom *r) {
-    if (time(NULL) - r->lastPostTimestamp < 3) {
+    if (time(NULL) - r->lastPostTimestamp < 2) {
         return;
     }
     pthread_mutex_lock(&r->pendingMessageLock);
@@ -279,9 +279,7 @@ void handleQueuedMessages(ChatRoom *r) {
     PendingMessage *m;
     if ((m = r->pendingMessageLinkedList)) {
         PendingMessage *m = r->pendingMessageLinkedList;
-        r->pendingMessageLinkedList = m->next;
         char *unescapedText = m->text;
-        free(m);
         
         
         pthread_mutex_lock(&r->clientLock);
@@ -289,7 +287,6 @@ void handleQueuedMessages(ChatRoom *r) {
         
         CURL *curl = r->client->curl;
         char *text = curl_easy_escape(curl, unescapedText, 0);
-        free(unescapedText);
         const size_t maxRequestLength = strlen(text) + 256;
         char request[maxRequestLength];
         request[0] = 0;
@@ -316,6 +313,17 @@ void handleQueuedMessages(ChatRoom *r) {
         
         //#ifndef DEBUG
         checkCURL(curl_easy_perform(curl));
+        long http_code = 0;
+        checkCURL(curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code));
+        if (http_code == 200) {
+            r->pendingMessageLinkedList = m->next;
+            free(unescapedText);
+            free(m);
+        }
+        else {
+            puts("Failed to post message; will try again soon.");
+        }
+        
         free(buf.data);
         //#endif
         

@@ -33,12 +33,12 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
     char *str;
     char *message;
-    char messageString [256];
-    char subString [127];
+    //char messageString [256];
+    //char subString [127];
     
     asprintf (&str, "%s", command->message->content);
     asprintf(&message, "Unrecognized command `%s`.", command->message->content);
-    sprintf (subString, "%s Did you want to type in", message);
+    /*sprintf (subString, "%s Did you want to type in", message);
     
     if (strcasestr (str, "to") == str || strcasestr (str, "tl") == str || strcasestr (str, "t[") == str || strcasestr (str, "t{") == str)
     {
@@ -183,7 +183,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (str);
         free (message);
         return;
-    }
+    }*/
     
         
     postReply(bot->room, message, command->message);
@@ -210,7 +210,7 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     ChatBot *bot = (ChatBot*)ws->user;
     Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
     if (p != NULL) {
-        checkPost(bot, p);
+        //checkPost(bot, p);
     }
     else {
         printf("Got a null post: %d\n", cJSON_GetObjectItem(post, "id")->valueint);
@@ -307,10 +307,9 @@ PrivRequest **loadPrivRequests ()
         cJSON *request = cJSON_GetArrayItem(json, i);
         
         long userID = cJSON_GetObjectItem (request, "user_id")->valueint;
-        char *username = cJSON_GetObjectItem (request, "user_name")->valuestring;
         int groupType = cJSON_GetObjectItem (request, "group_type")->valueint;
         
-        requests [i] = createPrivRequest (userID, username, groupType);
+        requests [i] = createPrivRequest (userID, groupType);
     }
     
     requests[total] = NULL;
@@ -408,8 +407,7 @@ void savePrivRequests (PrivRequest **requests, unsigned totalRequests)
         cJSON *object = cJSON_CreateObject();
         
         cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (request->userID));
-        cJSON_AddItemToObject (object, "user_name", cJSON_CreateString (request->username));
-        cJSON_AddItemToObject (object, "groupType", cJSON_CreateNumber (request->groupType));
+        cJSON_AddItemToObject (object, "group_type", cJSON_CreateNumber (request->groupType));
         
         cJSON_AddItemToArray(json, object);
     }
@@ -435,8 +433,8 @@ PrivUser **loadPrivUsers ()
         puts ("privUsers.json does not exist. Creating skeleton file...");
         PrivUser **users = malloc(sizeof(PrivUser*) * 3);
         
-        users [0] = createPrivUser (3476191, "NobodyNada", 3);
-        users [1] = createPrivUser (5735775, "Ashish Ahuja ツ", 3);
+        users [0] = createPrivUser (3476191, 3);    //NobodyNada
+        users [1] = createPrivUser (5735775, 3);    //Ashish Ahuja ツ
         users [2] = NULL;
         return users;
     }
@@ -460,9 +458,8 @@ PrivUser **loadPrivUsers ()
         cJSON *user = cJSON_GetArrayItem(json, i);
         
         long userID = cJSON_GetObjectItem (user, "user_id")->valueint;
-        char *username = cJSON_GetObjectItem (user, "user_name")->valuestring;
         int privLevel = cJSON_GetObjectItem (user, "priv_level")->valueint;
-        users [i] = createPrivUser (userID, username, privLevel);
+        users [i] = createPrivUser (userID, privLevel);
     }
     users [privUsersCount] = NULL;
     
@@ -479,7 +476,6 @@ void savePrivUsers (PrivUser **users, unsigned privUsersCount)
         PrivUser *user = users [i];
         cJSON *object = cJSON_CreateObject();
         cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (user->userID));
-        cJSON_AddItemToObject (object, "user_name", cJSON_CreateString (user->username));
         cJSON_AddItemToObject (object, "priv_level", cJSON_CreateNumber (user->privLevel));
         
         cJSON_AddItemToArray(json, object);
@@ -505,7 +501,8 @@ void savePrivUsers (PrivUser **users, unsigned privUsersCount)
 }
 
 void wsClosed(WebSocket *socket) {
-    postMessage(((ChatBot*)(socket->user))->room, "Websocket disconnected! Reboot the bot to reconnect the websocket. (cc @NobodyNada)");
+    //postMessage(((ChatBot*)(socket->user))->room, "Websocket disconnected! Reboot the bot to reconnect the websocket. (cc @NobodyNada)");
+    postMessage(((ChatBot*)(socket->user))->room, "@FireAlarm reboot");
 }
 
 void saveFilters(Filter **filters, unsigned filterCount) {
@@ -715,7 +712,7 @@ int main(int argc, const char * argv[]) {
         createCommand("check threshold *", 0, checkThreshold),
         createCommand("test post *", 0, testPostCallback),
         createCommand("privilege user * *", 2, addUserPriv),
-        createCommand("unprivilege user *", 2, removeUserPriv),
+        createCommand("unprivilege user * *", 2, removeUserPriv),
         createCommand("priv user * *", 2, addUserPriv),
         createCommand("unpriv user *", 2, removeUserPriv),
         createCommand("is privileged ...", 0, isPrivileged),
@@ -735,6 +732,7 @@ int main(int argc, const char * argv[]) {
         createCommand("opt out", 0, optOut),
         createCommand("notify me", 0, notifyMe),
         createCommand("unnotify me", 0, unnotifyMe),
+        createCommand("say ...", 0, say),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify);
@@ -764,7 +762,10 @@ int main(int argc, const char * argv[]) {
         }
         if (time(NULL) > saveTime) {
             saveFilters(bot->filters, bot->filterCount);
+            savePrivUsers(bot->privUsers, bot->numOfPrivUsers);
             saveReports(bot->latestReports, bot->reportsUntilAnalysis);
+            savePrivRequests(bot->privRequests, bot->totalPrivRequests);
+            saveNotifications (bot->notify, bot->totalNotifications);
             saveTime = time(NULL) + SAVE_INTERVAL;
         }
     }

@@ -195,4 +195,19 @@ void unnotifyMe (RunningCommand *command, void *ctx)
     return;
 }
 
+void say(RunningCommand *command, void *ctx) {
+    ChatBot *bot = ctx;
+    size_t messageLength = 1;
+    char *message = malloc(messageLength);
+    *message = 0;
+    
+    for (int i = 0; i < command->argc; i++) {
+        messageLength += strlen(command->argv[i]) + 2;
+        message = realloc(message, messageLength);
+        snprintf(message + strlen(message) + 1, messageLength - strlen(message), "%s ", command->argv[i]);
+    }
+    postMessage(bot->room, message);
+    free(message);
+}
+
 #endif /* misc_commands_h */

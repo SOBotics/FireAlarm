@@ -20,20 +20,18 @@ typedef struct _RunningCommand RunningCommand;
 
 typedef struct _PrivUser {
     long userID;
-    char *username;
     int privLevel;  // 1 if member, 2 if bot owner.
 }PrivUser;
 
 typedef struct _PrivRequest {
     long userID;
-    char *username;
     int groupType;  // 0 if user wants to join membeers, 1 if user wants to join bot owners.
 }PrivRequest;
 
 unsigned int checkPrivUser (ChatBot *bot, long userID);
-PrivUser *createPrivUser (long userID, char *username, int privLevel);
+PrivUser *createPrivUser (long userID, int privLevel);
 PrivUser *getPrivUserByID (ChatBot *bot, long userID);
-PrivRequest *createPrivRequest (long userID, char *name, int groupType);
+PrivRequest *createPrivRequest (long userID, int groupType);
 unsigned checkPrivUser (ChatBot *bot, long userID);
 unsigned commandPriv (RunningCommand *commands);
 unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot);

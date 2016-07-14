@@ -267,7 +267,7 @@ ChatBot *createChatBot(
     while (*(requests++))
     {
         c->privRequests = realloc (c->privRequests, ++c->totalPrivRequests * sizeof (PrivRequest*));
-        c->privRequests[c->totalPrivRequests-1] = *(c->privRequests -1);
+        c->privRequests[c->totalPrivRequests-1] = *(requests - 1);
     }
     
     while (*(users++)) {
@@ -474,7 +474,8 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
     }
     
     if (likelihood > THRESHOLD && (recentlyReported (post->postID, bot) == 0)) {
-        const size_t maxMessage = strlen(messageBuf) + 256;
+        const char *notifString = getNotificationString(bot);
+        const size_t maxMessage = strlen(messageBuf) + strlen(post->title) + strlen(notifString) + strlen(REPORT_HEADER) + 256;
         char *message = malloc(maxMessage);
         snprintf(message, maxMessage,
                  REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) %s",
@@ -505,7 +506,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         free (messageBuf);
         return 0;
     }
-    else if (bodyLength != 1 && (recentlyReported (post->postID, bot) == 0))
+   /* else if (bodyLength != 1 && (recentlyReported (post->postID, bot) == 0))
     {
         const size_t maxMessage = 256;
         char *message = malloc(maxMessage);
@@ -535,7 +536,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         bot->latestReports[0] = report;
         free (message);
         return 0;
-    }
+    }*/
     else {
         deletePost(post);
         free (messageBuf);

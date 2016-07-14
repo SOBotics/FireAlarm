@@ -95,9 +95,9 @@ void changeMode (RunningCommand *command, void *ctx)
         asprintf (&message, "Invalid group type %s. ", group);
         postReply (bot->room, message, command->message);
         free (message);
-        free (group);
-        free (item);
-        free (option);
+        //free (group);
+        //free (item);
+        //free (option);
         return;
     }
     
@@ -144,9 +144,9 @@ void changeMode (RunningCommand *command, void *ctx)
     asprintf (&toPost, "`%s` has been %sd successfully.", group, option);
     postReply (bot->room, toPost, command->message);
     free (toPost);
-    free (group);
-    free (item);
-    free (option);
+    //free (group);
+    //free (item);
+    //free (option);
     return;
 }
 

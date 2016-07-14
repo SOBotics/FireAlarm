@@ -66,7 +66,6 @@
 		849032331CDA6150000605EA /* ChatMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ChatMessage.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		849032351CDA6163000605EA /* ChatUser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = ChatUser.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		849032361CDA6163000605EA /* ChatUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ChatUser.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		8497AA811D15E8A40012ADA2 /* priv_commands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = priv_commands.h; sourceTree = "<group>"; };
 		8497AA821D15E8A40012ADA2 /* Privileges.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Privileges.c; sourceTree = "<group>"; };
 		8497AA831D15E8A40012ADA2 /* Privileges.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Privileges.h; sourceTree = "<group>"; };
 		84BD4F311CDABD2C00D31751 /* RunningCommand.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = RunningCommand.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
@@ -140,7 +139,6 @@
 				84BD4F311CDABD2C00D31751 /* RunningCommand.c */,
 				84ED03791CFE20510092F0FE /* misc_functions.h */,
 				84ED03781CFE203A0092F0FE /* misc_functions.c */,
-				8497AA811D15E8A40012ADA2 /* priv_commands.h */,
 				8497AA831D15E8A40012ADA2 /* Privileges.h */,
 				8497AA821D15E8A40012ADA2 /* Privileges.c */,
 				AB14F19F1D37072400F39B38 /* Modes.c */,

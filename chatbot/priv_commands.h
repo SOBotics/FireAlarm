@@ -13,34 +13,15 @@ void addUserPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    long userID = (long) strtol(command->argv[0], NULL, 10);
-    char *privType = command->argv [1];
-    int groupType;
-    
-    if (strcmp (privType, "bot owner") != 0 && strcmp (privType, "member") != 0)
+    if (command->argc != 2)
     {
         postReply (bot->room, "**Usage:** privilege user [user id] [group]", command->message);
         return;
     }
-    if (strcmp (privType, "bot owner") == 0)
-    {
-        groupType = 0;
-    }
-    else if (strcmp (privType, "member") == 0)
-    {
-        groupType = 1;
-    }
     
-    if (groupType == 1 && (checkPrivUser (bot, userID) != 0))
-    {
-        postReply (bot->room, "The user is already a member.", command->message);
-        return;
-    }
-    else if (groupType == 2 && (checkPrivUser (bot, userID) == 2))
-    {
-        postReply (bot->room, "The user is already a bot owner.", command->message);
-        return;
-    }
+    long userID = (long) strtol(command->argv[0], NULL, 10);
+    char *privType = command->argv [1];
+    int groupType = privilegeNamed(privType);
     
     if (userID <= 0)
     {
@@ -50,26 +31,24 @@ void addUserPriv (RunningCommand *command, void *ctx)
     
     PrivUser **users = bot->privUsers;
     
-    users [bot->numOfPrivUsers]->userID = userID;
-    users [bot->numOfPrivUsers]->username = getUsernameByID (bot, userID);
-    users [bot->numOfPrivUsers]->privLevel = groupType;
-    
-    bot->numOfPrivUsers ++;
+    PrivUser *user = getPrivUserByID(bot, userID);
+    if (user) {
+        user->privLevel |= groupType;
+    }
+    else {
+        user = createPrivUser(userID, groupType);
+        users = bot->privUsers = realloc(users, (bot->numOfPrivUsers + 1) * sizeof(PrivUser*));
+        
+        users[bot->numOfPrivUsers] = user;
+        
+        bot->numOfPrivUsers ++;
+    }
     
     char *messageString;
     
-    if (groupType == 1)
-    {
-        asprintf (&messageString, "The user is now a member.");
-    }
-    else if (groupType == 2)
-    {
-        asprintf (&messageString, "The user is now a bot owner.");
-    }
+    asprintf (&messageString, "Added %s privileges to user ID %lu.", privType, userID);
     
     postReply (bot->room, messageString, command->message);
-    
-    printf ("User ID %ld added to privilege list.", userID);
     
     return;
 }
@@ -78,43 +57,32 @@ void removeUserPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    long userID = (long) strtol(command->argv[0], NULL, 10);
-    
-    if (!checkPrivUser (bot, userID))
+    if (command->argc != 2)
     {
-        postReply (bot->room, "The user is not privileged already.", command->message);
+        postReply (bot->room, "**Usage:** unprivilege user [user id] [group]", command->message);
         return;
     }
-    else if (userID < 1)
+    
+    long userID = (long) strtol(command->argv[0], NULL, 10);
+    char *privType = command->argv [1];
+    int groupType = privilegeNamed(privType);
+    
+    if (userID <= 0)
     {
         postReply (bot->room, "Please enter a valid User ID.", command->message);
         return;
     }
     
-    PrivUser **users = bot->privUsers;
-    int check;
-    
-    for (int i = 0; i < bot->numOfPrivUsers; i ++)
-    {
-        if (users[i]->userID == userID)
-        {
-            check = i;
-            break;
-        }
+    PrivUser *user = getPrivUserByID(bot, userID);
+    if (user) {
+        user->privLevel &= ~groupType;
     }
     
-    for (int i = check; i < bot->numOfPrivUsers; i ++)
-    {
-        users [i] = users [i + 1];
-    }
+    char *messageString;
     
-    users [bot->numOfPrivUsers] = NULL;
+    asprintf (&messageString, "Removed %s privileges from user ID %lu.", privType, userID);
     
-    bot->numOfPrivUsers --;
-    
-    postReply (bot->room, "The user has been removed from the privilege list.", command->message);
-    
-    printf ("User ID %ld removed from privilege list.", userID);
+    postReply (bot->room, messageString, command->message);
     
     return;
 }
@@ -144,18 +112,23 @@ void requestPriv (RunningCommand *command, void *ctx)
     unsigned groupID = privilegeNamed(group);
     if (!groupID) {
         postReply(bot->room, "Invalid privilege group", command->message);
+        return;
     }
-    if (getPrivUserByID(bot, userID)->privLevel & groupID) {
+    if (getPrivUserByID(bot, userID) && getPrivUserByID(bot, userID)->privLevel & groupID) {
         postReply(bot->room, "You already have that privilege", command->message);
+        return;
     }
     
     bot->privRequests = realloc(bot->privRequests, (++bot->totalPrivRequests + 1) * sizeof(PrivRequest*));
     bot->privRequests [bot->totalPrivRequests - 1] = createPrivRequest (
                                                                         userID,
-                                                                        command->message->user->name,
                                                                         groupID
                                                                         );
     bot->privRequests[bot->totalPrivRequests] = NULL;
+    
+    char *message;
+    asprintf(&message, "Request #%d created.", bot->totalPrivRequests);
+    postReply(bot->room, message, command->message);
     
     
     return;
@@ -189,15 +162,15 @@ void approvePrivRequest (RunningCommand *command, void *ctx)
     }
     else {
         bot->privUsers = users = realloc(users, ++bot->numOfPrivUsers);
-        users [bot->numOfPrivUsers - 1] = createPrivUser (request->userID, request->username, request->groupType);
+        users [bot->numOfPrivUsers - 1] = createPrivUser (request->userID, request->groupType);
     }
     
     
-    char *username = requests [priv_number - 1]->username;
+    char *username = getUsernameByID(bot, requests [priv_number - 1]->userID);
     char *message;
     
     asprintf (&message, "Privilege request number %d has been approved. (cc @%s)", priv_number, username);
-    free (username);
+    //free (username);
     postReply (bot->room, message, command->message);
     
     deletePrivRequest (bot, priv_number);
@@ -228,7 +201,7 @@ void rejectPrivRequest (RunningCommand *command, void *ctx)
     PrivRequest **requests = bot->privRequests;
     
     char *message;
-    char *username = requests [priv_number - 1]->username;
+    char *username = getUsernameByID(bot, requests [priv_number - 1]->userID);
     
     asprintf (&message, "Privilege request number %d has been rejected. (cc @%s)", priv_number, username);
     free (username);
@@ -245,33 +218,27 @@ void printPrivRequests (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    char *message = malloc (sizeof (bot->totalPrivRequests * 100 + 200));
+    const size_t maxMessage = bot->totalPrivRequests * 200 + 200;
+    char *message = malloc (maxMessage);
     
     postReply (bot->room, "The current privilege requests are: ", command->message);
     
-    sprintf (message,
-             "    Request Num   |     Username    |     Privilege Request Type    \n"
-             "--------------------------------------------------------------------"
-             );
+    snprintf (message, maxMessage,
+              "    Request Num   |     Username    |     Privilege Request Type    \n"
+              "--------------------------------------------------------------------\n"
+              );
     
-    char *messageString = malloc (sizeof (200));
+    char *messageString = malloc (200);
     char groupType [30];
     PrivRequest **requests = bot->privRequests;
     
     for (int i = 0; i < bot->totalPrivRequests; i ++)
     {
-        if (requests [i]->groupType == 0)
-        {
-            strcpy (groupType, "Member");
-        }
-        else if (requests [i]->groupType == 1)
-        {
-            strcpy (groupType, "Bot Owner");
-        }
+        strcpy(groupType, getPrivilegeGroups()[requests [i]->groupType]);
         
-        sprintf (messageString,
-                 "       %d         |  %s             |        %s                     \n",
-                 i + 1, requests [i]->username, groupType);
+        snprintf (messageString, 200,
+                  "       %d         |  %s             |        %s                     \n",
+                  i + 1, getUsernameByID(bot, requests [i]->userID), groupType);
         
         sprintf (message + strlen (message), "%s", messageString);
     }
@@ -356,62 +323,49 @@ void printPrivUser (RunningCommand *command, void *ctx)
     
     int check = 0;
     
-    if (command->argc == 1)
-    {
-        if (strcmp (command->argv [0], "bot owner") == 0)
-        {
-            check = 1;
-        }
-        else if (strcmp (command->argv [0], "member") == 0)
-        {
-            check = 2;
-        }
+    if (command->argc == 1) {
+        check = privilegeNamed(command->argv[0]);
+    }
+    else if (command->argc > 1) {
+        postReply(bot->room, "**Usage**: membership [group]", command->message);
+        return;
     }
     
     postReply (bot->room, "The privileged users are: ", command->message);
     PrivUser **users = bot->privUsers;
+    unsigned userCount = bot->numOfPrivUsers;
     
-    char *messageStringMembers = malloc (sizeof (64 * bot->numOfPrivUsers));
-    char *messageStringOwners = malloc (sizeof (64 * bot->numOfPrivUsers));
-    char *messageString = malloc (sizeof ((64 * bot->numOfPrivUsers) + 50));
+    char *message = malloc(1);
+    *message = 0;
     
-    for (int i = 0; i < bot->numOfPrivUsers; i ++)
-    {
-        if (users [i]->privLevel == 1)
-        {
-            snprintf (messageStringMembers + strlen (messageStringMembers), 63,
-                      "%s (user ID %ld)\n", users [i]->username, users [i]->userID);
+    char *newString;
+    
+    for (char **groups = getPrivilegeGroups(); *groups; groups++) {
+        unsigned groupID = privilegeNamed(*groups);
+        if (groupID == 0 || (check && check != groupID)) {
+            continue;
         }
-        else if (users [i]->privLevel == 1)
-        {
-            snprintf (messageStringOwners + strlen (messageStringOwners), 63,
-                      "%s (user ID %ld)\n", users [i]->username, users [i]->userID);
+        asprintf(&newString, "%s:\n", *groups);
+        message = realloc(message, strlen(message) + strlen(newString) + 1);
+        strcat(message, newString);
+        free(newString);
+        
+        for (int i = 0; i < userCount; i++) {
+            PrivUser *user = users[i];
+            if (user->privLevel & groupID) {
+                asprintf(&newString, "%s\n", getUsernameByID(bot, user->userID));
+                message = realloc(message, strlen(message) + strlen(newString) + 1);
+                strcat(message, newString);
+                free(newString);
+            }
         }
+        message = realloc(message, strlen(message) + 2);
+        strcat(message, "\n");
     }
     
-    if (check != 2 && check != 1)
-    {
-        sprintf (messageString, "Members:\n");
-        sprintf (messageString + strlen (messageString), "%s\n", messageStringMembers);
-        sprintf (messageString + strlen (messageString), "Bot Owners:\n");
-        sprintf (messageString + strlen (messageString), "%s\n", messageStringOwners);
-    }
-    else if (check == 2)
-    {
-        sprintf (messageString, "Members:\n");
-        sprintf (messageString + strlen (messageString), "%s\n", messageStringMembers);
-    }
-    else if (check == 1)
-    {
-        sprintf (messageString, "Bot Owners:\n");
-        sprintf (messageString + strlen (messageString), "%s\n", messageStringOwners);
-    }
+    postMessage (bot->room, message);
     
-    postMessage (bot->room, messageString);
-    
-    free (messageString);
-    free (messageStringMembers);
-    free (messageStringOwners);
+    free(message);
     
     return;
 }

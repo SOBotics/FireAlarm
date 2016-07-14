@@ -52,7 +52,8 @@ Notify *getNotificationByID (ChatBot *bot, long userID)
 
 char *getNotificationString (ChatBot *bot)
 {
-    char *str = malloc (sizeof (50));
+    char *str = malloc (bot->totalNotifications * 50);
+    *str = 0;
     
     Notify **notify = bot->notify;
     

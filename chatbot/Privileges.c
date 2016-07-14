@@ -9,23 +9,21 @@
 #include "Privileges.h"
 #include "ChatBot.h"
 
-PrivUser *createPrivUser (long userID, char *name, int privLevel)
+PrivUser *createPrivUser (long userID, int privLevel)
 {
     PrivUser *pu = malloc (sizeof (PrivUser));
     
     pu->userID = userID;
-    pu->username = name;
     pu->privLevel = privLevel;
     
     return pu;
 }
 
-PrivRequest *createPrivRequest (long userID, char *name, int groupType)
+PrivRequest *createPrivRequest (long userID, int groupType)
 {
     PrivRequest *pr = malloc (sizeof (PrivRequest));
     
     pr->userID = userID;
-    pr->username = name;
     pr->groupType = groupType;
     
     return pr;
@@ -45,14 +43,12 @@ void deletePrivRequest (ChatBot *bot, unsigned priv_number)
         }
     }
     
-    for (int i = check; i < bot->totalPrivRequests; i ++)
+    for (int i = check; i < bot->totalPrivRequests - 1; i ++)
     {
         requests [i] = requests [i + 1];
     }
     
-    requests [bot->totalPrivRequests] = NULL;
-    
-    bot->totalPrivRequests --;
+    requests [--bot->totalPrivRequests] = NULL;
     
     return;
 }
@@ -118,7 +114,7 @@ char **getPrivilegeGroups() {
     static char *groups[] = {
         "none",
         "member",
-        "bot owner",
+        "owner",
         NULL
     };
     return groups;
