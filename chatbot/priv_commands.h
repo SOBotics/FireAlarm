@@ -331,7 +331,7 @@ void printPrivUser (RunningCommand *command, void *ctx)
         return;
     }
     
-    postReply (bot->room, "The privileged users are: ", command->message);
+    postReply (bot->room, "The privilege groups are: ", command->message);
     PrivUser **users = bot->privUsers;
     unsigned userCount = bot->numOfPrivUsers;
     
@@ -362,6 +362,9 @@ void printPrivUser (RunningCommand *command, void *ctx)
         message = realloc(message, strlen(message) + 2);
         strcat(message, "\n");
     }
+    const char *modInfo = "Mods and room owners can run any command, regardless of privileges.";
+    message = realloc(message, strlen(message) + strlen(modInfo) + 1);
+    strcat(message, modInfo);
     
     postMessage (bot->room, message);
     

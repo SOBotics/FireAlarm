@@ -8,6 +8,7 @@
 
 #include "Privileges.h"
 #include "ChatBot.h"
+#include <limits.h>
 
 PrivUser *createPrivUser (long userID, int privLevel)
 {
@@ -70,6 +71,10 @@ unsigned checkPrivUser (ChatBot *bot, long userID)
     {
         if (users[i]->userID == userID)
         {
+            ChatUser *user = getUserByID(bot->room, users[i]->userID);
+            if (user->isModerator || user->isRoomOwner) {
+                users[i]->privLevel = INT_MAX;
+            }
             return users[i]->privLevel;
         }
     }

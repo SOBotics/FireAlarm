@@ -187,17 +187,20 @@ void statistics (RunningCommand *command, void *ctx)
     
     if (numStats <= 0)
     {
-        postReply (bot->room, "Please enter a number bigger than 0.", command->message);
+        postReply (bot->room, "Please enter a number greater than 0.", command->message);
+        return;
     }
     else if (numStats > REPORT_MEMORY)
     {
-        sprintf (message, "Please enter a number smaller than %d.", (REPORT_MEMORY + 1));
+        sprintf (message, "Please enter a number less than %d.", (REPORT_MEMORY + 1));
+        return;
         
         postReply (bot->room, message, command->message);
     }
     else if (bot->latestReports [0] == NULL)
     {
         postReply (bot->room, "There are no reports available.", command->message);
+        return;
     }
     
     /* Calculating the number of truePositives, falsePositives, and unconfirmed reports */

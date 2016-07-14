@@ -14,6 +14,8 @@
 typedef struct _ChatUser {
     char *name;
     unsigned long userID;
+    int isModerator;
+    int isRoomOwner;
 }ChatUser;
 
 ChatUser *createUser(unsigned long userID, const char *username);

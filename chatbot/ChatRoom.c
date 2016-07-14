@@ -58,6 +58,69 @@ ChatRoom *createChatRoom(Client *client, unsigned roomID) {
     return r;
 }
 
+void getInfoForUsers(ChatRoom *r, ChatUser **users, unsigned userCount) {
+    printf("Getting information for %d user%s...\n", userCount, userCount == 1 ? "" : "s");
+    const int maxUrlLength = 256;
+    char url[maxUrlLength];
+    snprintf(url, maxUrlLength,
+             "chat.%s/user/info",
+             r->client->host
+             );
+    
+    CURL *curl = r->client->curl;
+    checkCURL(curl_easy_setopt(curl, CURLOPT_URL, url));
+    
+    char *userIDs = malloc(1);
+    *userIDs = 0;
+    
+    for (int i = 0; i < userCount; i++) {
+        ChatUser *user = users[i];
+        if (user->userID == 0) {
+            continue;
+        }
+        char *newUser;
+        asprintf(&newUser, "%lu%s", user->userID,
+                 (i == (userCount - 1) || (i == (userCount - 2) && users[userCount-1]->userID == 0) ? "" : ","));
+        
+        userIDs = realloc(userIDs, strlen(userIDs) + strlen(newUser) + 1);
+        strcat(userIDs, newUser);
+        
+        free(newUser);
+    }
+    
+    char *postFields;
+    asprintf(&postFields, "ids=%s&roomId=%d", userIDs, r->roomID);
+    free(userIDs);
+    
+    checkCURL(curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, postFields));
+    free(postFields);
+    
+    OutBuffer buf;
+    buf.data = NULL;
+    checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf));
+    checkCURL(curl_easy_perform(curl));
+    
+    cJSON *json = cJSON_Parse(buf.data);
+    free(buf.data);
+    
+    cJSON *userDatas;
+    if (json) {
+        if ((userDatas = cJSON_GetObjectItem(json, "users"))) {
+            for (int i = 0; i < cJSON_GetArraySize(userDatas); i++) {
+                cJSON *userData = cJSON_GetArrayItem(userDatas, i);
+                ChatUser *user = getUserByID(r, cJSON_GetObjectItem(userData, "id")->valueint);
+                
+                user->isModerator = (cJSON_GetObjectItem(userData, "is_moderator")->type == cJSON_True);
+                user->isRoomOwner = (cJSON_GetObjectItem(userData, "is_owner")->type == cJSON_True);
+                if (user->isModerator || user->isRoomOwner) {
+                    printf("%s is a %s!\n", user->name, user->isModerator ? "moderator" : "room owner");
+                }
+            }
+        }
+        cJSON_Delete(json);
+    }
+}
+
 void addUserToRoom(ChatRoom *r, ChatUser *u) {
     printf("Registering user \"%s\" (%lu)\n", u->name, u->userID);
     r->users = realloc(r->users, (++r->userCount) * sizeof(ChatUser *));
@@ -71,7 +134,9 @@ void refreshUsers(ChatRoom *r) {
         deleteUser(r->users[i]);
     }
     r->userCount = 0;
-    addUserToRoom(r, createUser(0, "Console"));
+    ChatUser *console = createUser(0, "Console");
+    console->isModerator = 1;
+    console->isRoomOwner = 1;
     
     const int maxUrlLength = 256;
     char url[maxUrlLength];
@@ -109,6 +174,8 @@ void refreshUsers(ChatRoom *r) {
         }
     }
     cJSON_Delete(json);
+    
+    getInfoForUsers(r, r->users, r->userCount);
 }
 
 void webSocketRecieved(WebSocket *socket, char *data, size_t len);
@@ -354,6 +421,7 @@ ChatMessage *processChatEvent(ChatRoom *r, cJSON *event) {
                 const char *username = cJSON_GetObjectItem(event, "user_name")->valuestring;
                 user = createUser(userID, username);
                 addUserToRoom(r, user);
+                getInfoForUsers(r, &user, 1);
             }
             break;
         case UserLeft:

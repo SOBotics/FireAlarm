@@ -17,6 +17,9 @@ ChatUser *createUser(unsigned long id, const char *name) {
     u->name = malloc(strlen(name) + 1);
     strcpy(u->name, name);
     
+    u->isModerator = 0;
+    u->isRoomOwner = 0;
+    
     return u;
 }
 

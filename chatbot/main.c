@@ -210,7 +210,7 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     ChatBot *bot = (ChatBot*)ws->user;
     Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
     if (p != NULL) {
-        //checkPost(bot, p);
+        checkPost(bot, p);
     }
     else {
         printf("Got a null post: %d\n", cJSON_GetObjectItem(post, "id")->valueint);
@@ -367,7 +367,6 @@ Notify **loadNotifications ()
 
 void saveNotifications (Notify **notify, unsigned totalNotifications)
 {
-    puts ("Saving Notifications...");
     FILE *file = fopen ("notifications.json", "w");
     
     cJSON *json = cJSON_CreateArray();
@@ -396,7 +395,6 @@ void saveNotifications (Notify **notify, unsigned totalNotifications)
 
 void savePrivRequests (PrivRequest **requests, unsigned totalRequests)
 {
-    puts ("Saving Privilege Requests...");
     FILE *file = fopen ("privRequest.json", "w");
     
     cJSON *json = cJSON_CreateArray();
@@ -468,7 +466,6 @@ PrivUser **loadPrivUsers ()
 
 void savePrivUsers (PrivUser **users, unsigned privUsersCount)
 {
-    puts ("Saving Privileged users...");
     cJSON *json = cJSON_CreateArray();
     
     for (int i = 0; i < privUsersCount; i ++)
@@ -506,7 +503,6 @@ void wsClosed(WebSocket *socket) {
 }
 
 void saveFilters(Filter **filters, unsigned filterCount) {
-    puts("Saving filters...");
     cJSON *json = cJSON_CreateArray();
     for (int i = 0; i < filterCount; i++) {
         Filter *filter = filters[i];
@@ -563,7 +559,6 @@ cJSON *loadReports() {
 }
 
 void saveReports(Report *reports[], int reportsUntilAnalysis) {
-    puts("Saving recent reports...");
     cJSON *container = cJSON_CreateObject();
     cJSON *json = cJSON_CreateArray();
     
@@ -772,6 +767,7 @@ int main(int argc, const char * argv[]) {
     
     leaveRoom(bot->room);
     
+    puts("Saving data...");
     saveFilters(bot->filters, bot->filterCount);
     savePrivUsers(bot->privUsers, bot->numOfPrivUsers);
     saveReports(bot->latestReports, bot->reportsUntilAnalysis);
