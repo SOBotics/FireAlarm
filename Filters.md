@@ -78,7 +78,7 @@ with `awkscript` containing the following:
     { printf "\"expression\": \"%s\",", $2}
     { printf "\"type\": 0," }
     { printf "\"truePositives\": %s,", PERCENTAGE }
-    { printf "\"falsePositives\": 0" }
+    { printf "\"falsePositives\": -1" }
     { printf "}" }
     END {print "\]" }
     
