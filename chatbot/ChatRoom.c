@@ -379,7 +379,7 @@ void handleQueuedMessages(ChatRoom *r) {
         checkCURL(curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request));
         checkCURL(curl_easy_setopt(curl, CURLOPT_URL, url));
         
-        #ifndef DEBUG
+#ifndef DEBUG
         checkCURL(curl_easy_perform(curl));
         long http_code = 0;
         checkCURL(curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code));
@@ -393,7 +393,12 @@ void handleQueuedMessages(ChatRoom *r) {
         }
         
         free(buf.data);
-        #endif
+#else
+        
+        r->pendingMessageLinkedList = m->next;
+        free(unescapedText);
+        free(m);
+#endif
         
         
         r->lastPostTimestamp = time(NULL);

@@ -204,7 +204,7 @@ void say(RunningCommand *command, void *ctx) {
     for (int i = 0; i < command->argc; i++) {
         messageLength += strlen(command->argv[i]) + 2;
         message = realloc(message, messageLength);
-        snprintf(message + strlen(message) + 1, messageLength - strlen(message), "%s ", command->argv[i]);
+        snprintf(message + strlen(message), messageLength - strlen(message), "%s ", command->argv[i]);
     }
     postMessage(bot->room, message);
     free(message);
