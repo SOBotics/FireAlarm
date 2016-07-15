@@ -477,9 +477,11 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         const char *notifString = getNotificationString(bot);
         const size_t maxMessage = strlen(messageBuf) + strlen(post->title) + strlen(notifString) + strlen(REPORT_HEADER) + 256;
         char *message = malloc(maxMessage);
+        char *notif = getNotificationString(bot);
         snprintf(message, maxMessage,
                  REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) %s",
-                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, getNotificationString (bot));
+                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, notif);
+        free(notif);
         
         postMessage(bot->room, message);
         

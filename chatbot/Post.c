@@ -31,6 +31,7 @@ Post *createPost(const char *title, const char *body, unsigned long postID, unsi
 void deletePost(Post *p) {
     free(p->title);
     free(p->body);
+    free(p);
 }
 
 int getCloseVotesByID (ChatBot *bot, unsigned long postID)

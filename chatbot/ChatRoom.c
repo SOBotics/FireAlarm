@@ -137,6 +137,7 @@ void refreshUsers(ChatRoom *r) {
     ChatUser *console = createUser(0, "Console");
     console->isModerator = 1;
     console->isRoomOwner = 1;
+    addUserToRoom(r, console);
     
     const int maxUrlLength = 256;
     char url[maxUrlLength];
@@ -378,7 +379,7 @@ void handleQueuedMessages(ChatRoom *r) {
         checkCURL(curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request));
         checkCURL(curl_easy_setopt(curl, CURLOPT_URL, url));
         
-        //#ifndef DEBUG
+        #ifndef DEBUG
         checkCURL(curl_easy_perform(curl));
         long http_code = 0;
         checkCURL(curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code));
@@ -392,7 +393,7 @@ void handleQueuedMessages(ChatRoom *r) {
         }
         
         free(buf.data);
-        //#endif
+        #endif
         
         
         r->lastPostTimestamp = time(NULL);

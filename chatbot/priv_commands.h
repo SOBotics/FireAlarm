@@ -176,6 +176,7 @@ void approvePrivRequest (RunningCommand *command, void *ctx)
     deletePrivRequest (bot, priv_number);
     
     free (message);
+    free(username);
     
     return;
 }
@@ -236,9 +237,11 @@ void printPrivRequests (RunningCommand *command, void *ctx)
     {
         strcpy(groupType, getPrivilegeGroups()[requests [i]->groupType]);
         
+        char *username = getUsernameByID(bot, requests [i]->userID);
         snprintf (messageString, 200,
                   "       %d         |  %s             |        %s                     \n",
-                  i + 1, getUsernameByID(bot, requests [i]->userID), groupType);
+                  i + 1, username, groupType);
+        free(username);
         
         sprintf (message + strlen (message), "%s", messageString);
     }
@@ -353,7 +356,9 @@ void printPrivUser (RunningCommand *command, void *ctx)
         for (int i = 0; i < userCount; i++) {
             PrivUser *user = users[i];
             if (user->privLevel & groupID) {
-                asprintf(&newString, "%s\n", getUsernameByID(bot, user->userID));
+                char *username = getUsernameByID(bot, user->userID);
+                asprintf(&newString, "%s\n", username);
+                free(username);
                 message = realloc(message, strlen(message) + strlen(newString) + 1);
                 strcat(message, newString);
                 free(newString);

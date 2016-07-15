@@ -67,14 +67,15 @@ unsigned checkPrivUser (ChatBot *bot, long userID)
 {
     PrivUser **users = bot->privUsers;
     
+    ChatUser *user = getUserByID(bot->room, userID);
+    if (user->isModerator || user->isRoomOwner) {
+        return INT_MAX;
+    }
+    
     for (int i = 0; i < bot->numOfPrivUsers; i ++)
     {
         if (users[i]->userID == userID)
         {
-            ChatUser *user = getUserByID(bot->room, users[i]->userID);
-            if (user->isModerator || user->isRoomOwner) {
-                users[i]->privLevel = INT_MAX;
-            }
             return users[i]->privLevel;
         }
     }

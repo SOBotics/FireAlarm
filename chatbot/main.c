@@ -461,6 +461,7 @@ PrivUser **loadPrivUsers ()
     }
     users [privUsersCount] = NULL;
     
+    cJSON_Delete(json);
     return users;
 }
 
