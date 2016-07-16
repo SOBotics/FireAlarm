@@ -210,4 +210,27 @@ void say(RunningCommand *command, void *ctx) {
     free(message);
 }
 
+void amINotified (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    long userID = command->message->user->userID;
+    
+    Notify *notify = getNotificationByID (bot, userID);
+    
+    if (notify == NULL)
+    {
+        postReply (bot->room, "You are not currently in the notification list.", command->message);
+    }
+    else if (notify->type == 0)
+    {
+        postReply (bot->room, "You are currently opted-in.", command->message);
+    }
+    else if (notify->type == 1)
+    {
+        postReply (bot->room, "You are currently notified of all reports.", command->message);
+    }
+    
+    return;
+}
+
 #endif /* misc_commands_h */
