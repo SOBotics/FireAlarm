@@ -280,6 +280,8 @@ void printLatestReports (RunningCommand *command, void *ctx)
     
     postReply (bot->room, message, command->message);
     
+    if (typePrinted == NULL)
+    {
     for (i = 0; i < numReports; i ++)
     {
         Report *report = reports [i];
@@ -299,6 +301,78 @@ void printLatestReports (RunningCommand *command, void *ctx)
                  confirmation, report->post->title, postType, report->post->postID, reportLink
                  );
     }
+    }
+    else if (strcmp (typePrinted, "true") == 0)
+    {
+        
+        for (i = 0; i < numReports; i ++)
+        {
+        Report *report = reports [i];
+        
+        sprintf (reportLink,
+                 "[message %lu](http://chat.stackoverflow.com/transcript/message/%lu#%lu)",
+                 report->messageID, report->messageID, report->messageID);
+                 
+        char *confirmation;
+        if (report->confirmation == 1) 
+        {
+            confirmation = "True positive";
+            
+            char *postType = report->post->isAnswer ? "a" :"q";
+            snprintf(messageString + strlen(messageString), maxLineSize,
+                 "%s: [%s](http://stackoverflow.com/%s/%lu) (%s)\n",
+                 confirmation, report->post->title, postType, report->post->postID, reportLink
+                 );
+        }
+        }
+    }
+    else if (strcmp (typePrinted, "false") == 0)
+    {
+        for (i = 0; i < numReports; i ++)
+        {
+        Report *report = reports [i];
+        
+        sprintf (reportLink,
+                 "[message %lu](http://chat.stackoverflow.com/transcript/message/%lu#%lu)",
+                 report->messageID, report->messageID, report->messageID);
+                 
+        char *confirmation;
+        if (report->confirmation == 0) 
+        {
+            confirmation = "False positive";
+            
+            char *postType = report->post->isAnswer ? "a" :"q";
+            snprintf(messageString + strlen(messageString), maxLineSize,
+                 "%s: [%s](http://stackoverflow.com/%s/%lu) (%s)\n",
+                 confirmation, report->post->title, postType, report->post->postID, reportLink
+                 );
+        }
+        }
+    }
+    else if (strcmp (typePrinted, "unconfirmed") == 0 || strcmp (typePrinted, "unknown") == 0)
+    {
+        for (i = 0; i < numReports; i ++)
+        {
+        Report *report = reports [i];
+        
+        sprintf (reportLink,
+                 "[message %lu](http://chat.stackoverflow.com/transcript/message/%lu#%lu)",
+                 report->messageID, report->messageID, report->messageID);
+                 
+        char *confirmation;
+        if (report->confirmation != 0 && report->confirmation != 1) 
+        {
+            confirmation = "Unconfirmed";
+            
+            char *postType = report->post->isAnswer ? "a" :"q";
+            snprintf(messageString + strlen(messageString), maxLineSize,
+                 "%s: [%s](http://stackoverflow.com/%s/%lu) (%s)\n",
+                 confirmation, report->post->title, postType, report->post->postID, reportLink
+                 );
+        }
+        }
+    }
+    
     
     postMessage(bot->room, messageString);
     
