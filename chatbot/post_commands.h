@@ -280,8 +280,6 @@ void printLatestReports (RunningCommand *command, void *ctx)
     
     postReply (bot->room, message, command->message);
     
-    if (typePrinted == NULL)
-    {
     for (i = 0; i < numReports; i ++)
     {
         Report *report = reports [i];
@@ -301,78 +299,6 @@ void printLatestReports (RunningCommand *command, void *ctx)
                  confirmation, report->post->title, postType, report->post->postID, reportLink
                  );
     }
-    }
-    else if (strcmp (typePrinted, "true") == 0)
-    {
-        
-        for (i = 0; i < numReports; i ++)
-        {
-        Report *report = reports [i];
-        
-        sprintf (reportLink,
-                 "[message %lu](http://chat.stackoverflow.com/transcript/message/%lu#%lu)",
-                 report->messageID, report->messageID, report->messageID);
-                 
-        char *confirmation;
-        if (report->confirmation == 1) 
-        {
-            confirmation = "True positive";
-            
-            char *postType = report->post->isAnswer ? "a" :"q";
-            snprintf(messageString + strlen(messageString), maxLineSize,
-                 "%s: [%s](http://stackoverflow.com/%s/%lu) (%s)\n",
-                 confirmation, report->post->title, postType, report->post->postID, reportLink
-                 );
-        }
-        }
-    }
-    else if (strcmp (typePrinted, "false") == 0)
-    {
-        for (i = 0; i < numReports; i ++)
-        {
-        Report *report = reports [i];
-        
-        sprintf (reportLink,
-                 "[message %lu](http://chat.stackoverflow.com/transcript/message/%lu#%lu)",
-                 report->messageID, report->messageID, report->messageID);
-                 
-        char *confirmation;
-        if (report->confirmation == 0) 
-        {
-            confirmation = "False positive";
-            
-            char *postType = report->post->isAnswer ? "a" :"q";
-            snprintf(messageString + strlen(messageString), maxLineSize,
-                 "%s: [%s](http://stackoverflow.com/%s/%lu) (%s)\n",
-                 confirmation, report->post->title, postType, report->post->postID, reportLink
-                 );
-        }
-        }
-    }
-    else if (strcmp (typePrinted, "unconfirmed") == 0 || strcmp (typePrinted, "unknown") == 0)
-    {
-        for (i = 0; i < numReports; i ++)
-        {
-        Report *report = reports [i];
-        
-        sprintf (reportLink,
-                 "[message %lu](http://chat.stackoverflow.com/transcript/message/%lu#%lu)",
-                 report->messageID, report->messageID, report->messageID);
-                 
-        char *confirmation;
-        if (report->confirmation != 0 && report->confirmation != 1) 
-        {
-            confirmation = "Unconfirmed";
-            
-            char *postType = report->post->isAnswer ? "a" :"q";
-            snprintf(messageString + strlen(messageString), maxLineSize,
-                 "%s: [%s](http://stackoverflow.com/%s/%lu) (%s)\n",
-                 confirmation, report->post->title, postType, report->post->postID, reportLink
-                 );
-        }
-        }
-    }
-    
     
     postMessage(bot->room, messageString);
     
@@ -467,6 +393,39 @@ void testPostCallback (RunningCommand *command, void *ctx)
     pthread_mutex_lock (&bot->detectorLock);
     testPost (bot, post, command);
     pthread_mutex_unlock (&bot->detectorLock);
+    
+    return;
+}
+
+void printUnclosedTP (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    Reports **reports = bot->latestReports;
+    
+    char *message = malloc (sizeof (256 * 10));
+    int f = 0;
+    
+    for (int i = 0; i < REPORT_MEMORY && f < 6; i ++)
+    {
+        Report *report = reports [i];
+        
+        if (report->confirmation)
+        {
+            int cv = getCloseVotesByID (bot, report->post->postID);
+            Post *post = report->post;
+            
+            if (cv > 0 && cv < 5)
+            {
+                sprintf (message + strlen (message), "%d close votes: [%s](http://stackoverflow.com/%s/%lu)",
+                         cv, post->title, post->isAnswer ? "a" : "q", post->postID);
+                         
+                f ++;
+            }
+        }
+    }
+    
+    postReply (bot->room, "True reports with close votes are:", command->message);
+    postMessage (bot->room, message);
     
     return;
 }
