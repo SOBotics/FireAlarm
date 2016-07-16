@@ -705,7 +705,7 @@ int main(int argc, const char * argv[]) {
         createCommand("cp *", 0, checkPostCallback),
         createCommand("pinfo *", 0, postInfo),
         createCommand("change threshold *", 2, changeThreshold),
-        createCommand("check threshold *", 0, checkThreshold),
+        createCommand("check threshold", 0, checkThreshold),
         createCommand("test post *", 0, testPostCallback),
         createCommand("privilege user * *", 2, addUserPriv),
         createCommand("unprivilege user * *", 2, removeUserPriv),
