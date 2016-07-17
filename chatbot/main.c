@@ -731,6 +731,7 @@ int main(int argc, const char * argv[]) {
         createCommand("say ...", 0, say),
         createCommand("aminotified", 0, amINotified),
         createCommand("is notified *", 0, isNotified),
+        createCommand("notified users", 0, printNotifiedUsers),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify);
