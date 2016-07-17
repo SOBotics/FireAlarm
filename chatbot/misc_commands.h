@@ -233,4 +233,48 @@ void amINotified (RunningCommand *command, void *ctx)
     return;
 }
 
+void isNotified (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    if (command->argc == 0)
+    {
+        postReply (bot->room, "One argument required.", command->message);
+        return;
+    }
+    
+    long userID = strtol (command->argv [0], NULL, 10);
+    
+    if (!validUserID (bot, userID))
+    {
+        postReply (bot->room, "Please enter a valid user id.", command->message);
+        return;
+    }
+    
+    int check = 0;
+    
+    if (command->message->user->userID == userID)
+    {
+        amINotified (command, ctx);
+        return;
+    }
+    
+    Notify *notify = getNotificationByID (bot, userID);
+    
+    if (notify == NULL)
+    {
+        postReply (bot->room, "That user is no currently in the notification list.", command->message);
+    }
+    else if (notify->type == 0)
+    {
+        postReply (bot->room, "That user is currently opted-in.", command->message);
+    }
+    else if (notify->type == 1)
+    {
+        postReply (bot->room, "That user is currently notified for all reports.");
+    }
+    
+    return;
+}
+
 #endif /* misc_commands_h */
