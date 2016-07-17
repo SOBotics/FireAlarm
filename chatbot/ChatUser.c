@@ -73,3 +73,15 @@ char *getUsernameByID (ChatBot *bot, long userID)
     cJSON_Delete (json);
     return NULL;
 }
+
+int isUserInPingableList (ChatBot *bot, long userID)
+{
+    if (getUsernameByID (bot, userID) == NULL)
+    {
+        return 0;
+    }
+    else 
+    {
+        return 1;
+    }
+}
