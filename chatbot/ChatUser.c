@@ -28,8 +28,10 @@ void deleteUser(ChatUser *u) {
     free(u);
 }
 
-char *getUsernameByID (ChatBot *bot, long userID)
+char *getUsernameByID (ChatBot *bot, unsigned long userID)
 {
+    if (isUserInPingableList (bot, userID))
+    {
     pthread_mutex_lock(&bot->room->clientLock);
     const int maxUrlLength = 256;
     char url[maxUrlLength];
@@ -71,6 +73,63 @@ char *getUsernameByID (ChatBot *bot, long userID)
     }
     
     cJSON_Delete (json);
+    return NULL;
+    }
+    else if (!isUserInPingableList)
+    {
+        pthread_mutex_lock(&bot->room->clientLock);
+        CURL *curl = bot->room->client->curl;
+    
+        checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
+        OutBuffer buffer;
+        buffer.data = NULL;
+        checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
+    
+        curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip, deflate");
+    
+        unsigned max = 256;
+        char request [max];
+    
+        snprintf (request, max,
+              "http://api.stackexchange.com/2.2/users/%lu?order=desc&sort=reputation&site=stackoverflow", userID);
+              
+        curl_easy_setopt(curl, CURLOPT_URL, request);
+    
+    
+    
+        checkCURL(curl_easy_perform(curl));
+    
+        checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
+    
+    
+        pthread_mutex_unlock(&bot->room->clientLock);
+    
+        cJSON *json = cJSON_Parse(buffer.data);
+    
+        free(buffer.data);
+    
+        if (!json || cJSON_GetObjectItem(json, "error_id")) {
+            if (json) {
+                cJSON_Delete(json);
+            }
+        puts("Error fetching post!");
+        return 0;
+        }
+    
+        cJSON *backoff;
+        if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
+            char *str;
+            asprintf(&str, "Recieved backoff: %d", backoff->valueint);
+            postMessage(bot->room, str);
+            free(str);
+        }
+        
+        char *username = cJSON_GetObjectItem (json, "display_name")->valuestring;
+        
+        cJSON_Delete (json);
+        return username;
+    }
+    
     return NULL;
 }
 
