@@ -127,6 +127,11 @@ char *getUsernameByID (ChatBot *bot, unsigned long userID)
         char *username = cJSON_GetObjectItem (json, "display_name")->valuestring;
         
         cJSON_Delete (json);
+        
+        if (username == NULL)
+        {
+            return 0;
+        }
         return username;
     }
     
@@ -140,6 +145,22 @@ int isUserInPingableList (ChatBot *bot, long userID)
         return 0;
     }
     else 
+    {
+        return 1;
+    }
+}
+
+int validUserID (ChatBot *bot, long userID)
+{
+    if (isUserInPingableList (bot, userID))
+    {
+        return 1;
+    }
+    else if (!getUsernameByID (bot, userID) || getUsernameByID (bot, userID) == NULL)
+    {
+        return 0;
+    }
+    else
     {
         return 1;
     }
