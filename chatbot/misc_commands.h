@@ -277,4 +277,48 @@ void isNotified (RunningCommand *command, void *ctx)
     return;
 }
 
+void printNotifiedUsers (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    char *message = malloc (sizeof (127));
+    char *messageString = malloc (sizeof (127 * (bot->totalNotifications + 2))
+    
+    sprintf (message, "There are totally %d notified users: ", bot->totalNotifications);
+    postReply (bot->room, message, command->message);
+    
+    Notify **notifications = bot->notify;
+    
+    sprintf (messageString, "Opted-in:\n");
+    
+    for (int i = 0; i < bot->totalNotifications; i ++)
+    {
+        Notify *notify = notifications [i];
+        
+        if (notify->type == 0)
+        {
+            sprintf (messageString + strlen (messageString), "%s\n", getUsernameByID (bot, notify->userID));
+        }
+    }
+    
+    sprintf (messageString + strlen (messageString), "\nNotified Users:\n");
+    
+    for (int i = 0; i < bot->totalNotifications; i ++)
+    {
+        Notify *notify = notifications [i];
+        
+        if (notify->type == 1)
+        {
+            sprintf (messageString + strlen (messageString), "%s\n", getUsernameByID (bot, notify->userID));
+        }
+    }
+    
+    postMessage (bot->room, messageString);
+    
+    free (messageString);
+    free (message);
+    
+    return;
+}
+
 #endif /* misc_commands_h */
