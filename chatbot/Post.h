@@ -9,6 +9,8 @@
 #ifndef Post_h
 #define Post_h
 
+typedef struct _ChatBot ChatBot;
+
 typedef struct {
     char *title;
     char *body;
@@ -19,5 +21,6 @@ typedef struct {
 
 Post *createPost(const char *title, const char *body, unsigned long postID, unsigned char isAnswer, unsigned long userID);
 void deletePost(Post *p);
+int getCloseVotesByID (ChatBot *bot, unsigned long postID);
 
 #endif /* Post_h */

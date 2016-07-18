@@ -245,13 +245,11 @@ void isNotified (RunningCommand *command, void *ctx)
     
     long userID = strtol (command->argv [0], NULL, 10);
     
-    if (!validUserID (bot, userID))
+    if (!isValidUserID (bot, userID))
     {
         postReply (bot->room, "Please enter a valid user id.", command->message);
         return;
     }
-    
-    int check = 0;
     
     if (command->message->user->userID == userID)
     {
@@ -271,7 +269,7 @@ void isNotified (RunningCommand *command, void *ctx)
     }
     else if (notify->type == 1)
     {
-        postReply (bot->room, "That user is currently notified for all reports.");
+        postReply (bot->room, "That user is currently notified for all reports.", command->message);
     }
     
     return;
@@ -282,9 +280,9 @@ void printNotifiedUsers (RunningCommand *command, void *ctx)
     ChatBot *bot = ctx;
     
     char *message = malloc (sizeof (127));
-    char *messageString = malloc (sizeof (127 * (bot->totalNotifications + 2))
+    char *messageString = malloc (sizeof (127 * (bot->totalNotifications + 2)));
     
-    sprintf (message, "There are totally %d notified users: ", bot->totalNotifications);
+    snprintf (message, 127, "There are %d total notified users: ", bot->totalNotifications);
     postReply (bot->room, message, command->message);
     
     Notify **notifications = bot->notify;

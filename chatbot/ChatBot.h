@@ -82,5 +82,7 @@ void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed);
 Report *reportWithMessage(ChatBot *bot, unsigned long messageID);
 void testPost (ChatBot *bot, Post *post, RunningCommand *command);
 int recentlyReported (long postID, ChatBot *bot);
+char *getUsernameByID (ChatBot *bot, unsigned long userID);
+int isValidUserID (ChatBot *bot, long userID);
 
 #endif /* ChatBot_h */
