@@ -705,7 +705,7 @@ int main(int argc, const char * argv[]) {
         createCommand("cp *", 0, checkPostCallback),
         createCommand("pinfo *", 0, postInfo),
         createCommand("change threshold *", 2, changeThreshold),
-        createCommand("check threshold *", 0, checkThreshold),
+        createCommand("check threshold", 0, checkThreshold),
         createCommand("test post *", 0, testPostCallback),
         createCommand("privilege user * *", 2, addUserPriv),
         createCommand("unprivilege user * *", 2, removeUserPriv),
@@ -729,6 +729,9 @@ int main(int argc, const char * argv[]) {
         createCommand("notify me", 0, notifyMe),
         createCommand("unnotify me", 0, unnotifyMe),
         createCommand("say ...", 0, say),
+        createCommand("aminotified", 0, amINotified),
+        createCommand("is notified *", 0, isNotified),
+        createCommand("notified users", 0, printNotifiedUsers),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify);

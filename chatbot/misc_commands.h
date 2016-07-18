@@ -210,4 +210,115 @@ void say(RunningCommand *command, void *ctx) {
     free(message);
 }
 
+void amINotified (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    long userID = command->message->user->userID;
+    
+    Notify *notify = getNotificationByID (bot, userID);
+    
+    if (notify == NULL)
+    {
+        postReply (bot->room, "You are not currently in the notification list.", command->message);
+    }
+    else if (notify->type == 0)
+    {
+        postReply (bot->room, "You are currently opted-in.", command->message);
+    }
+    else if (notify->type == 1)
+    {
+        postReply (bot->room, "You are currently notified of all reports.", command->message);
+    }
+    
+    return;
+}
+
+void isNotified (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    if (command->argc == 0)
+    {
+        postReply (bot->room, "One argument required.", command->message);
+        return;
+    }
+    
+    long userID = strtol (command->argv [0], NULL, 10);
+    
+    if (!validUserID (bot, userID))
+    {
+        postReply (bot->room, "Please enter a valid user id.", command->message);
+        return;
+    }
+    
+    int check = 0;
+    
+    if (command->message->user->userID == userID)
+    {
+        amINotified (command, ctx);
+        return;
+    }
+    
+    Notify *notify = getNotificationByID (bot, userID);
+    
+    if (notify == NULL)
+    {
+        postReply (bot->room, "That user is no currently in the notification list.", command->message);
+    }
+    else if (notify->type == 0)
+    {
+        postReply (bot->room, "That user is currently opted-in.", command->message);
+    }
+    else if (notify->type == 1)
+    {
+        postReply (bot->room, "That user is currently notified for all reports.");
+    }
+    
+    return;
+}
+
+void printNotifiedUsers (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    char *message = malloc (sizeof (127));
+    char *messageString = malloc (sizeof (127 * (bot->totalNotifications + 2))
+    
+    sprintf (message, "There are totally %d notified users: ", bot->totalNotifications);
+    postReply (bot->room, message, command->message);
+    
+    Notify **notifications = bot->notify;
+    
+    sprintf (messageString, "Opted-in:\n");
+    
+    for (int i = 0; i < bot->totalNotifications; i ++)
+    {
+        Notify *notify = notifications [i];
+        
+        if (notify->type == 0)
+        {
+            sprintf (messageString + strlen (messageString), "%s\n", getUsernameByID (bot, notify->userID));
+        }
+    }
+    
+    sprintf (messageString + strlen (messageString), "\nNotified Users:\n");
+    
+    for (int i = 0; i < bot->totalNotifications; i ++)
+    {
+        Notify *notify = notifications [i];
+        
+        if (notify->type == 1)
+        {
+            sprintf (messageString + strlen (messageString), "%s\n", getUsernameByID (bot, notify->userID));
+        }
+    }
+    
+    postMessage (bot->room, messageString);
+    
+    free (messageString);
+    free (message);
+    
+    return;
+}
+
 #endif /* misc_commands_h */
