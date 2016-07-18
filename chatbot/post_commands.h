@@ -338,6 +338,10 @@ void postInfo (RunningCommand *command, void *ctx)
     {
         Report *report = reports [i];
         
+        if (!report) {
+            continue;
+        }
+        
         copyPostID = report->post->postID;
         
         if (copyPostID == postID)
@@ -357,7 +361,7 @@ void postInfo (RunningCommand *command, void *ctx)
             
             sprintf (link, "http://stackoverflow.com/%s/%lu", post->isAnswer ? "a" : "q", postID);
             
-            sprintf (message, "[Your Post](%s) was reported recently. It's current status is %s.",
+            sprintf (message, "[That post](%s) was reported recently. It's current status is %s.",
                      link, status);
             
             postReply (bot->room, message, command->message);
@@ -365,7 +369,7 @@ void postInfo (RunningCommand *command, void *ctx)
         }
     }
     
-    postReply (bot->room, "Your post was not reported recently.", command->message);
+    postReply (bot->room, "That post was not reported recently.", command->message);
     
     return;
 }
