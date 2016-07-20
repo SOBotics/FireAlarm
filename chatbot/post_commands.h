@@ -449,6 +449,78 @@ void printUnclosedTP (RunningCommand *command, void *ctx)
     postReply (bot->room, "True reports with close votes are:", command->message);
     postMessage (bot->room, message);
     
+    free (message);
+    
+    return;
+}
+
+void printClosedFP (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    Report **reports = bot->latestReports;
+    
+    char *message = malloc (sizeof (264 * 10));
+    int f = 0;
+    
+    for (int i = 0; i < REPORT_MEMORY && f < 6; i ++)
+    {
+        Report *report = reports [i];
+        
+        if (!report->confirmation)
+        {
+            int cv = getCloseVotesByID (bot, report->post->postID);
+            Post *post = report->post;
+            
+            if (cv > 4)
+            {
+                sprintf (message + strlen (message), "%d close votes: [%s](http://stackoverflow.com/%s/%lu)",
+                         cv, post->title, post->isAnswer ? "a" : "q", post->postID);
+                
+                f ++;
+            }
+        }
+    }
+    
+    postReply (bot->room, "False reports which are closed are:", command->message);
+    postMessage (bot->room, message);
+    
+    free (message);
+    
+    return;
+}
+
+void printCloseVotesOnFP (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    Report **reports = bot->latestReports;
+    
+    char *message = malloc (sizeof (264 * 10));
+    int f = 0;
+    
+    for (int i = 0; i < REPORT_MEMORY && f < 6; i ++)
+    {
+        Report *report = reports [i];
+        
+        if (!report->confirmation)
+        {
+            int cv = getCloseVotesByID (bot, report->post->postID);
+            Post *post = report->post;
+            
+            if (cv > 0 && cv < 5)
+            {
+                sprintf (message + strlen (message), "%d close votes: [%s](http://stackoverflow.com/%s/%lu)",
+                         cv, post->title, post->isAnswer ? "a" : "q", post->postID);
+                
+                f ++;
+            }
+        }
+    }
+    
+    postReply (bot->room, "False positive reports with close votes are:", command->message);
+    postMessage (bot->room, message);
+    
+    free (message);
+    
     return;
 }
 
