@@ -23,7 +23,7 @@ void addUserPriv (RunningCommand *command, void *ctx)
     char *privType = command->argv [1];
     int groupType = privilegeNamed(privType);
     
-    if (userID <= 0)
+    if (!isValidUserID (bot, userID))
     {
         postReply (bot->room, "Please enter a valid User ID.", command->message);
         return;
@@ -67,7 +67,7 @@ void removeUserPriv (RunningCommand *command, void *ctx)
     char *privType = command->argv [1];
     int groupType = privilegeNamed(privType);
     
-    if (userID <= 0)
+    if (!isValidUserID (bot, userID))
     {
         postReply (bot->room, "Please enter a valid User ID.", command->message);
         return;
