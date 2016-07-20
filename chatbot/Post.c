@@ -49,13 +49,26 @@ int getCloseVotesByID (ChatBot *bot, unsigned long postID)
     unsigned max = 256;
     char request [max];
     
+    checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
+                                   "api.stackexchange.com/2.2/filters/create"
+                                   "?unsafe=false&key="API_KEY
+                                   ));
+    checkCURL(curl_easy_perform(curl));
+        
+    cJSON *json = cJSON_Parse(buffer.data);
+    free(buffer.data);
+    buffer.data = NULL;
+        
+    cJSON *items = cJSON_GetObjectItem(json, "items");
+    char *filter = cJSON_GetObjectItem(cJSON_GetArrayItem(items, 0), "filter")->valuestring;
+    
     snprintf (request, max,
-              "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=!5-dm_.B4Dkg%%29AM2phiJMbbo4oPnNg.YWfy%%2838d",
-              postID);
+              "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=%s",
+              postID, filter);
+              
+    free (filter);
               
     curl_easy_setopt(curl, CURLOPT_URL, request);
-    
-    
     
     checkCURL(curl_easy_perform(curl));
     
