@@ -436,7 +436,7 @@ void printUnclosedTP (RunningCommand *command, void *ctx)
             int cv = getCloseVotesByID (bot, report->post->postID);
             Post *post = report->post;
             
-            if (!isPostClosed 9bot, post->postID)
+            if (!isPostClosed (bot, post->postID))
             {
                 sprintf (message + strlen (message), "%d close votes: [%s](http://stackoverflow.com/%s/%lu)",
                          cv, post->title, post->isAnswer ? "a" : "q", post->postID);
@@ -461,7 +461,49 @@ void printUnclosedTP (RunningCommand *command, void *ctx)
     return;
 }
 
-void printClosedFP (RunningCommand *command, void *ctx)
+void printClosedTP (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    Report **reports = bot->latestReports;
+    
+    char *message = malloc (sizeof (256 * 10));
+    int f = 0;
+    
+    for (int i = 0; i < REPORT_MEMORY && f < 6; i ++)
+    {
+        Report *report = reports [i];
+        
+        if (report->confirmation)
+        {
+            int cv = getCloseVotesByID (bot, report->post->postID);
+            Post *post = report->post;
+            
+            if (isPostClosed (bot, post->postID))
+            {
+                sprintf (message + strlen (message), "%s: [%s](http://stackoverflow.com/%s/%lu)",
+                         getClosedReasonByID (bot, post->postID), post->title, post->isAnswer ? "a" : "q", post->postID);
+                
+                f ++;
+            }
+        }
+    }
+    
+    if (message == NULL)
+    {
+        postReply (bot->room, "There are currently no reports true positive reports which are closed.", command->message);
+        free (message);
+        return;
+    }
+    
+    postReply (bot->room, "True reports which are closed are:", command->message);
+    postMessage (bot->room, message);
+    
+    free (message);
+    
+    return;
+}
+
+void printClosedTP (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     Report **reports = bot->latestReports;
@@ -473,7 +515,7 @@ void printClosedFP (RunningCommand *command, void *ctx)
     {
         Report *report = reports [i];
         
-        if (!report->confirmation)
+        if (report->confirmation)
         {
             Post *post = report->post;
             
