@@ -104,7 +104,7 @@ int getCloseVotesByID (ChatBot *bot, unsigned long postID)
     return cvCount;
 }
 
-int isPostClosed (ChatBot *bot, unsigned long userID)
+int isPostClosed (ChatBot *bot, unsigned long postID)
 {
     pthread_mutex_lock(&bot->room->clientLock);
     CURL *curl = bot->room->client->curl;
@@ -181,7 +181,7 @@ int isPostClosed (ChatBot *bot, unsigned long userID)
     }
 }
 
-char *getClosedReasonByID (ChatBot *bot, unsigned long userID)
+char *getClosedReasonByID (ChatBot *bot, unsigned long postID)
 {
     if (!isPostClosed (bot, userID))
     {
