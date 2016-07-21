@@ -436,7 +436,7 @@ void printUnclosedTP (RunningCommand *command, void *ctx)
             int cv = getCloseVotesByID (bot, report->post->postID);
             Post *post = report->post;
             
-            if (cv > 0 && cv < 5)
+            if (!isPostClosed 9bot, post->postID)
             {
                 sprintf (message + strlen (message), "%d close votes: [%s](http://stackoverflow.com/%s/%lu)",
                          cv, post->title, post->isAnswer ? "a" : "q", post->postID);
@@ -444,6 +444,13 @@ void printUnclosedTP (RunningCommand *command, void *ctx)
                 f ++;
             }
         }
+    }
+    
+    if (message == NULL)
+    {
+        postReply (bot->room, "There are currently no reports true positive reports which are not closed.", command->message);
+        free (message);
+        return;
     }
     
     postReply (bot->room, "True reports with close votes are:", command->message);
@@ -480,6 +487,13 @@ void printClosedFP (RunningCommand *command, void *ctx)
         }
     }
     
+    if (message == NULL)
+    {
+        postReply (bot->room, "There are currently no false positive reports which are closed.", command->message);
+        free (message);
+        return;
+    }
+    
     postReply (bot->room, "False reports which are closed are:", command->message);
     postMessage (bot->room, message);
     
@@ -513,6 +527,11 @@ void printCloseVotesOnFP (RunningCommand *command, void *ctx)
                 f ++;
             }
         }
+    }
+    
+    if (message == NULL)
+    {
+        postReply (bot->room, "There are currently no false positive reports with close votes.", command->message);
     }
     
     postReply (bot->room, "False positive reports with close votes are:", command->message);
