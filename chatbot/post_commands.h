@@ -468,13 +468,12 @@ void printClosedFP (RunningCommand *command, void *ctx)
         
         if (!report->confirmation)
         {
-            int cv = getCloseVotesByID (bot, report->post->postID);
             Post *post = report->post;
             
-            if (cv > 4)
+            if (isPostClosed (bot, post->postID))
             {
-                sprintf (message + strlen (message), "%d close votes: [%s](http://stackoverflow.com/%s/%lu)",
-                         cv, post->title, post->isAnswer ? "a" : "q", post->postID);
+                sprintf (message + strlen (message), "%s: [%s](http://stackoverflow.com/%s/%lu)",
+                         getClosedReasonByID (bot, post->postID), post->title, post->isAnswer ? "a" : "q", post->postID);
                 
                 f ++;
             }
