@@ -180,3 +180,76 @@ int isPostClosed (ChatBot *bot, unsigned long userID)
         return 1;
     }
 }
+
+char *getClosedReasonByID (ChatBot *bot, unsigned long userID)
+{
+    if (!isPostClosed (bot, userID))
+    {
+        return NULL;
+    }
+    
+    pthread_mutex_lock(&bot->room->clientLock);
+    CURL *curl = bot->room->client->curl;
+    
+    checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
+    OutBuffer buffer;
+    buffer.data = NULL;
+    checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
+    
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip, deflate");
+    
+    unsigned max = 256;
+    char request [max];
+    
+    checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
+                                   "api.stackexchange.com/2.2/filters/create"
+                                   "?unsafe=false&key="API_KEY
+                                   ));
+    checkCURL(curl_easy_perform(curl));
+        
+    cJSON *json = cJSON_Parse(buffer.data);
+    free(buffer.data);
+    buffer.data = NULL;
+        
+    cJSON *items = cJSON_GetObjectItem(json, "items");
+    char *filter = cJSON_GetObjectItem(cJSON_GetArrayItem(items, 0), "filter")->valuestring;
+    
+    snprintf (request, max,
+              "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=%s",
+              postID, filter);
+              
+    free (filter);
+              
+    curl_easy_setopt(curl, CURLOPT_URL, request);
+    
+    checkCURL(curl_easy_perform(curl));
+    
+    checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
+    
+    
+    pthread_mutex_unlock(&bot->room->clientLock);
+    
+    cJSON *json = cJSON_Parse(buffer.data);
+    
+    free(buffer.data);
+    
+    if (!json || cJSON_GetObjectItem(json, "error_id")) {
+        if (json) {
+            cJSON_Delete(json);
+        }
+        puts("Error fetching post!");
+        return 0;
+    }
+    
+    cJSON *backoff;
+    if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
+        char *str;
+        asprintf(&str, "Recieved backoff: %d", backoff->valueint);
+        postMessage(bot->room, str);
+        free(str);
+    }
+    
+    char *closedReason = cJSON_GetObjectItem (json, "closed_reason")->valuestring;
+    
+    return closedReason;
+}
