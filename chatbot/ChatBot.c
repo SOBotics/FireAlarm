@@ -20,7 +20,6 @@
 #include "Client.h"
 
 #define REPORT_HEADER "Potentially bad question"
-#define API_KEY "HNA2dbrFtyTZxeHN6rThNg(("
 //#define THRESHOLD 1000
 
 long THRESHOLD = 1000;
@@ -360,7 +359,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     if (bot->apiFilter == NULL) {
         checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
                                    "api.stackexchange.com/2.2/filters/create"
-                                   "?include=post.title;post.body;question.tags;user.user_id;&unsafe=false&key="API_KEY
+                                   "?include=post.title;post.body;question.tags;user.user_id;question.closed_reason&unsafe=false&key="API_KEY
                                    ));
         checkCURL(curl_easy_perform(curl));
         
@@ -584,7 +583,7 @@ StopAction runChatBot(ChatBot *c) {
         }
     }
     if (c->stopAction != ACTION_NONE) {
-        if (c->room->pendingMessageLinkedList == NULL && (c->runningCommandCount == 0)) {
+        if (c->room->pendingMessageLinkedList == NULL && (c->runningCommandCount == 0) && c->reportsWaiting == 0) {
             return c->stopAction;
         }
     }

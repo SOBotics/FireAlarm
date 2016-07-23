@@ -34,8 +34,8 @@ void deletePost(Post *p) {
     free(p);
 }
 
-int getCloseVotesByID (ChatBot *bot, unsigned long postID)
-{
+int getCloseVotesByID (ChatBot *bot, unsigned long postID) {
+    
     pthread_mutex_lock(&bot->room->clientLock);
     CURL *curl = bot->room->client->curl;
     
@@ -49,24 +49,9 @@ int getCloseVotesByID (ChatBot *bot, unsigned long postID)
     unsigned max = 256;
     char request [max];
     
-    checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
-                                   "api.stackexchange.com/2.2/filters/create"
-                                   "?unsafe=false&key="API_KEY
-                                   ));
-    checkCURL(curl_easy_perform(curl));
-        
-    cJSON *json = cJSON_Parse(buffer.data);
-    free(buffer.data);
-    buffer.data = NULL;
-        
-    cJSON *items = cJSON_GetObjectItem(json, "items");
-    char *filter = cJSON_GetObjectItem(cJSON_GetArrayItem(items, 0), "filter")->valuestring;
-    
     snprintf (request, max,
               "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=%s",
-              postID, filter);
-              
-    free (filter);
+              postID, bot->apiFilter);
               
     curl_easy_setopt(curl, CURLOPT_URL, request);
     
@@ -104,8 +89,8 @@ int getCloseVotesByID (ChatBot *bot, unsigned long postID)
     return cvCount;
 }
 
-int isPostClosed (ChatBot *bot, unsigned long postID)
-{
+int isPostClosed (ChatBot *bot, unsigned long postID) {
+    
     pthread_mutex_lock(&bot->room->clientLock);
     CURL *curl = bot->room->client->curl;
     
@@ -119,24 +104,9 @@ int isPostClosed (ChatBot *bot, unsigned long postID)
     unsigned max = 256;
     char request [max];
     
-    checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
-                                   "api.stackexchange.com/2.2/filters/create"
-                                   "?unsafe=false&key="API_KEY
-                                   ));
-    checkCURL(curl_easy_perform(curl));
-        
-    cJSON *json = cJSON_Parse(buffer.data);
-    free(buffer.data);
-    buffer.data = NULL;
-        
-    cJSON *items = cJSON_GetObjectItem(json, "items");
-    char *filter = cJSON_GetObjectItem(cJSON_GetArrayItem(items, 0), "filter")->valuestring;
-    
     snprintf (request, max,
               "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=%s",
-              postID, filter);
-              
-    free (filter);
+              postID, bot->apiFilter);
               
     curl_easy_setopt(curl, CURLOPT_URL, request);
     
@@ -183,7 +153,7 @@ int isPostClosed (ChatBot *bot, unsigned long postID)
 
 char *getClosedReasonByID (ChatBot *bot, unsigned long postID)
 {
-    if (!isPostClosed (bot, userID))
+    if (!isPostClosed (bot, postID))
     {
         return NULL;
     }
@@ -201,25 +171,10 @@ char *getClosedReasonByID (ChatBot *bot, unsigned long postID)
     unsigned max = 256;
     char request [max];
     
-    checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
-                                   "api.stackexchange.com/2.2/filters/create"
-                                   "?unsafe=false&key="API_KEY
-                                   ));
-    checkCURL(curl_easy_perform(curl));
-        
-    cJSON *json = cJSON_Parse(buffer.data);
-    free(buffer.data);
-    buffer.data = NULL;
-        
-    cJSON *items = cJSON_GetObjectItem(json, "items");
-    char *filter = cJSON_GetObjectItem(cJSON_GetArrayItem(items, 0), "filter")->valuestring;
-    
     snprintf (request, max,
               "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=%s",
-              postID, filter);
-              
-    free (filter);
-              
+              postID, bot->apiFilter);
+    
     curl_easy_setopt(curl, CURLOPT_URL, request);
     
     checkCURL(curl_easy_perform(curl));
@@ -230,6 +185,14 @@ char *getClosedReasonByID (ChatBot *bot, unsigned long postID)
     pthread_mutex_unlock(&bot->room->clientLock);
     
     cJSON *json = cJSON_Parse(buffer.data);
+    
+    free(buffer.data);
+    
+    curl_easy_setopt(curl, CURLOPT_URL, request);
+    
+    checkCURL(curl_easy_perform(curl));
+    
+    checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
     
     free(buffer.data);
     

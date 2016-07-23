@@ -9,6 +9,9 @@
 #ifndef ChatBot_h
 #define ChatBot_h
 
+
+#define API_KEY "HNA2dbrFtyTZxeHN6rThNg(("
+
 #include <stdio.h>
 #include "ChatRoom.h"
 #include "Command.h"

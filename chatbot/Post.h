@@ -22,5 +22,7 @@ typedef struct {
 Post *createPost(const char *title, const char *body, unsigned long postID, unsigned char isAnswer, unsigned long userID);
 void deletePost(Post *p);
 int getCloseVotesByID (ChatBot *bot, unsigned long postID);
+int isPostClosed (ChatBot *bot, unsigned long postID);
+char *getClosedReasonByID (ChatBot *bot, unsigned long postID);
 
 #endif /* Post_h */

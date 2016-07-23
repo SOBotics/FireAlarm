@@ -475,7 +475,6 @@ void printClosedTP (RunningCommand *command, void *ctx)
         
         if (report->confirmation)
         {
-            int cv = getCloseVotesByID (bot, report->post->postID);
             Post *post = report->post;
             
             if (isPostClosed (bot, post->postID))
@@ -496,47 +495,6 @@ void printClosedTP (RunningCommand *command, void *ctx)
     }
     
     postReply (bot->room, "True reports which are closed are:", command->message);
-    postMessage (bot->room, message);
-    
-    free (message);
-    
-    return;
-}
-
-void printClosedTP (RunningCommand *command, void *ctx)
-{
-    ChatBot *bot = ctx;
-    Report **reports = bot->latestReports;
-    
-    char *message = malloc (sizeof (264 * 10));
-    int f = 0;
-    
-    for (int i = 0; i < REPORT_MEMORY && f < 6; i ++)
-    {
-        Report *report = reports [i];
-        
-        if (report->confirmation)
-        {
-            Post *post = report->post;
-            
-            if (isPostClosed (bot, post->postID))
-            {
-                sprintf (message + strlen (message), "%s: [%s](http://stackoverflow.com/%s/%lu)",
-                         getClosedReasonByID (bot, post->postID), post->title, post->isAnswer ? "a" : "q", post->postID);
-                
-                f ++;
-            }
-        }
-    }
-    
-    if (message == NULL)
-    {
-        postReply (bot->room, "There are currently no false positive reports which are closed.", command->message);
-        free (message);
-        return;
-    }
-    
-    postReply (bot->room, "False reports which are closed are:", command->message);
     postMessage (bot->room, message);
     
     free (message);

@@ -12,9 +12,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+char curlErrorBuf[CURL_ERROR_SIZE] = {0};
+
 void checkCurlError(CURLcode code, const char *func, const char *file, int line) {
     if (code) {
-        fprintf(stderr, "CURL error: %d\nfile: %s\nline: %d\nfunction: %s\n", code, file, line, func);
+        fprintf(stderr, "CURL error: %s (%d)\nfile: %s\nline: %d\nfunction: %s\n", curlErrorBuf, code, file, line, func);
         exit(EXIT_FAILURE);
     }
 }
@@ -67,6 +69,8 @@ Client *createClient(const char *host, const char *cookiefile) {
     CURL *curl = curl_easy_init();
     c->curl = curl;
     //Configure CURL
+    
+    checkCURL(curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curlErrorBuf));
     
     //Uncomment this to pass all requests through mitmproxy, for debugging.
     //checkCURL(curl_easy_setopt(curl, CURLOPT_PROXY, "https://127.0.0.1:8080"));
