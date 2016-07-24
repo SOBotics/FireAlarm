@@ -695,7 +695,7 @@ int isValidUserID (ChatBot *bot, long userID)
 
 char *getUsernameByID (ChatBot *bot, unsigned long userID)
 {
-    if (isUserInPingableList (bot, userID))
+    /*if (isUserInPingableList (bot, userID))
     {
         pthread_mutex_lock(&bot->room->clientLock);
         const int maxUrlLength = 256;
@@ -741,7 +741,7 @@ char *getUsernameByID (ChatBot *bot, unsigned long userID)
         return NULL;
     }
     else if (!isUserInPingableList(bot, userID))
-    {
+    {*/
         pthread_mutex_lock(&bot->room->clientLock);
         CURL *curl = bot->room->client->curl;
         
@@ -798,7 +798,7 @@ char *getUsernameByID (ChatBot *bot, unsigned long userID)
             return 0;
         }
         return username;
-    }
+    //}
     
     return NULL;
 }
