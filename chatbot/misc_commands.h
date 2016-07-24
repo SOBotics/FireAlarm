@@ -318,4 +318,66 @@ void printNotifiedUsers (RunningCommand *command, void *ctx)
     return;
 }
 
+void apiQuota (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    
+    pthread_mutex_lock(&bot->room->clientLock);
+    CURL *curl = bot->room->client->curl;
+    
+    checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
+    OutBuffer buffer;
+    buffer.data = NULL;
+    checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
+    
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip, deflate");
+    
+    unsigned max = 256;
+    char request [max];
+    
+    snprintf (request, max,
+              "api.stackexchange.com/2.2/info?site=stackoverflow");
+              
+    curl_easy_setopt(curl, CURLOPT_URL, request);
+    
+    checkCURL(curl_easy_perform(curl));
+    
+    checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
+    
+    
+    pthread_mutex_unlock(&bot->room->clientLock);
+    
+    cJSON *json = cJSON_Parse(buffer.data);
+    
+    free(buffer.data);
+    
+    if (!json || cJSON_GetObjectItem(json, "error_id")) {
+        if (json) {
+            cJSON_Delete(json);
+        }
+        puts("Error fetching post!");
+        return 0;
+    }
+    
+    cJSON *backoff;
+    if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
+        char *str;
+        asprintf(&str, "Recieved backoff: %d", backoff->valueint);
+        postMessage(bot->room, str);
+        free(str);
+    }
+    
+    int apiQuota = cJSON_GetObjectItem (json, "quota_remaining")->valueint;
+    
+    cJSON_Delete (json);
+    
+    char *message;
+    
+    asprintf (&message, "The current api quota is %d.", apiQuota);
+    postReply (bot->room, message, command->message);
+    
+    free (message);
+    return;
+}
+
 #endif /* misc_commands_h */
