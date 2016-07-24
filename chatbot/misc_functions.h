@@ -9,3 +9,4 @@
 #include <stdio.h>
 
 void lowercase (char *str);
+void removeSpaces (char* source);
