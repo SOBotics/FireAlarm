@@ -735,6 +735,7 @@ int main(int argc, const char * argv[]) {
         createCommand("unclosed t", 0, printUnclosedTP),
         createCommand("unclosed tp", 0, printUnclosedTP),
         createCommand("unclosed true", 0, printUnclosedTP),
+        createCommand("api quota", 0, apiQuota),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify);
