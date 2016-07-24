@@ -80,5 +80,7 @@ char *getNotificationString (ChatBot *bot)
         }
     }
     
+    removeSpaces (str);
+    
     return str;
 }
