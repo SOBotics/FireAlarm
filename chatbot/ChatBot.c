@@ -583,7 +583,7 @@ StopAction runChatBot(ChatBot *c) {
         }
     }
     if (c->stopAction != ACTION_NONE) {
-        if (c->room->pendingMessageLinkedList == NULL && (c->runningCommandCount == 0) && c->reportsWaiting == 0) {
+        if (c->room->pendingMessageLinkedList == NULL && (c->runningCommandCount == 0) && c->reportsWaiting == -1) {
             return c->stopAction;
         }
     }

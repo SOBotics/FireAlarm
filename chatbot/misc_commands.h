@@ -129,10 +129,9 @@ void optIn (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     
-    Notify **notify = bot->notify;
+    Notify **notify = bot->notify = realloc(bot->notify, ++bot->totalNotifications * sizeof(Notify*));
     
     notify[bot->totalNotifications - 1] = createNotification (0, command->message->user->userID);
-    bot->totalNotifications ++;
     
     postReply (bot->room, "Opt-in successful. You will now be pinged for reports.", command->message);
     
