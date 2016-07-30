@@ -169,6 +169,99 @@ void analyzeReports(ChatBot *bot) {
         }
     }
     
+    //Now coming to analyzing the tag filter
+    char **tagsCaught;
+    int j = 0;
+    trueOccurences = 0;
+    falseOccurences = 0;
+    totalOccurences = 0;
+    
+    for (i = 0; i < bot->filterCount; i ++)
+    {
+        if (bot->filters [i]->type == 3)
+        {
+            tagsCaught [j] = bot->filters [i]->filter;
+            j++;
+        }
+    }
+    
+    //Now looking for patterns of more bad tags which can be added to the list
+    j = 0;
+    int k = 0;
+    int totalNewTags = 0;
+    char **newTags;
+    int tps [50];
+    int fps [50];
+    int tpRate [50];
+    for (i = 0; i < REPORT_MEMORY; i ++)
+    {
+        report = reports [i];
+        
+        char **postTags = getTagsByID (bot, report->post->postID);
+        
+        for (j = 0; j < 5; j ++)
+        {
+            char *currentTag = postTags [i];
+            
+            if (!isTagProgrammingRelated (currentTag) && !isTagInFilter (bot, currentTag))
+            {
+                for (k = 0; k < REPORT_MEMORY; k ++)
+                {
+                    Report *currentReport = reports [k];
+                    
+                    if (currentReport->messageID != report->messageID)
+                    {
+                        char **currentPostTags = getTagsByID (bot, currentReport->postID)
+                        
+                        if (postHasTags (currentReport->post, currentTag))
+                        {
+                            if (currentReport->confirmation)
+                            {
+                                trueOccurences ++;
+                            }
+                            else if (!currentReport->confirmation)
+                            {
+                                falseOccurences ++;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if ((trueOccurences - falseOccurences) >= 15)
+            {
+                trueOccurences = 0;
+                falseOccurences = 0;
+                newTags [totalNewTags] = currentTag;
+                tps [totalNewTags] = trueOccurences;
+                fps [totalNewTags] = falseOccurences;
+                tpRate [totalNewTags] = trueOccurences / falseOccurences;
+                totalNewTags ++;
+            }
+            if (trueOccurences > 0 || falseOccurences > 0)
+            {
+                trueOccurences = 0;
+                falseOccurences = 0;
+            }
+        }
+    }
+    
+    Filter **filters = bot->filters;
+    puts("            Tags    TP rate      TPs     FPs\n");
+    for (i = 0; i < totalNewTags; i ++)
+    {
+        char *desc = malloc (sizeof (char) * 50);
+        
+        sprintf (desc, "[tag:%s]", newTags [i]);
+        
+        filters = realloc (filters, ++bot->filterCount * sizeof (Filter *));
+        filters [bot->filterCount - 1] = createFilter (desc, newTags [i], 3, tps [i], fps [i]);
+        
+        printf("%16s\t%4f\t%4d\t%4d\n", newTags [i], tpRate [i], tps [i], fps [i]);
+    }
+    
+    free (desc);
+    return;
 }
 
 static Report **parseReports(ChatBot *bot, cJSON *json) {
@@ -449,7 +542,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
     {
         for (int i = 0; i < bot->filterCount; i++) {
             unsigned start, end;
-            if (postMatchesFilter(post, bot->filters[i], &start, &end)) {
+            if (postMatchesFilter(bot, post, bot->filters[i], &start, &end)) {
                 
                 const char *desc = bot->filters[i]->desc;
                 messageBuf = realloc(messageBuf, strlen(messageBuf) + strlen(desc) + 16);
@@ -464,13 +557,13 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         }
     }
     
-    if (bot->modes->lengthFilter)
+    /*if (bot->modes->lengthFilter)
     {
         if (strlen (post->body) < 200)
         {
             bodyLength = (unsigned)strlen (post->body);
         }
-    }
+    }*/
     
     if (likelihood > THRESHOLD && (recentlyReported (post->postID, bot) == 0)) {
         const char *notifString = getNotificationString(bot);
@@ -538,11 +631,42 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         free (message);
         return 0;
     }*/
+    /*else if (postMatchesTagFilter (post) && (recentlyReported (post->postID, bot) == 0))
+    {
+        const char *notifString = getNotificationString(bot);
+        sprintf (messageBuf, "bad tags in body");
+        const size_t maxMessage = strlen(messageBuf) + strlen(post->title) + strlen(notifString) + strlen(REPORT_HEADER) + 256;
+        char *message = malloc(maxMessage);
+        char *notif = getNotificationString(bot);
+        snprintf(message, maxMessage,
+                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) %s",
+                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, notif);
+        free(notif);
+        
+        postMessage(bot->room, message);
+        
+        if (bot->latestReports[REPORT_MEMORY-1]) {
+            free(bot->latestReports[REPORT_MEMORY-1]->post);
+            free(bot->latestReports[REPORT_MEMORY-1]);
+        }
+        int i = REPORT_MEMORY;
+        while(--i) {
+            bot->latestReports[i] = bot->latestReports[i-1];
+        }
+        Report *report = malloc(sizeof(Report));
+        report->post = post;
+        report->confirmation = -1;
+        //report->likelihood = likelihood;
+        bot->latestReports[0] = report;
+        free(message);
+        free (messageBuf);
+        return 0;
+    }
     else {
         deletePost(post);
         free (messageBuf);
         return 1;
-    }
+    }*/
 }
 
 void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed) {
@@ -801,4 +925,140 @@ char *getUsernameByID (ChatBot *bot, unsigned long userID)
     //}
     
     return NULL;
+}
+
+char **getTagsByID (ChatBot *bot, unsigned long postID)
+{
+    pthread_mutex_lock(&bot->room->clientLock);
+    CURL *curl = bot->room->client->curl;
+    
+    checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
+    OutBuffer buffer;
+    buffer.data = NULL;
+    checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
+    
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip, deflate");
+    
+    unsigned max = 256;
+    char request [max];
+    
+    snprintf (request, max,
+              "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=%s",
+              postID, bot->apiFilter);
+              
+    curl_easy_setopt(curl, CURLOPT_URL, request);
+    
+    checkCURL(curl_easy_perform(curl));
+    
+    checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
+    
+    
+    pthread_mutex_unlock(&bot->room->clientLock);
+    
+    cJSON *json = cJSON_Parse(buffer.data);
+    
+    free(buffer.data);
+    
+    if (!json || cJSON_GetObjectItem(json, "error_id")) {
+        if (json) {
+            cJSON_Delete(json);
+        }
+        puts("Error fetching post!");
+        return 0;
+    }
+    
+    cJSON *backoff;
+    if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
+        char *str;
+        asprintf(&str, "Recieved backoff: %d", backoff->valueint);
+        postMessage(bot->room, str);
+        free(str);
+    }
+    
+    //char **tags = cJSON_GetArrayItem (json, "tags");
+    
+    char **tags = cJSON_GetObjectItem (json, "tags")->valuestring;
+    
+    cJSON_Delete (json);
+    return tags;
+}
+
+Filter *getFilterByTag (ChatBot *bot, char *tag)
+{
+    if (!isTagInFilter (bot, tag))
+    {
+        return NULL;
+    }
+    
+    Filter **filters = bot->filters;
+    
+    for (int i = 0; i < bot->totalFilters; i ++)
+    {
+        Filter *filter = filters [i];
+        
+        if (filter->type == 3)
+        {
+            if (strcmp (filter->filter, tag) == 0)
+            {
+                return filter;
+            }
+        }
+    }
+    
+    return NULL;
+}
+
+Filter **getTagsCaughtInPost (ChatBot *bot, Post *post)
+{
+    Filter *filters = bot->filters;
+    char **tags = getTagsByID (bot, post->postID);
+    char **tagsCaught;
+    
+    int k = 0;
+    for (int i = 0; i < bot->totalFilters; i ++)
+    {
+        Filter *filter = filters [i];
+        
+        if (filter->type == 3)
+        {
+            for (int j = 0; j < 5; j ++)
+            {
+                if (strcmp (tags [j], filter->filter) == 0)
+                {
+                    tagsCaught [k] = filter->filter;
+                    k ++;
+                }
+            }
+        }
+    }
+    
+    Filter **filtersCaught;
+    
+    for (i = 0; i < 5; i ++)
+    {
+        filtersCaught [i] = getFilterByTag (bot, tagsCaught [i]);
+    }
+    
+    return filtersCaught;
+}
+
+void editFilter (ChatBot *bot, Post *post, int confirm)
+{
+    Filters **filtersCaught = getTagsCaughtInPost (bot, post);
+    
+    for (int i = 0; i < 5; i ++)
+    {
+        Filter *filter = filtersCaught [i];
+        
+        if (confirm)
+        {
+            filter->truePositives ++;
+        }
+        else if (!confirm)
+        {
+            filter->falsePositives ++;
+        }
+    }
+     
+    return;
 }
