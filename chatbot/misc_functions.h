@@ -10,3 +10,6 @@
 
 void lowercase (char *str);
 void removeSpaces (char* source);
+int isTagProgrammingRelated (char *tag);
+int postHasTags (Post *post, char *tag);
+unsigned isTagInFilter (ChatBot *bot, char *tag);
