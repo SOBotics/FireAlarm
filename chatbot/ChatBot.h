@@ -87,5 +87,9 @@ void testPost (ChatBot *bot, Post *post, RunningCommand *command);
 int recentlyReported (long postID, ChatBot *bot);
 char *getUsernameByID (ChatBot *bot, unsigned long userID);
 int isValidUserID (ChatBot *bot, long userID);
+void editFilter (ChatBot *bot, Post *post, int confirm);
+Filter **getTagsCaughtInPost (ChatBot *bot, Post *post);
+Filter *getFilterByTag (ChatBot *bot, char *tag);
+char **getTagsByID (ChatBot *bot, unsigned long postID);
 
 #endif /* ChatBot_h */
