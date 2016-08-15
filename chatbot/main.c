@@ -35,11 +35,11 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
     char *message;
     //char messageString [256];
     //char subString [127];
-    
+
     asprintf (&str, "%s", command->message->content);
     asprintf(&message, "Unrecognized command `%s`.", command->message->content);
     /*sprintf (subString, "%s Did you want to type in", message);
-    
+
     if (strcasestr (str, "to") == str || strcasestr (str, "tl") == str || strcasestr (str, "t[") == str || strcasestr (str, "t{") == str)
     {
         sprintf (messageString, "%s `tp`?", subString);
@@ -184,10 +184,10 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
         free (message);
         return;
     }*/
-    
-        
+
+
     postReply(bot->room, message, command->message);
-    
+
     free(str);
     free (message);
     return;
@@ -232,27 +232,27 @@ Filter **loadFilters() {
                                   0,
                                   0
                                   );
-        
+
         filters[1] = NULL;
         return filters;
     }
-    
+
     fseek(file, 0, SEEK_END);
     long size = ftell(file);
     rewind(file);
-    
+
     char *buf = malloc(size+1);
     fread(buf, size, 1, file);
     buf[size] = 0;
-    
+
     fclose(file);
-    
+
     cJSON *json = cJSON_Parse(buf);
     free(buf);
-    
+
     unsigned filterCount = cJSON_GetArraySize(json);
     Filter **filters = malloc(sizeof(Filter*) * (filterCount + 1));
-    
+
     for (int i = 0; i < filterCount; i++) {
         cJSON *filter = cJSON_GetArrayItem(json, i);
         const char *desc = cJSON_GetObjectItem(filter, "description")->valuestring;
@@ -269,9 +269,9 @@ Filter **loadFilters() {
         filters[i] = createFilter(desc, expr, type, truePositives, falsePositives);
     }
     filters[filterCount] = NULL;
-    
+
     cJSON_Delete(json);
-    
+
     return filters;
 }
 
@@ -279,7 +279,7 @@ PrivRequest **loadPrivRequests ()
 {
     puts ("Loading Privilege Requests...");
     FILE *file = fopen ("privRequest.json", "r");
-    
+
     if (!file)
     {
         puts ("privRequest.json does not exist. Returning an empty list...");
@@ -287,36 +287,36 @@ PrivRequest **loadPrivRequests ()
         *list = NULL;
         return list;
     }
-    
+
     fseek(file, 0, SEEK_END);
     long size = ftell(file);
     rewind(file);
-    
+
     char *buf = malloc(size+1);
     fread(buf, size, 1, file);
     buf[size] = 0;
-    
+
     cJSON *json = cJSON_Parse (buf);
     free (buf);
-    
+
     unsigned total = cJSON_GetArraySize(json);
     PrivRequest **requests = malloc (sizeof (PrivRequest*) * (total + 1));
-    
+
     for (int i = 0; i < total; i ++)
     {
         cJSON *request = cJSON_GetArrayItem(json, i);
-        
+
         long userID = cJSON_GetObjectItem (request, "user_id")->valueint;
         int groupType = cJSON_GetObjectItem (request, "group_type")->valueint;
-        
+
         requests [i] = createPrivRequest (userID, groupType);
     }
-    
+
     requests[total] = NULL;
-    
+
     cJSON_Delete (json);
     fclose (file);
-    
+
     return requests;
 }
 
@@ -324,7 +324,7 @@ Notify **loadNotifications ()
 {
     puts ("Loading Notifications...");
     FILE *file = fopen ("notifications.json", "r");
-    
+
     if (!file)
     {
         puts ("notifications.json does not exist. Returning an empty list...");
@@ -332,92 +332,92 @@ Notify **loadNotifications ()
         *list = NULL;
         return list;
     }
-    
+
     fseek(file, 0, SEEK_END);
     long size = ftell(file);
     rewind(file);
-    
+
     char *buf = malloc(size+1);
     fread(buf, size, 1, file);
     buf[size] = 0;
-    
+
     cJSON *json = cJSON_Parse (buf);
     free (buf);
-    
+
     unsigned total = cJSON_GetArraySize(json);
     Notify **notify = malloc (sizeof (Notify*) * (total + 1));
-    
+
     for (int i = 0; i < total; i ++)
     {
         cJSON *n = cJSON_GetArrayItem(json, i);
-        
+
         long userID = cJSON_GetObjectItem (n, "user_id")->valueint;
         int type = cJSON_GetObjectItem (n, "type")->valueint;
-        
+
         notify [i] = createNotification (type, userID);
     }
-    
+
     notify[total] = NULL;
-    
+
     cJSON_Delete (json);
     fclose (file);
-    
+
     return notify;
 }
 
 void saveNotifications (Notify **notify, unsigned totalNotifications)
 {
     FILE *file = fopen ("notifications.json", "w");
-    
+
     cJSON *json = cJSON_CreateArray();
-    
+
     for (int i = 0; i < totalNotifications; i ++)
     {
         Notify *n = notify [i];
         cJSON *object = cJSON_CreateObject();
-        
+
         cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (n->userID));
         cJSON_AddItemToObject (object, "type", cJSON_CreateNumber (n->type));
-        
+
         cJSON_AddItemToArray(json, object);
     }
-    
+
     char *str = cJSON_Print(json);
     cJSON_Delete(json);
-    
+
     fwrite(str, strlen(str), 1, file);
-    
+
     fclose (file);
     free (str);
-    
+
     return;
 }
 
 void savePrivRequests (PrivRequest **requests, unsigned totalRequests)
 {
     FILE *file = fopen ("privRequest.json", "w");
-    
+
     cJSON *json = cJSON_CreateArray();
-    
+
     for (int i = 0; i < totalRequests; i ++)
     {
         PrivRequest *request = requests [i];
         cJSON *object = cJSON_CreateObject();
-        
+
         cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (request->userID));
         cJSON_AddItemToObject (object, "group_type", cJSON_CreateNumber (request->groupType));
-        
+
         cJSON_AddItemToArray(json, object);
     }
-    
+
     char *str = cJSON_Print(json);
     cJSON_Delete(json);
-    
+
     fwrite(str, strlen(str), 1, file);
-    
+
     fclose (file);
     free (str);
-    
+
     return;
 }
 
@@ -425,42 +425,42 @@ PrivUser **loadPrivUsers ()
 {
     puts ("Loading Privileged Users...");
     FILE *file = fopen ("privUsers.json", "r");
-    
+
     if (!file)
     {
         puts ("privUsers.json does not exist. Creating skeleton file...");
         PrivUser **users = malloc(sizeof(PrivUser*) * 3);
-        
+
         users [0] = createPrivUser (3476191, 3);    //NobodyNada
         users [1] = createPrivUser (5735775, 3);    //Ashish Ahuja ツ
         users [2] = NULL;
         return users;
     }
-    
+
     fseek(file, 0, SEEK_END);
     long size = ftell(file);
     rewind(file);
-    
+
     char *buf = malloc(size+1);
     fread(buf, size, 1, file);
     buf[size] = 0;
-    
+
     cJSON *json = cJSON_Parse(buf);
     free(buf);
-    
+
     unsigned privUsersCount = cJSON_GetArraySize(json);
     PrivUser **users = malloc(sizeof(PrivUser*) * (privUsersCount + 1));
-    
+
     for (int i = 0; i < privUsersCount; i ++)
     {
         cJSON *user = cJSON_GetArrayItem(json, i);
-        
+
         long userID = cJSON_GetObjectItem (user, "user_id")->valueint;
         int privLevel = cJSON_GetObjectItem (user, "priv_level")->valueint;
         users [i] = createPrivUser (userID, privLevel);
     }
     users [privUsersCount] = NULL;
-    
+
     cJSON_Delete(json);
     return users;
 }
@@ -468,33 +468,33 @@ PrivUser **loadPrivUsers ()
 void savePrivUsers (PrivUser **users, unsigned privUsersCount)
 {
     cJSON *json = cJSON_CreateArray();
-    
+
     for (int i = 0; i < privUsersCount; i ++)
     {
         PrivUser *user = users [i];
         cJSON *object = cJSON_CreateObject();
         cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (user->userID));
         cJSON_AddItemToObject (object, "priv_level", cJSON_CreateNumber (user->privLevel));
-        
+
         cJSON_AddItemToArray(json, object);
     }
-    
+
     char *str = cJSON_Print(json);
     cJSON_Delete(json);
-    
+
     FILE *file = fopen ("privUsers.json", "w");
-    
+
     if (!file)
     {
         fputs ("Failed to open privUsers.json!", stderr);
         return;
     }
-    
+
     fwrite(str, strlen(str), 1, file);
-    
+
     fclose (file);
     free (str);
-    
+
     return;
 }
 
@@ -508,61 +508,61 @@ void saveFilters(Filter **filters, unsigned filterCount) {
     for (int i = 0; i < filterCount; i++) {
         Filter *filter = filters[i];
         cJSON *object = cJSON_CreateObject();
-        
+
         cJSON_AddItemToObject(object, "description", cJSON_CreateString(filter->desc));
         cJSON_AddItemToObject(object, "expression", cJSON_CreateString(filter->filter));
         cJSON_AddItemToObject(object, "type", cJSON_CreateNumber(filter->type));
         cJSON_AddItemToObject(object, "truePositives", cJSON_CreateNumber(filter->truePositives));
         cJSON_AddItemToObject(object, "falsePositives", cJSON_CreateNumber(filter->falsePositives));
-        
+
         cJSON_AddItemToArray(json, object);
     }
-    
-    
+
+
     char *str = cJSON_Print(json);
     cJSON_Delete(json);
-    
+
     FILE *file = fopen("filters.json", "w");
     if (!file) {
         fputs("Failed to open filter file!", stderr);
         return;
     }
-    
+
     fwrite(str, strlen(str), 1, file);
-    
+
     fclose(file);
-    
+
     free(str);
 }
 
 cJSON *loadReports() {
     puts("Loading recent reports...");
     FILE *file = fopen("reports.json", "r");
-    
+
     if (!file) {
         return NULL;
     }
-    
+
     fseek(file, 0, SEEK_END);
     long size = ftell(file);
     rewind(file);
-    
+
     char *buf = malloc(size+1);
     fread(buf, size, 1, file);
     buf[size] = 0;
-    
+
     fclose(file);
-    
+
     cJSON *json = cJSON_Parse(buf);
     free(buf);
-    
+
     return json;
 }
 
 void saveReports(Report *reports[], int reportsUntilAnalysis) {
     cJSON *container = cJSON_CreateObject();
     cJSON *json = cJSON_CreateArray();
-    
+
     for (int i = 0; i < REPORT_MEMORY; i++) {
         if (reports[i] == NULL) {
             cJSON_AddItemToArray(json, cJSON_CreateNull());
@@ -573,31 +573,31 @@ void saveReports(Report *reports[], int reportsUntilAnalysis) {
         cJSON_AddItemToObject(item, "confirmation", cJSON_CreateNumber(reports[i]->confirmation));
         cJSON_AddItemToObject (item, "likelihood", cJSON_CreateNumber (reports [i]->likelihood));
         cJSON_AddItemToObject (item, "body_length", cJSON_CreateNumber (reports [i]->bodyLength));
-        
+
         Post *post = reports[i]->post;
         cJSON_AddItemToObject(item, "postID", cJSON_CreateNumber(post->postID));
         cJSON_AddItemToObject(item, "title", cJSON_CreateString(post->title));
         cJSON_AddItemToObject(item, "body", cJSON_CreateString(post->body));
         cJSON_AddItemToObject(item, "userID", cJSON_CreateNumber(post->userID));
         cJSON_AddItemToObject(item, "isAnswer", cJSON_CreateBool(post->isAnswer));
-        
+
         cJSON_AddItemToArray(json, item);
     }
-    
+
     cJSON_AddItemToObject(container, "latestReports", json);
     cJSON_AddItemToObject(container, "reportsUntilAnalysis", cJSON_CreateNumber(reportsUntilAnalysis));
-    
+
     char *str = cJSON_Print(container);
     cJSON_Delete(container);
-    
+
     FILE *file = fopen("reports.json", "w");
     if (!file) {
         fputs("Failed to open reports file!", stderr);
         return;
     }
-    
+
     fwrite(str, strlen(str), 1, file);
-    
+
     fclose(file);
     free(str);
 }
@@ -612,8 +612,8 @@ int main(int argc, const char * argv[]) {
         fputs("Error initializing libcurl!", stderr);
         exit(EXIT_FAILURE);
     }
-    
-    
+
+
     //Get the chatbot directory path.
     //http://stackoverflow.com/a/26696759/3476191
     const char *homedir;
@@ -628,14 +628,14 @@ int main(int argc, const char * argv[]) {
     strcat(dirPath, dirName);
     char resolvedPath[PATH_MAX];
     realpath(dirPath, resolvedPath);
-    
+
     struct stat st;
     if (stat(resolvedPath, &st) == -1) {
         mkdir(resolvedPath, 0700);
     }
-    
+
     chdir(resolvedPath);
-    
+
     Client *client = createClient("stackoverflow.com", "cookies");
     if (!client->isLoggedIn) {
         char *env_email, *env_pass;
@@ -649,7 +649,7 @@ int main(int argc, const char * argv[]) {
             char email[maxEmailLen];
             fgets(email, maxEmailLen, stdin);
             email[maxEmailLen-1] = 0;   //make sure it's null terminated
-            
+
             char *password = getpass("Password: ");
             loginWithEmailAndPassword(client, email, password);
             //overwrite the password so it doesn't stay in memory
@@ -660,21 +660,21 @@ int main(int argc, const char * argv[]) {
             memset(env_pass, 0, strlen(env_pass));
         }
     }
-    
+
     //ChatRoom *roomPostTrue = createChatRoom (client, 773); //773 is room number of LQPHQ
-    
+
     ChatRoom *room = createChatRoom(client, 68414); // 68414 is room number of SOCVR Testing Facility
-    
+
     enterChatRoom(room);
     //enterChatRoom (roomPostTrue);
-    
-    
+
+
     Filter **filters = loadFilters();
     PrivUser **users = loadPrivUsers();
     PrivRequest **requests = loadPrivRequests();
     Modes *modes = createMode (1, 1, 1, 1);
     Notify **notify = loadNotifications ();
-    
+
     Command *commands[] = {
         createCommand("I can put anything I want here; the first command runs when no other commands match", 0, unrecognizedCommand),
         createCommand("test1", 0, test1Callback),
@@ -704,7 +704,7 @@ int main(int argc, const char * argv[]) {
         createCommand("fr", 1, falsePositiveRespond),
         createCommand("cp *", 0, checkPostCallback),
         createCommand("pinfo *", 0, postInfo),
-        createCommand("change threshold *", 2, changeThreshold),
+        createCommand("change threshold *", 2, modifyFilterThreshold),
         createCommand("check threshold", 0, checkThreshold),
         createCommand("test post *", 0, testPostCallback),
         createCommand("privilege user * *", 2, addUserPriv),
@@ -724,10 +724,10 @@ int main(int argc, const char * argv[]) {
         createCommand("amiprivileged", 0, amiPrivileged),
         createCommand("mode * * ...", 2, changeMode),
         createCommand("check mode", 0, printCurrentMode),
-        createCommand("opt in", 0, optIn),
-        createCommand("opt out", 0, optOut),
-        createCommand("notify me", 0, notifyMe),
-        createCommand("unnotify me", 0, unnotifyMe),
+        createCommand("opt in *", 0, optIn),
+        createCommand("opt out *", 0, optOut),
+        createCommand("notify me *", 0, notifyMe),
+        createCommand("unnotify me *", 0, unnotifyMe),
         createCommand("say ...", 0, say),
         createCommand("aminotified", 0, amINotified),
         createCommand("is notified *", 0, isNotified),
@@ -739,18 +739,18 @@ int main(int argc, const char * argv[]) {
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify);
-    
-    
+
+
     WebSocket *socket = createWebSocketWithClient(client);
     socket->user = bot;
     socket->openCallback = webSocketOpened;
     socket->recieveCallback = wsRecieved;
     socket->closeCallback = wsClosed;
     connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
-    
+
     puts("Fire Alarm started.");
     postMessage (bot->room, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started.");
-    
+
     unsigned char reboot = 0;
     time_t saveTime = time(NULL) + SAVE_INTERVAL;
     for (;;) {
@@ -772,24 +772,24 @@ int main(int argc, const char * argv[]) {
             saveTime = time(NULL) + SAVE_INTERVAL;
         }
     }
-    
+
     leaveRoom(bot->room);
-    
+
     puts("Saving data...");
     saveFilters(bot->filters, bot->filterCount);
     savePrivUsers(bot->privUsers, bot->numOfPrivUsers);
     saveReports(bot->latestReports, bot->reportsUntilAnalysis);
     savePrivRequests(bot->privRequests, bot->totalPrivRequests);
     saveNotifications (bot->notify, bot->totalNotifications);
-    
+
     puts("Waiting (to allow networking to finish)...");
     sleep(5);   //give background threads a bit of time
-    
+
     curl_easy_cleanup(client->curl);
-    
+
     if (reboot) {
         execv(argv[0], (char*const*)argv);  //Reload the program.
     }
-    
+
     return 0;
 }

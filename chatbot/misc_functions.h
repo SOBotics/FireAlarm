@@ -13,3 +13,4 @@ void removeSpaces (char* source);
 int isTagProgrammingRelated (char *tag);
 int postHasTags (Post *post, char *tag);
 unsigned isTagInFilter (ChatBot *bot, char *tag);
+void removeChar (char* str, char c);

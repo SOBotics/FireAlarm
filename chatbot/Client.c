@@ -414,7 +414,7 @@ int websocketCallback(struct lws *ws,
 void setupWebsocketContext(Client *c) {
     puts("Starting libwebsockets...");
     struct lws_context_creation_info info;
-    struct lws_protocols *protocols = malloc(sizeof(struct lws_protocols) * 3);
+    struct lws_protocols *protocols = malloc(sizeof(lws_protocols) * 3);
     
     memset(&info, 0, sizeof(info));
     info.port = CONTEXT_PORT_NO_LISTEN;

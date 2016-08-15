@@ -19,7 +19,7 @@ void lowercase (char *str)
         *str = tolower(*str);
         str++;
     }
-    
+
     return;
 }
 
@@ -34,7 +34,7 @@ void removeSpaces(char* source)
       i++;
   }
   *i = 0;
-  
+
   return;
 }
 
@@ -182,7 +182,7 @@ int isTagProgrammingRelated (char *tag)
         "xml",
         "xslt"
     }
-    
+
     for (int i = 0; i < 139; i ++)
     {
         if (strcasestr (tag, progTags [i]) == tag)
@@ -190,14 +190,14 @@ int isTagProgrammingRelated (char *tag)
             return 1;
         }
     }
-    
+
     return 0;
 }
 
 int postHasTags (Post *post, char *tag)
 {
     char **tags = getTagsByID (post->postID);
-    
+
     for (int i = 0; i < 5; i ++)
     {
         if (strcmp (tags [i], tag) == 0)
@@ -205,14 +205,14 @@ int postHasTags (Post *post, char *tag)
             return 1;
         }
     }
-    
+
     return 0;
 }
 
 unsigned isTagInFilter (ChatBot *bot, char *tag)
 {
     Filter **filters = bot->filters;
-    
+
     for (int i = 0; i < bot->totalFilters; i ++)
     {
         if (strcmp (filters [i]->filter, tag) == 0)
@@ -220,6 +220,29 @@ unsigned isTagInFilter (ChatBot *bot, char *tag)
             return 1;
         }
     }
-    
+
     return 0;
+}
+
+void removeChar (char* str, char c) {
+    char *pr = str;
+    char *pw = str;
+    while (*pr) {
+        *pw = *pr++;
+        pw += (*pw != c);
+    }
+    *pw = '\0';
+}
+
+unsigned isStringCotainingNumbers (char *str)
+{
+    unsigned len = strlen (str);
+
+    for (int i = 0; i < len; i ++)
+    {
+        if (!(str [i] >= '0' && str [i]<= '9'))
+            return 0;
+    }
+
+    return 1;
 }
