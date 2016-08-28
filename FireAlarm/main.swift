@@ -2,7 +2,7 @@
 //  main.swift
 //  FireAlarm
 //
-//  Created by Jonathan Keller on 8/27/16.
+//  Created by NobodyNada on 8/27/16.
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
@@ -64,3 +64,21 @@ if !client.loggedIn {
         }
     }
 }
+
+let room = ChatRoom(client: client, roomID: 68414)  //SOCVR Testing Facility
+try room.join()
+
+room.postMessage("[FireAlarm](//github.com/NobodyNada/FireAlarm) started.")
+
+func handleError(error: ErrorType) {
+    if room.inRoom {
+        room.postMessage("An error occured:\n\(error)")
+    }
+}
+
+
+repeat {
+    if let input = readLine() {
+        
+    }
+} while true

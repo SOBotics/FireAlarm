@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ABAE420F1D725E090018DF57 /* ChatRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE420E1D725E090018DF57 /* ChatRoom.swift */; };
+		ABAE421C1D72620C0018DF57 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE421B1D72620C0018DF57 /* WebSocket.swift */; };
+		ABAE421E1D7262630018DF57 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = ABAE421D1D7262630018DF57 /* libz.tbd */; };
 		ABD01E491D721B1800B1A7F8 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD01E481D721B1800B1A7F8 /* main.swift */; };
 		ABD01E501D721D4F00B1A7F8 /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD01E4F1D721D4F00B1A7F8 /* Client.swift */; };
 /* End PBXBuildFile section */
@@ -24,6 +27,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		ABAE420E1D725E090018DF57 /* ChatRoom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatRoom.swift; sourceTree = "<group>"; };
+		ABAE421B1D72620C0018DF57 /* WebSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
+		ABAE421D1D7262630018DF57 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		ABD01E451D721B1800B1A7F8 /* FireAlarm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FireAlarm; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABD01E481D721B1800B1A7F8 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		ABD01E4F1D721D4F00B1A7F8 /* Client.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
@@ -34,12 +40,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABAE421E1D7262630018DF57 /* libz.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		ABAE421F1D7262690018DF57 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				ABAE421B1D72620C0018DF57 /* WebSocket.swift */,
+				ABAE421D1D7262630018DF57 /* libz.tbd */,
+			);
+			name = Support;
+			sourceTree = "<group>";
+		};
 		ABD01E3C1D721B1800B1A7F8 = {
 			isa = PBXGroup;
 			children = (
@@ -60,7 +76,9 @@
 			isa = PBXGroup;
 			children = (
 				ABD01E481D721B1800B1A7F8 /* main.swift */,
+				ABAE420E1D725E090018DF57 /* ChatRoom.swift */,
 				ABD01E4F1D721D4F00B1A7F8 /* Client.swift */,
+				ABAE421F1D7262690018DF57 /* Support */,
 			);
 			path = FireAlarm;
 			sourceTree = "<group>";
@@ -122,6 +140,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABAE420F1D725E090018DF57 /* ChatRoom.swift in Sources */,
+				ABAE421C1D72620C0018DF57 /* WebSocket.swift in Sources */,
 				ABD01E501D721D4F00B1A7F8 /* Client.swift in Sources */,
 				ABD01E491D721B1800B1A7F8 /* main.swift in Sources */,
 			);
@@ -245,6 +265,7 @@
 				ABD01E4E1D721B1800B1A7F8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

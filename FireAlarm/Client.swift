@@ -2,7 +2,7 @@
 //  Client.swift
 //  FireAlarm
 //
-//  Created by Jonathan Keller on 8/27/16.
+//  Created by NobodyNada on 8/27/16.
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
@@ -46,6 +46,35 @@ class Client: NSObject, NSURLSessionDataDelegate {
     var session: NSURLSession!
     
     var loggedIn = false
+    
+    let queue = dispatch_queue_create("Client queue", nil)
+    
+    private var _fkey: String!
+    
+    var fkey: String! {
+        if _fkey == nil {
+            //Get the chat fkey.
+            let joinFavorites: String = try! get("https://chat.\(host.rawValue)/chats/join/favorite")
+            
+            guard let inputIndex = joinFavorites.rangeOfString("type=\"hidden\"")?.endIndex else {
+                fatalError("Could not find fkey")
+            }
+            let input = joinFavorites.substringFromIndex(inputIndex)
+            
+            guard let fkeyStartIndex = input.rangeOfString("value=\"")?.endIndex else {
+                fatalError("Could not find fkey")
+            }
+            let fkeyStart = input.substringFromIndex(fkeyStartIndex)
+            
+            guard let fkeyEnd = fkeyStart.rangeOfString("\"")?.startIndex else {
+                fatalError("Could not find fkey")
+            }
+            
+            
+            _fkey = fkeyStart.substringToIndex(fkeyEnd)
+        }
+        return _fkey
+    }
     
     enum Host: String {
         case StackOverflow = "stackoverflow.com"
@@ -133,6 +162,10 @@ class Client: NSObject, NSURLSessionDataDelegate {
             throw RequestError.NotUTF8
         }
         return string
+    }
+    
+    func parseJSON(json: String) throws -> AnyObject {
+        return try NSJSONSerialization.JSONObjectWithData(json.dataUsingEncoding(NSUTF8StringEncoding)!, options: .AllowFragments)
     }
     
     
