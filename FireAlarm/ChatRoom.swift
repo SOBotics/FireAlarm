@@ -8,6 +8,10 @@
 
 import Foundation
 
+protocol ChatRoomDelegate {
+    func chatRoomMessage(room: ChatRoom, message: ChatMessage, isEdit: Bool)
+}
+
 class ChatRoom: NSObject, WebSocketDelegate {
     enum ChatEvent: Int {
         case MessagePosted = 1
@@ -41,6 +45,94 @@ class ChatRoom: NSObject, WebSocketDelegate {
     
     let client: Client
     let roomID: Int
+    
+    var delegate: ChatRoomDelegate?
+    
+    private var pendingLookup = [ChatUser]()
+    
+    var userDB = [ChatUser]()
+    
+    func lookupUserInformation() {
+        do {
+            print("Looking up \(pendingLookup.count) user\(pendingLookup.count == 1 ? "" : "s")...")
+            let ids = pendingLookup.map {user in
+                String(user.id)
+            }
+            
+            let json: String = try client.post(
+                "https://chat.\(client.host.rawValue)/user/info",
+                [
+                    "ids" : ids.joinWithSeparator(","),
+                    "roomID" : "1"
+                ]
+            )
+            
+            guard let results = try client.parseJSON(json) as? NSDictionary else {
+                    throw EventError.JSONParsingFailed(json: json)
+            }
+            
+            guard let users = results["users"] as? NSArray else {
+                throw EventError.JSONParsingFailed(json: json)
+            }
+            
+            for obj in users {
+                guard let user = obj as? NSDictionary else {
+                    throw EventError.JSONParsingFailed(json: json)
+                }
+                
+                guard let id = user["id"] as? Int else {
+                    throw EventError.JSONParsingFailed(json: json)
+                }
+                guard let name = user["name"] as? String else {
+                    throw EventError.JSONParsingFailed(json: json)
+                }
+                
+                let isMod = (user["is_moderator"] as? Bool) ?? false
+                
+                //if user["is_owner"] is an NSNull, the user is NOT an owner.
+                let isRO = (user["is_owner"] as? NSNull) == nil ? true : false
+                
+                let chatUser = userWithID(id)
+                chatUser.name = name
+                chatUser.isMod = isMod
+                chatUser.isRO = isRO
+            }
+            pendingLookup.removeAll()
+        }
+        catch {
+            handleError(error, "while looking up \(pendingLookup)")
+        }
+    }
+    
+    ///Looks up a user by ID.  If the user is not in the database, they are added.
+    func userWithID(id: Int) -> ChatUser {
+        for user in userDB {
+            if user.id == id {
+                return user
+            }
+        }
+        let user = ChatUser(room: self, id: id)
+        userDB.append(user)
+        if id == 0 {
+            user.name = "Console"
+        }
+        else {
+            pendingLookup.append(user)
+        }
+        return user
+    }
+    
+    
+    ///Looks up a user by name.  The user must already exist in the database!
+    func userNamed(name: String) -> [ChatUser] {
+        var users = [ChatUser]()
+        for user in userDB {
+            if user.name == name {
+                users.append(user)
+            }
+        }
+        return users
+    }
     
     var ws: WebSocket!
     private var wsRetries = 0
@@ -122,38 +214,77 @@ class ChatRoom: NSObject, WebSocketDelegate {
         }
     }
     
+    func postReply(reply: String, to: ChatMessage) {
+        if let id = to.id {
+            postMessage(":\(id) \(reply)")
+        }
+        else {
+            postMessage("@\(to.user) \(reply)")
+        }
+    }
+    
     func join() throws {
         print("Joining chat room \(roomID)...")
         
         try connectWS()
+        
+        userWithID(0)   //add the Console to the database
+        let json: String = try client.get("https://chat.\(client.host.rawValue)/rooms/pingable/\(roomID)")
+        guard let users = try client.parseJSON(json) as? NSArray else {
+                    throw EventError.JSONParsingFailed(json: json)
+        }
+        
+        for userObj in users {
+            guard let user = userObj as? NSArray else {
+                throw EventError.JSONParsingFailed(json: json)
+            }
+            guard let userID = user[0] as? Int else {
+                throw EventError.JSONParsingFailed(json: json)
+            }
+            userWithID(userID)
+        }
+        
+        print("Users in database: \((userDB.map {$0.description}).joinWithSeparator(", "))")
+        
+        inRoom = true
+        
     }
     
     enum EventError: ErrorType {
-        case JSONParsingFailed
-        case InvalidEventType
+        case JSONParsingFailed(json: String)
+        case InvalidEventType(type: Int)
     }
     
     func handleEvents(events: NSArray) throws {
         for e in events {
             guard let event = e as? NSDictionary else {
-                throw EventError.JSONParsingFailed
+                throw EventError.JSONParsingFailed(json: String(events))
             }
             guard let typeCode = event["event_type"] as? Int else {
-                throw EventError.JSONParsingFailed
+                throw EventError.JSONParsingFailed(json: String(events))
             }
             guard let type = ChatEvent(rawValue: typeCode) else {
-                throw EventError.InvalidEventType
+                throw EventError.InvalidEventType(type: typeCode)
             }
             
             switch type {
             case .MessagePosted, .MessageEdited:
                 guard
-                    let user = event["user_name"] as? String,
+                    let userID = event["user_id"] as? Int,
+                    let messageID = event["message_id"] as? Int,
                     let content = event["content"] as? String else {
-                        throw EventError.JSONParsingFailed
+                        throw EventError.JSONParsingFailed(json: String(events))
                 }
                 
+                //look up the user instead of getting their name to make sure they're in the DB
+                let user = userWithID(userID)
+                
                 print("\(user): \(content)")
+                
+                let message = ChatMessage(user: user, content: content, id: messageID)
+                if let d = delegate {
+                    d.chatRoomMessage(self, message: message, isEdit: type == .MessageEdited)
+                }
             default:
                 break
             }
@@ -176,18 +307,18 @@ class ChatRoom: NSObject, WebSocketDelegate {
     @objc func webSocketMessageText(text: String) {
         do {
             guard let json = try client.parseJSON(text) as? NSDictionary else {
-                throw EventError.JSONParsingFailed
+                throw EventError.JSONParsingFailed(json: text)
             }
             
             let roomKey = "r\(roomID)"
             guard let events = (json[roomKey] as? NSDictionary)?["e"] as? NSArray else {
-                throw EventError.JSONParsingFailed
+                return  //no events
             }
             
             try handleEvents(events)
         }
         catch {
-            handleError(error)
+            handleError(error, "while parsing events")
         }
     }
     
