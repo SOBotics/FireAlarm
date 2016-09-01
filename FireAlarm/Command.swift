@@ -14,18 +14,27 @@ class Command {
         fatalError("usage() must be overriden")
     }
     
-    let message: ChatMessage    //The message that triggered this command.
+    ///The message that triggered this command.
+    let message: ChatMessage
     let bot: ChatBot
-    var finished = false    //Whether the command has completed execution.  Will be set to true automatically.
+    
+    ///Whether the command has completed execution.  Will be set to true automatically by ChatBot.
+    var finished = false
+    
     let arguments: [String]
+    
+    ///Which usage of the command was run.  Useful for implementing
+    ///commands that share most of their code, like shutdown/reboot.
+    let usageIndex: Int
     
     func run() throws {
         fatalError("run() must be overridden")
     }
     
-    required init(bot: ChatBot, message: ChatMessage, arguments: [String]) {
+    required init(bot: ChatBot, message: ChatMessage, arguments: [String], usageIndex: Int = 0) {
         self.bot = bot
         self.message = message
         self.arguments = arguments
+        self.usageIndex = usageIndex
     }
 }

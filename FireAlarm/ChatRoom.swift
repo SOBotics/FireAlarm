@@ -68,7 +68,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
             )
             
             guard let results = try client.parseJSON(json) as? NSDictionary else {
-                    throw EventError.JSONParsingFailed(json: json)
+                throw EventError.JSONParsingFailed(json: json)
             }
             
             guard let users = results["users"] as? NSArray else {
@@ -142,7 +142,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
     
     var timestamp: Int = 0
     
-    private var messageQueue = [String]()
+    var messageQueue = [String]()
     
     init(client: Client, roomID: Int) {
         self.client = client
@@ -199,7 +199,12 @@ class ChatRoom: NSObject, WebSocketDelegate {
                 }
             }
             catch {
-                print(result)
+                if let r = result {
+                    print(r)
+                }
+                else {
+                    handleError(error)
+                }
             }
             sleep(1)
         }
@@ -231,7 +236,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
         userWithID(0)   //add the Console to the database
         let json: String = try client.get("https://chat.\(client.host.rawValue)/rooms/pingable/\(roomID)")
         guard let users = try client.parseJSON(json) as? NSArray else {
-                    throw EventError.JSONParsingFailed(json: json)
+            throw EventError.JSONParsingFailed(json: json)
         }
         
         for userObj in users {
@@ -248,6 +253,17 @@ class ChatRoom: NSObject, WebSocketDelegate {
         
         inRoom = true
         
+    }
+    
+    func leave() {
+        //we don't really care if this fails
+        //...right?
+        inRoom = false
+        let _ = try? client.post("https://chat.\(client.host.rawValue)/chats/leave/\(roomID)", ["quiet":"true","fkey":client.fkey]) as String
+        ws.close()
+        while ws.readyState == .Closing {
+            sleep(1)
+        }
     }
     
     enum EventError: ErrorType {

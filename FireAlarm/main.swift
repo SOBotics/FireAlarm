@@ -17,6 +17,8 @@ func clearCookies() {
     }
 }
 
+
+
 func makeTable(heading: [String], contents: [String]...) -> String {
     if heading.count != contents.count {
         fatalError("heading and contents have different counts")
@@ -63,12 +65,28 @@ func makeTable(heading: [String], contents: [String]...) -> String {
     return "    " + [head,divider,table.joinWithSeparator("\n    ")].joinWithSeparator("\n    ")
 }
 
+
+
 private var errorRoom: ChatRoom?
+private enum BackgroundTask {
+    case HandleInput(input: String)
+    case ShutDown(reboot: Bool)
+}
+
+private var backgroundTasks = [BackgroundTask]()
+private let backgroundSemaphore = dispatch_semaphore_create(0)
+
+
 
 func main() throws {
-    
     print("FireAlarm starting...")
     
+    //Save the working directory so we don't break rebooting if we chdir.
+    let originalWorkingDirectory = NSFileManager.defaultManager().currentDirectoryPath
+    
+    
+    
+    //Log in
     let client = Client(host: .StackOverflow)
     
     if !client.loggedIn {
@@ -115,22 +133,77 @@ func main() throws {
         }
     }
     
+    
+    
+    //Join the chat room
     let room = ChatRoom(client: client, roomID: 68414)  //SOCVR Testing Facility
     errorRoom = room
     let bot = ChatBot(room)
     room.delegate = bot
     try room.join()
     
+    
+    
+    //Startup finished
     room.postMessage("[FireAlarm-Swift](//github.com/NobodyNada/FireAlarm/tree/swift) started.")
     
     
+    
+    //Run background tasks
+    
+    
+    func inputMonitor() {
+        repeat {
+            if let input = readLine() {
+                backgroundTasks.append(.HandleInput(input: input))
+                dispatch_semaphore_signal(backgroundSemaphore)
+            }
+        } while true
+    }
+    
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), inputMonitor)
+    
+    
     repeat {
-        if let input = readLine() {
-        //if readLine() != nil {
-            bot.chatRoomMessage(room, message: ChatMessage(user: room.userWithID(0), content: input, id: nil), isEdit: false)
+        //wait for a background task
+        dispatch_semaphore_wait(backgroundSemaphore, DISPATCH_TIME_FOREVER)
+        
+        switch backgroundTasks.removeFirst() {
+        case .HandleInput(let input):
+            bot.chatRoomMessage(
+                room,
+                message: ChatMessage(
+                    user: room.userWithID(0),
+                    content: input,
+                    id: nil
+                ),
+                isEdit: false
+            )
+        case .ShutDown(let reboot):
+            //Wait for pending messages to be posted.
+            while !room.messageQueue.isEmpty {
+                sleep(1)
+            }
+            room.leave()
+            
+            
+            if reboot {
+                //Change to the old working directory.
+                NSFileManager.defaultManager().changeCurrentDirectoryPath(originalWorkingDirectory)
+                
+                //Reload the program binary, which will restart the bot.
+                execv(Process.arguments[0], Process.unsafeArgv)
+            }
+            //If a reboot fails, it will fall through to here & just shutdown instead.
+            return
         }
     } while true
-    
+}
+
+func halt(reboot reboot: Bool = false) {
+    backgroundTasks.append(.ShutDown(reboot: reboot))
+    dispatch_semaphore_signal(backgroundSemaphore)
 }
 
 func handleError(error: ErrorType, _ context: String? = nil) {
@@ -153,5 +226,7 @@ func handleError(error: ErrorType, _ context: String? = nil) {
         fatalError("\(message1)\n\(message2)")
     }
 }
+
+
 
 try! main()

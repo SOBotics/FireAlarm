@@ -19,6 +19,7 @@
 		ABAE422F1D73BA8C0018DF57 /* CommandListRunning.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE422E1D73BA8C0018DF57 /* CommandListRunning.swift */; };
 		ABD01E491D721B1800B1A7F8 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD01E481D721B1800B1A7F8 /* main.swift */; };
 		ABD01E501D721D4F00B1A7F8 /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD01E4F1D721D4F00B1A7F8 /* Client.swift */; };
+		ABF730B41D77A534002A606C /* CommandStop.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF730B31D77A534002A606C /* CommandStop.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -47,6 +48,7 @@
 		ABD01E451D721B1800B1A7F8 /* FireAlarm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FireAlarm; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABD01E481D721B1800B1A7F8 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		ABD01E4F1D721D4F00B1A7F8 /* Client.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
+		ABF730B31D77A534002A606C /* CommandStop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandStop.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +94,7 @@
 			children = (
 				ABAE422C1D73BA860018DF57 /* CommandHelp.swift */,
 				ABAE422E1D73BA8C0018DF57 /* CommandListRunning.swift */,
+				ABF730B31D77A534002A606C /* CommandStop.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -186,6 +189,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ABAE422D1D73BA860018DF57 /* CommandHelp.swift in Sources */,
+				ABF730B41D77A534002A606C /* CommandStop.swift in Sources */,
 				ABAE42251D73B7640018DF57 /* ChatMessage.swift in Sources */,
 				ABAE420F1D725E090018DF57 /* ChatRoom.swift in Sources */,
 				ABAE422F1D73BA8C0018DF57 /* CommandListRunning.swift in Sources */,
