@@ -11,6 +11,7 @@
 
 #include "Privileges.h"
 #include "Notifications.h"
+#include "misc_functions.h"
 
 void listCommands(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
@@ -270,7 +271,7 @@ void optOut (RunningCommand *command, void *ctx)
     }
 
     int isUserOptedTag = 0;
-    for (int i = 0; i < totalTags; i ++)
+    for (int i = 0; i < notify->totalTags; i ++)
     {
         if (strcmp (arg, notify->tags [i]) == 0)
         {
@@ -339,7 +340,7 @@ void unnotifyMe (RunningCommand *command, void *ctx)
     }
 
     int isUserOptedTag = 0;
-    for (int i = 0; i < totalTags; i ++)
+    for (int i = 0; i < notify->totalTags; i ++)
     {
         if (strcmp (arg, notify->tags [i]) == 0)
         {
@@ -423,7 +424,7 @@ void amINotified (RunningCommand *command, void *ctx)
     }
     else if (notify->type == 0)
     {
-        if (notify->totaltags == -1)
+        if (notify->totalTags == -1)
         {
             postReply (bot->room, "You are currently opted in.", command->message);
             return;
@@ -443,7 +444,7 @@ void amINotified (RunningCommand *command, void *ctx)
                     sprintf (message + strlen (message), "[tag:%s], ", notify->tags [i]);
                 }
             }
-            postReply (bot->room, message, comand->message);
+            postReply (bot->room, message, command->message);
             free (message);
             return;
         }
@@ -563,7 +564,7 @@ void printNotifiedUsers (RunningCommand *command, void *ctx)
     return;
 }
 
-void apiQuota (RunningCommand *command, void *ctx)
+/*void apiQuota (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
 
@@ -601,7 +602,7 @@ void apiQuota (RunningCommand *command, void *ctx)
             cJSON_Delete(json);
         }
         puts("Error fetching post!");
-        return 0;
+        return;
     }
 
     cJSON *backoff;
@@ -623,7 +624,7 @@ void apiQuota (RunningCommand *command, void *ctx)
 
     free (message);
     return;
-}
+}*/
 
 void modifyFilterThreshold (RunningCommand *command, void *ctx)
 {
@@ -661,7 +662,7 @@ void addKeywordToFilter (RunningCommand *command, void *ctx)
     int truePositives = (int) strtol (command->argv [1], NULL, 10);
     int falsePositives = (int) strtol (command->argv [2], NULL, 10);
 
-    if (truePositives < 0 || truePositives > 100 || falsePositves < 0 || falsePositives > 100)
+    if (truePositives < 0 || truePositives > 100 || falsePositives < 0 || falsePositives > 100)
     {
         postReply (bot->room, "Please enter values that are only positive and smaller than 100.", command->message);
         return;
@@ -714,7 +715,7 @@ void addTagToFilter (RunningCommand *command, void *ctx)
     Filter **filters = bot->filters;
 
     filters = realloc (filters, ++bot->filterCount * sizeof (Filter *));
-    filters [bot->filterCount - 1] = createFilter (desc, tag, 3, truePositves, falsePositives);
+    filters [bot->filterCount - 1] = createFilter (desc, tag, 3, truePositives, falsePositives);
     free (desc);
 
     char *str;
@@ -881,7 +882,7 @@ void modifyKeywordFilter (RunningCommand *command, void *ctx)
     }
     if (changeFalsePositive)
     {
-        asprintf (&message, "Successfully changed false positives of filter \"%s\" from %d to %d.", keyword, oldTFalsePositive, newFalsePositive);
+        asprintf (&message, "Successfully changed false positives of filter \"%s\" from %d to %d.", keyword, oldFalsePositive, newFalsePositive);
     }
     if (changeFalsePositive && changeTruePositive)
     {
@@ -903,14 +904,14 @@ void filterInfo (RunningCommand *command, void *ctx)
         return;
     }
 
-    char *type = command->argv [0];
+    char *argOne = command->argv [0];
     int type = -1;
 
-    if (strcmp (type, "keyword") == )
+    if (strcmp (argOne, "keyword") == 0)
     {
         type = 0;
     }
-    if (strcmp (type, "tag") == 0)
+    if (strcmp (argOne, "tag") == 0)
     {
         type = 1;
     }
@@ -918,7 +919,7 @@ void filterInfo (RunningCommand *command, void *ctx)
     if (type == -1)
     {
         char *message;
-        asprintf (&message, "First argument '%s' is invalid. Enter either `keyword` or `tag`.", type);
+        asprintf (&message, "First argument '%s' is invalid. Enter either `keyword` or `tag`.", argOne);
         postReply (bot->room, message, command->message);
         free (message);
         return;
@@ -1039,7 +1040,7 @@ void printAccuracyOfFilter (RunningCommand *command, void *ctx)
         asprintf (&message, "The accuracy of the tag filter is %f, with %u true positives and %u false positives.", accuracy, trueOccurences, falseOccurences);
     }
 
-    postReply (bot->room, message, command->message):
+    postReply (bot->room, message, command->message);
     free (message);
 
     return;
@@ -1061,7 +1062,7 @@ void printReportsByFilter (RunningCommand *command, void *ctx)
 
     if (command->argc > 1)
     {
-        if (isStringContainingNumbers (command->argv [1]))
+        if (isStringContainingNumbers2 (command->argv [1]))
         {
             printCount = (unsigned) strtol (command->argv [1], NULL, 10);
 
@@ -1184,6 +1185,119 @@ void printReportsByFilter (RunningCommand *command, void *ctx)
     free (message);
     free (toPrint);
 
+    return;
+}
+
+void printFilters (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+
+    unsigned keywordType = 0;
+    unsigned lengthType = 2;
+    unsigned tagType = 3;
+    unsigned totalFilters = 3;
+    unsigned trueOccurences = 0;
+    unsigned falseOccurences = 0;
+    float accuracy = 0.0;
+    char *str = malloc (sizeof (char) * totalFilters * 500);
+
+    sprintf (str,
+             "        Filter          |"
+             "       Accuracy Rate    |"
+             "       True Positives   |"
+             "      False Positives   \n"
+             "    ---------------------"
+             "-------------------------"
+             "-------------------------"
+             "-------------------------\n");
+
+    Filter **filters = bot->filters;
+
+    for (int i = 0; i < totalFilters; i ++)
+    {
+        if (i == keywordType)
+        {
+            sprintf (str + strlen (str),
+                     "     Keyword Filter     |");
+
+            for (int j = 0; j < bot->filterCount; j ++)
+            {
+                if (filters [j]->type == keywordType)
+                {
+                    trueOccurences += filters [j]->truePositives;
+                    falseOccurences += filters [j]->falsePositives;
+                }
+            }
+
+            accuracy = trueOccurences / (trueOccurences + falseOccurences);
+
+            sprintf (str + strlen (str),
+                     "            %f          |"
+                     "            %u          |"
+                     "            %u          \n",
+                     accuracy, trueOccurences, falseOccurences);
+
+            trueOccurences = 0;
+            falseOccurences = 0;
+            accuracy = 0.0;
+        }
+        else if (i == lengthType)
+        {
+            sprintf (str + strlen (str),
+                     "     Length Filter      |");
+
+            for (int j = 0; j < bot->filterCount; j ++)
+            {
+                if (filters [j]->type == lengthType)
+                {
+                    trueOccurences += filters [j]->truePositives;
+                    falseOccurences += filters [j]->falsePositives;
+                }
+            }
+
+            accuracy = trueOccurences / (trueOccurences + falseOccurences);
+
+            sprintf (str + strlen (str),
+                     "            %f          |"
+                     "            %u          |"
+                     "            %u          \n",
+                     accuracy, trueOccurences, falseOccurences);
+
+            trueOccurences = 0;
+            falseOccurences = 0;
+            accuracy = 0.0;
+        }
+        else if (i == tagType)
+        {
+            sprintf (str + strlen (str),
+                     "     Tag Filter         |");
+
+            for (int j = 0; j < bot->filterCount; j ++)
+            {
+                if (filters [j]->type == tagType)
+                {
+                    trueOccurences += filters [j]->truePositives;
+                    falseOccurences += filters [j]->falsePositives;
+                }
+            }
+
+            accuracy = trueOccurences / (trueOccurences + falseOccurences);
+
+            sprintf (str + strlen (str),
+                     "            %f          |"
+                     "            %u          |"
+                     "            %u          \n",
+                     accuracy, trueOccurences, falseOccurences);
+
+            trueOccurences = 0;
+            falseOccurences = 0;
+            accuracy = 0.0;
+        }
+    }
+
+    postReply (bot->room, "All the filters used by the bot are: ", command->message);
+    postMessage (bot->room, str);
+    free (str);
     return;
 }
 

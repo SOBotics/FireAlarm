@@ -12,25 +12,25 @@
 void addUserPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
+
     if (command->argc != 2)
     {
         postReply (bot->room, "**Usage:** privilege user [user id] [group]", command->message);
         return;
     }
-    
+
     long userID = (long) strtol(command->argv[0], NULL, 10);
     char *privType = command->argv [1];
     int groupType = privilegeNamed(privType);
-    
+
     if (!isValidUserID (bot, userID))
     {
         postReply (bot->room, "Please enter a valid User ID.", command->message);
         return;
     }
-    
+
     PrivUser **users = bot->privUsers;
-    
+
     PrivUser *user = getPrivUserByID(bot, userID);
     if (user) {
         user->privLevel |= groupType;
@@ -38,61 +38,61 @@ void addUserPriv (RunningCommand *command, void *ctx)
     else {
         user = createPrivUser(userID, groupType);
         users = bot->privUsers = realloc(users, (bot->numOfPrivUsers + 1) * sizeof(PrivUser*));
-        
+
         users[bot->numOfPrivUsers] = user;
-        
+
         bot->numOfPrivUsers ++;
     }
-    
+
     char *messageString;
-    
+
     asprintf (&messageString, "Added %s privileges to user ID %lu.", privType, userID);
-    
+
     postReply (bot->room, messageString, command->message);
-    
+
     return;
 }
 
 void removeUserPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
+
     if (command->argc != 2)
     {
         postReply (bot->room, "**Usage:** unprivilege user [user id] [group]", command->message);
         return;
     }
-    
+
     long userID = (long) strtol(command->argv[0], NULL, 10);
     char *privType = command->argv [1];
     int groupType = privilegeNamed(privType);
-    
+
     if (!isValidUserID (bot, userID))
     {
         postReply (bot->room, "Please enter a valid User ID.", command->message);
         return;
     }
-    
+
     PrivUser *user = getPrivUserByID(bot, userID);
     if (user) {
         user->privLevel &= ~groupType;
     }
-    
+
     char *messageString;
-    
+
     asprintf (&messageString, "Removed %s privileges from user ID %lu.", privType, userID);
-    
+
     postReply (bot->room, messageString, command->message);
-    
+
     return;
 }
 
 void requestPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
+
     unsigned long userID = command->message->user->userID;
-    
+
     if (command->argc == 0)
     {
         postReply (bot->room, "**Usage:** `@FireAlarm request privilege [group name]`", command->message);
@@ -106,9 +106,9 @@ void requestPriv (RunningCommand *command, void *ctx)
             return;
         }
     }
-    
+
     char *group = command->argv [0];
-    
+
     unsigned groupID = privilegeNamed(group);
     if (!groupID) {
         postReply(bot->room, "Invalid privilege group", command->message);
@@ -118,44 +118,44 @@ void requestPriv (RunningCommand *command, void *ctx)
         postReply(bot->room, "You already have that privilege", command->message);
         return;
     }
-    
+
     bot->privRequests = realloc(bot->privRequests, (++bot->totalPrivRequests + 1) * sizeof(PrivRequest*));
     bot->privRequests [bot->totalPrivRequests - 1] = createPrivRequest (
                                                                         userID,
                                                                         groupID
                                                                         );
     bot->privRequests[bot->totalPrivRequests] = NULL;
-    
+
     char *message;
     asprintf(&message, "Request #%d created.", bot->totalPrivRequests);
     postReply(bot->room, message, command->message);
-    
-    
+
+
     return;
 }
 
 void approvePrivRequest (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
+
     if (command->argc == 0)
     {
         postReply (bot->room, "**Usage:** `@FireAlarm approve privilege request [request number]`", command->message);
         return;
     }
-    
+
     unsigned priv_number = (int) strtol(command->argv [0], NULL, 10);
-    
+
     if (!privRequestExist (bot, priv_number))
     {
         postReply (bot->room, "There is no request by that number.", command->message);
         return;
     }
-    
+
     PrivRequest **requests = bot->privRequests;
     PrivRequest *request = requests[priv_number - 1];
     PrivUser **users = bot->privUsers;
-    
+
     PrivUser *user = getPrivUserByID(bot, request->userID);
     if (user) {
         user->privLevel = request->groupType;
@@ -164,103 +164,103 @@ void approvePrivRequest (RunningCommand *command, void *ctx)
         bot->privUsers = users = realloc(users, ++bot->numOfPrivUsers);
         users [bot->numOfPrivUsers - 1] = createPrivUser (request->userID, request->groupType);
     }
-    
-    
+
+
     char *username = getUsernameByID(bot, requests [priv_number - 1]->userID);
     char *message;
-    
+
     asprintf (&message, "Privilege request number %d has been approved. (cc @%s)", priv_number, username);
     //free (username);
     postReply (bot->room, message, command->message);
-    
+
     deletePrivRequest (bot, priv_number);
-    
+
     free (message);
     free(username);
-    
+
     return;
 }
 
 void rejectPrivRequest (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
+
     if (command->argc == 0)
     {
         postReply (bot->room, "**Usage:** `@FireAlarm reject privilege request [request number]`", command->message);
         return;
     }
-    
+
     unsigned priv_number = (int) strtol(command->argv [0], NULL, 10);
-    
+
     if (!privRequestExist (bot, priv_number))
     {
         postReply (bot->room, "There is no request by that number.", command->message);
         return;
     }
-    
+
     PrivRequest **requests = bot->privRequests;
-    
+
     char *message;
     char *username = getUsernameByID(bot, requests [priv_number - 1]->userID);
-    
+
     asprintf (&message, "Privilege request number %d has been rejected. (cc @%s)", priv_number, username);
     free (username);
     postReply (bot->room, message, command->message);
-    
+
     deletePrivRequest (bot, priv_number);
-    
+
     free (message);
-    
+
     return;
 }
 
 void printPrivRequests (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
+
     const size_t maxMessage = bot->totalPrivRequests * 200 + 200;
     char *message = malloc (maxMessage);
-    
+
     postReply (bot->room, "The current privilege requests are: ", command->message);
-    
+
     snprintf (message, maxMessage,
               "    Request Num   |     Username    |     Privilege Request Type    \n"
               "--------------------------------------------------------------------\n"
               );
-    
+
     char *messageString = malloc (200);
     char groupType [30];
     PrivRequest **requests = bot->privRequests;
-    
+
     for (int i = 0; i < bot->totalPrivRequests; i ++)
     {
         strcpy(groupType, getPrivilegeGroups()[requests [i]->groupType]);
-        
+
         char *username = getUsernameByID(bot, requests [i]->userID);
         snprintf (messageString, 200,
                   "       %d         |  %s             |        %s                     \n",
                   i + 1, username, groupType);
         free(username);
-        
+
         sprintf (message + strlen (message), "%s", messageString);
     }
-    
+
     postMessage (bot->room, message);
-    
+
     free (message);
     free (messageString);
-    
+
     return;
 }
 
 void isPrivileged (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
+
     unsigned long userID;
     int check = 0;
-    
+
     if (command->argc == 1)
     {
         userID = (int)strtol (command->argv [0], NULL, 10);
@@ -275,7 +275,7 @@ void isPrivileged (RunningCommand *command, void *ctx)
         postReply(bot->room, "**Usage:** @FireAlarm is privileged [user id]", command->message);
         return;
     }
-    
+
     if (checkPrivUser (bot, userID) == 1)
     {
         if (check)
@@ -309,7 +309,7 @@ void isPrivileged (RunningCommand *command, void *ctx)
             postReply (bot->room, "No, that user is not privileged.", command->message);
         }
     }
-    
+
     return;
 }
 
@@ -323,9 +323,9 @@ void amiPrivileged (RunningCommand *command, void *ctx)
 void printPrivUser (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    
+
     int check = 0;
-    
+
     if (command->argc == 1) {
         check = privilegeNamed(command->argv[0]);
     }
@@ -333,16 +333,20 @@ void printPrivUser (RunningCommand *command, void *ctx)
         postReply(bot->room, "**Usage**: membership [group]", command->message);
         return;
     }
-    
-    postReply (bot->room, "The privilege groups are: ", command->message);
     PrivUser **users = bot->privUsers;
+    if (users == NULL)
+    {
+        postReply (bot->room, "there are no users in the privilege groups.", command->message);
+        return;
+    }
+    postReply (bot->room, "The privilege groups are: ", command->message);
     unsigned userCount = bot->numOfPrivUsers;
-    
+
     char *message = malloc(1);
     *message = 0;
-    
+
     char *newString;
-    
+
     for (char **groups = getPrivilegeGroups(); *groups; groups++) {
         unsigned groupID = privilegeNamed(*groups);
         if (groupID == 0 || (check && check != groupID)) {
@@ -352,7 +356,7 @@ void printPrivUser (RunningCommand *command, void *ctx)
         message = realloc(message, strlen(message) + strlen(newString) + 1);
         strcat(message, newString);
         free(newString);
-        
+
         for (int i = 0; i < userCount; i++) {
             PrivUser *user = users[i];
             if (user->privLevel & groupID) {
@@ -367,13 +371,53 @@ void printPrivUser (RunningCommand *command, void *ctx)
         message = realloc(message, strlen(message) + 2);
         strcat(message, "\n");
     }
-    const char *modInfo = "Mods and room owners can run any command, regardless of privileges.";
+    const char *modInfo = "Moderaters and room owners can run any command, regardless of privileges.";
     message = realloc(message, strlen(message) + strlen(modInfo) + 1);
     strcat(message, modInfo);
-    
+
     postMessage (bot->room, message);
-    
+
     free(message);
-    
+
+    return;
+}
+
+void printPrivCommands (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    Command **commands = bot->commands;
+
+    char *str = malloc (sizeof (char) * 100 * 256);
+
+    sprintf (str, "Commands which can be used by users in 'member' group: \n");
+    unsigned i;
+
+    for (i = 0; commands [i]; i ++)
+    {
+        if (commands [i]->privileges == 1)
+        {
+            sprintf (str + strlen (str), "%s \n", commands [i]->name);
+        }
+    }
+
+    sprintf (str + strlen (str), "\n");
+    sprintf (str + strlen (str), "Commands which can be used by users in 'owner group: \n");
+
+    for (i = 0; commands [i]; i ++)
+    {
+        if (commands [i]->privileges == 2)
+        {
+            sprintf (str + strlen (str), "%s \n", commands[i]->name);
+        }
+    }
+
+    const char *modInfo = "Moderaters and room owners can run any command, regardless of privileges.";
+    str = realloc (str, strlen (str) + strlen (modInfo) + 1);
+    strcat (str, modInfo);
+
+    postReply (bot->room, "Commands run by users in different privilege groups are:", command->message);
+    postMessage (bot->room, str);
+    free (str);
+
     return;
 }

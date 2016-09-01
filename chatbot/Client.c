@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <libwebsockets.h>
+#include <curl/curl.h>
 
 char curlErrorBuf[CURL_ERROR_SIZE] = {0};
 
@@ -33,14 +35,14 @@ size_t curlCallback(char *data, size_t inSize, size_t nmemb, OutBuffer *outBuf) 
         size = outBuf->size + size;
         outBuf->data = realloc(outBuf->data, size);
     }
-    
+
     memcpy(outBuf->data + where, data, inSize * nmemb);
     outBuf->data[size-1] = 0;
-    
+
     return inSize * nmemb;
 }
 
-#ifdef DEBUG
+//#ifdef DEBUG
 
 int curlDebug(CURL *curl, curl_infotype type, char *data, size_t size, void *usrptr) {
     if (type != CURLINFO_TEXT) {
@@ -50,13 +52,13 @@ int curlDebug(CURL *curl, curl_infotype type, char *data, size_t size, void *usr
     char buf[size+1];
     memcpy(buf, data, size);
     buf[size+1] = 0;
-    
+
     printf("curl: %s\n", data);
-    
+
     return 0;
 }
 
-#endif
+//#endif
 
 Client *createClient(const char *host, const char *cookiefile) {
     Client *c = malloc(sizeof(Client));
@@ -65,73 +67,75 @@ Client *createClient(const char *host, const char *cookiefile) {
     c->socketCount = 0;
     c->host = malloc(strlen(host) + 1);
     strcpy(c->host, host);
-    
+
     CURL *curl = curl_easy_init();
     c->curl = curl;
     //Configure CURL
-    
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curlErrorBuf));
-    
+
     //Uncomment this to pass all requests through mitmproxy, for debugging.
     //checkCURL(curl_easy_setopt(curl, CURLOPT_PROXY, "https://127.0.0.1:8080"));
-    
+
 #ifdef DEBUG
-    //checkCURL(curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, curlDebug));
-    //checkCURL(curl_easy_setopt(curl, CURLOPT_VERBOSE, 1));
+    checkCURL(curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, curlDebug));
+    checkCURL(curl_easy_setopt(curl, CURLOPT_VERBOSE, 1));
 #endif
-    
+
     char cookiebuf[PATH_MAX];
     realpath(cookiefile, cookiebuf);
-    
+
     //Enable cookies.
     checkCURL(curl_easy_setopt(curl, CURLOPT_COOKIEFILE, cookiebuf));
     checkCURL(curl_easy_setopt(curl, CURLOPT_COOKIEJAR, cookiebuf));
-    
-    
+
+
     //Enable SSL.
     checkCURL(curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY));
-    
-    
+
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
-    
-    
+
+
     //Specify callback data
     checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlCallback));
-    
+
     OutBuffer buf;
     buf.data = NULL;
     checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf));
-    
+
     //check if we are currently logged in by seeing if stackexchange.com/logout redirects
     checkCURL(curl_easy_setopt(curl, CURLOPT_URL, "https://stackexchange.com/users/logout"));
     checkCURL(curl_easy_perform(curl));
     free(buf.data);
-    
+
     long http_code = 0;
     checkCURL(curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code));
-    
+
     c->isLoggedIn = (http_code == 200);
-    
-    
+
+
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    
+
     return c;
 }
 
 void getFkey(Client *client, char *data) {
     //Find the fkey
     char *fkeyLocation = strstr(data, "name=\"fkey\"");
+    //printf ("FUNCTION GETFKEY CALLED>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>\n");
+    //printf ("\n%s\n", data);
     if (fkeyLocation == NULL) {
         client->fkey = NULL;
         return;
     }
     fkeyLocation = strstr(fkeyLocation, "value=");
-    
+
     if (fkeyLocation == NULL) {
         client->fkey = NULL;
         return;
     }
-    
+
     while (*(fkeyLocation++) != '"');   //point it to after the opening quote
     int fkeySize = 8;
     char *fkey = malloc(fkeySize + 1);
@@ -158,20 +162,20 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
     }
     puts("Logging in...");
     CURL *curl = client->curl;
-    
+
     OutBuffer buffer;
     buffer.data = NULL;
-    
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
-    
-    
+
+
     //Log in to Stack Exchange.
     checkCURL(curl_easy_setopt(curl, CURLOPT_POSTFIELDS,
                                "from=https%3A%2F%2Fstackexchange.com%2Fusers%2Flogin%23log-in"));
     checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
                                "https://stackexchange.com/users/signin")
               );
-    
+
     checkCURL(curl_easy_perform(curl));
     //getFkey(client, buffer.data);
     checkCURL(curl_easy_setopt(curl, CURLOPT_URL, buffer.data));
@@ -180,12 +184,12 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
     checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
     checkCURL(curl_easy_perform(curl));
     getFkey(client, buffer.data);
-    
+
     //Make a buffer for POST data.
     const size_t maxPostLength = 256;
     char postBuffer[maxPostLength];
     postBuffer[0] = 0;
-    
+
     char *escapedEmail = curl_easy_escape(curl, email, (int)strlen(email));
     char *escapedPassword = curl_easy_escape(curl, password, (int)strlen(password));
     snprintf(postBuffer,
@@ -195,35 +199,35 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
              escapedPassword,
              client->fkey
              );
-    
+
     //Overwrite the password with zeroes.
     memset(escapedPassword, 0, strlen(escapedPassword));
     curl_free(escapedEmail);
     curl_free(escapedPassword);
-    
+
     postBuffer[maxPostLength-1] = 0;
-    
-    
+
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 0));
     checkCURL(curl_easy_setopt(curl, CURLOPT_POST, 1));
     checkCURL(curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postBuffer));
     checkCURL(curl_easy_setopt(curl, CURLOPT_URL, "https://openid.stackexchange.com/affiliate/form/login/submit"));
-    
+
     free(buffer.data);
     buffer.data = NULL;
     checkCURL(curl_easy_perform(curl));
-    
-    
+
+
     //Overwrite the buffer with zeroes since it contains the password.
     memset(postBuffer, 0, maxPostLength);
-    
+
     //Get the authenticate link.
     char *authLink = malloc(strlen(buffer.data) + 1);
     char *authLink_orig = authLink; //so we can free it
     strcpy(authLink, buffer.data);
     free(buffer.data);
     buffer.data = NULL;
-    
+
     authLink = strstr(authLink, "<a");
     if (authLink == NULL) {
         fputs("Failed to log in!\n", stderr);
@@ -232,22 +236,22 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
     }
     authLink = strchr(authLink, '"') + 1;
     *(strchr(authLink, '"')) = 0;
-    
+
     //Follow the link.
     checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L));
     checkCURL(curl_easy_setopt(curl, CURLOPT_URL, authLink));
     free(authLink_orig);
     checkCURL(curl_easy_perform(curl));
-    
+
     free(buffer.data);
     buffer.data = NULL;
-    
+
     if (!strstr(client->host, "stackexchange")) {   //If we're not at stackexchange.com,
         //Log into host.
         //Make a buffer for POST data.
         const size_t maxPostLength = 256;
         char postBuffer[maxPostLength];
-        
+
         snprintf(postBuffer, maxPostLength,
                  "https://%s/users/login",
                  client->host
@@ -256,13 +260,13 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
         postBuffer[0] = 0;
         checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
         checkCURL(curl_easy_perform(curl));
-        
+
         free(client->fkey);
         getFkey(client, buffer.data);
-        
+
         free(buffer.data);
         buffer.data = NULL;
-        
+
         char *escapedEmail = curl_easy_escape(curl, email, (int)strlen(email));
         char *escapedPassword = curl_easy_escape(curl, password, (int)strlen(password));
         snprintf(postBuffer,
@@ -272,22 +276,22 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
                  escapedPassword,
                  client->fkey
                  );
-        
+
         //Overwrite the password with zeroes.
         memset(escapedPassword, 0, strlen(escapedPassword));
         curl_free(escapedEmail);
         curl_free(escapedPassword);
-        
+
         postBuffer[maxPostLength-1] = 0;
-        
-        
+
+
         checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 0));
         checkCURL(curl_easy_setopt(curl, CURLOPT_POST, 1));
         checkCURL(curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postBuffer));
-        
+
         checkCURL(curl_easy_perform(curl));
-        
-        
+
+
         //Overwrite the buffer with zeroes since it contains the password.
         memset(postBuffer, 0, maxPostLength);
     }
@@ -295,7 +299,7 @@ void loginWithEmailAndPassword(Client *client, const char *email, const char *pa
 
 WebSocket *createWebSocketWithClient(Client *client) {
     WebSocket *s = malloc(sizeof(WebSocket));
-    
+
     s->openCallback = NULL;
     s->recieveCallback = NULL;
     s->closeCallback = NULL;
@@ -303,17 +307,17 @@ WebSocket *createWebSocketWithClient(Client *client) {
     s->user = NULL;
     s->client = client;
     s->isSetUp = 0;
-    
+
     return s;
 }
 
 void connectWebSocket(WebSocket *socket, const char *host, const char *path) {
     Client *c = socket->client;
     addWebsocket(c, socket);
-    
+
     struct lws_client_connect_info info;
     memset(&info, 0, sizeof(info));
-    
+
     info.context = c->wsContext;
     info.address = host;
     info.port = 80;
@@ -322,11 +326,11 @@ void connectWebSocket(WebSocket *socket, const char *host, const char *path) {
     info.host = host;
     info.origin = NULL;
     info.protocol = NULL;
-    
-    struct lws *ws = lws_client_connect_via_info(&info);
-    
-    /*
-     struct lws *ws = lws_client_connect(
+
+    //struct lws *ws = lws_client_connect_via_info(&info);
+    //struct libwebsocket_context
+
+     struct lws *ws = libwebsocket_client_connect(
                                         c->wsContext,
                                         host,
                                         80,
@@ -337,10 +341,10 @@ void connectWebSocket(WebSocket *socket, const char *host, const char *path) {
                                         NULL,
                                         -1
                                         );
-     */
-    
-    
-    
+
+
+
+
     if (ws == NULL) {
         fputs("Failed to create websocket!\n", stderr);
         exit(EXIT_FAILURE);
@@ -353,9 +357,17 @@ WebSocket *webSocketWithLWS(Client *c, struct lws *ws) {
             return c->sockets[i];
         }
     }
-    
+
     return NULL;
 }
+
+const struct libwebsocket_context *getContext (const struct lws *wsi)
+{
+    return wsi->context;
+}
+
+/*enum lws_callback_reasons {
+        LWS_CALLBACK_ESTABLISHED                                =  0};*/
 
 int websocketCallback(struct lws *ws,
                       enum lws_callback_reasons reason,
@@ -363,13 +375,33 @@ int websocketCallback(struct lws *ws,
                       void *in, size_t len) {
     char *data;
     Client *c = NULL;
+    //const struct lws *check = ws;
+    //struct libwebsocket_context *check =  ws->context;
+    //struct lws_context *check = ws->context;
+    /*if (check == NULL)
+    {
+        printf ("Check is NULL! Function: WebsocketCallback.");
+    }*/
+    //const struct libwebsocket *check = ws;
     if (ws) {
-        c = (Client *)lws_context_user(lws_get_context(ws));
+        //c = (Client *)libwebsocket_context_user(getContext (ws));
+         c = (Client *)ws->user_space;
     }
     WebSocket *socket = NULL;
-    if (user) {
-        socket = *(WebSocket**)user;
+    /*if (user == NULL)
+    {
+        printf ("USER IS NULL!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
     }
+    else
+    {
+        printf ("USER IS NOT NULL!!!!!!\N USER: %02x\n", (uint8_t*) user);
+    }*/
+    /*if (user) {
+        //socket = *(WebSocket**)user;
+        //socket->user = user;
+        socket = *(WebSocket**)user;
+
+    }*/
     switch (reason) {
         case LWS_CALLBACK_CLIENT_ESTABLISHED:
             puts("Connection established");
@@ -387,13 +419,14 @@ int websocketCallback(struct lws *ws,
             }
             break;
         case LWS_CALLBACK_CLIENT_RECEIVE:
+            puts ("\nReceived item...\n");
             data = malloc((strlen(in) + 1) * sizeof(char));
             strcpy(data, in);
-            
+
             if (socket->recieveCallback != NULL) {
                 socket->recieveCallback(socket, data, strlen(in));
             }
-            
+
             free(data);
             break;
         case LWS_CALLBACK_CLOSED:
@@ -414,8 +447,9 @@ int websocketCallback(struct lws *ws,
 void setupWebsocketContext(Client *c) {
     puts("Starting libwebsockets...");
     struct lws_context_creation_info info;
-    struct lws_protocols *protocols = malloc(sizeof(lws_protocols) * 3);
-    
+    //struct lws_protocols *protocols = malloc(sizeof(struct lws_protocols) * 3);
+    struct lws_protocols protocols [10000];
+
     memset(&info, 0, sizeof(info));
     info.port = CONTEXT_PORT_NO_LISTEN;
     info.iface = NULL;
@@ -428,46 +462,46 @@ void setupWebsocketContext(Client *c) {
     info.uid = -1;
     info.options = 0;
     info.user = c;
-    
-    
-    
+
+
+
     protocols[0].name = "http-only";
     protocols[1].name = "";
     protocols[2].name = "";
-    
+
     protocols[0].callback = websocketCallback;
     protocols[1].callback = websocketCallback;
     protocols[2].callback = NULL;
-    
+
     protocols[0].id = 0;
     protocols[1].id = 0;
     protocols[2].id = 0;
-    
+
     protocols[0].per_session_data_size = sizeof(WebSocket*);
     protocols[1].per_session_data_size = sizeof(WebSocket*);
     protocols[2].per_session_data_size = sizeof(WebSocket*);
-    
+
     protocols[0].user = c;
     protocols[1].user = c;
     protocols[2].user = c;
-    
+
     protocols[0].rx_buffer_size = 0;
     protocols[1].rx_buffer_size = 0;
     protocols[2].rx_buffer_size = 0;
-    
-    
-    
-    c->wsContext = lws_create_context(&info);
+
+
+
+    c->wsContext = libwebsocket_create_context(&info);
     if (c->wsContext == NULL) {
         fputs("Failed to create websocket context!\n", stderr);
         exit(EXIT_FAILURE);
     }
-    
+
     //lws_set_proxy(c->wsContext, "localhost:8080");
 }
 
 void serviceWebsockets(Client *client) {
-    lws_service(client->wsContext, 50);
+    libwebsocket_service(client->wsContext, 50);
 }
 
 ///Sends data across the websocket.
@@ -480,9 +514,9 @@ unsigned sendDataOnWebsocket(struct lws *socket, void *data, size_t len) {
     }
     unsigned char *buf = malloc(LWS_SEND_BUFFER_PRE_PADDING + len + LWS_SEND_BUFFER_POST_PADDING);
     memcpy(buf + LWS_SEND_BUFFER_PRE_PADDING, data, len);
-    
-    int ret = lws_write(socket, buf + LWS_SEND_BUFFER_PRE_PADDING, len, LWS_WRITE_TEXT);
-    
+
+    int ret = libwebsocket_write(socket, buf + LWS_SEND_BUFFER_PRE_PADDING, len, LWS_WRITE_TEXT);
+
     free(buf);
     return ret;
 }
@@ -495,11 +529,12 @@ void addWebsocket(Client *client, WebSocket *ws) {
 
 unsigned long connectClientToRoom(Client *client, unsigned roomID) {
     CURL *curl = client->curl;
-    
+
+    const size_t maxPostLength = 256;
     OutBuffer buffer;
     buffer.data = NULL;
     checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
-    
+
     //Get the chat fkey.
     checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
     const size_t maxLength = 256;
@@ -510,44 +545,50 @@ unsigned long connectClientToRoom(Client *client, unsigned roomID) {
              );
     checkCURL(curl_easy_setopt(curl, CURLOPT_URL, request));
     checkCURL(curl_easy_perform(curl));
-    
+    //printf ("\nold fkey: %s\n", client->fkey);
+
     free(client->fkey);
+    client->fkey = NULL;
     getFkey(client, buffer.data);
     free(buffer.data);
     buffer.data = NULL;
+
+    //printf ("\n%s\n", client->fkey);
     if (client->fkey == NULL) {
         fputs("Could not find fkey!\n", stderr);
         exit(EXIT_FAILURE);
     }
-    
+
     setupWebsocketContext(client);
     //client->ws = connectWebsocket(client, "qa.sockets.stackexchange.com", "/");
     //sendDataOnWebsocket(client->ws, "155-questions-active", 0);
-    
+
     //get the timestamp
-    
-    const size_t maxPostLength = 256;
+
     char postBuffer[maxPostLength];
-    
+
+    //snprintf(postBuffer, maxPostLength - 1, "roomid=%d", roomID, client->fkey);
     snprintf(postBuffer, maxPostLength - 1, "roomid=%d&fkey=%s", roomID, client->fkey);
     checkCURL(curl_easy_setopt(curl, CURLOPT_POST, 1));
     checkCURL(curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postBuffer));
-    
-    
-    
+
+
+
     char urlBuffer[maxPostLength];
-    
+
     snprintf(urlBuffer, maxPostLength, "chat.%s/chats/%d/events", client->host, roomID);
     checkCURL(curl_easy_setopt(curl, CURLOPT_URL, urlBuffer));
-    
-    
+
+
     curl_easy_perform(curl);
-    
+
     cJSON *json = cJSON_Parse(buffer.data);
     free(buffer.data);
-    
+
     unsigned long time = cJSON_GetObjectItem(json, "time")->valueint;
     cJSON_Delete(json);
     return time;
 }
+
+
 

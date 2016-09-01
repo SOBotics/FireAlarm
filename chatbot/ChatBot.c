@@ -18,6 +18,7 @@
 #include "cJSON.h"
 #include "misc_functions.h"
 #include "Client.h"
+#include "Filter.h"
 
 #define REPORT_HEADER "Potentially bad question"
 //#define THRESHOLD 1000
@@ -213,7 +214,7 @@ void analyzeReports(ChatBot *bot) {
                     {
                         char **currentPostTags = getTagsByID (bot, currentReport->post->postID);
 
-                        if (postHasTags (currentReport->post, currentTag))
+                        if (postHasTags (bot, currentReport->post, currentTag))
                         {
                             if (currentReport->confirmation)
                             {
@@ -527,17 +528,21 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
 
 unsigned int checkPost(ChatBot *bot, Post *post) {
 
-    if (!bot->modes->reportMode)
+    /*if (!bot->modes->reportMode)
     {
         return 0;
-    }
+    }*/
+
+    printf ("Checking post: %lu\n", post->postID);
 
     unsigned likelihood = 0;
     unsigned bodyLength = 1;
     char *messageBuf = malloc(sizeof(char));
     *messageBuf = 0;
 
-    if (bot->modes->keywordFilter)
+
+
+    //if (bot->modes->keywordFilter)
     {
         for (int i = 0; i < bot->filterCount; i++) {
             unsigned start, end;
@@ -564,17 +569,28 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         }
     }*/
 
-    if (likelihood > THRESHOLD && (recentlyReported (post->postID, bot) == 0)) {
-        const char *notifString = getNotificationString(bot, post);
-        const size_t maxMessage = strlen(messageBuf) + strlen(post->title) + strlen(notifString) + strlen(REPORT_HEADER) + 256;
-        char *message = malloc(maxMessage);
-        char *notif = getNotificationString(bot, post);
-        snprintf(message, maxMessage,
-                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) %s",
-                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, notif);
-        free(notif);
+    printf ("Post %lu likelihood: %u\n", post->postID, likelihood);
 
+    if (likelihood > THRESHOLD && (recentlyReported (post->postID, bot) == 0)) {
+        puts ("Preparing report...\n");
+        //char *notifString = getNotificationString(bot, post);
+        puts ("Completed line 576.");
+        const size_t maxMessage = strlen(messageBuf) + strlen(post->title) + strlen(REPORT_HEADER) + 256;
+        puts ("Completed line 578.");
+        char *message = malloc(maxMessage);
+        puts ("Completed line 580.");
+        //char *notif = getNotificationString(bot, post);
+        puts ("Completed line 582.");
+        snprintf(message, maxMessage,
+                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) ",
+                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood);
+        puts ("Completed preparing report.");
+        //free(notif);
+        //if (notifString != NULL)
+            //free (notifString);
+        puts ("Posting report...");
         postMessage(bot->room, message);
+            puts ("Posted report.");
 
         if (bot->latestReports[REPORT_MEMORY-1]) {
             free(bot->latestReports[REPORT_MEMORY-1]->post);
@@ -973,10 +989,12 @@ char **getTagsByID (ChatBot *bot, unsigned long postID)
         postMessage(bot->room, str);
         free(str);
     }
+    char **tags = malloc (sizeof (char) * 256);
 
     //char **tags = cJSON_GetArrayItem (json, "tags");
 
-    char **tags = cJSON_GetObjectItem (json, "tags")->valuestring;
+    //char **tags = cJSON_GetObjectItem (json, "tags")->valuestring;
+    strcpy (tags [0], "java");
 
     cJSON_Delete (json);
     return tags;
@@ -1111,11 +1129,11 @@ int isValidTag (ChatBot *bot, char *tag)
         free(str);
     }
 
-    cJSON *tagJSON = cJSON_GetArrayItem(cJSON_GetObjectItem(json, "items"), 0);
+    /*cJSON *tagJSON = cJSON_GetArrayItem(cJSON_GetObjectItem(json, "items"), 0);
     if (tagJSON == NULL) {
         cJSON_Delete(json);
         return 0;
-    }
+    }*/
 
     cJSON_Delete (json);
     return 1;
@@ -1163,9 +1181,9 @@ Filter *getFilterByKeyword (ChatBot *bot, char *keyword)
     return NULL;
 }
 
-unsigned isTagInFilter (ChatBot *bot, char *tag)
+/*unsigned isTagInFilter (ChatBot *bot, char *tag)
 {
-    Filter **filter = bot->filters;
+    Filter **filters = bot->filters;
     int i;
 
     for (i = 0; i < bot->filterCount; i ++)
@@ -1182,9 +1200,9 @@ unsigned isTagInFilter (ChatBot *bot, char *tag)
     }
 
     return 0;
-}
+}*/
 
-Reports **getReportsByFilter (ChatBot *bot, unsigned filterType, unsigned totalReports)
+Report **getReportsByFilter (ChatBot *bot, unsigned filterType, unsigned totalReports)
 {
     Report **reports = bot->latestReports;
     Filter **filters = bot->filters;

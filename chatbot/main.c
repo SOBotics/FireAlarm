@@ -210,6 +210,7 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     ChatBot *bot = (ChatBot*)ws->user;
     Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
     if (p != NULL) {
+        printf ("checking post: %lu", p->postID);
         checkPost(bot, p);
     }
     else {
@@ -221,7 +222,7 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
 
 Filter **loadFilters() {
     puts("Loading filters...");
-    FILE *file = fopen("filters.json", "r");
+    FILE *file = fopen("../FireAlarm/filters.json", "r");
     if (!file) {
         puts("Could not read from ~/.chatbot/filters.json.  Creating a skeleton filter list.");
         Filter **filters = malloc(sizeof(Filter*) * 2);
@@ -354,7 +355,7 @@ Notify **loadNotifications ()
         long userID = cJSON_GetObjectItem (n, "user_id")->valueint;
         int type = cJSON_GetObjectItem (n, "type")->valueint;
 
-        notify [i] = createNotification (type, userID);
+        notify [i] = createNotification (type, userID, NULL, 0);
     }
 
     notify[total] = NULL;
@@ -651,6 +652,7 @@ int main(int argc, const char * argv[]) {
             email[maxEmailLen-1] = 0;   //make sure it's null terminated
 
             char *password = getpass("Password: ");
+            char *password = malloc (sizeof (char) * 50);
             loginWithEmailAndPassword(client, email, password);
             //overwrite the password so it doesn't stay in memory
             memset(password, 0, strlen(password));
@@ -735,7 +737,18 @@ int main(int argc, const char * argv[]) {
         createCommand("unclosed t", 0, printUnclosedTP),
         createCommand("unclosed tp", 0, printUnclosedTP),
         createCommand("unclosed true", 0, printUnclosedTP),
-        createCommand("api quota", 0, apiQuota),
+        //createCommand("api quota", 0, apiQuota),
+        createCommand("filter modify threshold *", 2, modifyFilterThreshold),
+        createCommand("filter add keyword * * *", 2, addKeywordToFilter),
+        createCommand("filter add tag * * *", 2, addTagToFilter),
+        createCommand("filter view tags", 0, printTagsInFilter),
+        createCommand("filter view keywords", 0, printKeywordsInFilter),
+        createCommand("filter view keyword", 0, printKeywordsInFilter),
+        createCommand("filter modify keyword * * *", 2, modifyKeywordFilter),
+        createCommand("filter info * *", 0, filterInfo),
+        createCommand("filter view accuracy * *", 0, printAccuracyOfFilter),
+        createCommand("filter view reports * ... ...", 0, printReportsByFilter),
+        createCommand("filter view filters", 0, printFilters),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify);

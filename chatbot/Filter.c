@@ -17,11 +17,11 @@ Filter *createFilter(const char *desc, const char *filter, FilterType type, unsi
     strcpy(f->desc, desc);
     f->filter = malloc(strlen(filter) + 1);
     strcpy(f->filter, filter);
-    
+
     f->type = type;
     f->truePositives = truePositives;
     f->falsePositives = falsePositives;
-    
+
     int error;
     if (type == FILTER_REGEX && (error = regcomp(&f->regex, f->filter, REG_ICASE))) {
         const unsigned max = 1024;
@@ -33,7 +33,7 @@ Filter *createFilter(const char *desc, const char *filter, FilterType type, unsi
     return f;
 }
 
-static unsigned char matchRegexFilter(Post *post, Filter *f, unsigned *outStart, unsigned *outEnd) {
+unsigned char matchRegexFilter(Post *post, Filter *f, unsigned *outStart, unsigned *outEnd) {
     regmatch_t match;
     int error = regexec(&f->regex, post->body, 1, &match, 0);
     if (error == REG_NOMATCH) {
@@ -52,6 +52,7 @@ static unsigned char matchRegexFilter(Post *post, Filter *f, unsigned *outStart,
 }
 
 unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsigned *outStart, unsigned *outEnd) {
+    unsigned titleLength;
     switch (filter->type) {
         case FILTER_TEXT:
             ;char *start = strstr(post->body, filter->filter);
@@ -67,82 +68,27 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
             return strlen(post->body) < 500;
         case FILTER_TAG:
             return matchTagFilter (bot, post, filter);
+        case FILTER_CAPS:
+            titleLength = strlen (post->title);
+            unsigned bodyLength = strlen (post->body);
+            unsigned totalCaps = 0;
+            totalCaps = getCapsInString (post->title);
+            if ((totalCaps/titleLength) * 100 > 40)
+                return 1;
+            totalCaps = getCapsInString (post->body);
+            if ((totalCaps/bodyLength) * 100 > 30)
+                return 1;
+            return 0;
         default:
             fprintf(stderr, "Invalid filter type %d\n", filter->type);
             exit(EXIT_FAILURE);
     }
 }
 
-unsigned postMatchesTagFilter (ChatBot *bot, Post *post)
-{
-    char *tagList;
-    
-    asprintf (&tagList,
-              "licensing; copyright; ownership; blogs; open-source; jobs; apple; driver; drivers; privacy; spam; protection; search-engine; stack-overflow");
-              
-    pthread_mutex_lock(&bot->room->clientLock);
-    CURL *curl = bot->room->client->curl;
-    
-    checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
-    OutBuffer buffer;
-    buffer.data = NULL;
-    checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
-    
-    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip, deflate");
-    
-    unsigned max = 256;
-    char request[max];
-    snprintf(request, max,
-             "https://api.stackexchange.com/2.2/search?site=stackoverflow&order=desc&sort=activity&tagged=%s&key="API_KEY, tagList);
-    
-    curl_easy_setopt(curl, CURLOPT_URL, request);
-    
-    checkCURL(curl_easy_perform(curl));
-    
-    checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
-    
-    
-    pthread_mutex_unlock(&bot->room->clientLock);
-    
-    cJSON *json = cJSON_Parse(buffer.data);
-    
-    free(buffer.data);
-    
-    if (!json || cJSON_GetObjectItem(json, "error_id")) {
-        if (json) {
-            cJSON_Delete(json);
-        }
-        puts("Error fetching post!");
-        return NULL;
-    }
-    
-    cJSON *backoff;
-    if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
-        char *str;
-        asprintf(&str, "Recieved backoff: %d", backoff->valueint);
-        postMessage(bot->room, str);
-        free(str);
-    }
-    
-    unsigned totalPosts = cJSON_GetArraySize (json);
-    
-    for (int i = 0; i < totalPosts; i ++)
-    {
-        if (cJSON_GetObjectItem (json, "question_id")->valueint == post->postID)
-        {
-            cJSON_Delete (json);
-            return 1;
-        }
-    }
-    
-    cJSON_Delete (json);
-    return 0;
-}
-
 unsigned matchTagFilter (ChatBot *bot, Post *post, Filter *filter)
 {
     char **tags = getTagsByID (bot, post->postID);
-    
+
     for (int i = 0; i < 5; i ++)
     {
         if (strcmp (tags [i], filter->filter) == 0)
@@ -150,6 +96,6 @@ unsigned matchTagFilter (ChatBot *bot, Post *post, Filter *filter)
             return 1;
         }
     }
-    
+
     return 0;
 }

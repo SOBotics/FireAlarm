@@ -19,7 +19,8 @@ typedef enum {
     FILTER_TEXT = 0,
     FILTER_REGEX = 1,
     FILTER_SHORTBODY = 2,
-    FILTER_TAG = 3
+    FILTER_TAG = 3,
+    FILTER_CAPS = 4
 }FilterType;
 
 typedef struct {
@@ -34,7 +35,7 @@ typedef struct {
 
 Filter *createFilter(const char *desc, const char *filter, FilterType type, unsigned truePositives, unsigned falsePositives);
 unsigned postMatchestagFilter (ChatBot *bot, Post *post);
-unsigned matchRegexFilter (ChatBot *bot, Post *post, Filter *filter);
+unsigned char matchRegexFilter (Post *post, Filter *filter, unsigned *outStart, unsigned *outEnd);
 unsigned matchTagFilter (ChatBot *bot, Post *post, Filter *filter);
 
 //Returns whether or not the specified post matchis the specified filter.

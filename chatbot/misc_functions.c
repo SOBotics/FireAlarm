@@ -181,7 +181,7 @@ int isTagProgrammingRelated (char *tag)
         "xcode",
         "xml",
         "xslt"
-    }
+    };
 
     for (int i = 0; i < 139; i ++)
     {
@@ -194,9 +194,9 @@ int isTagProgrammingRelated (char *tag)
     return 0;
 }
 
-int postHasTags (Post *post, char *tag)
+int postHasTags (ChatBot *bot, Post *post, char *tag)
 {
-    char **tags = getTagsByID (post->postID);
+    char **tags = getTagsByID (bot, post->postID);
 
     for (int i = 0; i < 5; i ++)
     {
@@ -209,11 +209,15 @@ int postHasTags (Post *post, char *tag)
     return 0;
 }
 
+
+void removeChar (char *str, char c);
+//unsigned isTagInFilter (ChatBot *bot, char *tag);
+
 unsigned isTagInFilter (ChatBot *bot, char *tag)
 {
     Filter **filters = bot->filters;
 
-    for (int i = 0; i < bot->totalFilters; i ++)
+    for (int i = 0; i < bot->filterCount; i ++)
     {
         if (strcmp (filters [i]->filter, tag) == 0)
         {
@@ -224,7 +228,7 @@ unsigned isTagInFilter (ChatBot *bot, char *tag)
     return 0;
 }
 
-void removeChar (char* str, char c) {
+void removeChar (char *str, char c) {
     char *pr = str;
     char *pw = str;
     while (*pr) {
@@ -234,15 +238,34 @@ void removeChar (char* str, char c) {
     *pw = '\0';
 }
 
-unsigned isStringCotainingNumbers (char *str)
+unsigned getCapsInString (char *str)
 {
     unsigned len = strlen (str);
-
+    unsigned totalCaps = 0;
     for (int i = 0; i < len; i ++)
     {
-        if (!(str [i] >= '0' && str [i]<= '9'))
+        if (str [i] <= 'Z' && str [i] >= 'A')
+        {
+            totalCaps ++;
+        }
+    }
+
+    return totalCaps;
+}
+
+unsigned isStringContainingNumbers2 (char *str)
+{
+    unsigned len = strlen (str);
+    unsigned i;
+
+    for (i = 0; i < len; i ++)
+    {
+        if (str [i] < 0 || str [i] > 9)
+        {
             return 0;
+        }
     }
 
     return 1;
 }
+

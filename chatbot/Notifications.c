@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ChatBot.h"
+#include "Post.h"
+
 
 Notify *createNotification (int type, long userID, char *tag, int totalTags)
 {
@@ -17,7 +19,7 @@ Notify *createNotification (int type, long userID, char *tag, int totalTags)
 
     n->type = type;
     n->userID = userID;
-    n->tag = tag;
+    n->tags [totalTags -1] = tag;
     n->totalTags = totalTags;
 
     return n;
@@ -51,8 +53,9 @@ void deleteTagNotification (Notify *notify, char *tag)
 {
     char **tags = notify->tags;
     int tagPos = -1;
+    int i;
 
-    for (int i = 0; i < notify->totalTags; i ++)
+    for (i = 0; i < notify->totalTags; i ++)
     {
         if (strcmp (tag, tags [i]) == 0)
         {
