@@ -76,14 +76,32 @@ private enum BackgroundTask {
 private var backgroundTasks = [BackgroundTask]()
 private let backgroundSemaphore = dispatch_semaphore_create(0)
 
+private var saveURL: NSURL!
+
+enum SaveFileAccessType {
+    case Reading
+    case Writing
+    case Updating
+}
+
+func saveFileNamed(name: String) -> NSURL {
+    return saveURL.URLByAppendingPathComponent(name)
+}
 
 
 func main() throws {
     print("FireAlarm starting...")
     
-    //Save the working directory so we don't break rebooting if we chdir.
+    //Save the working directory & change to the chatbot directory.
     let originalWorkingDirectory = NSFileManager.defaultManager().currentDirectoryPath
     
+    let saveDirURL = NSURL(fileURLWithPath: NSHomeDirectory()).URLByAppendingPathComponent(".firealarm", isDirectory: true)
+    
+    if !NSFileManager.defaultManager().fileExistsAtPath(saveDirURL.path!) {
+        try! NSFileManager.defaultManager().createDirectoryAtURL(saveDirURL, withIntermediateDirectories: false, attributes: nil)
+    }
+    
+    saveURL = saveDirURL
     
     
     //Log in
@@ -137,6 +155,7 @@ func main() throws {
     
     //Join the chat room
     let room = ChatRoom(client: client, roomID: 68414)  //SOCVR Testing Facility
+    try room.loadUserDB()
     errorRoom = room
     let bot = ChatBot(room)
     room.delegate = bot
@@ -186,6 +205,9 @@ func main() throws {
                 sleep(1)
             }
             room.leave()
+            
+            
+            try room.saveUserDB()
             
             
             if reboot {

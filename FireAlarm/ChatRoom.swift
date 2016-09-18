@@ -134,6 +134,36 @@ class ChatRoom: NSObject, WebSocketDelegate {
         return users
     }
     
+    
+    func loadUserDB() throws {
+        guard let data = NSData(contentsOfURL: saveFileNamed("users.json")) else {
+            return
+        }
+        guard let db = try NSJSONSerialization.JSONObjectWithData(data, options: []) as? NSArray else {
+            return
+        }
+        
+        userDB = []
+        var users = userDB
+        
+        for item in db {
+            guard let id = (item as? NSDictionary)?["id"] as? Int else {
+                continue
+            }
+            users.append(userWithID(id))
+        }
+        
+        userDB = users
+    }
+    
+    func saveUserDB() throws {
+        let db = userDB.map {["id":$0.id]}
+        let data = try NSJSONSerialization.dataWithJSONObject(db, options: .PrettyPrinted)
+        data.writeToURL(saveFileNamed("users.json"), atomically: true)
+    }
+    
+    
+    
     var ws: WebSocket!
     private var wsRetries = 0
     private let wsMaxRetries = 10

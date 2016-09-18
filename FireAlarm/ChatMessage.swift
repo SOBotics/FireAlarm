@@ -2,7 +2,7 @@
 //  ChatMessage.swift
 //  FireAlarm
 //
-//  Created by Jonathan Keller on 8/28/16.
+//  Created by NobodyNada on 8/28/16.
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
