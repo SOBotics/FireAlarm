@@ -9,7 +9,7 @@
 import Foundation
 
 class CommandStop: Command {
-    private let REBOOT_INDEX = 4
+    fileprivate let REBOOT_INDEX = 4
     override class func usage() -> [String] {
         return ["stop", "halt", "shutdown", "shut down", "restart", "reboot"]
     }
@@ -18,11 +18,11 @@ class CommandStop: Command {
         let action: ChatBot.StopAction
         let reply: String
         if usageIndex < REBOOT_INDEX {
-            action = .Halt
+            action = .halt
             reply = "Shutting down..."
         }
         else {
-            action = .Reboot
+            action = .reboot
             reply = "Rebooting..."
         }
         bot.room.postReply(reply, to: message)

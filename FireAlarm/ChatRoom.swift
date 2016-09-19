@@ -9,36 +9,36 @@
 import Foundation
 
 protocol ChatRoomDelegate {
-    func chatRoomMessage(room: ChatRoom, message: ChatMessage, isEdit: Bool)
+    func chatRoomMessage(_ room: ChatRoom, message: ChatMessage, isEdit: Bool)
 }
 
 class ChatRoom: NSObject, WebSocketDelegate {
     enum ChatEvent: Int {
-        case MessagePosted = 1
-        case MessageEdited = 2
-        case UserEntered = 3
-        case UserLeft = 4
-        case RoomNameChanged = 5
-        case MessageStarred = 6
-        case DebugMessage = 7
-        case UserMentioned = 8
-        case MessageFlagged = 9
-        case MessageDeleted = 10
-        case FileAdded = 11
-        case ModeratorFlag = 12
-        case UserSettingsChanged = 13
-        case GlobalNotification = 14
-        case AccessLevelChanged = 15
-        case UserNotification = 16
-        case Invitation = 17
-        case MessageReply = 18
-        case MessageMovedOut = 19
-        case MessageMovedIn = 20
-        case TimeBreak = 21
-        case FeedTicker = 22
-        case UserSuspended = 29
-        case UserMerged = 30
-        case UsernameChanged = 34
+        case messagePosted = 1
+        case messageEdited = 2
+        case userEntered = 3
+        case userLeft = 4
+        case roomNameChanged = 5
+        case messageStarred = 6
+        case debugMessage = 7
+        case userMentioned = 8
+        case messageFlagged = 9
+        case messageDeleted = 10
+        case fileAdded = 11
+        case moderatorFlag = 12
+        case userSettingsChanged = 13
+        case globalNotification = 14
+        case accessLevelChanged = 15
+        case userNotification = 16
+        case invitation = 17
+        case messageReply = 18
+        case messageMovedOut = 19
+        case messageMovedIn = 20
+        case timeBreak = 21
+        case feedTicker = 22
+        case userSuspended = 29
+        case userMerged = 30
+        case usernameChanged = 34
     };
     
     
@@ -48,7 +48,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
     
     var delegate: ChatRoomDelegate?
     
-    private var pendingLookup = [ChatUser]()
+    fileprivate var pendingLookup = [ChatUser]()
     
     var userDB = [ChatUser]()
     
@@ -62,29 +62,29 @@ class ChatRoom: NSObject, WebSocketDelegate {
             let json: String = try client.post(
                 "https://chat.\(client.host.rawValue)/user/info",
                 [
-                    "ids" : ids.joinWithSeparator(","),
+                    "ids" : ids.joined(separator: ","),
                     "roomID" : "1"
                 ]
             )
             
             guard let results = try client.parseJSON(json) as? NSDictionary else {
-                throw EventError.JSONParsingFailed(json: json)
+                throw EventError.jsonParsingFailed(json: json)
             }
             
             guard let users = results["users"] as? NSArray else {
-                throw EventError.JSONParsingFailed(json: json)
+                throw EventError.jsonParsingFailed(json: json)
             }
             
             for obj in users {
                 guard let user = obj as? NSDictionary else {
-                    throw EventError.JSONParsingFailed(json: json)
+                    throw EventError.jsonParsingFailed(json: json)
                 }
                 
                 guard let id = user["id"] as? Int else {
-                    throw EventError.JSONParsingFailed(json: json)
+                    throw EventError.jsonParsingFailed(json: json)
                 }
                 guard let name = user["name"] as? String else {
-                    throw EventError.JSONParsingFailed(json: json)
+                    throw EventError.jsonParsingFailed(json: json)
                 }
                 
                 let isMod = (user["is_moderator"] as? Bool) ?? false
@@ -105,7 +105,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
     }
     
     ///Looks up a user by ID.  If the user is not in the database, they are added.
-    func userWithID(id: Int) -> ChatUser {
+    func userWithID(_ id: Int) -> ChatUser {
         for user in userDB {
             if user.id == id {
                 return user
@@ -124,7 +124,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
     
     
     ///Looks up a user by name.  The user must already exist in the database!
-    func userNamed(name: String) -> [ChatUser] {
+    func userNamed(_ name: String) -> [ChatUser] {
         var users = [ChatUser]()
         for user in userDB {
             if user.name == name {
@@ -136,10 +136,10 @@ class ChatRoom: NSObject, WebSocketDelegate {
     
     
     func loadUserDB() throws {
-        guard let data = NSData(contentsOfURL: saveFileNamed("users.json")) else {
+        guard let data = try? Data(contentsOf: saveFileNamed("users.json")) else {
             return
         }
-        guard let db = try NSJSONSerialization.JSONObjectWithData(data, options: []) as? NSArray else {
+        guard let db = try JSONSerialization.jsonObject(with: data, options: []) as? NSArray else {
             return
         }
         
@@ -158,15 +158,15 @@ class ChatRoom: NSObject, WebSocketDelegate {
     
     func saveUserDB() throws {
         let db = userDB.map {["id":$0.id]}
-        let data = try NSJSONSerialization.dataWithJSONObject(db, options: .PrettyPrinted)
-        data.writeToURL(saveFileNamed("users.json"), atomically: true)
+        let data = try JSONSerialization.data(withJSONObject: db, options: .prettyPrinted)
+        try? data.write(to: saveFileNamed("users.json"), options: [.atomic])
     }
     
     
     
     var ws: WebSocket!
-    private var wsRetries = 0
-    private let wsMaxRetries = 10
+    fileprivate var wsRetries = 0
+    fileprivate let wsMaxRetries = 10
     
     var inRoom = false
     
@@ -179,17 +179,17 @@ class ChatRoom: NSObject, WebSocketDelegate {
         self.roomID = roomID
     }
     
-    enum RoomJoinError: ErrorType {
-        case RoomInfoRetrievalFailed
+    enum RoomJoinError: Error {
+        case roomInfoRetrievalFailed
     }
     
-    private func connectWS() throws {
+    fileprivate func connectWS() throws {
         //get the timestamp
         guard let time = (try client.parseJSON(client.post("https://chat.\(client.host.rawValue)/chats/\(roomID)/events", [
             "roomid" : roomID,
             "fkey": client.fkey
             ])) as? NSDictionary)?["time"] as? Int else {
-                throw RoomJoinError.RoomInfoRetrievalFailed
+                throw RoomJoinError.roomInfoRetrievalFailed
         }
         timestamp = time
         
@@ -201,7 +201,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
         
         let wsURL = wsAuth["url"] as! String
         
-        let request = NSMutableURLRequest(URL: NSURL(string: "\(wsURL)?l=\(timestamp)")!)
+        let request = NSMutableURLRequest(url: URL(string: "\(wsURL)?l=\(timestamp)")!)
         
         request.setValue("https://chat.\(client.host.rawValue)", forHTTPHeaderField: "Origin")
         
@@ -210,7 +210,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
         ws.delegate = self
     }
     
-    private func messageQueueHandler() {
+    fileprivate func messageQueueHandler() {
         while messageQueue.count != 0 {
             var result: String? = nil
             do {
@@ -240,16 +240,16 @@ class ChatRoom: NSObject, WebSocketDelegate {
         }
     }
     
-    func postMessage(message: String) {
+    func postMessage(_ message: String) {
         messageQueue.append(message)
         if messageQueue.count == 1 {
-            dispatch_async(client.queue) {
+            client.queue.async {
                 self.messageQueueHandler()
             }
         }
     }
     
-    func postReply(reply: String, to: ChatMessage) {
+    func postReply(_ reply: String, to: ChatMessage) {
         if let id = to.id {
             postMessage(":\(id) \(reply)")
         }
@@ -266,20 +266,20 @@ class ChatRoom: NSObject, WebSocketDelegate {
         userWithID(0)   //add the Console to the database
         let json: String = try client.get("https://chat.\(client.host.rawValue)/rooms/pingable/\(roomID)")
         guard let users = try client.parseJSON(json) as? NSArray else {
-            throw EventError.JSONParsingFailed(json: json)
+            throw EventError.jsonParsingFailed(json: json)
         }
         
         for userObj in users {
             guard let user = userObj as? NSArray else {
-                throw EventError.JSONParsingFailed(json: json)
+                throw EventError.jsonParsingFailed(json: json)
             }
             guard let userID = user[0] as? Int else {
-                throw EventError.JSONParsingFailed(json: json)
+                throw EventError.jsonParsingFailed(json: json)
             }
             userWithID(userID)
         }
         
-        print("Users in database: \((userDB.map {$0.description}).joinWithSeparator(", "))")
+        print("Users in database: \((userDB.map {$0.description}).joined(separator: ", "))")
         
         inRoom = true
         
@@ -291,35 +291,35 @@ class ChatRoom: NSObject, WebSocketDelegate {
         inRoom = false
         let _ = try? client.post("https://chat.\(client.host.rawValue)/chats/leave/\(roomID)", ["quiet":"true","fkey":client.fkey]) as String
         ws.close()
-        while ws.readyState == .Closing {
+        while ws.readyState == .closing {
             sleep(1)
         }
     }
     
-    enum EventError: ErrorType {
-        case JSONParsingFailed(json: String)
-        case InvalidEventType(type: Int)
+    enum EventError: Error {
+        case jsonParsingFailed(json: String)
+        case invalidEventType(type: Int)
     }
     
-    func handleEvents(events: NSArray) throws {
+    func handleEvents(_ events: NSArray) throws {
         for e in events {
             guard let event = e as? NSDictionary else {
-                throw EventError.JSONParsingFailed(json: String(events))
+                throw EventError.jsonParsingFailed(json: String(describing: events))
             }
             guard let typeCode = event["event_type"] as? Int else {
-                throw EventError.JSONParsingFailed(json: String(events))
+                throw EventError.jsonParsingFailed(json: String(describing: events))
             }
             guard let type = ChatEvent(rawValue: typeCode) else {
-                throw EventError.InvalidEventType(type: typeCode)
+                throw EventError.invalidEventType(type: typeCode)
             }
             
             switch type {
-            case .MessagePosted, .MessageEdited:
+            case .messagePosted, .messageEdited:
                 guard
                     let userID = event["user_id"] as? Int,
                     let messageID = event["message_id"] as? Int,
                     let content = event["content"] as? String else {
-                        throw EventError.JSONParsingFailed(json: String(events))
+                        throw EventError.jsonParsingFailed(json: String(describing: events))
                 }
                 
                 //look up the user instead of getting their name to make sure they're in the DB
@@ -329,7 +329,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
                 
                 let message = ChatMessage(user: user, content: content, id: messageID)
                 if let d = delegate {
-                    d.chatRoomMessage(self, message: message, isEdit: type == .MessageEdited)
+                    d.chatRoomMessage(self, message: message, isEdit: type == .messageEdited)
                 }
             default:
                 break
@@ -342,18 +342,18 @@ class ChatRoom: NSObject, WebSocketDelegate {
         wsRetries = 0
     }
     
-    func webSocketClose(code: Int, reason: String, wasClean: Bool) {
+    func webSocketClose(_ code: Int, reason: String, wasClean: Bool) {
         //do nothing -- we'll handle this in webSocketEnd
     }
     
-    func webSocketError(error: NSError) {
+    func webSocketError(_ error: NSError) {
         //do nothing -- we'll handle this in webSocketEnd
     }
     
-    @objc func webSocketMessageText(text: String) {
+    @objc func webSocketMessageText(_ text: String) {
         do {
             guard let json = try client.parseJSON(text) as? NSDictionary else {
-                throw EventError.JSONParsingFailed(json: text)
+                throw EventError.jsonParsingFailed(json: text)
             }
             
             let roomKey = "r\(roomID)"
@@ -368,11 +368,11 @@ class ChatRoom: NSObject, WebSocketDelegate {
         }
     }
     
-    @objc func webSocketMessageData(data: NSData) {
+    @objc func webSocketMessageData(_ data: Data) {
         print("Recieved binary data: \(data)")
     }
     
-    func webSocketEnd(code: Int, reason: String, wasClean: Bool, error: NSError?) {
+    func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: NSError?) {
         if let e = error {
             print("Websocket error:\n\(e)")
         }

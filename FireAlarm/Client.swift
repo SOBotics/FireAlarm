@@ -10,19 +10,19 @@ import Foundation
 
 extension String {
     var urlEncodedString: String {
-        let allowed = NSMutableCharacterSet(charactersInString: "+&")
-        allowed.formUnionWithCharacterSet(NSCharacterSet.URLQueryAllowedCharacterSet())
-        return self.stringByAddingPercentEncodingWithAllowedCharacters(allowed)!
+        let allowed = NSMutableCharacterSet(charactersIn: "+&")
+        allowed.formUnion(with: CharacterSet.urlQueryAllowed)
+        return self.addingPercentEncoding(withAllowedCharacters: allowed as CharacterSet)!
     }
     
     init(urlParameters: [String:Any]) {
         var result = [String]()
         
         for (key, value) in urlParameters {
-            result.append("\(key.urlEncodedString)=\(String(value).urlEncodedString)")
+            result.append("\(key.urlEncodedString)=\(String(describing: value).urlEncodedString)")
         }
         
-        self.init(result.joinWithSeparator("&"))
+        self.init(result.joined(separator: "&"))
     }
 }
 
@@ -35,43 +35,43 @@ func + <K, V> (left: [K:V], right: [K:V]) -> [K:V] {
 }
 
 //http://stackoverflow.com/a/24052094/3476191
-func += <K, V> (inout left: [K:V], right: [K:V]) {
+func += <K, V> (left: inout [K:V], right: [K:V]) {
     for (k, v) in right {
         left[k] = v
     }
 }
 
-class Client: NSObject, NSURLSessionDataDelegate {
+class Client: NSObject, URLSessionDataDelegate {
     
-    var session: NSURLSession!
+    var session: URLSession!
     
     var loggedIn = false
     
-    let queue = dispatch_queue_create("Client queue", nil)
+    let queue = DispatchQueue(label: "Client queue", attributes: [])
     
-    private var _fkey: String!
+    fileprivate var _fkey: String!
     
     var fkey: String! {
         if _fkey == nil {
             //Get the chat fkey.
             let joinFavorites: String = try! get("https://chat.\(host.rawValue)/chats/join/favorite")
             
-            guard let inputIndex = joinFavorites.rangeOfString("type=\"hidden\"")?.endIndex else {
+            guard let inputIndex = joinFavorites.range(of: "type=\"hidden\"")?.upperBound else {
                 fatalError("Could not find fkey")
             }
-            let input = joinFavorites.substringFromIndex(inputIndex)
+            let input = joinFavorites.substring(from: inputIndex)
             
-            guard let fkeyStartIndex = input.rangeOfString("value=\"")?.endIndex else {
+            guard let fkeyStartIndex = input.range(of: "value=\"")?.upperBound else {
                 fatalError("Could not find fkey")
             }
-            let fkeyStart = input.substringFromIndex(fkeyStartIndex)
+            let fkeyStart = input.substring(from: fkeyStartIndex)
             
-            guard let fkeyEnd = fkeyStart.rangeOfString("\"")?.startIndex else {
+            guard let fkeyEnd = fkeyStart.range(of: "\"")?.lowerBound else {
                 fatalError("Could not find fkey")
             }
             
             
-            _fkey = fkeyStart.substringToIndex(fkeyEnd)
+            _fkey = fkeyStart.substring(to: fkeyEnd)
         }
         return _fkey
     }
@@ -85,87 +85,87 @@ class Client: NSObject, NSURLSessionDataDelegate {
             return "chat." + rawValue
         }
         
-        var url: NSURL {
-            return NSURL(string: "https://" + rawValue)!
+        var url: URL {
+            return URL(string: "https://" + rawValue)!
         }
         
-        var chatHostURL: NSURL {
-            return NSURL(string: "https://" + chatHost)!
+        var chatHostURL: URL {
+            return URL(string: "https://" + chatHost)!
         }
     }
     
     let host: Host
     
-    enum RequestError: ErrorType {
-        case InvalidURL
-        case NotUTF8
+    enum RequestError: Error {
+        case invalidURL
+        case notUTF8
     }
     
-    func performRequest(request: NSURLRequest) throws -> (NSData, NSHTTPURLResponse) {
-        let sema = dispatch_semaphore_create(0)
+    func performRequest(_ request: URLRequest) throws -> (Data, HTTPURLResponse) {
+        let sema = DispatchSemaphore(value: 0)
         
-        var data: NSData!
-        var resp: NSURLResponse!
+        var data: Data!
+        var resp: URLResponse!
         var error: NSError!
         
-        session.dataTaskWithRequest(request) {inData, inResp, inError in
-            (data, resp, error) = (inData, inResp, inError)
-            dispatch_semaphore_signal(sema)
-            }.resume()
+        session.dataTask(with: request, completionHandler: {inData, inResp, inError in
+            (data, resp, error) = (inData, inResp, inError as NSError!)
+            sema.signal()
+            }) .resume()
         
-        dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER)
+        sema.wait(timeout: DispatchTime.distantFuture)
         
-        guard let response = resp as? NSHTTPURLResponse where data != nil else {
+        guard let response = resp as? HTTPURLResponse , data != nil else {
             throw error
         }
         
         return (data, response)
     }
     
-    func get(url: String) throws -> (NSData, NSHTTPURLResponse) {
-        guard let nsUrl = NSURL(string: url) else {
-            throw RequestError.InvalidURL
+    func get(_ url: String) throws -> (Data, HTTPURLResponse) {
+        guard let nsUrl = URL(string: url) else {
+            throw RequestError.invalidURL
         }
-        return try performRequest(NSURLRequest(URL: nsUrl))
+        return try performRequest(URLRequest(url: nsUrl))
     }
     
-    func post(url: String, _ data: [String:Any]) throws -> (NSData, NSHTTPURLResponse) {
-        guard let nsUrl = NSURL(string: url) else {
-            throw RequestError.InvalidURL
+    func post(_ url: String, _ data: [String:Any]) throws -> (Data, HTTPURLResponse) {
+        guard let nsUrl = URL(string: url) else {
+            throw RequestError.invalidURL
         }
-        let request = NSMutableURLRequest(URL: nsUrl)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = String(urlParameters: data).dataUsingEncoding(NSUTF8StringEncoding)
-        return try performRequest(request)
+        let request = NSMutableURLRequest(url: nsUrl)
+        request.httpMethod = "POST"
+        request.httpBody = String(urlParameters: data).data(using: String.Encoding.utf8)
+        return try performRequest(request as URLRequest)
     }
     
     
-    func performRequest(request: NSURLRequest) throws -> String {
+    func performRequest(_ request: URLRequest) throws -> String {
         let (data, _) = try performRequest(request)
-        guard let string = String(data: data, encoding: NSUTF8StringEncoding) else {
-            throw RequestError.NotUTF8
+        guard let string = String(data: data, encoding: String.Encoding.utf8) else {
+            throw RequestError.notUTF8
         }
         return string
     }
     
-    func get(url: String) throws -> String {
+    func get(_ url: String) throws -> String {
         let (data, _) = try get(url)
-        guard let string = String(data: data, encoding: NSUTF8StringEncoding) else {
-            throw RequestError.NotUTF8
+        guard let string = String(data: data, encoding: String.Encoding.utf8) else {
+            throw RequestError.notUTF8
         }
         return string
     }
     
-    func post(url: String, _ fields: [String:Any]) throws -> String {
+    func post(_ url: String, _ fields: [String:Any]) throws -> String {
         let (data, _) = try post(url, fields)
-        guard let string = String(data: data, encoding: NSUTF8StringEncoding) else {
-            throw RequestError.NotUTF8
+        guard let string = String(data: data, encoding: String.Encoding.utf8) else {
+            throw RequestError.notUTF8
         }
         return string
     }
     
-    func parseJSON(json: String) throws -> AnyObject {
-        return try NSJSONSerialization.JSONObjectWithData(json.dataUsingEncoding(NSUTF8StringEncoding)!, options: .AllowFragments)
+    func parseJSON(_ json: String) throws -> AnyObject {
+        return try JSONSerialization.jsonObject(with: json.data(using: String.Encoding.utf8)!, options: .allowFragments)
     }
     
     
@@ -178,66 +178,66 @@ class Client: NSObject, NSURLSessionDataDelegate {
         
         super.init()
         
-        let configuration =  NSURLSessionConfiguration.defaultSessionConfiguration()
+        let configuration =  URLSessionConfiguration.default
         
-        session = NSURLSession(
+        session = URLSession(
             configuration: configuration,
             delegate: nil, delegateQueue: nil
         )
         
         //check if we're already logged in
-        let request = NSURLRequest(URL: NSURL(string: "https://stackexchange.com/users/logout")!)
+        let request = URLRequest(url: URL(string: "https://stackexchange.com/users/logout")!)
         
-        let semaphore = dispatch_semaphore_create(0)
+        let semaphore = DispatchSemaphore(value: 0)
         
-        let task = session.dataTaskWithRequest(request) {data, resp, error in
-            guard let response = (resp as? NSHTTPURLResponse) where error == nil else {
+        let task = session.dataTask(with: request, completionHandler: {data, resp, error in
+            guard let response = (resp as? HTTPURLResponse) , error == nil else {
                 self.loggedIn = false
-                dispatch_semaphore_signal(semaphore)
+                semaphore.signal()
                 return
             }
             
-            self.loggedIn = response.statusCode == 200 && response.URL?.lastPathComponent == "logout"
-            dispatch_semaphore_signal(semaphore)
-        }
+            self.loggedIn = response.statusCode == 200 && response.url?.lastPathComponent == "logout"
+            semaphore.signal()
+        }) 
         
         task.resume()
         
-        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+        semaphore.wait(timeout: DispatchTime.distantFuture)
     }
     
-    enum LoginError: ErrorType {
-        case AlreadyLoggedIn
-        case LoginDataNotFound
-        case LoginFailed(message: String)
+    enum LoginError: Error {
+        case alreadyLoggedIn
+        case loginDataNotFound
+        case loginFailed(message: String)
     }
     
-    private func getHiddenInputs(string: String) -> [String:String] {
+    fileprivate func getHiddenInputs(_ string: String) -> [String:String] {
         var result = [String:String]()
         
-        let components = string.componentsSeparatedByString("<input type=\"hidden\"")
+        let components = string.components(separatedBy: "<input type=\"hidden\"")
         
         for input in components[1..<components.count] {
-            guard let nameStartIndex = input.rangeOfString("name=\"")?.endIndex else {
+            guard let nameStartIndex = input.range(of: "name=\"")?.upperBound else {
                 continue
             }
-            let nameStart = input.substringFromIndex(nameStartIndex)
+            let nameStart = input.substring(from: nameStartIndex)
             
-            guard let nameEndIndex = nameStart.rangeOfString("\"")?.startIndex else {
+            guard let nameEndIndex = nameStart.range(of: "\"")?.lowerBound else {
                 continue
             }
-            let name = nameStart.substringToIndex(nameEndIndex)
+            let name = nameStart.substring(to: nameEndIndex)
             
-            guard let valueStartIndex = nameStart.rangeOfString("value=\"")?.endIndex else {
+            guard let valueStartIndex = nameStart.range(of: "value=\"")?.upperBound else {
                 continue
             }
-            let valueStart = nameStart.substringFromIndex(valueStartIndex)
+            let valueStart = nameStart.substring(from: valueStartIndex)
             
-            guard let valueEndIndex = valueStart.rangeOfString("\"")?.startIndex else {
+            guard let valueEndIndex = valueStart.range(of: "\"")?.lowerBound else {
                 continue
             }
             
-            let value = valueStart.substringToIndex(valueEndIndex)
+            let value = valueStart.substring(to: valueEndIndex)
             
             result[name] = value
         }
@@ -245,9 +245,9 @@ class Client: NSObject, NSURLSessionDataDelegate {
         return result
     }
     
-    func loginWithEmail(email: String, password: String) throws {
+    func loginWithEmail(_ email: String, password: String) throws {
         if loggedIn {
-            throw LoginError.AlreadyLoggedIn
+            throw LoginError.alreadyLoggedIn
         }
         
         print("Logging in...")
@@ -259,7 +259,7 @@ class Client: NSObject, NSURLSessionDataDelegate {
         let hiddenInputs = getHiddenInputs(loginPage)
         
         guard hiddenInputs["affId"] != nil && hiddenInputs["fkey"] != nil else {
-            throw LoginError.LoginDataNotFound
+            throw LoginError.loginDataNotFound
         }
         
         let fields: [String:Any] = [
@@ -272,19 +272,19 @@ class Client: NSObject, NSURLSessionDataDelegate {
             "https://openid.stackexchange.com/affiliate/form/login/submit", fields
         )
         
-        let page = String(data: linkData, encoding: NSUTF8StringEncoding)!
+        let page = String(data: linkData, encoding: String.Encoding.utf8)!
         
-        if let errorStartIndex = page.rangeOfString("<div class=\"error\"><p>")?.endIndex {
-            let errorStart = page.substringFromIndex(errorStartIndex)
-            let errorEndIndex = errorStart.rangeOfString("</p></div>")!.startIndex
-            let error = errorStart.substringToIndex(errorEndIndex)
+        if let errorStartIndex = page.range(of: "<div class=\"error\"><p>")?.upperBound {
+            let errorStart = page.substring(from: errorStartIndex)
+            let errorEndIndex = errorStart.range(of: "</p></div>")!.lowerBound
+            let error = errorStart.substring(to: errorEndIndex)
             
-            throw LoginError.LoginFailed(message: error)
+            throw LoginError.loginFailed(message: error)
         }
         
-        let linkStart = page.substringFromIndex(page.rangeOfString("<a href=\"")!.endIndex)
-        let linkEndIndex = linkStart.rangeOfString("\"")!.startIndex
-        let link = linkStart.substringToIndex(linkEndIndex)
+        let linkStart = page.substring(from: page.range(of: "<a href=\"")!.upperBound)
+        let linkEndIndex = linkStart.range(of: "\"")!.lowerBound
+        let link = linkStart.substring(to: linkEndIndex)
         
         let (_,_) = try get(link)
         
@@ -294,7 +294,7 @@ class Client: NSObject, NSURLSessionDataDelegate {
             let hostLoginURL = "https://\(host.rawValue)/users/login"
             let hostLoginPage: String = try get(hostLoginURL)
             guard let fkey = getHiddenInputs(hostLoginPage)["fkey"] else {
-                throw LoginError.LoginDataNotFound
+                throw LoginError.loginDataNotFound
             }
             
             let (_,_) = try post(hostLoginURL, [

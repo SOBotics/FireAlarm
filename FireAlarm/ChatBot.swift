@@ -16,36 +16,36 @@ class ChatBot: ChatRoomDelegate {
         CommandHelp.self, CommandListRunning.self, CommandStop.self
     ]
     
-    let commandQueue = dispatch_queue_create("Command Queue", DISPATCH_QUEUE_CONCURRENT)
+    let commandQueue = DispatchQueue(label: "Command Queue", attributes: DispatchQueue.Attributes.concurrent)
     
     var runningCommands = [Command]()
     
     enum StopAction {
-        case Run
-        case Halt
-        case Reboot
+        case run
+        case halt
+        case reboot
     }
     
-    private var pendingStopAction = StopAction.Run
+    fileprivate var pendingStopAction = StopAction.run
     
-    private func runCommand(command: Command) {
+    fileprivate func runCommand(_ command: Command) {
         runningCommands.append(command)
-        dispatch_async(commandQueue) {
+        commandQueue.async {
             do {
                 try command.run()
             }
             catch {
                 handleError(error, "while running \"\(command.message.content)\"")
             }
-            self.runningCommands.removeAtIndex(self.runningCommands.indexOf {$0 === command}!)
-            if (self.pendingStopAction == .Halt || self.pendingStopAction == .Reboot) && self.runningCommands.isEmpty {
-                halt(reboot: self.pendingStopAction == .Reboot)
+            self.runningCommands.remove(at: self.runningCommands.index {$0 === command}!)
+            if (self.pendingStopAction == .halt || self.pendingStopAction == .reboot) && self.runningCommands.isEmpty {
+                halt(reboot: self.pendingStopAction == .reboot)
             }
         }
     }
     
-    private func handleCommand(message: ChatMessage) {
-        var components = message.content.lowercaseString.componentsSeparatedByCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+    fileprivate func handleCommand(_ message: ChatMessage) {
+        var components = message.content.lowercased().components(separatedBy: CharacterSet.whitespaces)
         components.removeFirst()
         
         var args = [String]()
@@ -57,7 +57,7 @@ class ChatBot: ChatRoomDelegate {
                 let usage = usages[i]
                 
                 var match = true
-                let usageComponents = usage.componentsSeparatedByCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+                let usageComponents = usage.components(separatedBy: CharacterSet.whitespaces)
                 let lastIndex = min(components.count, usageComponents.count)
                 
                 for i in 0..<lastIndex {
@@ -69,7 +69,7 @@ class ChatBot: ChatRoomDelegate {
                     }
                     else if usageComponent == "..." {
                         //everything else is arguments; add them to the list
-                        args.appendContentsOf(components[i..<components.count])
+                        args.append(contentsOf: components[i..<components.count])
                     }
                     else if component != usageComponent {
                         match = false
@@ -91,13 +91,13 @@ class ChatBot: ChatRoomDelegate {
         }
     }
     
-    func chatRoomMessage(room: ChatRoom, message: ChatMessage, isEdit: Bool) {
-        if pendingStopAction == .Run && message.content.lowercaseString.hasPrefix("@fir") {
+    func chatRoomMessage(_ room: ChatRoom, message: ChatMessage, isEdit: Bool) {
+        if pendingStopAction == .run && message.content.lowercased().hasPrefix("@fir") {
             handleCommand(message)
         }
     }
     
-    func stop(stopAction: StopAction) {
+    func stop(_ stopAction: StopAction) {
         pendingStopAction = stopAction
     }
     

@@ -12,9 +12,9 @@ class ChatUser: CustomStringConvertible {
     
     let id: Int
     
-    private var _name: String?
-    private var _isMod: Bool?
-    private var _isRO: Bool?
+    fileprivate var _name: String?
+    fileprivate var _isMod: Bool?
+    fileprivate var _isRO: Bool?
     
     var name: String {
         get {

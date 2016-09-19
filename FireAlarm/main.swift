@@ -9,7 +9,7 @@
 import Foundation
 
 func clearCookies() {
-    let storage = NSHTTPCookieStorage.sharedHTTPCookieStorage()
+    let storage = HTTPCookieStorage.shared
     if let cookies = storage.cookies {
         for cookie in cookies {
             storage.deleteCookie(cookie)
@@ -19,7 +19,7 @@ func clearCookies() {
 
 
 
-func makeTable(heading: [String], contents: [String]...) -> String {
+func makeTable(_ heading: [String], contents: [String]...) -> String {
     if heading.count != contents.count {
         fatalError("heading and contents have different counts")
     }
@@ -39,17 +39,17 @@ func makeTable(heading: [String], contents: [String]...) -> String {
             maxLength[col] = max(row.characters.count, maxLength[col])
         }
         rows = max(contents[col].count, rows)
-        alignedHeading.append(heading[col].stringByPaddingToLength(maxLength[col], withString: " ", startingAtIndex: 0))
+        alignedHeading.append(heading[col].padding(toLength: maxLength[col], withPad: " ", startingAt: 0))
         alignedContents.append(contents[col].map {
-            $0.stringByPaddingToLength(maxLength[col], withString: " ", startingAtIndex: 0)
+            $0.padding(toLength: maxLength[col], withPad: " ", startingAt: 0)
             }
         )
         tableWidth += maxLength[col]
     }
     tableWidth += (cols - 1) * 3
     
-    let head = alignedHeading.joinWithSeparator(" | ")
-    let divider = String([Character](count: tableWidth, repeatedValue: "-"))
+    let head = alignedHeading.joined(separator: " | ")
+    let divider = String([Character](repeating: "-", count: tableWidth))
     var table = [String]()
     
     for row in 0..<rows {
@@ -57,35 +57,35 @@ func makeTable(heading: [String], contents: [String]...) -> String {
         for col in 0..<cols {
             columns.append(
                 alignedContents[col].count > row ?
-                    alignedContents[col][row] : String([Character](count:maxLength[col], repeatedValue: " ")))
+                    alignedContents[col][row] : String([Character](repeating: " ", count: maxLength[col])))
         }
-        table.append(columns.joinWithSeparator(" | "))
+        table.append(columns.joined(separator: " | "))
     }
     
-    return "    " + [head,divider,table.joinWithSeparator("\n    ")].joinWithSeparator("\n    ")
+    return "    " + [head,divider,table.joined(separator: "\n    ")].joined(separator: "\n    ")
 }
 
 
 
 private var errorRoom: ChatRoom?
 private enum BackgroundTask {
-    case HandleInput(input: String)
-    case ShutDown(reboot: Bool)
+    case handleInput(input: String)
+    case shutDown(reboot: Bool)
 }
 
 private var backgroundTasks = [BackgroundTask]()
-private let backgroundSemaphore = dispatch_semaphore_create(0)
+private let backgroundSemaphore = DispatchSemaphore(value: 0)
 
-private var saveURL: NSURL!
+private var saveURL: URL!
 
 enum SaveFileAccessType {
-    case Reading
-    case Writing
-    case Updating
+    case reading
+    case writing
+    case updating
 }
 
-func saveFileNamed(name: String) -> NSURL {
-    return saveURL.URLByAppendingPathComponent(name)
+func saveFileNamed(_ name: String) -> URL {
+    return saveURL.appendingPathComponent(name)
 }
 
 
@@ -93,12 +93,12 @@ func main() throws {
     print("FireAlarm starting...")
     
     //Save the working directory & change to the chatbot directory.
-    let originalWorkingDirectory = NSFileManager.defaultManager().currentDirectoryPath
+    let originalWorkingDirectory = FileManager.default.currentDirectoryPath
     
-    let saveDirURL = NSURL(fileURLWithPath: NSHomeDirectory()).URLByAppendingPathComponent(".firealarm", isDirectory: true)
+    let saveDirURL = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".firealarm", isDirectory: true)
     
-    if !NSFileManager.defaultManager().fileExistsAtPath(saveDirURL.path!) {
-        try! NSFileManager.defaultManager().createDirectoryAtURL(saveDirURL, withIntermediateDirectories: false, attributes: nil)
+    if !FileManager.default.fileExists(atPath: saveDirURL.path) {
+        try! FileManager.default.createDirectory(at: saveDirURL, withIntermediateDirectories: false, attributes: nil)
     }
     
     saveURL = saveDirURL
@@ -111,7 +111,7 @@ func main() throws {
         let email: String
         let password: String
         
-        let env =  NSProcessInfo.processInfo().environment
+        let env =  ProcessInfo.processInfo.environment
         
         let envEmail = env["ChatBotEmail"]
         let envPassword = env["ChatBotPass"]
@@ -128,13 +128,13 @@ func main() throws {
             password = envPassword!
         }
         else {
-            password = String(UTF8String: getpass("Password: "))!
+            password = String(validatingUTF8: getpass("Password: "))!
         }
         
         do {
             try client.loginWithEmail(email, password: password)
         }
-        catch Client.LoginError.LoginFailed(let message) {
+        catch Client.LoginError.loginFailed(let message) {
             print("Login failed: \(message)")
             exit(EXIT_FAILURE)
         }
@@ -174,22 +174,22 @@ func main() throws {
     func inputMonitor() {
         repeat {
             if let input = readLine() {
-                backgroundTasks.append(.HandleInput(input: input))
-                dispatch_semaphore_signal(backgroundSemaphore)
+                backgroundTasks.append(.handleInput(input: input))
+                backgroundSemaphore.signal()
             }
         } while true
     }
     
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), inputMonitor)
+    DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.background).async(execute: inputMonitor)
     
     
     repeat {
         //wait for a background task
-        dispatch_semaphore_wait(backgroundSemaphore, DISPATCH_TIME_FOREVER)
+        backgroundSemaphore.wait(timeout: DispatchTime.distantFuture)
         
         switch backgroundTasks.removeFirst() {
-        case .HandleInput(let input):
+        case .handleInput(let input):
             bot.chatRoomMessage(
                 room,
                 message: ChatMessage(
@@ -199,7 +199,7 @@ func main() throws {
                 ),
                 isEdit: false
             )
-        case .ShutDown(let reboot):
+        case .shutDown(let reboot):
             //Wait for pending messages to be posted.
             while !room.messageQueue.isEmpty {
                 sleep(1)
@@ -212,10 +212,10 @@ func main() throws {
             
             if reboot {
                 //Change to the old working directory.
-                NSFileManager.defaultManager().changeCurrentDirectoryPath(originalWorkingDirectory)
+                FileManager.default.changeCurrentDirectoryPath(originalWorkingDirectory)
                 
                 //Reload the program binary, which will restart the bot.
-                execv(Process.arguments[0], Process.unsafeArgv)
+                execv(CommandLine.arguments[0], CommandLine.unsafeArgv)
             }
             //If a reboot fails, it will fall through to here & just shutdown instead.
             return
@@ -223,12 +223,12 @@ func main() throws {
     } while true
 }
 
-func halt(reboot reboot: Bool = false) {
-    backgroundTasks.append(.ShutDown(reboot: reboot))
-    dispatch_semaphore_signal(backgroundSemaphore)
+func halt(reboot: Bool = false) {
+    backgroundTasks.append(.shutDown(reboot: reboot))
+    backgroundSemaphore.signal()
 }
 
-func handleError(error: ErrorType, _ context: String? = nil) {
+func handleError(_ error: Error, _ context: String? = nil) {
     let contextStr: String
     if context != nil {
         contextStr = " \(context!)"
@@ -237,8 +237,8 @@ func handleError(error: ErrorType, _ context: String? = nil) {
         contextStr = ""
     }
     
-    let message1 = "An error (`\(String(reflecting: error.dynamicType))`) occured\(contextStr):"
-    let message2 = String(error)
+    let message1 = "An error (`\(String(reflecting: type(of: error)))`) occured\(contextStr):"
+    let message2 = String(describing: error)
     
     if let room = errorRoom {
         room.postMessage(message1)
