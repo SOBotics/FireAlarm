@@ -22,7 +22,7 @@ extension String {
             result.append("\(key.urlEncodedString)=\(String(describing: value).urlEncodedString)")
         }
         
-        self.init(result.joined(separator: "&"))
+        self.init(result.joined(separator: "&"))!
     }
 }
 
@@ -113,7 +113,7 @@ class Client: NSObject, URLSessionDataDelegate {
             sema.signal()
             }) .resume()
         
-        sema.wait(timeout: DispatchTime.distantFuture)
+        sema.wait()
         
         guard let response = resp as? HTTPURLResponse , data != nil else {
             throw error
@@ -164,7 +164,7 @@ class Client: NSObject, URLSessionDataDelegate {
         return string
     }
     
-    func parseJSON(_ json: String) throws -> AnyObject {
+    func parseJSON(_ json: String) throws -> Any {
         return try JSONSerialization.jsonObject(with: json.data(using: String.Encoding.utf8)!, options: .allowFragments)
     }
     
@@ -203,7 +203,7 @@ class Client: NSObject, URLSessionDataDelegate {
         
         task.resume()
         
-        semaphore.wait(timeout: DispatchTime.distantFuture)
+        semaphore.wait()
     }
     
     enum LoginError: Error {

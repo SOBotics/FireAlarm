@@ -21,7 +21,7 @@ private class Payload {
     init(){
         len = 0
         cap = windowBufferSize
-        ptr = UnsafeMutablePointer<UInt8>(malloc(cap))
+        ptr = malloc(cap).bindMemory(to: UInt8.self, capacity: cap)
     }
     deinit{
         free(ptr)
@@ -35,7 +35,7 @@ private class Payload {
                 while cap < newValue {
                     cap *= 2
                 }
-                ptr = UnsafeMutablePointer<UInt8>(realloc(ptr, cap))
+                ptr = realloc(ptr, cap).bindMemory(to: UInt8.self, capacity: cap)
             }
             len = newValue
         }
@@ -88,7 +88,7 @@ private enum OpCode : UInt8, CustomStringConvertible {
     }
     var description : String {
         switch self {
-        case continue: return "Continue"
+        case .continue: return "Continue"
         case .text: return "Text"
         case .binary: return "Binary"
         case .close: return "Close"
@@ -410,11 +410,8 @@ private class Inflater {
     var tInput = [[UInt8]]()
     var inflateEnd : [UInt8] = [0x00, 0x00, 0xFF, 0xFF]
     var bufferSize = windowBufferSize
-    var buffer = UnsafeMutablePointer<UInt8>(malloc(windowBufferSize))
+    var buffer = malloc(windowBufferSize).bindMemory(to: UInt8.self, capacity: windowBufferSize)
     init?(windowBits : Int){
-        if buffer == nil {
-            return nil
-        }
         self.windowBits = windowBits
         let ret = inflateInit2(&strm, windowBits: -CInt(windowBits), version: zlibVersion(), stream_size: CInt(MemoryLayout<z_stream>.size))
         if ret != 0 {
@@ -422,7 +419,7 @@ private class Inflater {
         }
     }
     deinit{
-        inflateEndG(&strm)
+        let _ = inflateEndG(&strm)
         free(buffer)
     }
     func inflate(_ bufin : UnsafePointer<UInt8>, length : Int, final : Bool) throws -> (p : UnsafeMutablePointer<UInt8>, n : Int){
@@ -443,7 +440,7 @@ private class Inflater {
             while true {
                 strm.avail_out = CUnsignedInt(bufsiz)
                 strm.next_out = buf
-                inflateG(&strm, flush: 0)
+                let _ = inflateG(&strm, flush: 0)
                 let have = bufsiz - Int(strm.avail_out)
                 bufsiz -= have
                 buflen += have
@@ -452,10 +449,7 @@ private class Inflater {
                 }
                 if bufsiz == 0 {
                     bufferSize *= 2
-                    let nbuf = UnsafeMutablePointer<UInt8>(realloc(buffer, bufferSize))
-                    if nbuf == nil {
-                        throw WebSocketError.payloadError("memory")
-                    }
+                    let nbuf = realloc(buffer, bufferSize).bindMemory(to: UInt8.self, capacity: bufferSize)
                     buffer = nbuf
                     buf = buffer+Int(buflen)
                     bufsiz = bufferSize - buflen
@@ -471,11 +465,8 @@ private class Deflater {
     var memLevel = 0
     var strm = z_stream()
     var bufferSize = windowBufferSize
-    var buffer = UnsafeMutablePointer<UInt8>(malloc(windowBufferSize))
+    var buffer = malloc(windowBufferSize).bindMemory(to: UInt8.self, capacity: windowBufferSize)
     init?(windowBits : Int, memLevel : Int){
-        if buffer == nil {
-            return nil
-        }
         self.windowBits = windowBits
         self.memLevel = memLevel
         let ret = deflateInit2(&strm, level: 6, method: 8, windowBits: -CInt(windowBits), memLevel: CInt(memLevel), strategy: 0, version: zlibVersion(), stream_size: CInt(MemoryLayout<z_stream>.size))
@@ -484,10 +475,10 @@ private class Deflater {
         }
     }
     deinit{
-        deflateEnd(&strm)
+        let _ = deflateEnd(&strm)
         free(buffer)
     }
-    func deflate(_ bufin : UnsafePointer<UInt8>, length : Int, final : Bool) -> (p : UnsafeMutablePointer<UInt8>, n : Int, err : NSError?){
+    func deflate(_ bufin : UnsafePointer<UInt8>, length : Int, final : Bool) -> (p : UnsafeMutablePointer<UInt8>?, n : Int, err : NSError?){
         return (nil, 0, nil)
     }
 }
@@ -615,7 +606,7 @@ private class InnerWebSocket: Hashable {
         self.delegate = Delegate()
         if stub{
             manager.queue.asyncAfter(deadline: DispatchTime.now() + Double(0) / Double(NSEC_PER_SEC)){
-                self
+                let _ = self
             }
         } else {
             manager.queue.asyncAfter(deadline: DispatchTime.now() + Double(0) / Double(NSEC_PER_SEC)){
@@ -845,10 +836,7 @@ private class InnerWebSocket: Hashable {
                         size *= 2
                     }
                     if size > inputBytesSize {
-                        let ptr = UnsafeMutablePointer<UInt8>(realloc(inputBytes, size))
-                        if ptr == nil {
-                            throw WebSocketError.memory
-                        }
+                        let ptr = realloc(inputBytes, size).bindMemory(to: UInt8.self, capacity: size)
                         inputBytes = ptr
                         inputBytesSize = size
                     }
@@ -976,8 +964,8 @@ private class InnerWebSocket: Hashable {
         wr.close()
     }
     
-    func openConn() throws {
-        let req = request.mutableCopy() as! NSMutableURLRequest
+    func openConn() throws -> Void {
+        var req = request!
         req.setValue("websocket", forHTTPHeaderField: "Upgrade")
         req.setValue("Upgrade", forHTTPHeaderField: "Connection")
         if req.value(forHTTPHeaderField: "User-Agent") == nil {
@@ -1025,7 +1013,7 @@ private class InnerWebSocket: Hashable {
             security = .none
         }
         
-        var path = CFURLCopyPath(req.url!) as String
+        var path = CFURLCopyPath(req.url! as CFURL!) as String
         if path == "" {
             path = "/"
         }
@@ -1044,7 +1032,8 @@ private class InnerWebSocket: Hashable {
         for i in 0 ..< 4 {
             keyb[i] = arc4random()
         }
-        let rkey = Data(bytes: UnsafePointer<UInt8>(keyb), count: 16).base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0))
+		
+        let rkey = Data(bytes: UnsafeRawPointer(keyb), count: 16).base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0))
         reqs += "Sec-WebSocket-Key: \(rkey)\r\n"
         reqs += "\r\n"
         var header = [UInt8]()
@@ -1059,27 +1048,28 @@ private class InnerWebSocket: Hashable {
         var (rdo, wro) : (InputStream?, OutputStream?)
         var readStream:  Unmanaged<CFReadStream>?
         var writeStream: Unmanaged<CFWriteStream>?
-        CFStreamCreatePairWithSocketToHost(nil, addr[0], UInt32(Int(addr[1])!), &readStream, &writeStream);
+        CFStreamCreatePairWithSocketToHost(nil, addr[0] as CFString!, UInt32(Int(addr[1])!), &readStream, &writeStream);
         rdo = readStream!.takeRetainedValue()
         wro = writeStream!.takeRetainedValue()
         (rd, wr) = (rdo!, wro!)
         rd.setProperty(security.level, forKey: Stream.PropertyKey.socketSecurityLevelKey)
         wr.setProperty(security.level, forKey: Stream.PropertyKey.socketSecurityLevelKey)
+		
         if services.contains(.VoIP) {
-            rd.setProperty(StreamNetworkServiceTypeValue.voIP, forKey: Stream.PropertyKey.networkServiceType)
-            wr.setProperty(StreamNetworkServiceTypeValue.voIP, forKey: Stream.PropertyKey.networkServiceType)
+			rd.setProperty(StreamNetworkServiceTypeValue.voIP as Any, forKey: Stream.PropertyKey.networkServiceType)
+			wr.setProperty(StreamNetworkServiceTypeValue.voIP as Any, forKey: Stream.PropertyKey.networkServiceType)
         }
         if services.contains(.Video) {
-            rd.setProperty(StreamNetworkServiceTypeValue.video, forKey: Stream.PropertyKey.networkServiceType)
-            wr.setProperty(StreamNetworkServiceTypeValue.video, forKey: Stream.PropertyKey.networkServiceType)
+            rd.setProperty(StreamNetworkServiceTypeValue.video as Any, forKey: Stream.PropertyKey.networkServiceType)
+            wr.setProperty(StreamNetworkServiceTypeValue.video as Any, forKey: Stream.PropertyKey.networkServiceType)
         }
         if services.contains(.Background) {
-            rd.setProperty(StreamNetworkServiceTypeValue.background, forKey: Stream.PropertyKey.networkServiceType)
-            wr.setProperty(StreamNetworkServiceTypeValue.background, forKey: Stream.PropertyKey.networkServiceType)
+            rd.setProperty(StreamNetworkServiceTypeValue.background as Any, forKey: Stream.PropertyKey.networkServiceType)
+            wr.setProperty(StreamNetworkServiceTypeValue.background as Any, forKey: Stream.PropertyKey.networkServiceType)
         }
         if services.contains(.Voice) {
-            rd.setProperty(StreamNetworkServiceTypeValue.voice, forKey: Stream.PropertyKey.networkServiceType)
-            wr.setProperty(StreamNetworkServiceTypeValue.voice, forKey: Stream.PropertyKey.networkServiceType)
+            rd.setProperty(StreamNetworkServiceTypeValue.voice as Any, forKey: Stream.PropertyKey.networkServiceType)
+            wr.setProperty(StreamNetworkServiceTypeValue.voice as Any, forKey: Stream.PropertyKey.networkServiceType)
         }
         if allowSelfSignedSSL {
             let prop: Dictionary<NSObject,NSObject> = [kCFStreamSSLPeerName: kCFNull, kCFStreamSSLValidatesCertificateChain: NSNumber(value: false as Bool)]
@@ -1101,10 +1091,7 @@ private class InnerWebSocket: Hashable {
             while outputBytesStart+outputBytesLength+length > size {
                 size *= 2
             }
-            let ptr = UnsafeMutablePointer<UInt8>(realloc(outputBytes, size))
-            if ptr == nil {
-                throw WebSocketError.memory
-            }
+            let ptr = realloc(outputBytes, size).bindMemory(to: UInt8.self, capacity: size)
             outputBytes = ptr
             outputBytesSize = size
         }
@@ -1114,13 +1101,12 @@ private class InnerWebSocket: Hashable {
     
     func readResponse() throws {
         let end : [UInt8] = [ 0x0D, 0x0A, 0x0D, 0x0A ]
-        let ptr = UnsafeMutablePointer<UInt8>(memmem(inputBytes!+inputBytesStart, inputBytesLength, end, 4))
-        if ptr == nil {
+		guard let ptr = (memmem(inputBytes!+inputBytesStart, inputBytesLength, end, 4)?.bindMemory(to: UInt8.self, capacity: 1)) else {
             throw WebSocketError.needMoreInput
         }
         let buffer = inputBytes!+inputBytesStart
-        let bufferCount = ptr-(inputBytes+inputBytesStart)
-        let string = NSString(bytesNoCopy: buffer, length: bufferCount, encoding: String.Encoding.utf8, freeWhenDone: false) as? String
+        let bufferCount = ptr-(inputBytes!+inputBytesStart)
+        let string = NSString(bytesNoCopy: buffer, length: bufferCount, encoding: String.Encoding.utf8.rawValue, freeWhenDone: false) as? String
         if string == nil {
             throw WebSocketError.invalidHeader
         }
@@ -1593,7 +1579,7 @@ private class Manager {
                     }
                 }
                 if wait {
-                    self.wait(250)
+                    let _ = self.wait(250)
                 }
                 pthread_mutex_unlock(&self.mutex)
             }
@@ -1685,7 +1671,7 @@ open class WebSocket: NSObject {
     }
     /// Create a WebSocket object with a deferred connection; the connection is not opened until the .open() method is called.
     public convenience override init(){
-        self.init(request: URLRequest(), subProtocols: [])
+		self.init(request: URLRequest(url: URL(fileURLWithPath: "invalid")), subProtocols: [])
     }
     /// The URL as resolved by the constructor. This is always an absolute URL. Read only.
     open var url : String{ return ws.url }

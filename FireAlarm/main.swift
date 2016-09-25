@@ -154,7 +154,7 @@ func main() throws {
     
     
     //Join the chat room
-    let room = ChatRoom(client: client, roomID: 68414)  //SOCVR Testing Facility
+    let room = ChatRoom(client: client, roomID: 123602)  //SOCVR Testing Facility
     try room.loadUserDB()
     errorRoom = room
     let bot = ChatBot(room)
@@ -181,12 +181,12 @@ func main() throws {
     }
     
     
-    DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.background).async(execute: inputMonitor)
+    DispatchQueue.global().async(execute: inputMonitor)
     
     
     repeat {
         //wait for a background task
-        backgroundSemaphore.wait(timeout: DispatchTime.distantFuture)
+        backgroundSemaphore.wait()
         
         switch backgroundTasks.removeFirst() {
         case .handleInput(let input):

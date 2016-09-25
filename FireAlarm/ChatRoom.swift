@@ -201,7 +201,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
         
         let wsURL = wsAuth["url"] as! String
         
-        let request = NSMutableURLRequest(url: URL(string: "\(wsURL)?l=\(timestamp)")!)
+        var request = URLRequest(url: URL(string: "\(wsURL)?l=\(timestamp)")!)
         
         request.setValue("https://chat.\(client.host.rawValue)", forHTTPHeaderField: "Origin")
         
@@ -263,7 +263,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
         
         try connectWS()
         
-        userWithID(0)   //add the Console to the database
+        let _ = userWithID(0)   //add the Console to the database
         let json: String = try client.get("https://chat.\(client.host.rawValue)/rooms/pingable/\(roomID)")
         guard let users = try client.parseJSON(json) as? NSArray else {
             throw EventError.jsonParsingFailed(json: json)
@@ -276,7 +276,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
             guard let userID = user[0] as? Int else {
                 throw EventError.jsonParsingFailed(json: json)
             }
-            userWithID(userID)
+            let _ = userWithID(userID)
         }
         
         print("Users in database: \((userDB.map {$0.description}).joined(separator: ", "))")
