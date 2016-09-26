@@ -129,12 +129,11 @@ class Filter: WebSocketDelegate {
 	}
 	
 	func reportPost(_ post: Post) {
-		bot.room.postMessage("Potentially bad question: [\(post.title)](//stackoverflow.com/q/\(post.id)")
+		bot.room.postMessage("Potentially bad question: [\(post.title)](//stackoverflow.com/q/\(post.id))")
 	}
 	
 	func webSocketMessageText(_ text: String) {
 		do {
-			print(text)
 			guard let data = text.data(using: .utf8) else {
 				throw QuestionProcessingError.textNotUTF8(text: text)
 			}
