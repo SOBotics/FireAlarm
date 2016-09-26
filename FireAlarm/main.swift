@@ -88,6 +88,7 @@ func saveFileNamed(_ name: String) -> URL {
     return saveURL.appendingPathComponent(name)
 }
 
+let saveDirURL = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".firealarm", isDirectory: true)
 
 func main() throws {
     print("FireAlarm starting...")
@@ -160,7 +161,8 @@ func main() throws {
     let bot = ChatBot(room)
     room.delegate = bot
     try room.join()
-    
+	
+	try bot.filter.start()
     
     
     //Startup finished
@@ -237,12 +239,11 @@ func handleError(_ error: Error, _ context: String? = nil) {
         contextStr = ""
     }
     
-    let message1 = "An error (`\(String(reflecting: type(of: error)))`) occured\(contextStr):"
+    let message1 = "    An error (\(String(reflecting: type(of: error)))) occured\(contextStr):"
     let message2 = String(describing: error)
     
     if let room = errorRoom {
-        room.postMessage(message1)
-        room.postMessage("    " + message2)
+        room.postMessage(message1 + "\n    " + message2.replacingOccurrences(of: "\n", with: "\n    "))
     }
     else {
         fatalError("\(message1)\n\(message2)")

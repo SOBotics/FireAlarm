@@ -20,6 +20,8 @@
 		ABD01E491D721B1800B1A7F8 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD01E481D721B1800B1A7F8 /* main.swift */; };
 		ABD01E501D721D4F00B1A7F8 /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD01E4F1D721D4F00B1A7F8 /* Client.swift */; };
 		ABF730B41D77A534002A606C /* CommandStop.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF730B31D77A534002A606C /* CommandStop.swift */; };
+		ABFA23431D974B4D007C9EE4 /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFA23421D974B4D007C9EE4 /* Filter.swift */; };
+		ABFA23451D9882E2007C9EE4 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFA23441D9882E2007C9EE4 /* Post.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -49,6 +51,8 @@
 		ABD01E481D721B1800B1A7F8 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		ABD01E4F1D721D4F00B1A7F8 /* Client.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
 		ABF730B31D77A534002A606C /* CommandStop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CommandStop.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		ABFA23421D974B4D007C9EE4 /* Filter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Filter.swift; sourceTree = "<group>"; };
+		ABFA23441D9882E2007C9EE4 /* Post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +124,8 @@
 			children = (
 				ABD01E481D721B1800B1A7F8 /* main.swift */,
 				ABAE42221D73B7090018DF57 /* ChatBot.swift */,
+				ABFA23421D974B4D007C9EE4 /* Filter.swift */,
+				ABFA23441D9882E2007C9EE4 /* Post.swift */,
 				ABAE42261D73B9130018DF57 /* Command.swift */,
 				ABAE42241D73B7640018DF57 /* ChatMessage.swift */,
 				ABAE420E1D725E090018DF57 /* ChatRoom.swift */,
@@ -194,11 +200,13 @@
 				ABAE42251D73B7640018DF57 /* ChatMessage.swift in Sources */,
 				ABAE420F1D725E090018DF57 /* ChatRoom.swift in Sources */,
 				ABAE422F1D73BA8C0018DF57 /* CommandListRunning.swift in Sources */,
+				ABFA23451D9882E2007C9EE4 /* Post.swift in Sources */,
 				ABAE421C1D72620C0018DF57 /* WebSocket.swift in Sources */,
 				ABD01E501D721D4F00B1A7F8 /* Client.swift in Sources */,
 				ABD01E491D721B1800B1A7F8 /* main.swift in Sources */,
 				ABAE42211D73AAAE0018DF57 /* ChatUser.swift in Sources */,
 				ABAE422B1D73BA800018DF57 /* CommandTest.swift in Sources */,
+				ABFA23431D974B4D007C9EE4 /* Filter.swift in Sources */,
 				ABAE42231D73B7090018DF57 /* ChatBot.swift in Sources */,
 				ABAE42271D73B9130018DF57 /* Command.swift in Sources */,
 			);
