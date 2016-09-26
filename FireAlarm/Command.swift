@@ -6,7 +6,7 @@
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
-import Cocoa
+import Foundation
 
 class Command {
     ///Returns an array of possible usages.  * means a parameter; ... means a variable number of parameters.

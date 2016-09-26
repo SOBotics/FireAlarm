@@ -6,7 +6,7 @@
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
-import Cocoa
+import Foundation
 
 class CommandListRunning: Command {
     override class func usage() -> [String] {
