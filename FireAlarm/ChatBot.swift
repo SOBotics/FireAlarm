@@ -6,7 +6,7 @@
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
-import Cocoa
+import Foundation
 
 class ChatBot: ChatRoomDelegate {
 	let room: ChatRoom
