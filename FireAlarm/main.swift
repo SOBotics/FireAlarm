@@ -178,8 +178,8 @@ func main() throws {
 		room.postMessage("Update failed!")
 	}
 	else if let new = try? String(contentsOfFile: "version-new.txt") {
-		try! new.write(toFile: "version.txt", atomically: true, encoding: .utf8)
 		room.postMessage("Updated from \(currentVersion) to \(new).")
+		try! new.write(toFile: "version.txt", atomically: true, encoding: .utf8)
 		currentVersion = new
 		try! FileManager.default.removeItem(atPath: "version-new.txt")
 	}
