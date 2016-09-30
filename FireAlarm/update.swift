@@ -43,10 +43,11 @@ func installUpdate() -> Bool {
 var currentVersion = (try? String(contentsOfFile: "version.txt").replacingOccurrences(of: "\n", with: "")) ?? ""
 
 func prepareUpdate(_ bot: ChatBot) {
+	bot.room.postMessage("Installing update...")
 	bot.stop(.update)
 }
 
-func update(_ bot: ChatBot) {
+func update(_ bot: ChatBot) -> Bool {
 	
 	
 	let versionScript = "git ls-remote https://github.com/NobodyNada/FireAlarm swift | cut -c1-7 > available_version.txt"
@@ -63,9 +64,11 @@ func update(_ bot: ChatBot) {
 		
 		if currentVersion != availableVersion {
 			prepareUpdate(bot)
+			return true
 		}
 	}
 	catch {
 		handleError(error, "while checking for updates")
 	}
+	return false
 }
