@@ -194,9 +194,11 @@ func main() throws {
 	//Run background tasks
 	
 	func autoUpdate() {
+		while true {
 		sleep(60 * 15)
 		//wait 15 minutes
 		let _ = update(bot)
+		}
 	}
 	
 	DispatchQueue.global().async { autoUpdate() }
