@@ -18,8 +18,8 @@ func installUpdate() -> Bool {
 			"git log --pretty=format:'%h' -n 1 > ../version-new.txt && " +
 			"cd .. && " +
 			"rm -rf update) || " +
-			"popd; " +
-		"touch update-failure"
+			"(popd; " +
+		"touch update-failure)"
 		
 		if FileManager.default.fileExists(atPath: "update-failure") {
 			try FileManager.default.removeItem(atPath: "update-failure")
