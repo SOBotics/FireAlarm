@@ -134,6 +134,7 @@ class ChatBot: ChatRoomDelegate {
 	
 	func stop(_ stopAction: StopAction) {
 		pendingStopAction = stopAction
+		filter.stop()
 	}
 	
 	init(_ room: ChatRoom) {
