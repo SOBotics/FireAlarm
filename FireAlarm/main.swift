@@ -197,7 +197,9 @@ func main() throws {
 		while true {
 			sleep(60)
 			//wait one minute
-			let _ = update(bot)
+			if update(bot) {
+				
+			}
 		}
 	}
 	

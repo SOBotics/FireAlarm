@@ -163,6 +163,9 @@ class ChatBot: ChatRoomDelegate {
 	func stop(_ stopAction: StopAction) {
 		pendingStopAction = stopAction
 		filter.stop()
+		if self.runningCommands.isEmpty {
+			halt(reboot: self.pendingStopAction == .reboot, update: self.pendingStopAction == .update)
+		}
 	}
 	
 	init(_ room: ChatRoom) {
