@@ -204,11 +204,11 @@ class Client: NSObject, URLSessionDataDelegate {
 		
 	}
 	
-	func postWithID(_ id: Int, site: String = "stackoverflow") throws -> Post {
+	func questionWithID(_ id: Int, site: String = "stackoverflow") throws -> Post {
 		if apiFilter == nil {
-			apiFilter = try! api("filters/create?include=post.title;post.body&unsafe=false")["filter"] as! String
+			apiFilter = try! api("filters/create?include=question.title;question.body;question.tags&unsafe=false")["filter"] as! String
 		}
-		let response = try api("posts/\(id)?site=\(site)&filter=\(apiFilter!)")
+		let response = try api("questions/\(id)?site=\(site)&filter=\(apiFilter!)")
 		guard let title = response["title"] as? String, let body = response["body"] as? String else {
 			throw APIError.badJSON(json: String(describing: response))
 		}

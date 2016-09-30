@@ -121,7 +121,7 @@ class Filter: WebSocketDelegate {
 	}
 	
 	func checkAndReportPost(_ id: Int) throws {
-		let post = try bot.room.client.postWithID(id)
+		let post = try bot.room.client.questionWithID(id)
 		
 		if !post.tags.contains("ios") {
 			return
