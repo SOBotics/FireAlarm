@@ -27,6 +27,8 @@ class Filter: WebSocketDelegate {
 	let initialProbability: Double
 	let words: [String:Word]
 	
+	var recentlyReportedPosts = [(id: Int, when: Date)]()
+	
 	init(_ bot: ChatBot) {
 		self.bot = bot
 		client = bot.room.client
@@ -39,9 +41,9 @@ class Filter: WebSocketDelegate {
 			words[word] = Word(word, probabilites.first!, probabilites.last!)
 		}
 		/*words = (db["wordProbabilities"] as! [String:[Double]]).reduce([String:Word]()) {words, element in
-			var ret = words
-			ret[element.key] = Word(element.key, element.value.first!, element.value.last!)
-			return ret
+		var ret = words
+		ret[element.key] = Word(element.key, element.value.first!, element.value.last!)
+		return ret
 		}*/
 		self.words = words
 	}
@@ -134,6 +136,20 @@ class Filter: WebSocketDelegate {
 	}
 	
 	func reportPost(_ post: Post) {
+		if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
+			recentlyReportedPosts = recentlyReportedPosts.filter {
+				$0.when > minDate
+			}
+		}
+		else {
+			bot.room.postMessage("Failed to calculate minimum report date!")
+		}
+		
+		if recentlyReportedPosts.contains(where: { $0.id == post.id }) {
+			return
+		}
+		
+		recentlyReportedPosts.append((id: post.id, when: Date()))
 		bot.room.postMessage("Potentially bad question: [\(post.title)](//stackoverflow.com/q/\(post.id))")
 	}
 	
