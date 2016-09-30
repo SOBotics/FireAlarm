@@ -46,6 +46,8 @@ class ChatRoom: NSObject, WebSocketDelegate {
 	let client: Client
 	let roomID: Int
 	
+	var recievedMessage = false
+	
 	var delegate: ChatRoomDelegate?
 	
 	fileprivate var pendingLookup = [ChatUser]()
@@ -340,6 +342,11 @@ class ChatRoom: NSObject, WebSocketDelegate {
 	func webSocketOpen() {
 		print("Websocket opened!")
 		wsRetries = 0
+		DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.seconds(10)) {
+			if !self.recievedMessage {
+				self.ws.close()
+			}
+		}
 	}
 	
 	func webSocketClose(_ code: Int, reason: String, wasClean: Bool) {
@@ -351,6 +358,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 	}
 	
 	@objc func webSocketMessageText(_ text: String) {
+		recievedMessage = true
 		do {
 			guard let json = try client.parseJSON(text) as? NSDictionary else {
 				throw EventError.jsonParsingFailed(json: text)
