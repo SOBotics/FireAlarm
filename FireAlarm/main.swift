@@ -198,7 +198,7 @@ func main() throws {
 			sleep(60)
 			//wait one minute
 			if update(bot) {
-				
+				return
 			}
 		}
 	}
