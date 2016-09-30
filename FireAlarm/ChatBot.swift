@@ -13,7 +13,7 @@ class ChatBot: ChatRoomDelegate {
 	
 	let commands: [Command.Type] = [
 		CommandTest.self,
-		CommandHelp.self, CommandListRunning.self, CommandStop.self
+		CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self
 	]
 	
 	var filter: Filter!
@@ -26,6 +26,7 @@ class ChatBot: ChatRoomDelegate {
 		case run
 		case halt
 		case reboot
+		case update
 	}
 	
 	fileprivate var pendingStopAction = StopAction.run
@@ -40,8 +41,8 @@ class ChatBot: ChatRoomDelegate {
 				handleError(error, "while running \"\(command.message.content)\"")
 			}
 			self.runningCommands.remove(at: self.runningCommands.index {$0 === command}!)
-			if (self.pendingStopAction == .halt || self.pendingStopAction == .reboot) && self.runningCommands.isEmpty {
-				halt(reboot: self.pendingStopAction == .reboot)
+			if (self.pendingStopAction != .run) && self.runningCommands.isEmpty {
+				halt(reboot: self.pendingStopAction == .reboot, update: self.pendingStopAction == .update)
 			}
 		}
 	}
