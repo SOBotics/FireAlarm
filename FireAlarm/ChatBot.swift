@@ -13,7 +13,8 @@ class ChatBot: ChatRoomDelegate {
 	
 	let commands: [Command.Type] = [
 		CommandTest.self,
-		CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self
+		CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self,
+		CommandCheckPost.self
 	]
 	
 	var filter: Filter!
@@ -130,6 +131,33 @@ class ChatBot: ChatRoomDelegate {
 			}
 			handleCommand(message)
 		}
+	}
+	
+	func postIDFromURL(_ url: URL) -> Int? {
+		if url.host != "stackoverflow.com" && url.host != "www.stackoverflow.com" {
+			return nil
+		}
+		
+		let componentIndex: Int
+		let component: String
+		if url.pathComponents.first == "/" {
+			if url.pathComponents.count < 3 {
+				return nil
+			}
+			componentIndex = 1
+		}
+		else {
+			if url.pathComponents.count < 2 {
+				return nil
+			}
+			componentIndex = 0
+		}
+		component = url.pathComponents[componentIndex]
+		
+		if component == "q" || component == "questions" {
+			return Int(url.pathComponents[componentIndex + 1])
+		}
+		return nil
 	}
 	
 	func stop(_ stopAction: StopAction) {

@@ -163,7 +163,8 @@ func main() throws {
 	
 	
 	//Join the chat room
-	let room = ChatRoom(client: client, roomID: 111347)  //SOBotics
+	//let room = ChatRoom(client: client, roomID: 111347)  //SOBotics
+	let room = ChatRoom(client: client, roomID: 123602)  //FireAlarm Development
 	try room.loadUserDB()
 	errorRoom = room
 	bot = ChatBot(room)
