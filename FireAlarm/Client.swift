@@ -212,8 +212,11 @@ class Client: NSObject, URLSessionDataDelegate {
 		guard let title = response["title"] as? String, let body = response["body"] as? String else {
 			throw APIError.badJSON(json: String(describing: response))
 		}
+		guard let tags = response["tags"] as? [String] else {
+			throw APIError.badJSON(json: String(describing: response))
+		}
 		
-		return Post(id: id, title: title, body: body)
+		return Post(id: id, title: title, body: body, tags: tags)
 	}
 	
 	
