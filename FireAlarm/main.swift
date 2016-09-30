@@ -195,9 +195,9 @@ func main() throws {
 	
 	func autoUpdate() {
 		while true {
-		sleep(60 * 15)
-		//wait 15 minutes
-		let _ = update(bot)
+			sleep(60)
+			//wait one minute
+			let _ = update(bot)
 		}
 	}
 	
