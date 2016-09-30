@@ -177,6 +177,7 @@ func main() throws {
 	//Startup finished
 	if FileManager.default.fileExists(atPath: "update-failure") {
 		room.postMessage("Update failed!")
+		try! FileManager.default.removeItem(atPath: "update-failure")
 	}
 	else if let new = try? String(contentsOfFile: "version-new.txt") {
 		room.postMessage("Updated from \(currentVersion) to \(new).")
