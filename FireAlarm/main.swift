@@ -163,7 +163,7 @@ func main() throws {
 	
 	
 	//Join the chat room
-	let room = ChatRoom(client: client, roomID: 123602)  //SOCVR Testing Facility
+	let room = ChatRoom(client: client, roomID: 111347)  //SOBotics
 	try room.loadUserDB()
 	errorRoom = room
 	bot = ChatBot(room)
