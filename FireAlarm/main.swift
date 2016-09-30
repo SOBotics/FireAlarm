@@ -17,7 +17,7 @@ func clearCookies() {
 	}
 }
 
-
+public var githubLink = "//github.com/NobodyNada/FireAlarm/tree/swift"
 
 func makeTable(_ heading: [String], contents: [String]...) -> String {
 	if heading.count != contents.count {
@@ -186,7 +186,7 @@ func main() throws {
 		try! FileManager.default.removeItem(atPath: "version-new.txt")
 	}
 	else {
-		room.postMessage("[FireAlarm-Swift](//github.com/NobodyNada/FireAlarm/tree/swift) started.")
+		room.postMessage("[FireAlarm-Swift](\(githubLink)) started.")
 	}
 	
 	
