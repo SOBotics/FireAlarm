@@ -193,7 +193,7 @@ func main() throws {
 	func autoUpdate() {
 		sleep(60 * 15)
 		//wait 15 minutes
-		update(bot)
+		let _ = update(bot)
 	}
 	
 	DispatchQueue.global().async { autoUpdate() }
