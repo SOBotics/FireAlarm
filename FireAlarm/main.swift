@@ -181,6 +181,7 @@ func main() throws {
 		try! new.write(toFile: "version.txt", atomically: true, encoding: .utf8)
 		room.postMessage("Updated from \(currentVersion) to \(new).")
 		currentVersion = new
+		try! FileManager.default.removeItem(atPath: "version-new.txt")
 	}
 	else {
 		room.postMessage("[FireAlarm-Swift](//github.com/NobodyNada/FireAlarm/tree/swift) started.")
