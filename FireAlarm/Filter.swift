@@ -179,7 +179,8 @@ class Filter: WebSocketDelegate {
 				
 				
 				try checkAndReportPost(id)
-				
+			} catch Client.APIError.noItems {
+				//do nothing
 			} catch let error as Client.APIError {
 				throw error
 			}
