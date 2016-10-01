@@ -14,6 +14,6 @@ class CommandSay: Command {
 	}
 	
 	override func run() throws {
-		bot.room.postMessage(arguments.joined(separator: " "))
+		bot.room.postMessage(message.content.components(separatedBy: " ").dropFirst().joined(separator: " "))
 	}
 }
