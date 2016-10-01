@@ -75,7 +75,7 @@ class ChatBot: ChatRoomDelegate {
 					}
 					else if usageComponent == "..." {
 						//everything else is arguments; add them to the list
-						args.append(contentsOf: components[i..<components.count])
+						args.append(contentsOf: components[(i + 1)..<components.count])
 					}
 					else if component != usageComponent {
 						match = false
