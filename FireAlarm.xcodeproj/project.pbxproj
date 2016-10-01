@@ -12,6 +12,9 @@
 		AB8FCBAD1D9ED444003ADCD5 /* CommandKill.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBAC1D9ED444003ADCD5 /* CommandKill.swift */; };
 		AB8FCBB01D9EDC83003ADCD5 /* CommandCheckPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBAF1D9EDC83003ADCD5 /* CommandCheckPost.swift */; };
 		AB8FCBB21DA0516D003ADCD5 /* CommandSay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBB11DA0516D003ADCD5 /* CommandSay.swift */; };
+		AB8FCBB51DA057D8003ADCD5 /* CommandOptIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBB41DA057D8003ADCD5 /* CommandOptIn.swift */; };
+		AB8FCBB71DA05B6A003ADCD5 /* CommandOptOut.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBB61DA05B6A003ADCD5 /* CommandOptOut.swift */; };
+		AB8FCBB91DA05CD9003ADCD5 /* CommandCheckNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBB81DA05CD9003ADCD5 /* CommandCheckNotification.swift */; };
 		ABAE420F1D725E090018DF57 /* ChatRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE420E1D725E090018DF57 /* ChatRoom.swift */; };
 		ABAE421C1D72620C0018DF57 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE421B1D72620C0018DF57 /* WebSocket.swift */; };
 		ABAE421E1D7262630018DF57 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = ABAE421D1D7262630018DF57 /* libz.tbd */; };
@@ -47,6 +50,9 @@
 		AB8FCBAC1D9ED444003ADCD5 /* CommandKill.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandKill.swift; sourceTree = "<group>"; };
 		AB8FCBAF1D9EDC83003ADCD5 /* CommandCheckPost.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandCheckPost.swift; sourceTree = "<group>"; };
 		AB8FCBB11DA0516D003ADCD5 /* CommandSay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandSay.swift; sourceTree = "<group>"; };
+		AB8FCBB41DA057D8003ADCD5 /* CommandOptIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandOptIn.swift; sourceTree = "<group>"; };
+		AB8FCBB61DA05B6A003ADCD5 /* CommandOptOut.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandOptOut.swift; sourceTree = "<group>"; };
+		AB8FCBB81DA05CD9003ADCD5 /* CommandCheckNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandCheckNotification.swift; sourceTree = "<group>"; };
 		ABAE420E1D725E090018DF57 /* ChatRoom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatRoom.swift; sourceTree = "<group>"; };
 		ABAE421B1D72620C0018DF57 /* WebSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
 		ABAE421D1D7262630018DF57 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
@@ -85,6 +91,16 @@
 			name = Reports;
 			sourceTree = "<group>";
 		};
+		AB8FCBB31DA05566003ADCD5 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				AB8FCBB41DA057D8003ADCD5 /* CommandOptIn.swift */,
+				AB8FCBB61DA05B6A003ADCD5 /* CommandOptOut.swift */,
+				AB8FCBB81DA05CD9003ADCD5 /* CommandCheckNotification.swift */,
+			);
+			name = Notifications;
+			sourceTree = "<group>";
+		};
 		ABAE421F1D7262690018DF57 /* Support */ = {
 			isa = PBXGroup;
 			children = (
@@ -100,6 +116,7 @@
 				ABAE42311D73BB0F0018DF57 /* Test */,
 				ABAE42321D73BB190018DF57 /* Utilities */,
 				AB8FCBAE1D9EDC59003ADCD5 /* Reports */,
+				AB8FCBB31DA05566003ADCD5 /* Notifications */,
 			);
 			name = Commands;
 			sourceTree = "<group>";
@@ -108,6 +125,7 @@
 			isa = PBXGroup;
 			children = (
 				ABAE422A1D73BA800018DF57 /* CommandTest.swift */,
+				AB8FCBB11DA0516D003ADCD5 /* CommandSay.swift */,
 			);
 			name = Test;
 			sourceTree = "<group>";
@@ -120,7 +138,6 @@
 				ABF730B31D77A534002A606C /* CommandStop.swift */,
 				AB8FCBAC1D9ED444003ADCD5 /* CommandKill.swift */,
 				AB8FCBA81D9EB9B5003ADCD5 /* CommandUpdate.swift */,
-				AB8FCBB11DA0516D003ADCD5 /* CommandSay.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -220,6 +237,7 @@
 			files = (
 				AB8FCBB01D9EDC83003ADCD5 /* CommandCheckPost.swift in Sources */,
 				ABAE422D1D73BA860018DF57 /* CommandHelp.swift in Sources */,
+				AB8FCBB71DA05B6A003ADCD5 /* CommandOptOut.swift in Sources */,
 				ABF730B41D77A534002A606C /* CommandStop.swift in Sources */,
 				ABAE42251D73B7640018DF57 /* ChatMessage.swift in Sources */,
 				ABAE420F1D725E090018DF57 /* ChatRoom.swift in Sources */,
@@ -228,6 +246,7 @@
 				AB8FCBA91D9EB9B5003ADCD5 /* CommandUpdate.swift in Sources */,
 				ABAE421C1D72620C0018DF57 /* WebSocket.swift in Sources */,
 				ABD01E501D721D4F00B1A7F8 /* Client.swift in Sources */,
+				AB8FCBB51DA057D8003ADCD5 /* CommandOptIn.swift in Sources */,
 				ABD01E491D721B1800B1A7F8 /* main.swift in Sources */,
 				AB8FCBAD1D9ED444003ADCD5 /* CommandKill.swift in Sources */,
 				AB8FCBAB1D9EBE90003ADCD5 /* update.swift in Sources */,
@@ -235,6 +254,7 @@
 				ABAE422B1D73BA800018DF57 /* CommandTest.swift in Sources */,
 				ABFA23431D974B4D007C9EE4 /* Filter.swift in Sources */,
 				ABAE42231D73B7090018DF57 /* ChatBot.swift in Sources */,
+				AB8FCBB91DA05CD9003ADCD5 /* CommandCheckNotification.swift in Sources */,
 				AB8FCBB21DA0516D003ADCD5 /* CommandSay.swift in Sources */,
 				ABAE42271D73B9130018DF57 /* Command.swift in Sources */,
 			);
