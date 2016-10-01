@@ -11,6 +11,7 @@
 
 import Foundation
 import Dispatch
+import CoreFoundation
 
 private let windowBufferSize = 0x2000
 
