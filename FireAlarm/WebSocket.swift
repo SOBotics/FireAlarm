@@ -132,7 +132,7 @@ public enum WebSocketBinaryType : CustomStringConvertible {
 }
 
 /// The WebSocketReadyState enum is used by the readyState property to describe the status of the WebSocket connection.
-@objc public enum WebSocketReadyState : Int, CustomStringConvertible {
+public enum WebSocketReadyState : Int, CustomStringConvertible {
     /// The connection is not yet open.
     case connecting = 0
     /// The connection is open and ready to communicate.
@@ -493,7 +493,7 @@ private class Deflater {
 }
 
 /// WebSocketDelegate is an Objective-C alternative to WebSocketEvents and is used to delegate the events for the WebSocket connection.
-@objc public protocol WebSocketDelegate {
+public protocol WebSocketDelegate {
     /// A function to be called when the WebSocket connection's readyState changes to .Open; this indicates that the connection is ready to send and receive data.
     func webSocketOpen()
     /// A function to be called when the WebSocket connection's readyState changes to .Closed.
@@ -501,13 +501,31 @@ private class Deflater {
     /// A function to be called when an error occurs.
     func webSocketError(_ error: NSError)
     /// A function to be called when a message (string) is received from the server.
-    @objc optional func webSocketMessageText(_ text: String)
+	func webSocketMessageText(_ text: String)
     /// A function to be called when a message (binary) is received from the server.
-    @objc optional func webSocketMessageData(_ data: Data)
+	func webSocketMessageData(_ data: Data)
     /// A function to be called when a pong is received from the server.
-    @objc optional func webSocketPong()
+	func webSocketPong()
     /// A function to be called when the WebSocket process has ended; this event is guarenteed to be called once and can be used as an alternative to the "close" or "error" events.
-    @objc optional func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: NSError?)
+	func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: NSError?)
+}
+
+extension WebSocketDelegate {
+	func webSocketMessageText(_ text: String) {
+		
+	}
+	
+	func webSocketMessageData(_ data: Data) {
+		
+	}
+	
+	func webSocketPong() {
+		
+	}
+	
+	func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: NSError?) {
+		
+	}
 }
 
 /// WebSocket objects are bidirectional network streams that communicate over HTTP. RFC 6455.
@@ -718,7 +736,7 @@ private class InnerWebSocket: Hashable {
                 case .text:
                     fire {
                         self.event.message(data: frame.utf8.text)
-                        self.eventDelegate?.webSocketMessageText?(frame.utf8.text)
+                        self.eventDelegate?.webSocketMessageText(frame.utf8.text)
                     }
                 case .binary:
                     fire {
@@ -728,7 +746,7 @@ private class InnerWebSocket: Hashable {
                         case .nsData:
                             self.event.message(data: frame.payload.nsdata)
                             // The WebSocketDelegate is necessary to add Objective-C compability and it is only possible to send binary data with NSData.
-                            self.eventDelegate?.webSocketMessageData?(frame.payload.nsdata)
+                            self.eventDelegate?.webSocketMessageData(frame.payload.nsdata)
                         case .uInt8UnsafeBufferPointer:
                             self.event.message(data: frame.payload.buffer)
                         }
@@ -749,7 +767,7 @@ private class InnerWebSocket: Hashable {
                         case .uInt8UnsafeBufferPointer:
                             self.event.pong(data: frame.payload.buffer)
                         }
-                        self.eventDelegate?.webSocketPong?()
+                        self.eventDelegate?.webSocketPong()
                     }
                 case .close:
                     lock()
@@ -776,7 +794,7 @@ private class InnerWebSocket: Hashable {
             case .end:
                 fire {
                     self.event.end(Int(self.closeCode), self.closeReason, self.closeClean, self.finalError)
-                    self.eventDelegate?.webSocketEnd?(Int(self.closeCode), reason: self.closeReason, wasClean: self.closeClean, error: self.finalError as? NSError)
+                    self.eventDelegate?.webSocketEnd(Int(self.closeCode), reason: self.closeReason, wasClean: self.closeClean, error: self.finalError as? NSError)
                 }
                 exit = true
                 manager.remove(self)
