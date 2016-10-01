@@ -2,7 +2,7 @@
 //  CommandCheckNotification.swift
 //  FireAlarm
 //
-//  Created by Jonathan Keller on 10/1/16.
+//  Created by NobodyNada on 10/1/16.
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
