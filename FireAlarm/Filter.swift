@@ -133,6 +133,7 @@ class Filter: WebSocketDelegate {
 		
 		let bad = checkPost(post)
 		if bad {
+			print("Reporting question \(id).")
 			reportPost(post)
 		}
 	}
