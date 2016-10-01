@@ -22,13 +22,13 @@ class CommandCheckNotification: Command {
 		}
 		else {
 			var string = ""
-			if arguments.count == 1 {
+			if message.user.notificationTags.count == 1 {
 				string = "[tag:\(arguments.first!)]"
 			}
 			else {
-				for tag in arguments {
+				for tag in message.user.notificationTags {
 					if tag == message.user.notificationTags.last {
-						string.append("and [tag:\(tag)]")
+						string.append("or [tag:\(tag)]")
 					}
 					else {
 						string.append("[tag:\(tag), ")
