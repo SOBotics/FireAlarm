@@ -14,7 +14,7 @@ class ChatBot: ChatRoomDelegate {
 	
 	let commands: [Command.Type] = [
 		CommandTest.self,
-		CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self,
+		CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self, CommandSay.self,
 		CommandCheckPost.self
 	]
 	

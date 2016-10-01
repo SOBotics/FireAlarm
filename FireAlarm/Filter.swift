@@ -154,7 +154,7 @@ class Filter: WebSocketDelegate {
 		
 		recentlyReportedPosts.append((id: post.id, when: Date()))
 		bot.room.postMessage("[ [FireAlarm-Swift](\(githubLink)) ] " +
-			"Potentially bad [tag:\(post.tags.first ?? "tagless")] question: [\(post.title)](//stackoverflow.com/q/\(post.id))")
+			"[tag:\(post.tags.first ?? "tagless")] Potentially bad question: [\(post.title)](//stackoverflow.com/q/\(post.id))")
 	}
 	
 	func webSocketMessageText(_ text: String) {
