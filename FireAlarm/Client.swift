@@ -136,7 +136,7 @@ class Client: NSObject, URLSessionDataDelegate {
 		guard let nsUrl = URL(string: url) else {
 			throw RequestError.invalidURL
 		}
-		let request = NSMutableURLRequest(url: nsUrl)
+		var request = URLRequest(url: nsUrl)
 		request.httpMethod = "POST"
 		request.httpBody = String(urlParameters: data).data(using: String.Encoding.utf8)
 		return try performRequest(request as URLRequest)
