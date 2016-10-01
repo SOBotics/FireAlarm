@@ -95,7 +95,23 @@ extension String {
 	}
 }
 
-
+func formatArray<T>(_ array: [T], conjunction: String) -> String {
+	var string = ""
+	if array.count == 1 {
+		string = "\(array.first!)"
+	}
+	else {
+		for (index, item) in array.enumerated() {
+			if index == array.count - 1 {
+				string.append("\(conjunction) \(item)")
+			}
+			else {
+				string.append("\(item)\(array.count == 2 ? "" : ",") ")
+			}
+		}
+	}
+	return string
+}
 
 
 

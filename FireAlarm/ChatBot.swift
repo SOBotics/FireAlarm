@@ -61,6 +61,7 @@ class ChatBot: ChatRoomDelegate {
 			
 			for i in 0..<usages.count {
 				let usage = usages[i]
+				args = []
 				
 				var match = true
 				let usageComponents = usage.components(separatedBy: CharacterSet.whitespaces)
@@ -75,7 +76,7 @@ class ChatBot: ChatRoomDelegate {
 					}
 					else if usageComponent == "..." {
 						//everything else is arguments; add them to the list
-						args.append(contentsOf: components[(i + 1)..<components.count])
+						args.append(contentsOf: components[i..<components.count])
 					}
 					else if component != usageComponent {
 						match = false

@@ -22,22 +22,8 @@ class CommandOptOut: Command {
 		else {
 			message.user.notificationTags = message.user.notificationTags.filter { !arguments.contains($0) }
 			
-			var string = ""
-			if arguments.count == 1 {
-				string = "[tag:\(arguments.first!)]"
-			}
-			else {
-				for tag in arguments {
-					if tag == message.user.notificationTags.last {
-						string.append("or [tag:\(tag)]")
-					}
-					else {
-						string.append("[tag:\(tag), ")
-					}
-				}
-			}
-			
-			bot.room.postReply("You will not be notified of posts tagged \(string).", to: message)
+			let formatted = formatArray(arguments.map { "[tag:\($0)]" }, conjunction: "or")
+			bot.room.postReply("You will not be notified of posts tagged \(formatted).", to: message)
 		}
 	}
 }
