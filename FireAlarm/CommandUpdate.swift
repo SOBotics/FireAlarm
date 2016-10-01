@@ -2,7 +2,7 @@
 //  CommandUpdate.swift
 //  FireAlarm
 //
-//  Created by Jonathan Keller on 9/30/16.
+//  Created by NobodyNada on 9/30/16.
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 

@@ -10,6 +10,7 @@
 */
 
 import Foundation
+import Dispatch
 
 private let windowBufferSize = 0x2000
 
@@ -349,7 +350,7 @@ private class Frame {
 }
 
 private class Delegate : NSObject, StreamDelegate {
-    @objc func stream(_ aStream: Stream, handle eventCode: Stream.Event){
+	func stream(_ aStream: Stream, handle eventCode: Stream.Event){
         manager.signal()
     }
 }
