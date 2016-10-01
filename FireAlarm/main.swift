@@ -9,8 +9,7 @@
 import Foundation
 import Dispatch
 
-func clearCookies() {
-	let storage = HTTPCookieStorage.shared
+func clearCookies(_ storage: HTTPCookieStorage) {
 	if let cookies = storage.cookies {
 		for cookie in cookies {
 			storage.deleteCookie(cookie)
@@ -109,7 +108,7 @@ func main() throws {
 	
 	saveURL = saveDirURL
 	
-	FileManager.default.changeCurrentDirectoryPath(saveDirURL.path)
+	let _ = FileManager.default.changeCurrentDirectoryPath(saveDirURL.path)
 	
 	
 	
@@ -150,7 +149,7 @@ func main() throws {
 		}
 		catch {
 			print("Login failed with error \(error).\nClearing cookies and retrying.")
-			clearCookies()
+			clearCookies(client.cookieStorage)
 			do {
 				try client.loginWithEmail(email, password: password)
 			}
@@ -255,7 +254,7 @@ func main() throws {
 			
 			if shouldReboot {
 				//Change to the old working directory.
-				FileManager.default.changeCurrentDirectoryPath(originalWorkingDirectory)
+				let _ = FileManager.default.changeCurrentDirectoryPath(originalWorkingDirectory)
 				
 				//Reload the program binary, which will restart the bot.
 				execv(CommandLine.arguments[0], CommandLine.unsafeArgv)

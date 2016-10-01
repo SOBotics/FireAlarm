@@ -48,6 +48,8 @@ class Client: NSObject, URLSessionDataDelegate {
 	
 	var session: URLSession!
 	
+	var cookieStorage: HTTPCookieStorage
+	
 	var loggedIn = false
 	
 	let queue = DispatchQueue(label: "Client queue", attributes: [])
@@ -257,9 +259,10 @@ class Client: NSObject, URLSessionDataDelegate {
 	init(host: Host) {
 		self.host = host
 		
-		super.init()
-		
 		let configuration =  URLSessionConfiguration.default
+		cookieStorage = configuration.httpCookieStorage!
+		
+		super.init()
 		
 		session = URLSession(
 			configuration: configuration,
