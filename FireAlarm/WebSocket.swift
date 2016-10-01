@@ -1835,7 +1835,6 @@ extension WebSocket {
 
      :param: text The message (string) to be sent to the server.
      */
-    @objc
     public func send(text: String){
         send(text)
     }
@@ -1844,7 +1843,6 @@ extension WebSocket {
 
      :param: data The message (binary) to be sent to the server.
      */
-    @objc
     public func send(data: Data){
         send(data)
     }
