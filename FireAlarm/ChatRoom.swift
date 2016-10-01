@@ -321,7 +321,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 				guard
 					let userID = event["user_id"] as? Int,
 					let messageID = event["message_id"] as? Int,
-					let content = event["content"] as? String else {
+					let content = (event["content"] as? String)?.stringByDecodingHTMLEntities else {
 						throw EventError.jsonParsingFailed(json: String(describing: events))
 				}
 				
