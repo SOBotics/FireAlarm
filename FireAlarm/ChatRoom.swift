@@ -358,7 +358,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 		//do nothing -- we'll handle this in webSocketEnd
 	}
 	
-	@objc func webSocketMessageText(_ text: String) {
+	func webSocketMessageText(_ text: String) {
 		recievedMessage = true
 		do {
 			guard let json = try client.parseJSON(text) as? NSDictionary else {
@@ -377,7 +377,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 		}
 	}
 	
-	@objc func webSocketMessageData(_ data: Data) {
+	func webSocketMessageData(_ data: Data) {
 		print("Recieved binary data: \(data)")
 	}
 	
