@@ -11,8 +11,8 @@ import Dispatch
 
 extension String {
 	var urlEncodedString: String {
-		let allowed = NSMutableCharacterSet(charactersIn: "+&")
-		allowed.formUnion(with: CharacterSet.urlQueryAllowed)
+		var allowed = CharacterSet(charactersIn: "+&")
+		allowed.formUnion(CharacterSet.urlQueryAllowed)
 		return self.addingPercentEncoding(withAllowedCharacters: allowed as CharacterSet)!
 	}
 	
