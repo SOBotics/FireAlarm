@@ -27,21 +27,8 @@ class CommandOptIn: Command {
 			bot.room.postReply("You will now be notified of all reports.", to: message)
 		}
 		else {
-			var string = ""
-			if message.user.notificationTags.count == 1 {
-				string = "[tag:\(arguments.first!)]"
-			}
-			else {
-				for tag in message.user.notificationTags {
-					if tag == message.user.notificationTags.last {
-						string.append("or [tag:\(tag)]")
-					}
-					else {
-						string.append("[tag:\(tag), ")
-					}
-				}
-			}
-			bot.room.postReply("You will now be notified of reports tagged \(string).", to: message)
+			let formatted = formatArray(message.user.notificationTags.map { "[tag:\($0)]" }, conjunction: "or")
+			bot.room.postReply("You will now be notified of reports tagged \(formatted).", to: message)
 		}
 	}
 }

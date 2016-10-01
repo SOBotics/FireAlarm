@@ -212,7 +212,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 			}
 		}
 		
-		return users.map { $0.name }.joined(separator: " ")
+		return users.map { "@" + $0.name }.joined(separator: " ")
 	}
 	
 	var ws: WebSocket!
@@ -391,7 +391,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 	func webSocketOpen() {
 		print("Websocket opened!")
 		wsRetries = 0
-		DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.seconds(10)) {
+		DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.seconds(5)) {
 			if !self.recievedMessage {
 				self.ws.close()
 			}
