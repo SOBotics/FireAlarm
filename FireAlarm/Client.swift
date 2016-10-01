@@ -219,7 +219,7 @@ class Client: NSObject, URLSessionDataDelegate {
 			throw APIError.badJSON(json: String(describing: response))
 		}
 		
-		return Post(id: id, title: title, body: body, tags: tags)
+		return Post(id: id, title: title.stringByDecodingHTMLEntities, body: body.stringByDecodingHTMLEntities, tags: tags)
 	}
 	
 	
