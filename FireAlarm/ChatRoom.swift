@@ -150,22 +150,70 @@ class ChatRoom: NSObject, WebSocketDelegate {
 		var users = userDB
 		
 		for item in db {
-			guard let id = (item as? NSDictionary)?["id"] as? Int else {
+			guard let info = (item as? NSDictionary) else {
 				continue
 			}
-			users.append(userWithID(id))
+			guard let id = info["id"] as? Int else {
+				continue
+			}
+			
+			let user = userWithID(id)
+			if let notified = info["notified"] as? Bool {
+				user.notified = notified
+			}
+			if let notificationTags = info["notificationTags"] as? [String] {
+				user.notificationTags = notificationTags
+			}
+			
+			users.append(user)
 		}
 		
 		userDB = users
 	}
 	
 	func saveUserDB() throws {
-		let db = userDB.map {["id":$0.id]}
+		let db = userDB.map {
+			[
+				"id":$0.id,
+				"notified":$0.notified,
+				"notificationTags":$0.notificationTags
+			]
+		}
 		let data = try JSONSerialization.data(withJSONObject: db, options: .prettyPrinted)
 		try? data.write(to: saveFileNamed("users.json"), options: [.atomic])
 	}
 	
-	
+	func notificationString(tags: [String]) -> String {
+		var users = [ChatUser]()
+		for user in userDB {
+			var shouldNotify = false
+			
+			if user.notified {
+				
+				
+				if !user.notificationTags.isEmpty {
+					
+					for tag in tags {
+						if user.notificationTags.contains(tag) {
+							shouldNotify = true
+						}
+					}
+					
+				}
+				else {
+					shouldNotify = true
+				}
+
+				
+			}
+			
+			if shouldNotify {
+				users.append(user)
+			}
+		}
+		
+		return users.map { $0.name }.joined(separator: " ")
+	}
 	
 	var ws: WebSocket!
 	fileprivate var wsRetries = 0

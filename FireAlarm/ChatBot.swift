@@ -13,9 +13,10 @@ class ChatBot: ChatRoomDelegate {
 	let room: ChatRoom
 	
 	let commands: [Command.Type] = [
-		CommandTest.self,
-		CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self, CommandSay.self,
-		CommandCheckPost.self
+		CommandTest.self, CommandSay.self,
+		CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self,
+		CommandCheckPost.self,
+		CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self
 	]
 	
 	var filter: Filter!

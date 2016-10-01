@@ -11,6 +11,9 @@ import Foundation
 class ChatUser: CustomStringConvertible {
     
     let id: Int
+	
+	var notified = false
+	var notificationTags = [String]()
     
     fileprivate var _name: String?
     fileprivate var _isMod: Bool?
