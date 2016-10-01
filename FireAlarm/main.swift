@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Dispatch
 
 func clearCookies() {
 	let storage = HTTPCookieStorage.shared

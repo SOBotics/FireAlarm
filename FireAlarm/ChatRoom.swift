@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Dispatch
 
 protocol ChatRoomDelegate {
 	func chatRoomMessage(_ room: ChatRoom, message: ChatMessage, isEdit: Bool)
