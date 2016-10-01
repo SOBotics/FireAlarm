@@ -11,6 +11,7 @@
 		AB8FCBAB1D9EBE90003ADCD5 /* update.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBAA1D9EBE90003ADCD5 /* update.swift */; };
 		AB8FCBAD1D9ED444003ADCD5 /* CommandKill.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBAC1D9ED444003ADCD5 /* CommandKill.swift */; };
 		AB8FCBB01D9EDC83003ADCD5 /* CommandCheckPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBAF1D9EDC83003ADCD5 /* CommandCheckPost.swift */; };
+		AB8FCBB21DA0516D003ADCD5 /* CommandSay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBB11DA0516D003ADCD5 /* CommandSay.swift */; };
 		ABAE420F1D725E090018DF57 /* ChatRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE420E1D725E090018DF57 /* ChatRoom.swift */; };
 		ABAE421C1D72620C0018DF57 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE421B1D72620C0018DF57 /* WebSocket.swift */; };
 		ABAE421E1D7262630018DF57 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = ABAE421D1D7262630018DF57 /* libz.tbd */; };
@@ -45,6 +46,7 @@
 		AB8FCBAA1D9EBE90003ADCD5 /* update.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = update.swift; sourceTree = "<group>"; };
 		AB8FCBAC1D9ED444003ADCD5 /* CommandKill.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandKill.swift; sourceTree = "<group>"; };
 		AB8FCBAF1D9EDC83003ADCD5 /* CommandCheckPost.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandCheckPost.swift; sourceTree = "<group>"; };
+		AB8FCBB11DA0516D003ADCD5 /* CommandSay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandSay.swift; sourceTree = "<group>"; };
 		ABAE420E1D725E090018DF57 /* ChatRoom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatRoom.swift; sourceTree = "<group>"; };
 		ABAE421B1D72620C0018DF57 /* WebSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
 		ABAE421D1D7262630018DF57 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
@@ -118,6 +120,7 @@
 				ABF730B31D77A534002A606C /* CommandStop.swift */,
 				AB8FCBAC1D9ED444003ADCD5 /* CommandKill.swift */,
 				AB8FCBA81D9EB9B5003ADCD5 /* CommandUpdate.swift */,
+				AB8FCBB11DA0516D003ADCD5 /* CommandSay.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -232,6 +235,7 @@
 				ABAE422B1D73BA800018DF57 /* CommandTest.swift in Sources */,
 				ABFA23431D974B4D007C9EE4 /* Filter.swift in Sources */,
 				ABAE42231D73B7090018DF57 /* ChatBot.swift in Sources */,
+				AB8FCBB21DA0516D003ADCD5 /* CommandSay.swift in Sources */,
 				ABAE42271D73B9130018DF57 /* Command.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
