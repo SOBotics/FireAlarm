@@ -1077,11 +1077,7 @@ private class InnerWebSocket: Hashable {
 			security = .none
 		}
 		
-		#if os(Linux)
-		var path = CFURLCopyPath(req.url!._cfObject) as String
-		#else
-			var path = CFURLCopyPath(req.url! as CFURL!) as String
-		#endif
+		var path = req.url!.path
         if path == "" {
             path = "/"
         }
@@ -1120,8 +1116,8 @@ private class InnerWebSocket: Hashable {
         var writeStream: Unmanaged<CFWriteStream>?
 		#if os(Linux)
 			CFStreamCreatePairWithSocketToHost(nil, addr[0]._cfObject, UInt32(Int(addr[1])!), &readStream, &writeStream);
-			rdo = readStream!.takeRetainedValue()._nsObject
-			wro = writeStream!.takeRetainedValue()._nsObject
+			rdo = readStream!.takeRetainedValue()._swiftObject
+			wro = writeStream!.takeRetainedValue()._swiftObject
 		#else
 			CFStreamCreatePairWithSocketToHost(nil, addr[0] as CFString!, UInt32(Int(addr[1])!), &readStream, &writeStream);
 			rdo = readStream!.takeRetainedValue()
