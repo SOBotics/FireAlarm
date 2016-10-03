@@ -9,15 +9,12 @@
 import Foundation
 import Dispatch
 
-class ChatBot: ChatRoomDelegate {
-	let room: ChatRoom
+open class ChatBot: ChatRoomDelegate {
+	open let room: ChatRoom
 	
-	let commands: [Command.Type] = [
-		CommandTest.self, CommandSay.self,
-		CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self,
-		CommandCheckPost.self,
-		CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self
-	]
+	open let commands: [Command.Type]
+	
+	open var info: Any? = nil
 	
 	var filter: Filter!
 	
@@ -171,8 +168,9 @@ class ChatBot: ChatRoomDelegate {
 		}
 	}
 	
-	init(_ room: ChatRoom) {
+	init(_ room: ChatRoom, commands: [Command.Type]) {
 		self.room = room
+		self.commands = commands
 		filter = Filter(self)
 	}
 }

@@ -13,7 +13,7 @@ protocol ChatRoomDelegate {
 	func chatRoomMessage(_ room: ChatRoom, message: ChatMessage, isEdit: Bool)
 }
 
-class ChatRoom: NSObject, WebSocketDelegate {
+open class ChatRoom: NSObject, WebSocketDelegate {
 	enum ChatEvent: Int {
 		case messagePosted = 1
 		case messageEdited = 2
@@ -158,12 +158,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 			}
 			
 			let user = userWithID(id)
-			if let notified = info["notified"] as? Bool {
-				user.notified = notified
-			}
-			if let notificationTags = info["notificationTags"] as? [String] {
-				user.notificationTags = notificationTags
-			}
+			user.info = (info["info"] as? [String:AnyObject]) ?? [:]
 			
 			users.append(user)
 		}
@@ -175,8 +170,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 		let db = userDB.map {
 			[
 				"id":$0.id,
-				"notified":$0.notified,
-				"notificationTags":$0.notificationTags
+				"info":$0.info
 			]
 		}
 		let data = try JSONSerialization.data(withJSONObject: db, options: .prettyPrinted)
@@ -393,7 +387,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 		}
 	}
 	
-	func webSocketOpen() {
+	public func webSocketOpen() {
 		print("Websocket opened!")
 		wsRetries = 0
 		DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.seconds(5)) {
@@ -403,15 +397,15 @@ class ChatRoom: NSObject, WebSocketDelegate {
 		}
 	}
 	
-	func webSocketClose(_ code: Int, reason: String, wasClean: Bool) {
+	public func webSocketClose(_ code: Int, reason: String, wasClean: Bool) {
 		//do nothing -- we'll handle this in webSocketEnd
 	}
 	
-	func webSocketError(_ error: NSError) {
+	public func webSocketError(_ error: NSError) {
 		//do nothing -- we'll handle this in webSocketEnd
 	}
 	
-	func webSocketMessageText(_ text: String) {
+	public func webSocketMessageText(_ text: String) {
 		recievedMessage = true
 		do {
 			guard let json = try client.parseJSON(text) as? NSDictionary else {
@@ -430,7 +424,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 		}
 	}
 	
-	func webSocketMessageData(_ data: Data) {
+	public func webSocketMessageData(_ data: Data) {
 		print("Recieved binary data: \(data)")
 	}
 	
@@ -450,7 +444,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 		} while !done
 	}
 	
-	func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: NSError?) {
+	public func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: NSError?) {
 		if let e = error {
 			print("Websocket error:\n\(e)")
 		}

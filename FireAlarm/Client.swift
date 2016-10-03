@@ -42,7 +42,7 @@ func += <K, V> (left: inout [K:V], right: [K:V]) {
 	}
 }
 
-class Client: NSObject, URLSessionDataDelegate {
+open class Client: NSObject, URLSessionDataDelegate {
 	
 	static let apiKey = "HNA2dbrFtyTZxeHN6rThNg(("
 	
