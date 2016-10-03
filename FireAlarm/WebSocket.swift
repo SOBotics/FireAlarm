@@ -1203,15 +1203,27 @@ private class InnerWebSocket: Hashable {
         memcpy(outputBytes!+outputBytesStart+outputBytesLength, bytes, length)
         outputBytesLength += length
     }
+	
+	private func findEnd(_ _haystack: UnsafeRawPointer, _ haystacklen: Int) -> (UnsafeRawPointer?, Int) {
+		let end : [UInt8] = [ 0x0D, 0x0A, 0x0D, 0x0A ]
+		let haystack = _haystack.bindMemory(to: UInt8.self, capacity: haystacklen)
+		for i in 0..<(haystacklen-4) {
+			if haystack[i] == end[0] && haystack[i+1] == end[1] && haystack[i+2] == end[2] && haystack[i+3] == end[3] {
+				return (UnsafeRawPointer(haystack.advanced(by: i)), i)
+			}
+		}
+		return (nil, 0)
+	}
 
-    func readResponse() throws {
-        let end : [UInt8] = [ 0x0D, 0x0A, 0x0D, 0x0A ]
-        let ptr = memmem(inputBytes!+inputBytesStart, inputBytesLength, end, 4)
+	func readResponse() throws {
+		//let end : [UInt8] = [ 0x0D, 0x0A, 0x0D, 0x0A ]
+        //let ptr = memmem(inputBytes!+inputBytesStart, inputBytesLength, end, 4)
+		let (ptr, bufferCount) = findEnd(inputBytes!+inputBytesStart, inputBytesLength)
         if ptr == nil {
             throw WebSocketError.needMoreInput
         }
         let buffer = inputBytes!+inputBytesStart
-        let bufferCount = ptr!.assumingMemoryBound(to: UInt8.self)-(inputBytes!+inputBytesStart)
+        //let bufferCount = ptr!.assumingMemoryBound(to: UInt8.self)-(inputBytes!+inputBytesStart)
         let string = NSString(bytesNoCopy: buffer, length: bufferCount, encoding: String.Encoding.utf8.rawValue, freeWhenDone: false) as? String
         if string == nil {
             throw WebSocketError.invalidHeader
