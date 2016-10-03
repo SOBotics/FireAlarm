@@ -27,7 +27,11 @@ func installUpdate() -> Bool {
 		
 		try updateScript.write(toFile: "update.sh", atomically: true, encoding: .utf8)
 		
-		let process = Process.launchedProcess(launchPath: "/bin/bash", arguments: ["update.sh"])
+		#if os(Linux)
+			let process = Task.launchedProcess(launchPath: "/bin/bash", arguments: ["update.sh"])
+		#else
+			let process = Process.launchedProcess(launchPath: "/bin/bash", arguments: ["update.sh"])
+		#endif
 		process.waitUntilExit()
 		
 		
