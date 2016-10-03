@@ -302,7 +302,7 @@ private class UTF8 {
             }
             if ascii {
 				#if os(Linux)
-                text += NSString(bytes: bytes, length: length, encoding: String.Encoding.ascii.rawValue)!.bridgeToSwift()
+                text += NSString(bytes: bytes, length: length, encoding: String.Encoding.ascii.rawValue)!._bridgeToSwift()
 				#else
 					text += NSString(bytes: bytes, length: length, encoding: String.Encoding.ascii.rawValue) as! String
 				#endif
@@ -321,7 +321,7 @@ private class UTF8 {
     static func bytes(_ string : String) -> [UInt8]{
         let data = string.data(using: String.Encoding.utf8)!
 		#if os(Linux)
-			return [UInt8](UnsafeBufferPointer<UInt8>(start: data.bridgeToObjectiveC().bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
+			return [UInt8](UnsafeBufferPointer<UInt8>(start: data._bridgeToObjectiveC().bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
 		#else
 			return [UInt8](UnsafeBufferPointer<UInt8>(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
 		#endif
@@ -329,7 +329,7 @@ private class UTF8 {
     static func string(_ bytes : [UInt8]) -> String{
         if let str = NSString(bytes: bytes, length: bytes.count, encoding: String.Encoding.utf8.rawValue) {
 			#if os(Linux)
-				return str.bridgeToSwift()
+				return str._bridgeToSwift()
 			#else
 				return str as String
 			#endif
