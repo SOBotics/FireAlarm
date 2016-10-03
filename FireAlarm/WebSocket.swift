@@ -1121,8 +1121,8 @@ private class InnerWebSocket: Hashable {
 				&readStream,
 				&writeStream
 			);
-			rdo = readStream!.takeRetainedValue()._swiftObject
-			wro = writeStream!.takeRetainedValue()._swiftObject
+			rdo = unsafeBitCast(readStream!.takeRetainedValue(), to: InputStream.self)
+			wro = unsafeBitCast(writeStream!.takeRetainedValue(), to: OutputStream.self)
 		#else
 			CFStreamCreatePairWithSocketToHost(nil, addr[0] as CFString!, UInt32(Int(addr[1])!), &readStream, &writeStream);
 			rdo = readStream!.takeRetainedValue()
