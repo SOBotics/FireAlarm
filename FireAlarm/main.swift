@@ -184,14 +184,14 @@ func makeTable(_ heading: [String], contents: [String]...) -> String {
 			get {
 				return (info["notified"] as? Bool) ?? false
 			} set {
-				info["notified"] = newValue as AnyObject
+				info["notified"] = newValue._bridgeToObjectiveC()
 			}
 		}
 		var notificationTags: [String] {
 			get {
 				return (info["notificationTags"] as? [String]) ?? []
 			} set {
-				info["notificationTags"] = newValue as AnyObject
+				info["notificationTags"] = newValue._bridgeToObjectiveC()
 			}
 		}
 	}
@@ -201,14 +201,14 @@ func makeTable(_ heading: [String], contents: [String]...) -> String {
 			get {
 				return (info["notified"] as? Bool) ?? false
 			} set {
-				info["notified"] = newValue._bridgeToObjectiveC()
+				info["notified"] = newValue as AnyObject
 			}
 		}
 		var notificationTags: [String] {
 			get {
 				return (info["notificationTags"] as? [String]) ?? []
 			} set {
-				info["notificationTags"] = newValue._bridgeToObjectiveC()
+				info["notificationTags"] = newValue as AnyObject
 			}
 		}
 	}
