@@ -805,7 +805,11 @@ private class InnerWebSocket: Hashable {
             case .closeConn:
                 if let error = finalError {
                     self.event.error(error)
-                    self.eventDelegate?.webSocketError(error as NSError)
+					#if os(Linux)
+						self.eventDelegate?.webSocketError(error._bridgeToNSError())
+					#else
+						self.eventDelegate?.webSocketError(error as NSError)
+					#endif
                 }
                 privateReadyState = .closed
                 if rd != nil {
@@ -1084,11 +1088,14 @@ private class InnerWebSocket: Hashable {
                 reqs += "\(key): \(val)\r\n"
             }
         }
-        var keyb = [UInt32](repeating: 0, count: 4)
-        for i in 0 ..< 4 {
-            keyb[i] = arc4random()
-        }
-        let rkey = Data(bytes: UnsafePointer(keyb), count: 16).base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0))
+        //var keyb = [UInt32](repeating: 0, count: 4)
+		let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 4*4)
+		let stream = InputStream(fileAtPath: "/dev/urandom")!
+        //for i in 0 ..< 4 {
+        //    //keyb[i] = arc4random()
+        //}
+		stream.read(buffer, maxLength: 4*4)
+        let rkey = Data(bytes: buffer, count: 16).base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0))
         reqs += "Sec-WebSocket-Key: \(rkey)\r\n"
         reqs += "\r\n"
         var header = [UInt8]()
@@ -1126,9 +1133,13 @@ private class InnerWebSocket: Hashable {
             wr.setProperty(StreamNetworkServiceTypeValue.voice.rawValue, forKey: Stream.PropertyKey.networkServiceType)
         }
         if allowSelfSignedSSL {
-            let prop: Dictionary<NSObject,NSObject> = [kCFStreamSSLPeerName: kCFNull, kCFStreamSSLValidatesCertificateChain: NSNumber(value: false)]
-            rd.setProperty(prop, forKey: Stream.PropertyKey(rawValue: kCFStreamPropertySSLSettings as String as String))
-            wr.setProperty(prop, forKey: Stream.PropertyKey(rawValue: kCFStreamPropertySSLSettings as String as String))
+			#if os(Linux)
+				fatalError("no self-signed SSL on Linux")
+			#else
+				let prop: Dictionary<NSObject,NSObject> = [kCFStreamSSLPeerName: kCFNull, kCFStreamSSLValidatesCertificateChain: NSNumber(value: false)]
+				rd.setProperty(prop, forKey: Stream.PropertyKey(rawValue: kCFStreamPropertySSLSettings as String as String))
+				wr.setProperty(prop, forKey: Stream.PropertyKey(rawValue: kCFStreamPropertySSLSettings as String as String))
+			#endif
         }
         rd.delegate = delegate
         wr.delegate = delegate
