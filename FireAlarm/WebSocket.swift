@@ -1115,7 +1115,12 @@ private class InnerWebSocket: Hashable {
         var readStream:  Unmanaged<CFReadStream>?
         var writeStream: Unmanaged<CFWriteStream>?
 		#if os(Linux)
-			CFStreamCreatePairWithSocketToHost(nil, addr[0]._cfObject, UInt32(Int(addr[1])!), &readStream, &writeStream);
+			CFStreamCreatePairWithSocketToHost(
+				nil,
+				CFStringCreateWithCString(nil, addr[0], CFStringBuiltInEncodings.UTF8.rawValue), UInt32(Int(addr[1])!),
+				&readStream,
+				&writeStream
+			);
 			rdo = readStream!.takeRetainedValue()._swiftObject
 			wro = writeStream!.takeRetainedValue()._swiftObject
 		#else
