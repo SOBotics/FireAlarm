@@ -1224,7 +1224,11 @@ private class InnerWebSocket: Hashable {
         }
         let buffer = inputBytes!+inputBytesStart
         //let bufferCount = ptr!.assumingMemoryBound(to: UInt8.self)-(inputBytes!+inputBytesStart)
-        let string = NSString(bytesNoCopy: buffer, length: bufferCount, encoding: String.Encoding.utf8.rawValue, freeWhenDone: false) as? String
+		#if os(Linux)
+			let string = NSString(bytesNoCopy: buffer, length: bufferCount, encoding: String.Encoding.utf8.rawValue, freeWhenDone: false)?._bridgeToObjectiveC()
+		#else
+			let string = NSString(bytesNoCopy: buffer, length: bufferCount, encoding: String.Encoding.utf8.rawValue, freeWhenDone: false) as? String
+		#endif
         if string == nil {
             throw WebSocketError.invalidHeader
         }
