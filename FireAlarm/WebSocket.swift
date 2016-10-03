@@ -1518,8 +1518,8 @@ private class InnerWebSocket: Hashable {
             }
         }
 		let inputStream = InputStream(fileAtPath: "/dev/urandom")!
-		var buffer = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
-		buffer.withMemoryRebound(to: UInt8.self, capacity: 4) {
+		let buffer = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
+		let _ = buffer.withMemoryRebound(to: UInt8.self, capacity: 4) {
 			inputStream.read($0, maxLength: 4)
 		}
 		let r = buffer.pointee
