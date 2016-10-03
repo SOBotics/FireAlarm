@@ -727,7 +727,7 @@ private class InnerWebSocket: Hashable {
     var more = true
 	
 	private func eventMessage(_ data: Any) {
-		self.event.message(data: data as Any)
+		event.message(data)
 	}
 	
     func step(){
@@ -787,11 +787,11 @@ private class InnerWebSocket: Hashable {
                     fire {
                         switch self.binaryType {
                         case .uInt8Array:
-                            self.event.pong(data: frame.payload.array)
+                            self.event.pong(frame.payload.array)
                         case .nsData:
-                            self.event.pong(data: frame.payload.nsdata)
+                            self.event.pong(frame.payload.nsdata)
                         case .uInt8UnsafeBufferPointer:
-                            self.event.pong(data: frame.payload.buffer)
+                            self.event.pong(frame.payload.buffer)
                         }
                         self.eventDelegate?.webSocketPong()
                     }
