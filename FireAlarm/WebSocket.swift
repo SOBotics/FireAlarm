@@ -725,6 +725,11 @@ private class InnerWebSocket: Hashable {
     var finalError : Error?
     var exit = false
     var more = true
+	
+	private func eventMessage(_ data: Any) {
+		self.event.message(data: data as Any)
+	}
+	
     func step(){
         if exit {
             return
@@ -756,20 +761,20 @@ private class InnerWebSocket: Hashable {
                 switch frame.code {
                 case .text:
                     fire {
-                        self.event.message(data: frame.utf8.text)
+                        self.eventMessage(frame.utf8.text)
                         self.eventDelegate?.webSocketMessageText(frame.utf8.text)
                     }
                 case .binary:
                     fire {
                         switch self.binaryType {
                         case .uInt8Array:
-                            self.event.message(data: frame.payload.array)
+							self.eventMessage(frame.payload.array)
                         case .nsData:
-                            self.event.message(data: frame.payload.nsdata)
+                            self.eventMessage(frame.payload.nsdata)
                             // The WebSocketDelegate is necessary to add Objective-C compability and it is only possible to send binary data with NSData.
                             self.eventDelegate?.webSocketMessageData(frame.payload.nsdata)
                         case .uInt8UnsafeBufferPointer:
-                            self.event.message(data: frame.payload.buffer)
+                            self.eventMessage(frame.payload.buffer)
                         }
                     }
                 case .ping:
