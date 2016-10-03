@@ -8,6 +8,20 @@
 
 import Foundation
 
+#if os(Linux)
+	
+	func launchProcess(path: String, arguments: [String]) -> Task {
+		return Task.launchedTaskWithLaunchPath(path, arguments: arguments)
+	}
+	
+#else
+	
+	func launchProcess(path: String, arguments: [String]) -> Process {
+		return Process.launchedProcess(launchPath: path, arguments: arguments)
+	}
+	
+#endif
+
 func installUpdate() -> Bool {
 	do {
 		let updateScript = "rm -rf update;pushd .;" +
@@ -27,11 +41,7 @@ func installUpdate() -> Bool {
 		
 		try updateScript.write(toFile: "update.sh", atomically: true, encoding: .utf8)
 		
-		#if os(Linux)
-			let process = Task.launchedProcess(launchPath: "/bin/bash", arguments: ["update.sh"])
-		#else
-			let process = Process.launchedProcess(launchPath: "/bin/bash", arguments: ["update.sh"])
-		#endif
+		let process = launchProcess(path: "/bin/bash", arguments: ["update.sh"])
 		process.waitUntilExit()
 		
 		
@@ -61,7 +71,7 @@ func update(_ bot: ChatBot) -> Bool {
 	do {
 		
 		try versionScript.write(toFile: "get_version.sh", atomically: true, encoding: .utf8)
-		let process = Process.launchedProcess(launchPath: "/bin/bash", arguments: ["get_version.sh"])
+		let process = launchProcess(path: "/bin/bash", arguments: ["get_version.sh"])
 		process.waitUntilExit()
 		
 		let availableVersion = try String(contentsOfFile: "available_version.txt").replacingOccurrences(of: "\n", with: "")
