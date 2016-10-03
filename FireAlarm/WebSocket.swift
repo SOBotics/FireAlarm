@@ -1117,7 +1117,7 @@ private class InnerWebSocket: Hashable {
 		#if os(Linux)
 			CFStreamCreatePairWithSocketToHost(
 				nil,
-				CFStringCreateWithCString(nil, addr[0], CFStringBuiltInEncodings.UTF8.rawValue), UInt32(Int(addr[1])!),
+				CFStringCreateWithCString(nil, addr[0], kCFStringEncodingUTF8), UInt32(Int(addr[1])!),
 				&readStream,
 				&writeStream
 			);
