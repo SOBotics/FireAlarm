@@ -63,7 +63,9 @@ private class Payload {
         }
         set {
             count = 0
-            append((newValue as NSData).bytes.bindMemory(to: UInt8.self, capacity: newValue.count), length: newValue.count)
+			newValue.withUnsafeBytes {
+				append($0, length: newValue.count)
+			}
         }
     }
     var buffer : UnsafeBufferPointer<UInt8> {
@@ -299,7 +301,11 @@ private class UTF8 {
                 }
             }
             if ascii {
-                text += NSString(bytes: bytes, length: length, encoding: String.Encoding.ascii.rawValue) as! String
+				#if os(Linux)
+                text += NSString(bytes: bytes, length: length, encoding: String.Encoding.ascii.rawValue)!.bridge()
+				#else
+					text += NSString(bytes: bytes, length: length, encoding: String.Encoding.ascii.rawValue) as! String
+				#endif
                 bcount += length
                 return
             }
@@ -314,7 +320,11 @@ private class UTF8 {
     }
     static func bytes(_ string : String) -> [UInt8]{
         let data = string.data(using: String.Encoding.utf8)!
-        return [UInt8](UnsafeBufferPointer<UInt8>(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
+		#if os(Linux)
+			return [UInt8](UnsafeBufferPointer<UInt8>(start: data.bridge().bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
+		#else
+			return [UInt8](UnsafeBufferPointer<UInt8>(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
+		#endif
     }
     static func string(_ bytes : [UInt8]) -> String{
         if let str = NSString(bytes: bytes, length: bytes.count, encoding: String.Encoding.utf8.rawValue) {
@@ -351,9 +361,15 @@ private class Frame {
 }
 
 private class Delegate : NSObject, StreamDelegate {
-	func stream(_ aStream: Stream, handle eventCode: Stream.Event){
-        manager.signal()
-    }
+	#if os(Linux)
+		func stream(_ aStream: Stream, handleEvent eventCode: Stream.Event) {
+			manager.signal()
+		}
+	#else
+		func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+			manager.signal()
+		}
+	#endif
 }
 
 
@@ -633,11 +649,11 @@ private class InnerWebSocket: Hashable {
         self.inputBytesSize = windowBufferSize
         self.delegate = Delegate()
         if stub{
-            manager.queue.asyncAfter(deadline: DispatchTime.now() + Double(0) / Double(NSEC_PER_SEC)){
+            manager.queue.asyncAfter(deadline: DispatchTime.now() + Double(0)){
                 _ = self
             }
         } else {
-            manager.queue.asyncAfter(deadline: DispatchTime.now() + Double(0) / Double(NSEC_PER_SEC)){
+            manager.queue.asyncAfter(deadline: DispatchTime.now() + Double(0)){
                 manager.add(self)
             }
         }
@@ -838,7 +854,7 @@ private class InnerWebSocket: Hashable {
                         self.unlock()
                         manager.signal()
                     } else {
-                        manager.queue.asyncAfter(deadline: DispatchTime.now() + Double(0) / Double(NSEC_PER_SEC)){
+                        manager.queue.asyncAfter(deadline: DispatchTime.now() + Double(0)){
                             self.lock()
                             self.frames += [frame]
                             self.unlock()
