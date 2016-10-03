@@ -98,8 +98,8 @@ class Filter: WebSocketDelegate {
 	}
 	
 	func checkPost(_ post: Post) -> Bool {
-		var trueProbability = Float80(0.263)
-		var falseProbability = Float80(1 - trueProbability)
+		var trueProbability = Double(0.263)
+		var falseProbability = Double(1 - trueProbability)
 		var checkedWords = [String]()
 		
 		let body = post.body
@@ -117,8 +117,12 @@ class Filter: WebSocketDelegate {
 			let pFalse = word.falseProbability
 			
 			
-			trueProbability *= Float80(pTrue)
-			falseProbability *= Float80(pFalse)
+			let newTrue = trueProbability * Double(pTrue)
+			let newFalse = falseProbability * Double(pFalse)
+			if newTrue != 0.0 && newFalse != 0.0 {
+				trueProbability = newTrue
+				falseProbability = newFalse
+			}
 		}
 		
 		return trueProbability * 1e45 > falseProbability
