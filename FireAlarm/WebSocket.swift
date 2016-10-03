@@ -1117,7 +1117,7 @@ private class InnerWebSocket: Hashable {
 		#if os(Linux)
 			CFStreamCreatePairWithSocketToHost(
 				nil,
-				CFStringCreateWithCString(nil, addr[0], kCFStringEncodingUTF8), UInt32(Int(addr[1])!),
+				CFStringCreateWithCString(nil, addr[0], CFStringEncoding(kCFStringEncodingUTF8)), UInt32(Int(addr[1])!),
 				&readStream,
 				&writeStream
 			);
@@ -1129,24 +1129,46 @@ private class InnerWebSocket: Hashable {
 			wro = writeStream!.takeRetainedValue()
 		#endif
         (rd, wr) = (rdo!, wro!)
-        rd.setProperty(security.level, forKey: Stream.PropertyKey.socketSecurityLevelKey)
-		wr.setProperty(security.level, forKey: Stream.PropertyKey.socketSecurityLevelKey)
-        if services.contains(.VoIP) {
-            rd.setProperty(StreamNetworkServiceTypeValue.voIP.rawValue, forKey: Stream.PropertyKey.networkServiceType)
-            wr.setProperty(StreamNetworkServiceTypeValue.voIP.rawValue, forKey: Stream.PropertyKey.networkServiceType)
-        }
-        if services.contains(.Video) {
-            rd.setProperty(StreamNetworkServiceTypeValue.video.rawValue, forKey: Stream.PropertyKey.networkServiceType)
-            wr.setProperty(StreamNetworkServiceTypeValue.video.rawValue, forKey: Stream.PropertyKey.networkServiceType)
-        }
-        if services.contains(.Background) {
-            rd.setProperty(StreamNetworkServiceTypeValue.background.rawValue, forKey: Stream.PropertyKey.networkServiceType)
-            wr.setProperty(StreamNetworkServiceTypeValue.background.rawValue, forKey: Stream.PropertyKey.networkServiceType)
-        }
-        if services.contains(.Voice) {
-            rd.setProperty(StreamNetworkServiceTypeValue.voice.rawValue, forKey: Stream.PropertyKey.networkServiceType)
-            wr.setProperty(StreamNetworkServiceTypeValue.voice.rawValue, forKey: Stream.PropertyKey.networkServiceType)
-        }
+		#if os(Linux)
+			rd.setProperty(security.level._bridgeToObjectiveC(), forKey: Stream.PropertyKey.socketSecurityLevelKey)
+			wr.setProperty(security.level._bridgeToObjectiveC(), forKey: Stream.PropertyKey.socketSecurityLevelKey)
+			if services.contains(.VoIP) {
+				rd.setProperty(StreamNetworkServiceTypeValue.voIP.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				wr.setProperty(StreamNetworkServiceTypeValue.voIP.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+			}
+			if services.contains(.Video) {
+				rd.setProperty(StreamNetworkServiceTypeValue.video.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				wr.setProperty(StreamNetworkServiceTypeValue.video.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+			}
+			if services.contains(.Background) {
+				rd.setProperty(StreamNetworkServiceTypeValue.background.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				wr.setProperty(StreamNetworkServiceTypeValue.background.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+			}
+			if services.contains(.Voice) {
+				rd.setProperty(StreamNetworkServiceTypeValue.voice.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				wr.setProperty(StreamNetworkServiceTypeValue.voice.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+			}
+			#else
+			
+			rd.setProperty(security.level as AnyObject, forKey: Stream.PropertyKey.socketSecurityLevelKey)
+			wr.setProperty(security.level as AnyObject, forKey: Stream.PropertyKey.socketSecurityLevelKey)
+			if services.contains(.VoIP) {
+				rd.setProperty(StreamNetworkServiceTypeValue.voIP.rawValue as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
+				wr.setProperty(StreamNetworkServiceTypeValue.voIP.rawValue as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
+			}
+			if services.contains(.Video) {
+				rd.setProperty(StreamNetworkServiceTypeValue.video.rawValue as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
+				wr.setProperty(StreamNetworkServiceTypeValue.video.rawValue as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
+			}
+			if services.contains(.Background) {
+				rd.setProperty(StreamNetworkServiceTypeValue.background.rawValue as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
+				wr.setProperty(StreamNetworkServiceTypeValue.background.rawValue as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
+			}
+			if services.contains(.Voice) {
+				rd.setProperty(StreamNetworkServiceTypeValue.voice.rawValue as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
+				wr.setProperty(StreamNetworkServiceTypeValue.voice.rawValue as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
+			}
+		#endif
         if allowSelfSignedSSL {
 			#if os(Linux)
 				fatalError("no self-signed SSL on Linux")
