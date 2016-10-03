@@ -178,23 +178,41 @@ func makeTable(_ heading: [String], contents: [String]...) -> String {
 	return "    " + [head,divider,table.joined(separator: "\n    ")].joined(separator: "\n    ")
 }
 
-
-extension ChatUser {
-	var notified: Bool {
-		get {
-			return (info["notified"] as? Bool) ?? false
-		} set {
-			info["notified"] = newValue as AnyObject
+#if os(Linux)
+	extension ChatUser {
+		var notified: Bool {
+			get {
+				return (info["notified"] as? Bool) ?? false
+			} set {
+				info["notified"] = newValue as AnyObject
+			}
+		}
+		var notificationTags: [String] {
+			get {
+				return (info["notificationTags"] as? [String]) ?? []
+			} set {
+				info["notificationTags"] = newValue as AnyObject
+			}
 		}
 	}
-	var notificationTags: [String] {
-		get {
-			return (info["notificationTags"] as? [String]) ?? []
-		} set {
-			info["notificationTags"] = newValue as AnyObject
+#else
+	extension ChatUser {
+		var notified: Bool {
+			get {
+				return (info["notified"] as? Bool) ?? false
+			} set {
+				info["notified"] = newValue._bridgeToObjectiveC()
+			}
+		}
+		var notificationTags: [String] {
+			get {
+				return (info["notificationTags"] as? [String]) ?? []
+			} set {
+				info["notificationTags"] = newValue._bridgeToObjectiveC()
+			}
 		}
 	}
-}
+#endif
 
 
 private var errorRoom: ChatRoom?
