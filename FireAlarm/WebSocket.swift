@@ -1130,23 +1130,23 @@ private class InnerWebSocket: Hashable {
 		#endif
         (rd, wr) = (rdo!, wro!)
 		#if os(Linux)
-			rd.setProperty(security.level._bridgeToObjectiveC(), forKey: Stream.PropertyKey.socketSecurityLevelKey)
-			wr.setProperty(security.level._bridgeToObjectiveC(), forKey: Stream.PropertyKey.socketSecurityLevelKey)
+			let _ = rd.setProperty(security.level._bridgeToObjectiveC(), forKey: Stream.PropertyKey.socketSecurityLevelKey)
+			let _ = wr.setProperty(security.level._bridgeToObjectiveC(), forKey: Stream.PropertyKey.socketSecurityLevelKey)
 			if services.contains(.VoIP) {
-				rd.setProperty(StreamNetworkServiceTypeValue.voIP.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
-				wr.setProperty(StreamNetworkServiceTypeValue.voIP.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				let _ = rd.setProperty(StreamNetworkServiceTypeValue.voIP.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				let _ = wr.setProperty(StreamNetworkServiceTypeValue.voIP.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
 			}
 			if services.contains(.Video) {
-				rd.setProperty(StreamNetworkServiceTypeValue.video.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
-				wr.setProperty(StreamNetworkServiceTypeValue.video.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				let _ = rd.setProperty(StreamNetworkServiceTypeValue.video.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				let _ = wr.setProperty(StreamNetworkServiceTypeValue.video.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
 			}
 			if services.contains(.Background) {
-				rd.setProperty(StreamNetworkServiceTypeValue.background.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
-				wr.setProperty(StreamNetworkServiceTypeValue.background.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				let _ = rd.setProperty(StreamNetworkServiceTypeValue.background.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				let _ = wr.setProperty(StreamNetworkServiceTypeValue.background.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
 			}
 			if services.contains(.Voice) {
-				rd.setProperty(StreamNetworkServiceTypeValue.voice.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
-				wr.setProperty(StreamNetworkServiceTypeValue.voice.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				let _ = rd.setProperty(StreamNetworkServiceTypeValue.voice.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
+				let _ = wr.setProperty(StreamNetworkServiceTypeValue.voice.rawValue._bridgeToObjectiveC(), forKey: Stream.PropertyKey.networkServiceType)
 			}
 			#else
 			
