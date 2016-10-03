@@ -8,12 +8,12 @@
 
 import Foundation
 
-class ChatMessage {
-    let user: ChatUser
-    let content: String
-    let id: Int?
+open class ChatMessage {
+    open let user: ChatUser
+    open let content: String
+    open let id: Int?
     
-    init(user: ChatUser, content: String, id: Int?) {
+    public init(user: ChatUser, content: String, id: Int?) {
         self.user = user
         self.content = content
         self.id = id

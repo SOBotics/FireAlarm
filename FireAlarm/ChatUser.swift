@@ -8,18 +8,18 @@
 
 import Foundation
 
-class ChatUser: CustomStringConvertible {
+open class ChatUser: CustomStringConvertible {
     
-    let id: Int
-	
-	var notified = false
-	var notificationTags = [String]()
+    open let id: Int
     
     fileprivate var _name: String?
     fileprivate var _isMod: Bool?
     fileprivate var _isRO: Bool?
+	
+	///Custom per-user persistent storage.  Must be serializable by JSONSerialization!
+	open var info: [String:AnyObject] = [:]
     
-    var name: String {
+    open var name: String {
         get {
             if let n = _name {
                 return n
@@ -34,7 +34,7 @@ class ChatUser: CustomStringConvertible {
         }
     }
     
-    var isMod: Bool {
+    open var isMod: Bool {
         get {
             if let i = _isMod {
                 return i
@@ -49,7 +49,7 @@ class ChatUser: CustomStringConvertible {
         }
     }
     
-    var isRO: Bool {
+    open var isRO: Bool {
         get {
             if let i = _isRO {
                 return i
@@ -64,14 +64,14 @@ class ChatUser: CustomStringConvertible {
         }
     }
     
-    var description: String {
+    open var description: String {
         return name
     }
     
     
-    let room: ChatRoom
+    open let room: ChatRoom
     
-    init(room: ChatRoom, id: Int, name: String? = nil) {
+    public init(room: ChatRoom, id: Int, name: String? = nil) {
         self.room = room
         self.id = id
         _name = name

@@ -544,7 +544,7 @@ extension WebSocketDelegate {
 		
 	}
 	
-	func webSocketPong() {
+	public func webSocketPong() {
 		
 	}
 	

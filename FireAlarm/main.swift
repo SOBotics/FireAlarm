@@ -9,6 +9,13 @@
 import Foundation
 import Dispatch
 
+let commands: [Command.Type] = [
+	CommandTest.self, CommandSay.self,
+	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self,
+	CommandCheckPost.self,
+	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self
+]
+
 //HTML-entity decoding extension by Martin R
 //http://stackoverflow.com/a/30141700/3476191
 // Mapping from XML/HTML character entity reference to character
@@ -172,6 +179,23 @@ func makeTable(_ heading: [String], contents: [String]...) -> String {
 }
 
 
+extension ChatUser {
+	var notified: Bool {
+		get {
+			return (info["notified"] as? Bool) ?? false
+		} set {
+			self.info["notified"] = newValue as AnyObject
+		}
+	}
+	var notificationTags: [String] {
+		get {
+			return (info["notified"] as? [String]) ?? []
+		} set {
+			info["notified"] = newValue as AnyObject
+		}
+	}
+}
+
 
 private var errorRoom: ChatRoom?
 private enum BackgroundTask {
@@ -281,7 +305,7 @@ func main() throws {
 	}
 	try room.loadUserDB()
 	errorRoom = room
-	bot = ChatBot(room)
+	bot = ChatBot(room, commands: commands)
 	room.delegate = bot
 	try room.join()
 	
