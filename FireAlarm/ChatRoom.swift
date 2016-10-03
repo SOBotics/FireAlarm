@@ -212,7 +212,7 @@ class ChatRoom: NSObject, WebSocketDelegate {
 			}
 		}
 		
-		return users.map { "@" + $0.name }.joined(separator: " ")
+		return users.map { "@" + $0.name.replacingOccurrences(of: " ", with: "") }.joined(separator: " ")
 	}
 	
 	var ws: WebSocket!
@@ -292,6 +292,9 @@ class ChatRoom: NSObject, WebSocketDelegate {
 	}
 	
 	func postMessage(_ message: String) {
+		if message.characters.count == 0 {
+			return
+		}
 		messageQueue.append(message)
 		if messageQueue.count == 1 {
 			client.queue.async {
@@ -368,10 +371,12 @@ class ChatRoom: NSObject, WebSocketDelegate {
 			case .messagePosted, .messageEdited:
 				guard
 					let userID = event["user_id"] as? Int,
-					let messageID = event["message_id"] as? Int,
-					let content = (event["content"] as? String)?.stringByDecodingHTMLEntities else {
+					let messageID = event["message_id"] as? Int/*,
+					let content = (event["content"] as? String)?.stringByDecodingHTMLEntities*/ else {
 						throw EventError.jsonParsingFailed(json: String(describing: events))
 				}
+				
+				let content: String = try client.get("https://chat.stackoverflow.com/message/\(messageID)?plain=true")
 				
 				//look up the user instead of getting their name to make sure they're in the DB
 				let user = userWithID(userID)

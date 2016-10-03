@@ -222,11 +222,11 @@ func main() throws {
 	//Log in
 	let client = Client(host: .StackOverflow)
 	
+	let env =  ProcessInfo.processInfo.environment
+	
 	if !client.loggedIn {
 		let email: String
 		let password: String
-		
-		let env =  ProcessInfo.processInfo.environment
 		
 		let envEmail = env["ChatBotEmail"]
 		let envPassword = env["ChatBotPass"]
@@ -269,8 +269,16 @@ func main() throws {
 	
 	
 	//Join the chat room
-	let room = ChatRoom(client: client, roomID: 111347)  //SOBotics
-	//let room = ChatRoom(client: client, roomID: 123602)  //FireAlarm Development
+	let room: ChatRoom
+	let development: Bool
+	if let devString = env["DEVELOPMENT"], let devRoom = Int(devString) {
+		room = ChatRoom(client: client, roomID: devRoom)  //FireAlarm Development
+		development = true
+	}
+	else {
+		room = ChatRoom(client: client, roomID: 111347)  //SOBotics
+		development = false
+	}
 	try room.loadUserDB()
 	errorRoom = room
 	bot = ChatBot(room)
@@ -307,7 +315,9 @@ func main() throws {
 		}
 	}
 	
-	DispatchQueue.global().async { autoUpdate() }
+	if !development {
+		DispatchQueue.global().async { autoUpdate() }
+	}
 	
 	
 	func inputMonitor() {

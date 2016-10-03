@@ -67,6 +67,11 @@
             value = "firealarm.chatbot@gmail.com"
             isEnabled = "YES">
          </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "DEVELOPMENT"
+            value = "123602"
+            isEnabled = "YES">
+         </EnvironmentVariable>
       </EnvironmentVariables>
       <AdditionalOptions>
       </AdditionalOptions>
