@@ -13,6 +13,10 @@ import Foundation
 import Dispatch
 import CoreFoundation
 
+#if os(Linux)
+	import Glibc
+#endif
+
 private let windowBufferSize = 0x2000
 
 private class Payload {
@@ -806,7 +810,7 @@ private class InnerWebSocket: Hashable {
                 if let error = finalError {
                     self.event.error(error)
 					#if os(Linux)
-						self.eventDelegate?.webSocketError(error._bridgeToNSError())
+						self.eventDelegate?.webSocketError(NSError(domain: "WebsocketError", code: 0, userInfo: ["error":error]))
 					#else
 						self.eventDelegate?.webSocketError(error as NSError)
 					#endif
@@ -1072,8 +1076,12 @@ private class InnerWebSocket: Hashable {
 			port = req.url!.port ?? 80
 			security = .none
 		}
-
-		var path = CFURLCopyPath(req.url! as CFURL!) as String
+		
+		#if os(Linux)
+		var path = CFURLCopyPath(req.url!._cfObject) as String
+		#else
+			var path = CFURLCopyPath(req.url! as CFURL!) as String
+		#endif
         if path == "" {
             path = "/"
         }
@@ -1094,7 +1102,7 @@ private class InnerWebSocket: Hashable {
         //for i in 0 ..< 4 {
         //    //keyb[i] = arc4random()
         //}
-		stream.read(buffer, maxLength: 4*4)
+		let _ = stream.read(buffer, maxLength: 4*4)
         let rkey = Data(bytes: buffer, count: 16).base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0))
         reqs += "Sec-WebSocket-Key: \(rkey)\r\n"
         reqs += "\r\n"
@@ -1110,9 +1118,15 @@ private class InnerWebSocket: Hashable {
         var (rdo, wro) : (InputStream?, OutputStream?)
         var readStream:  Unmanaged<CFReadStream>?
         var writeStream: Unmanaged<CFWriteStream>?
-        CFStreamCreatePairWithSocketToHost(nil, addr[0] as CFString!, UInt32(Int(addr[1])!), &readStream, &writeStream);
-        rdo = readStream!.takeRetainedValue()
-        wro = writeStream!.takeRetainedValue()
+		#if os(Linux)
+			CFStreamCreatePairWithSocketToHost(nil, addr[0]._cfObject, UInt32(Int(addr[1])!), &readStream, &writeStream);
+			rdo = readStream!.takeRetainedValue()._nsObject
+			wro = writeStream!.takeRetainedValue()._nsObject
+		#else
+			CFStreamCreatePairWithSocketToHost(nil, addr[0] as CFString!, UInt32(Int(addr[1])!), &readStream, &writeStream);
+			rdo = readStream!.takeRetainedValue()
+			wro = writeStream!.takeRetainedValue()
+		#endif
         (rd, wr) = (rdo!, wro!)
         rd.setProperty(security.level, forKey: Stream.PropertyKey.socketSecurityLevelKey)
 		wr.setProperty(security.level, forKey: Stream.PropertyKey.socketSecurityLevelKey)
