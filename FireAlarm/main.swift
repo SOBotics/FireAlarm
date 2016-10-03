@@ -184,14 +184,14 @@ extension ChatUser {
 		get {
 			return (info["notified"] as? Bool) ?? false
 		} set {
-			self.info["notified"] = newValue as AnyObject
+			info["notified"] = newValue as AnyObject
 		}
 	}
 	var notificationTags: [String] {
 		get {
-			return (info["notified"] as? [String]) ?? []
+			return (info["notificationTags"] as? [String]) ?? []
 		} set {
-			info["notified"] = newValue as AnyObject
+			info["notificationTags"] = newValue as AnyObject
 		}
 	}
 }
