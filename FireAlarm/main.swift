@@ -122,13 +122,13 @@ func formatArray<T>(_ array: [T], conjunction: String) -> String {
 
 
 
-func clearCookies(_ storage: HTTPCookieStorage) {
+/*func clearCookies(_ storage: HTTPCookieStorage) {
 	if let cookies = storage.cookies {
 		for cookie in cookies {
 			storage.deleteCookie(cookie)
 		}
 	}
-}
+}*/
 
 public var githubLink = "//github.com/NobodyNada/FireAlarm/tree/swift"
 
@@ -297,7 +297,7 @@ func main() throws {
 		}
 		catch {
 			print("Login failed with error \(error).\nClearing cookies and retrying.")
-			clearCookies(client.cookieStorage)
+			//clearCookies(client.cookieStorage)
 			do {
 				try client.loginWithEmail(email, password: password)
 			}
