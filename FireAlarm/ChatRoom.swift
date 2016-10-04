@@ -253,6 +253,7 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 		ws = WebSocket(request: request)
 		ws.eventQueue = client.queue
 		ws.delegate = self
+		ws.open()
 	}
 	
 	fileprivate func messageQueueHandler() {

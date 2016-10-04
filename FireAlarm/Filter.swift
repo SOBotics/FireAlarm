@@ -63,7 +63,8 @@ class Filter: WebSocketDelegate {
 	func start() throws {
 		_running = true
 		
-		ws = WebSocket("wss://qa.sockets.stackexchange.com/")
+		let request = URLRequest(url: URL(string: "wss://qa.sockets.stackexchange.com/")!)
+		ws = WebSocket(request: request)
 		ws.eventQueue = bot.room.client.queue
 		ws.delegate = self
 		ws.open()

@@ -1095,10 +1095,12 @@ private class InnerWebSocket: Hashable {
         //var keyb = [UInt32](repeating: 0, count: 4)
 		let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 4*4)
 		let stream = InputStream(fileAtPath: "/dev/urandom")!
+		stream.open()
         //for i in 0 ..< 4 {
         //    //keyb[i] = arc4random()
         //}
 		let _ = stream.read(buffer, maxLength: 4*4)
+		stream.close()
         let rkey = Data(bytes: buffer, count: 16).base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0))
         reqs += "Sec-WebSocket-Key: \(rkey)\r\n"
         reqs += "\r\n"
@@ -1210,7 +1212,7 @@ private class InnerWebSocket: Hashable {
 		guard haystacklen >= 4 else {
 			return (nil, 0)
 		}
-		for i in 0..<(haystacklen-4) {
+		for i in 0...(haystacklen-4) {
 			if haystack[i] == end[0] && haystack[i+1] == end[1] && haystack[i+2] == end[2] && haystack[i+3] == end[3] {
 				return (UnsafeRawPointer(haystack.advanced(by: i)), i)
 			}
