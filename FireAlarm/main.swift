@@ -292,10 +292,6 @@ func main() throws {
 		do {
 			try client.loginWithEmail(email, password: password)
 		}
-		catch Client.LoginError.loginFailed(let message) {
-			print("Login failed: \(message)")
-			exit(EXIT_FAILURE)
-		}
 		catch {
 			print("Login failed with error \(error).\nClearing cookies and retrying.")
 			#if os(macOS)
