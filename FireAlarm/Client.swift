@@ -147,6 +147,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		request.httpMethod = "POST"
 		request.httpBody = String(urlParameters: data).data(using: String.Encoding.utf8)
 		request.setValue(String(request.httpBody?.count ?? 0), forHTTPHeaderField: "Content-Length")
+		request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type" )
 		#if os(Linux)
 			return try performRequest(request._bridgeToSwift())
 		#else
