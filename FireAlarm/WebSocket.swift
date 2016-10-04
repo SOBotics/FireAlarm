@@ -1576,10 +1576,12 @@ private class InnerWebSocket: Hashable {
             }
         }
 		let inputStream = InputStream(fileAtPath: "/dev/urandom")!
+		inputStream.open
 		let buffer = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
 		let _ = buffer.withMemoryRebound(to: UInt8.self, capacity: 4) {
 			inputStream.read($0, maxLength: 4)
 		}
+		inputStream.close()
 		let r = buffer.pointee
         var maskBytes : [UInt8] = [UInt8(r >> 0 & 0xFF), UInt8(r >> 8 & 0xFF), UInt8(r >> 16 & 0xFF), UInt8(r >> 24 & 0xFF)]
         for i in 0 ..< 4 {
