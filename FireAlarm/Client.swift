@@ -108,7 +108,6 @@ open class Client: NSObject, URLSessionDataDelegate {
 	
 	func performRequest(_ request: URLRequest) throws -> (Data, HTTPURLResponse) {
 		let sema = DispatchSemaphore(value: 0)
-		print(request)
 		var data: Data!
 		var resp: URLResponse!
 		var error: NSError!
