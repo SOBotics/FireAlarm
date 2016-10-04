@@ -54,7 +54,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 	
 	var loggedIn = false
 	
-	let queue = DispatchQueue(label: "Client queue", attributes: [])
+	let queue = DispatchQueue(label: "Client queue", attributes: [.concurrent])
 	
 	fileprivate var _fkey: String!
 	
