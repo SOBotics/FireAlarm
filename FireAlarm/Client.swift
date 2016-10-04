@@ -114,10 +114,14 @@ open class Client: NSObject, URLSessionDataDelegate {
 		var resp: URLResponse!
 		var error: NSError!
 		
-		session.dataTask(with: request, completionHandler: {inData, inResp, inError in
-			(data, resp, error) = (inData, inResp, inError as NSError!)
-			sema.signal()
-		}) .resume()
+		dispatch_async(queue) {
+			
+			session.dataTask(with: request, completionHandler: {inData, inResp, inError in
+				(data, resp, error) = (inData, inResp, inError as NSError!)
+				sema.signal()
+			}) .resume()
+			
+		}
 		
 		sema.wait()
 		
@@ -274,7 +278,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		
 		let configuration =  URLSessionConfiguration.default
 		#if os(macOS)
-		cookieStorage = configuration.httpCookieStorage!
+			cookieStorage = configuration.httpCookieStorage!
 		#endif
 		
 		
