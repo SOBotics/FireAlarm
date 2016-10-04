@@ -114,9 +114,9 @@ open class Client: NSObject, URLSessionDataDelegate {
 		var resp: URLResponse!
 		var error: NSError!
 		
-		dispatch_async(queue) {
+		queue.async {
 			
-			session.dataTask(with: request, completionHandler: {inData, inResp, inError in
+			self.session.dataTask(with: request, completionHandler: {inData, inResp, inError in
 				(data, resp, error) = (inData, inResp, inError as NSError!)
 				sema.signal()
 			}) .resume()
