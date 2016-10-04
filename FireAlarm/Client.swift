@@ -102,7 +102,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 	let host: Host
 	
 	enum RequestError: Error {
-		case invalidURL
+		case invalidURL(url: String)
 		case notUTF8
 	}
 	
@@ -129,14 +129,14 @@ open class Client: NSObject, URLSessionDataDelegate {
 	
 	func get(_ url: String) throws -> (Data, HTTPURLResponse) {
 		guard let nsUrl = URL(string: url) else {
-			throw RequestError.invalidURL
+			throw RequestError.invalidURL(url: url)
 		}
 		return try performRequest(URLRequest(url: nsUrl))
 	}
 	
 	func post(_ url: String, _ data: [String:Any]) throws -> (Data, HTTPURLResponse) {
 		guard let nsUrl = URL(string: url) else {
-			throw RequestError.invalidURL
+			throw RequestError.invalidURL(url: url)
 		}
 		var request = URLRequest(url: nsUrl)
 		request.httpMethod = "POST"
