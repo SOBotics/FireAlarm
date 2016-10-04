@@ -131,7 +131,9 @@ open class Client: NSObject, URLSessionDataDelegate {
 		guard let nsUrl = URL(string: url) else {
 			throw RequestError.invalidURL(url: url)
 		}
-		return try performRequest(URLRequest(url: nsUrl))
+		var request = URLRequest(url: nsUrl)
+		request.setValue(String(request.httpBody?.count ?? 0), forHTTPHeaderField: "Content-Length")
+		return try performRequest(request)
 	}
 	
 	func post(_ url: String, _ data: [String:Any]) throws -> (Data, HTTPURLResponse) {
@@ -141,6 +143,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		var request = URLRequest(url: nsUrl)
 		request.httpMethod = "POST"
 		request.httpBody = String(urlParameters: data).data(using: String.Encoding.utf8)
+		request.setValue(String(request.httpBody?.count ?? 0), forHTTPHeaderField: "Content-Length")
 		return try performRequest(request as URLRequest)
 	}
 	
@@ -261,6 +264,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		
 		let configuration =  URLSessionConfiguration.default
 		//cookieStorage = configuration.httpCookieStorage!
+		
 		
 		super.init()
 		
