@@ -136,29 +136,21 @@ open class Client: NSObject, URLSessionDataDelegate {
 		guard let nsUrl = URL(string: url) else {
 			throw RequestError.invalidURL(url: url)
 		}
-		let request = NSMutableURLRequest(url: nsUrl)
+		var request = URLRequest(url: nsUrl)
 		request.setValue(String(request.httpBody?.count ?? 0), forHTTPHeaderField: "Content-Length")
-		#if os(Linux)
-			return try performRequest(request._bridgeToSwift())
-		#else
-			return try performRequest(request as URLRequest)
-		#endif
+		return try performRequest(request)
 	}
 	
 	func post(_ url: String, _ data: [String:Any]) throws -> (Data, HTTPURLResponse) {
 		guard let nsUrl = URL(string: url) else {
 			throw RequestError.invalidURL(url: url)
 		}
-		let request = NSMutableURLRequest(url: nsUrl)
+		var request = URLRequest(url: nsUrl)
 		request.httpMethod = "POST"
 		request.httpBody = String(urlParameters: data).data(using: String.Encoding.utf8)
 		request.setValue(String(request.httpBody?.count ?? 0), forHTTPHeaderField: "Content-Length")
 		request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type" )
-		#if os(Linux)
-			return try performRequest(request._bridgeToSwift())
-		#else
-			return try performRequest(request as URLRequest)
-		#endif
+		return try performRequest(request)
 	}
 	
 	enum APIError: Error {
