@@ -48,7 +48,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 	
 	var session: URLSession!
 	
-	var cookieStorage: HTTPCookieStorage
+	//var cookieStorage: HTTPCookieStorage
 	
 	var loggedIn = false
 	
@@ -260,7 +260,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		self.host = host
 		
 		let configuration =  URLSessionConfiguration.default
-		cookieStorage = configuration.httpCookieStorage!
+		//cookieStorage = configuration.httpCookieStorage!
 		
 		super.init()
 		
