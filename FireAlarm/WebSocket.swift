@@ -1207,6 +1207,9 @@ private class InnerWebSocket: Hashable {
 	private func findEnd(_ _haystack: UnsafeRawPointer, _ haystacklen: Int) -> (UnsafeRawPointer?, Int) {
 		let end : [UInt8] = [ 0x0D, 0x0A, 0x0D, 0x0A ]
 		let haystack = _haystack.bindMemory(to: UInt8.self, capacity: haystacklen)
+		guard haystacklen >= 4 else {
+			return (nil, 0)
+		}
 		for i in 0..<(haystacklen-4) {
 			if haystack[i] == end[0] && haystack[i+1] == end[1] && haystack[i+2] == end[2] && haystack[i+3] == end[3] {
 				return (UnsafeRawPointer(haystack.advanced(by: i)), i)
