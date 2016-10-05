@@ -158,13 +158,23 @@ open class Client: NSObject, URLSessionDataDelegate {
 		
 		queue.async {
 			
-			self.session.uploadTask(
-				with: request,
-				from: String(urlParameters: data).data(using: String.Encoding.utf8),
-				completionHandler: {inData, inResp, inError in
-					(responseData, resp, error) = (inData, inResp, inError as NSError!)
-					sema.signal()
-			}) .resume()
+			#if os(Linux)
+				self.session.uploadTask(
+					with: request,
+					fromData: String(urlParameters: data).data(using: String.Encoding.utf8),
+					completionHandler: {inData, inResp, inError in
+						(responseData, resp, error) = (inData, inResp, inError as NSError!)
+						sema.signal()
+				}) .resume()
+			#else
+				self.session.uploadTask(
+					with: request,
+					from: String(urlParameters: data).data(using: String.Encoding.utf8),
+					completionHandler: {inData, inResp, inError in
+						(responseData, resp, error) = (inData, inResp, inError as NSError!)
+						sema.signal()
+				}) .resume()
+			#endif
 			
 		}
 		
