@@ -35,7 +35,7 @@ func + <K, V> (left: [K:V], right: [K:V]) -> [K:V] {
 	return result
 }
 
-//http://stackoverflow.com/a/24052094/3476191
+//https://stackoverflow.com/a/24052094/3476191
 func += <K, V> (left: inout [K:V], right: [K:V]) {
 	for (k, v) in right {
 		left[k] = v
@@ -48,11 +48,59 @@ open class Client: NSObject, URLSessionDataDelegate {
 	
 	var session: URLSession!
 	
-	#if os(macOS)
-	var cookieStorage: HTTPCookieStorage
-	#endif
-	
 	var loggedIn = false
+	
+	var cookies = [HTTPCookie]()
+	
+	/*public func urlSession(_ session: URLSession,
+	didReceive challenge: URLAuthenticationChallenge,
+	completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+	completionHandler(.useCredential, nil)
+	}*/
+	
+	func addCookies(_ newCookies: [HTTPCookie]) {
+		var toAdd = newCookies
+		for i in 0..<cookies.count {	//for each existing cookie...
+			if let index = toAdd.index(where: { $0.name == cookies[i].name && $0.domain == cookies[i].domain }) {
+				//if this cookie needs to be replaced, replace it
+				cookies[index] = toAdd[index]
+				toAdd.remove(at: index)
+			}
+		}
+		cookies.append(contentsOf: toAdd)
+	}
+	
+	func cookieHost(_ host: String, matchesDomain domain: String) -> Bool {
+		let hostFields = host.components(separatedBy: ".")
+		var domainFields = domain.components(separatedBy: ".")
+		if hostFields.count == 0 || domainFields.count == 0 {
+			return false
+		}
+		
+		if domainFields.first!.isEmpty {
+			domainFields.removeFirst()
+		}
+		
+		//if the domain starts with a dot, match any host which is a subdomain of domain
+		var hostIndex = hostFields.count - 1
+		for i in (0...domainFields.count - 1).reversed() {
+			if hostIndex == 0 && i != 0 {
+				return false
+			}
+			if domainFields[i] != hostFields[hostIndex] {
+				return false
+			}
+			
+			hostIndex -= 1
+		}
+		return true
+	}
+	
+	func cookieHeaders(forURL url: URL) -> [String:String] {
+		return HTTPCookie.requestHeaderFields(with: cookies.filter {
+			cookieHost(url.host ?? "", matchesDomain: $0.domain)
+		})
+	}
 	
 	let queue = DispatchQueue(label: "Client queue", attributes: [.concurrent])
 	
@@ -108,15 +156,38 @@ open class Client: NSObject, URLSessionDataDelegate {
 		case notUTF8
 	}
 	
+	public func urlSession(
+		_ session: URLSession,
+		task: URLSessionTask,
+		willPerformHTTPRedirection response: HTTPURLResponse,
+		newRequest request: URLRequest,
+		completionHandler: @escaping (URLRequest?) -> Void) {
+		
+		var headers = [String:String]()
+		for (k, v) in response.allHeaderFields {
+			headers[String(describing: k)] = String(describing: v)
+		}
+		addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: response.url ?? URL(fileURLWithPath: "invalid")))
+		completionHandler(request)
+	}
+	
 	func performRequest(_ request: URLRequest) throws -> (Data, HTTPURLResponse) {
+		var req = request
+		
 		let sema = DispatchSemaphore(value: 0)
 		var data: Data!
 		var resp: URLResponse!
 		var error: NSError!
 		
+		let url = req.url ?? URL(fileURLWithPath: ("invalid"))
+		
+		for (key, val) in cookieHeaders(forURL: url) {
+			req.setValue(val, forHTTPHeaderField: key)
+		}
+		
 		queue.async {
 			
-			self.session.dataTask(with: request, completionHandler: {inData, inResp, inError in
+			self.session.dataTask(with: req, completionHandler: {inData, inResp, inError in
 				(data, resp, error) = (inData, inResp, inError as NSError!)
 				sema.signal()
 			}) .resume()
@@ -129,6 +200,12 @@ open class Client: NSObject, URLSessionDataDelegate {
 			print(error)
 			throw error
 		}
+		
+		var headers = [String:String]()
+		for (k, v) in response.allHeaderFields {
+			headers[String(describing: k)] = String(describing: v)
+		}
+		addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url))
 		
 		return (data, response)
 	}
@@ -150,6 +227,10 @@ open class Client: NSObject, URLSessionDataDelegate {
 		request.httpMethod = "POST"
 		//request.setValue(String(request.httpBody?.count ?? 0), forHTTPHeaderField: "Content-Length")
 		//request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type" )
+		let url = request.url ?? URL(fileURLWithPath: ("invalid"))
+		for (key, val) in cookieHeaders(forURL: url ) {
+			request.setValue(val, forHTTPHeaderField: key)
+		}
 		
 		
 		let sema = DispatchSemaphore(value: 0)
@@ -158,7 +239,6 @@ open class Client: NSObject, URLSessionDataDelegate {
 		var error: NSError!
 		
 		queue.async {
-			
 			#if os(Linux)
 				self.session.uploadTask(
 					with: request,
@@ -185,6 +265,11 @@ open class Client: NSObject, URLSessionDataDelegate {
 			print(error)
 			throw error
 		}
+		var headers = [String:String]()
+		for (k, v) in response.allHeaderFields {
+			headers[String(describing: k)] = String(describing: v)
+		}
+		addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url))
 		
 		return (responseData, response)
 	}
@@ -305,19 +390,25 @@ open class Client: NSObject, URLSessionDataDelegate {
 		self.host = host
 		
 		let configuration =  URLSessionConfiguration.default
-		#if os(Linux)
-			configuration.httpShouldSetCookies = true
-			configuration.httpCookieAcceptPolicy = .always
-		#else
-			cookieStorage = configuration.httpCookieStorage!
-		#endif
-		
 		
 		super.init()
 		
+		/*configuration.connectionProxyDictionary = [
+		"HTTPEnable" : 1,
+		kCFNetworkProxiesHTTPProxy as AnyHashable : "192.168.1.234",
+		kCFNetworkProxiesHTTPPort as AnyHashable : 8080,
+		
+		"HTTPSEnable" : 1,
+		kCFNetworkProxiesHTTPSProxy as AnyHashable : "192.168.1.234",
+		kCFNetworkProxiesHTTPSPort as AnyHashable : 8080
+		]*/
+		
+		configuration.httpCookieStorage = nil
+		//clearCookies(configuration.httpCookieStorage!)
+		
 		session = URLSession(
 			configuration: configuration,
-			delegate: nil, delegateQueue: nil
+			delegate: self, delegateQueue: nil
 		)
 		
 		//check if we're already logged in

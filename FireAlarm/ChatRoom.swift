@@ -246,9 +246,13 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 		
 		let wsURL = wsAuth["url"] as! String
 		
-		var request = URLRequest(url: URL(string: "\(wsURL)?l=\(timestamp)")!)
+		let url = URL(string: "\(wsURL)?l=\(timestamp)")!
+		var request = URLRequest(url: url)
 		
 		request.setValue("https://chat.\(client.host.rawValue)", forHTTPHeaderField: "Origin")
+		for (header, value) in client.cookieHeaders(forURL: url) {
+			request.setValue(value, forHTTPHeaderField: header)
+		}
 		
 		ws = WebSocket(request: request)
 		ws.eventQueue = client.queue

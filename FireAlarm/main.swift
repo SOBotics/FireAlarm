@@ -17,9 +17,9 @@ let commands: [Command.Type] = [
 ]
 
 //HTML-entity decoding extension by Martin R
-//http://stackoverflow.com/a/30141700/3476191
+//https://stackoverflow.com/a/30141700/3476191
 // Mapping from XML/HTML character entity reference to character
-// From http://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
+// From https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
 private let characterEntities : [ String : Character ] = [
 	// XML predefined entities:
 	"&quot;"    : "\"",
@@ -294,9 +294,9 @@ func main() throws {
 		}
 		catch {
 			print("Login failed with error \(error).\nClearing cookies and retrying.")
-			#if os(macOS)
-			clearCookies(client.cookieStorage)
-			#endif
+			//#if os(macOS)
+			//clearCookies(client.cookieStorage)
+			//#endif
 			do {
 				try client.loginWithEmail(email, password: password)
 			}
