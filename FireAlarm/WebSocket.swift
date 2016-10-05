@@ -1795,7 +1795,7 @@ open class WebSocket: NSObject {
         ws = InnerWebSocket(request: request, subProtocols: subProtocols, stub: !hasURL)
         super.init()
         // weak/strong pattern from:
-        // http://stackoverflow.com/a/17105368/424124
+        // https://stackoverflow.com/a/17105368/424124
         // https://dhoerl.wordpress.com/2013/04/23/i-finally-figured-out-weakself-and-strongself/
         ws.eclose = { [weak self] in
             if let strongSelf = self {
