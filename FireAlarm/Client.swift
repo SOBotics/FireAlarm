@@ -58,8 +58,16 @@ open class Client: NSObject, URLSessionDataDelegate {
 	completionHandler(.useCredential, nil)
 	}*/
 	
+	private func processCookieDomain(domain: String) -> String {
+		return URL(string: domain)?.host ?? domain
+	}
+	
 	func addCookies(_ newCookies: [HTTPCookie]) {
-		var toAdd = newCookies
+		var toAdd = newCookies.map {cookie -> HTTPCookie in
+			var properties = cookie.properties ?? [:]
+			properties[HTTPCookiePropertyKey.domain] = processCookieDomain(domain: cookie.domain)
+			return HTTPCookie(properties: properties) ?? HTTPCookie()
+		}
 		for i in 0..<cookies.count {	//for each existing cookie...
 			if let index = toAdd.index(where: { $0.name == cookies[i].name && $0.domain == cookies[i].domain }) {
 				//if this cookie needs to be replaced, replace it
