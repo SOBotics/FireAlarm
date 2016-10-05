@@ -305,7 +305,10 @@ open class Client: NSObject, URLSessionDataDelegate {
 		self.host = host
 		
 		let configuration =  URLSessionConfiguration.default
-		#if os(macOS)
+		#if os(Linux)
+			configuration.httpShouldSetCookies = true
+			configuration.httpCookieAcceptPolicy = .always
+		#else
 			cookieStorage = configuration.httpCookieStorage!
 		#endif
 		
