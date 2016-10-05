@@ -66,7 +66,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		var toAdd = newCookies.map {cookie -> HTTPCookie in
 			var properties = cookie.properties ?? [:]
 			properties[HTTPCookiePropertyKey.domain] = processCookieDomain(domain: cookie.domain)
-			return HTTPCookie(properties: properties) ?? HTTPCookie()
+			return HTTPCookie(properties: properties) ?? cookie
 		}
 		for i in 0..<cookies.count {	//for each existing cookie...
 			if let index = toAdd.index(where: { $0.name == cookies[i].name && $0.domain == cookies[i].domain }) {
