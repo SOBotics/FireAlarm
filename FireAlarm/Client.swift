@@ -167,7 +167,11 @@ open class Client: NSObject, URLSessionDataDelegate {
 		for (k, v) in response.allHeaderFields {
 			headers[String(describing: k)] = String(describing: v)
 		}
-		addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: response.url ?? URL(fileURLWithPath: "invalid")))
+		#if os(Linux)
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: response.url ?? URL(fileURLWithPath: "invalid")))
+		#else
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: response.url ?? URL(fileURLWithPath: "invalid")))
+		#endif
 		completionHandler(request)
 	}
 	
@@ -205,7 +209,11 @@ open class Client: NSObject, URLSessionDataDelegate {
 		for (k, v) in response.allHeaderFields {
 			headers[String(describing: k)] = String(describing: v)
 		}
-		addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url))
+		#if os(Linux)
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url))
+		#else
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url))
+		#endif
 		
 		return (data, response)
 	}
@@ -269,7 +277,11 @@ open class Client: NSObject, URLSessionDataDelegate {
 		for (k, v) in response.allHeaderFields {
 			headers[String(describing: k)] = String(describing: v)
 		}
-		addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url))
+		#if os(Linux)
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url))
+		#else
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url))
+		#endif
 		
 		return (responseData, response)
 	}
