@@ -147,10 +147,34 @@ open class Client: NSObject, URLSessionDataDelegate {
 		}
 		var request = URLRequest(url: nsUrl)
 		request.httpMethod = "POST"
-		request.httpBody = String(urlParameters: data).data(using: String.Encoding.utf8)
-		request.setValue(String(request.httpBody?.count ?? 0), forHTTPHeaderField: "Content-Length")
-		request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type" )
-		return try performRequest(request)
+		//request.setValue(String(request.httpBody?.count ?? 0), forHTTPHeaderField: "Content-Length")
+		//request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type" )
+		
+		
+		let sema = DispatchSemaphore(value: 0)
+		var responseData: Data!
+		var resp: URLResponse!
+		var error: NSError!
+		
+		queue.async {
+			
+			self.session.uploadTask(
+				with: request,
+				from: String(urlParameters: data).data(using: String.Encoding.utf8),
+				completionHandler: {inData, inResp, inError in
+					(responseData, resp, error) = (inData, inResp, inError as NSError!)
+					sema.signal()
+			}) .resume()
+			
+		}
+		
+		sema.wait()
+		
+		guard let response = resp as? HTTPURLResponse , responseData != nil else {
+			throw error
+		}
+		
+		return (responseData, response)
 	}
 	
 	enum APIError: Error {
