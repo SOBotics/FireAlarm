@@ -25,17 +25,19 @@ void lowercase (char *str)
 
 void removeSpaces(char* source)
 {
-  char* i = source;
-  char* j = source;
-  while(*j != 0)
-  {
-    *i = *j++;
-    if(*i != ' ')
-      i++;
-  }
-  *i = 0;
+    if (source == NULL)
+        return;
+    char* i = source;
+    char* j = source;
+    while(*j != 0)
+    {
+        *i = *j++;
+        if(*i != ' ')
+            i++;
+    }
+    *i = 0;
 
-  return;
+    return;
 }
 
 int isTagProgrammingRelated (char *tag)
@@ -267,5 +269,35 @@ unsigned isStringContainingNumbers2 (char *str)
     }
 
     return 1;
+}
+
+unsigned isFileEmpty (FILE *file)
+{
+    fseek(file, 0, SEEK_END);
+    unsigned long len = (unsigned long)ftell(file);
+    if (len > 0)
+        return 0;
+    else
+        return 1;
+}
+
+void removeAllChars (char *str)
+{
+     unsigned i = 0, j = 0;
+     char *temp = malloc (sizeof (char) * 100);
+while (i != strlen (str))
+{
+    if ((str[i] >= 48) && (str[i] <= 57))
+    {
+        temp[j] = str[i];
+        i++;
+        j++;
+    }
+    else
+    {
+        i++;
+    }
+}
+str = temp;
 }
 

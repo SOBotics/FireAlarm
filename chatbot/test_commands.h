@@ -30,10 +30,26 @@ void testArgCallback(RunningCommand *command, void *ctx) {
 
 void test2Callback(RunningCommand *command, void *ctx) {
     puts("Test 2");
-    sleep(10);
+    ChatBot *bot = ctx;
+    char *str;
+    asprintf (&str, "bot->reportsUntilAnalysis is %d", bot->reportsUntilAnalysis);
+    postMessage (bot->room, str);
+    free (str);
+    return;
 }
 
+void getTagsTest (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    unsigned long postID = strtol (command->argv [0], NULL, 10);
 
+    char **tags = getTagsByID (bot, postID);
+    char *str;
+    asprintf (&str, "The tags are: %s %s %s", tags [0], tags [1], tags [2]);
+    postMessage (bot->room, str);
+    free (str);
+    return;
+}
 
 
 

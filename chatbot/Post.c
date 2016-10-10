@@ -17,14 +17,15 @@ Post *createPost(const char *title, const char *body, unsigned long postID, unsi
     Post *p = malloc(sizeof(Post));
     p->title = malloc(strlen(title) + 1);
     strcpy(p->title, title);
-    
+
     p->body = malloc(strlen(body) + 1);
     strcpy(p->body, body);
-    
+    //printf ("In function 'createPost'.. Body is %s\n", p->body);
+
     p->postID = postID;
     p->isAnswer = isAnswer;
     p->userID = userID;
-    
+
     return p;
 }
 
@@ -35,37 +36,37 @@ void deletePost(Post *p) {
 }
 
 int getCloseVotesByID (ChatBot *bot, unsigned long postID) {
-    
+
     pthread_mutex_lock(&bot->room->clientLock);
     CURL *curl = bot->room->client->curl;
-    
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
     OutBuffer buffer;
     buffer.data = NULL;
     checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
-    
+
     curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip, deflate");
-    
+
     unsigned max = 256;
     char request [max];
-    
+
     snprintf (request, max,
               "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=%s",
               postID, bot->apiFilter);
-              
+
     curl_easy_setopt(curl, CURLOPT_URL, request);
-    
+
     checkCURL(curl_easy_perform(curl));
-    
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
-    
-    
+
+
     pthread_mutex_unlock(&bot->room->clientLock);
-    
+
     cJSON *json = cJSON_Parse(buffer.data);
-    
+
     free(buffer.data);
-    
+
     if (!json || cJSON_GetObjectItem(json, "error_id")) {
         if (json) {
             cJSON_Delete(json);
@@ -73,7 +74,7 @@ int getCloseVotesByID (ChatBot *bot, unsigned long postID) {
         puts("Error fetching post!");
         return 0;
     }
-    
+
     cJSON *backoff;
     if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
         char *str;
@@ -81,46 +82,46 @@ int getCloseVotesByID (ChatBot *bot, unsigned long postID) {
         postMessage(bot->room, str);
         free(str);
     }
-    
+
     int cvCount = cJSON_GetObjectItem (json, "close_vote_count")->valueint;
-    
+
     cJSON_Delete (json);
-    
+
     return cvCount;
 }
 
 int isPostClosed (ChatBot *bot, unsigned long postID) {
-    
+
     pthread_mutex_lock(&bot->room->clientLock);
     CURL *curl = bot->room->client->curl;
-    
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
     OutBuffer buffer;
     buffer.data = NULL;
     checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
-    
+
     curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip, deflate");
-    
+
     unsigned max = 256;
     char request [max];
-    
+
     snprintf (request, max,
               "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=%s",
               postID, bot->apiFilter);
-              
+
     curl_easy_setopt(curl, CURLOPT_URL, request);
-    
+
     checkCURL(curl_easy_perform(curl));
-    
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
-    
-    
+
+
     pthread_mutex_unlock(&bot->room->clientLock);
-    
+
     cJSON *json = cJSON_Parse(buffer.data);
-    
+
     free(buffer.data);
-    
+
     if (!json || cJSON_GetObjectItem(json, "error_id")) {
         if (json) {
             cJSON_Delete(json);
@@ -128,7 +129,7 @@ int isPostClosed (ChatBot *bot, unsigned long postID) {
         puts("Error fetching post!");
         return 0;
     }
-    
+
     cJSON *backoff;
     if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
         char *str;
@@ -136,11 +137,11 @@ int isPostClosed (ChatBot *bot, unsigned long postID) {
         postMessage(bot->room, str);
         free(str);
     }
-    
+
     char *closedReason = cJSON_GetObjectItem (json, "closed_reason")->valuestring;
-    
+
     cJSON_Delete (json);
-    
+
     if (closedReason == NULL)
     {
         return 0;
@@ -157,45 +158,45 @@ char *getClosedReasonByID (ChatBot *bot, unsigned long postID)
     {
         return NULL;
     }
-    
+
     pthread_mutex_lock(&bot->room->clientLock);
     CURL *curl = bot->room->client->curl;
-    
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
     OutBuffer buffer;
     buffer.data = NULL;
     checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
-    
+
     curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip, deflate");
-    
+
     unsigned max = 256;
     char request [max];
-    
+
     snprintf (request, max,
               "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=%s",
               postID, bot->apiFilter);
-    
+
     curl_easy_setopt(curl, CURLOPT_URL, request);
-    
+
     checkCURL(curl_easy_perform(curl));
-    
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
-    
-    
+
+
     pthread_mutex_unlock(&bot->room->clientLock);
-    
+
     cJSON *json = cJSON_Parse(buffer.data);
-    
+
     free(buffer.data);
-    
+
     curl_easy_setopt(curl, CURLOPT_URL, request);
-    
+
     checkCURL(curl_easy_perform(curl));
-    
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
-    
+
     free(buffer.data);
-    
+
     if (!json || cJSON_GetObjectItem(json, "error_id")) {
         if (json) {
             cJSON_Delete(json);
@@ -203,7 +204,7 @@ char *getClosedReasonByID (ChatBot *bot, unsigned long postID)
         puts("Error fetching post!");
         return 0;
     }
-    
+
     cJSON *backoff;
     if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
         char *str;
@@ -211,8 +212,8 @@ char *getClosedReasonByID (ChatBot *bot, unsigned long postID)
         postMessage(bot->room, str);
         free(str);
     }
-    
+
     char *closedReason = cJSON_GetObjectItem (json, "closed_reason")->valuestring;
-    
+
     return closedReason;
 }

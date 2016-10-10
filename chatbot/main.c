@@ -25,6 +25,7 @@
 #include "Filter.h"
 #undef Client_h
 #include "Client.h"
+#include "Logs.h"
 
 #define SAVE_INTERVAL 60
 //long postMessage = 1;
@@ -186,7 +187,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
     }*/
 
 
-    postReply(bot->room, message, command->message);
+    //postReply(bot->room, message, command->message);
 
     free(str);
     free (message);
@@ -200,6 +201,7 @@ void webSocketOpened(WebSocket *ws) {
 
 void wsRecieved(WebSocket *ws, char *data, size_t len) {
     cJSON *json = cJSON_Parse(data);
+    printf ("\n%s\n", data);
     cJSON *post = cJSON_Parse(cJSON_GetObjectItem(json, "data")->valuestring);
     if (strcmp(cJSON_GetObjectItem(post, "apiSiteParameter")->valuestring, "stackoverflow")) {
         //if this isn't SO
@@ -220,10 +222,104 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     cJSON_Delete(post);
 }
 
+Log **loadLogs ()
+{
+    puts ("Loading Logs...");
+    FILE *file = fopen ("logs.json", "r");
+    if (!file || isFileEmpty (file))
+    {
+        puts ("Could not read from ~/.chatbot/logs.json. Returning an empty lost...");
+        Log **logs = malloc (sizeof (Log*));
+        *logs = NULL;
+        return logs;
+    }
+
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+
+    char *buf = malloc(size+1);
+    fread(buf, size, 1, file);
+    buf[size] = 0;
+
+    cJSON *json = cJSON_Parse (buf);
+    free (buf);
+
+    unsigned total = cJSON_GetArraySize(json);
+    Log **logs = malloc (sizeof (Log*) * (total + 1));
+
+    for (unsigned i = 0; i < total; i ++)
+    {
+        cJSON *log = cJSON_GetArrayItem (json, i);
+
+        unsigned type = cJSON_GetObjectItem (log, "type")->valueint;
+        char *funcCaller = cJSON_GetObjectItem (log, "caller")->valuestring;
+        char *location = cJSON_GetObjectItem (log, "location")->valuestring;
+        size_t size = (size_t) cJSON_GetObjectItem (log, "size")->valueint;
+        unsigned key = cJSON_GetObjectItem (log, "key")->valueint;
+        char *time = cJSON_GetObjectItem (log, "time")->valuestring;
+        char *message = cJSON_GetObjectItem (log, "message")->valuestring;
+
+        logs [i] = createLog (type, funcCaller, location, size, key, message, time);
+    }
+
+    logs [total] = NULL;
+    cJSON_Delete (json);
+    fclose (file);
+
+    return logs;
+}
+
+void saveLogs (Log **logs, unsigned totalLogs)
+{
+    FILE *file = fopen ("logs.json", "w");
+    printf ("bot->totalLogs is %d\n", totalLogs);
+
+    if (!file)
+    {
+        fputs ("Falied to open ~/.chatbot/logs.json/!", stderr);
+        return;
+    }
+
+    if (logs == NULL)
+        return;
+
+    puts ("saving..");
+
+    cJSON *json = cJSON_CreateArray ();
+
+    for (unsigned i = 0; i < totalLogs; i ++)
+    {
+        Log *log = logs [i];
+        cJSON *object = cJSON_CreateObject ();
+
+        cJSON_AddItemToObject (object, "type", cJSON_CreateNumber (log->type));
+        cJSON_AddItemToObject (object, "caller", cJSON_CreateString (log->funcCaller));
+        cJSON_AddItemToObject (object, "location", cJSON_CreateString (log->location));
+        cJSON_AddItemToObject (object, "size", cJSON_CreateNumber (log->size));
+        cJSON_AddItemToObject (object, "key", cJSON_CreateNumber (log->key));
+        cJSON_AddItemToObject (object, "time", cJSON_CreateString (log->time));
+        cJSON_AddItemToObject (object, "message", cJSON_CreateString (log->message));
+
+        cJSON_AddItemToArray (json, object);
+    }
+
+    char *str = cJSON_Print (json);
+    cJSON_Delete (json);
+
+    fwrite(str, strlen(str), 1, file);
+
+    fclose(file);
+
+    free(str);
+
+    return;
+}
+
 Filter **loadFilters() {
     puts("Loading filters...");
-    FILE *file = fopen("../FireAlarm/filters.json", "r");
-    if (!file) {
+    FILE *file = fopen("filters.json", "r");
+    if (!file || isFileEmpty (file)) {
         puts("Could not read from ~/.chatbot/filters.json.  Creating a skeleton filter list.");
         Filter **filters = malloc(sizeof(Filter*) * 2);
         filters[0] = createFilter(
@@ -605,6 +701,8 @@ void saveReports(Report *reports[], int reportsUntilAnalysis) {
 
 int main(int argc, const char * argv[]) {
     // insert code here...
+    reboot:
+
     puts("Starting...");
 #ifdef DEBUG
     puts("Debug mode is active.  Messages will not be posted to the chat room.");
@@ -652,7 +750,7 @@ int main(int argc, const char * argv[]) {
             email[maxEmailLen-1] = 0;   //make sure it's null terminated
 
             char *password = getpass("Password: ");
-            char *password = malloc (sizeof (char) * 50);
+            //char *password = malloc (sizeof (char) * 50);
             loginWithEmailAndPassword(client, email, password);
             //overwrite the password so it doesn't stay in memory
             memset(password, 0, strlen(password));
@@ -665,7 +763,7 @@ int main(int argc, const char * argv[]) {
 
     //ChatRoom *roomPostTrue = createChatRoom (client, 773); //773 is room number of LQPHQ
 
-    ChatRoom *room = createChatRoom(client, 68414); // 68414 is room number of SOCVR Testing Facility
+    ChatRoom *room = createChatRoom(client, 123602); // 68414 is room number of SOCVR Testing Facility
 
     enterChatRoom(room);
     //enterChatRoom (roomPostTrue);
@@ -676,13 +774,14 @@ int main(int argc, const char * argv[]) {
     PrivRequest **requests = loadPrivRequests();
     Modes *modes = createMode (1, 1, 1, 1);
     Notify **notify = loadNotifications ();
+    Log **logs = loadLogs ();
 
     Command *commands[] = {
         createCommand("I can put anything I want here; the first command runs when no other commands match", 0, unrecognizedCommand),
         createCommand("test1", 0, test1Callback),
         createCommand("test1 test2 ...", 0, testVarCallback),
         createCommand("test1 * test3", 0, testArgCallback),
-        createCommand("test2 test3", 0, test2Callback),
+        createCommand("test", 0, test2Callback),
         createCommand("running commands", 0, listCommands),
         createCommand("stop", 2, stopBot),
         createCommand("reboot", 1, rebootBot),
@@ -737,7 +836,7 @@ int main(int argc, const char * argv[]) {
         createCommand("unclosed t", 0, printUnclosedTP),
         createCommand("unclosed tp", 0, printUnclosedTP),
         createCommand("unclosed true", 0, printUnclosedTP),
-        //createCommand("api quota", 0, apiQuota),
+        createCommand("api quota", 0, printApiQuota),
         createCommand("filter modify threshold *", 2, modifyFilterThreshold),
         createCommand("filter add keyword * * *", 2, addKeywordToFilter),
         createCommand("filter add tag * * *", 2, addTagToFilter),
@@ -749,9 +848,13 @@ int main(int argc, const char * argv[]) {
         createCommand("filter view accuracy * *", 0, printAccuracyOfFilter),
         createCommand("filter view reports * ... ...", 0, printReportsByFilter),
         createCommand("filter view filters", 0, printFilters),
+        createCommand("get posts", 0, manualGetPosts),
+        createCommand("error logs", 0, printErrorLogs),
+        createCommand("clear error logs", 2, clearErrorLogs),
+        createCommand("get tags *", 0, getTagsTest),
         NULL
     };
-    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify);
+    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify, logs);
 
 
     WebSocket *socket = createWebSocketWithClient(client);
@@ -763,6 +866,8 @@ int main(int argc, const char * argv[]) {
 
     puts("Fire Alarm started.");
     postMessage (bot->room, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started.");
+    registerError (bot, "main.c/main", "test error", "main");
+    registerError (bot, "main.c/main", "test error 2", "main");
 
     unsigned char reboot = 0;
     time_t saveTime = time(NULL) + SAVE_INTERVAL;
@@ -794,6 +899,7 @@ int main(int argc, const char * argv[]) {
     saveReports(bot->latestReports, bot->reportsUntilAnalysis);
     savePrivRequests(bot->privRequests, bot->totalPrivRequests);
     saveNotifications (bot->notify, bot->totalNotifications);
+    saveLogs (bot->log, bot->totalLogs);
 
     puts("Waiting (to allow networking to finish)...");
     sleep(5);   //give background threads a bit of time
@@ -801,7 +907,10 @@ int main(int argc, const char * argv[]) {
     curl_easy_cleanup(client->curl);
 
     if (reboot) {
-        execv(argv[0], (char*const*)argv);  //Reload the program.
+        //execv(argv[0], (char*const*)argv);  //Reload the program.
+        //goto reboot;
+        sleep (5);
+        system ("valgrind ../FireBackup/./firealarm");
     }
 
     return 0;

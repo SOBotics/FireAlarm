@@ -15,5 +15,6 @@
 #include "post_commands.h"
 #include "priv_commands.h"
 #include "mode_commands.h"
+#include "log_commands.h"
 
 #endif /* commands_h */

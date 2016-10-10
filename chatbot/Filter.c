@@ -53,6 +53,11 @@ unsigned char matchRegexFilter(Post *post, Filter *f, unsigned *outStart, unsign
 
 unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsigned *outStart, unsigned *outEnd) {
     unsigned titleLength;
+    /*if (post->body == NULL)
+    {
+        puts ("In 'postMacthesFilter'.. post->body is NULL!\n");
+        return 0;
+    }*/
     switch (filter->type) {
         case FILTER_TEXT:
             ;char *start = strstr(post->body, filter->filter);
@@ -65,7 +70,32 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
         case FILTER_REGEX:
             return matchRegexFilter(post, filter, outStart, outEnd);
         case FILTER_SHORTBODY:
-            return strlen(post->body) < 500;
+            /*if (post == NULL)
+            {
+                puts ("Post is NULL!\n");
+                return 0;
+            }*/
+            /*if (post->body == NULL)
+            {
+                printf ("post body is NULL!\n");
+                return 0;
+            }
+            for (unsigned i = 0; i < 202; i ++)
+            {
+                if (post->body [i] == '\0')
+                {
+                    return 1;
+                }
+            }
+            return 0;*/
+            //printf ("\nPost length: %ld\n", strlen (post->body));
+            //printf ("Post body is %s\n", post->body);
+            //return strlen(post->body) < 500;
+            if (strlen (post->body) < 500)
+            {
+                return 1;
+            }
+            return 0;
         case FILTER_TAG:
             return matchTagFilter (bot, post, filter);
         case FILTER_CAPS:

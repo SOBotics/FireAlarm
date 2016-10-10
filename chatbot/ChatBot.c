@@ -19,6 +19,7 @@
 #include "misc_functions.h"
 #include "Client.h"
 #include "Filter.h"
+//#include "Logs.h"
 
 #define REPORT_HEADER "Potentially bad question"
 //#define THRESHOLD 1000
@@ -320,7 +321,8 @@ ChatBot *createChatBot(
                        PrivUser **users,
                        PrivRequest **requests,
                        Modes *modes,
-                       Notify **notify
+                       Notify **notify,
+                       Log **logs
                        ) {
     ChatBot *c = malloc(sizeof(ChatBot));
     c->room = room;
@@ -342,6 +344,8 @@ ChatBot *createChatBot(
     c->totalPrivRequests = 0;
     c->notify = NULL;
     c->totalNotifications = 0;
+    c->log = NULL;
+    c->totalLogs = 0;
 
     c->reportsWaiting = -1;
 
@@ -365,6 +369,11 @@ ChatBot *createChatBot(
     while (*(users++)) {
         c->privUsers = realloc(c->privUsers, ++c->numOfPrivUsers * sizeof(PrivUser*));
         c->privUsers[c->numOfPrivUsers-1] = *(users - 1);
+    }
+
+    while (*(logs++)) {
+        c->log = realloc(c->log, ++c->totalLogs * sizeof(Log*));
+        c->log[c->totalLogs-1] = *(logs - 1);
     }
 
     Report **reports = parseReports(c, latestReports);
@@ -503,7 +512,9 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
         char *str;
         asprintf(&str, "Recieved backoff: %d", backoff->valueint);
         postMessage(bot->room, str);
+        //sleep (backoff->valueint);
         free(str);
+        //return getPostByID (bot, postID);
     }
 
     cJSON *postJSON = cJSON_GetArrayItem(cJSON_GetObjectItem(json, "items"), 0);
@@ -532,8 +543,22 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
     {
         return 0;
     }*/
-
-    printf ("Checking post: %lu\n", post->postID);
+    if (post == NULL)
+    {
+        puts ("\nNULL post!\n");
+        return 0;
+    }
+    /*else if (post->body == NULL)
+    {
+        puts ("Post->body is NULL!");
+        return 0;
+    }*/
+    //else if (post->isAnswer == 1)
+   /* {
+        puts ("Checking answer :p\n");
+        return 0;
+    }*/
+    //printf ("Checking post: %lu\n", post->postID);
 
     unsigned likelihood = 0;
     unsigned bodyLength = 1;
@@ -546,6 +571,8 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
     {
         for (int i = 0; i < bot->filterCount; i++) {
             unsigned start, end;
+            if (bot->filters[i]->type != 2)
+            {
             if (postMatchesFilter(bot, post, bot->filters[i], &start, &end)) {
 
                 const char *desc = bot->filters[i]->desc;
@@ -558,6 +585,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
                 const float truePositives = bot->filters[i]->truePositives;
                 likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
             }
+            }
         }
     }
 
@@ -569,28 +597,28 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         }
     }*/
 
-    printf ("Post %lu likelihood: %u\n", post->postID, likelihood);
+    //printf ("Post %lu likelihood: %u\n", post->postID, likelihood);
 
     if (likelihood > THRESHOLD && (recentlyReported (post->postID, bot) == 0)) {
-        puts ("Preparing report...\n");
+        //puts ("Preparing report...\n");
         //char *notifString = getNotificationString(bot, post);
-        puts ("Completed line 576.");
+        //puts ("Completed line 576.");
         const size_t maxMessage = strlen(messageBuf) + strlen(post->title) + strlen(REPORT_HEADER) + 256;
-        puts ("Completed line 578.");
+        //puts ("Completed line 578.");
         char *message = malloc(maxMessage);
-        puts ("Completed line 580.");
+       // puts ("Completed line 580.");
         //char *notif = getNotificationString(bot, post);
-        puts ("Completed line 582.");
+        //puts ("Completed line 582.");
         snprintf(message, maxMessage,
                  REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) ",
                  messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood);
-        puts ("Completed preparing report.");
+        //puts ("Completed preparing report.");
         //free(notif);
         //if (notifString != NULL)
             //free (notifString);
-        puts ("Posting report...");
+        //puts ("Posting report...");
         postMessage(bot->room, message);
-            puts ("Posted report.");
+            //puts ("Posted report.");
 
         if (bot->latestReports[REPORT_MEMORY-1]) {
             free(bot->latestReports[REPORT_MEMORY-1]->post);
@@ -682,6 +710,134 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         free (messageBuf);
         return 1;
     }*/
+    free (messageBuf);
+}
+
+Post **getPosts (ChatBot *bot, int *total)
+{
+    pthread_mutex_lock(&bot->room->clientLock);
+    CURL *curl = bot->room->client->curl;
+
+    checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
+    OutBuffer buffer;
+    buffer.data = NULL;
+    checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
+
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip, deflate");
+
+    if (bot->apiFilter == NULL) {
+        checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
+                                   "api.stackexchange.com/2.2/filters/create"
+                                   "?include=post.title;post.body;question.tags;user.user_id;question.closed_reason;user.display_name&unsafe=false&key="API_KEY
+                                   ));
+        checkCURL(curl_easy_perform(curl));
+
+        cJSON *JSON = cJSON_Parse(buffer.data);
+        free(buffer.data);
+        buffer.data = NULL;
+
+        cJSON *items = cJSON_GetObjectItem(JSON, "items");
+        char *filter = cJSON_GetObjectItem(cJSON_GetArrayItem(items, 0), "filter")->valuestring;
+        bot->apiFilter = malloc(strlen(filter) + 1);
+        strcpy(bot->apiFilter, filter);
+        cJSON_Delete(JSON);
+    }
+
+    unsigned max = 256;
+    char request[max];
+    snprintf(request, max,
+             "https://api.stackexchange.com/2.2/posts?pagesize=50&order=desc&sort=activity&filter=%s&site=stackoverflow&key="API_KEY,
+             bot->apiFilter
+             );
+    curl_easy_setopt(curl, CURLOPT_URL, request);
+
+
+
+    checkCURL(curl_easy_perform(curl));
+
+    checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
+
+
+    pthread_mutex_unlock(&bot->room->clientLock);
+
+    cJSON *json = cJSON_Parse(buffer.data);
+
+    free(buffer.data);
+    //puts (cJSON_Print (json));
+
+    if (!json || cJSON_GetObjectItem(json, "error_id")) {
+        if (json) {
+            cJSON_Delete(json);
+        }
+        puts("Error fetching post!");
+        return NULL;
+    }
+
+    cJSON *backoff;
+    if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
+        char *str;
+        asprintf(&str, "Recieved backoff: %d", backoff->valueint);
+        postMessage(bot->room, str);
+        sleep (backoff->valueint + 5);
+        free(str);
+    }
+
+    cJSON *item = cJSON_GetObjectItem (json, "items");
+    /*if (postsJSON == NULL)
+    {
+        printf ("postJSON is NULL!");
+        cJSON_Delete (json);
+        return NULL;
+    }*/
+
+    unsigned totalPosts = cJSON_GetArraySize(item);
+    //unsigned totalPosts = 10;
+    Post **posts = malloc(sizeof(Post*) * (50 + 1));
+    posts = NULL;
+    unsigned i;
+
+    for (i = 0; i < 49; i ++)
+    {
+        //cJSON *postJSON = cJSON_GetArrayItem (postsJSON, i);
+        /*char *title = cJSON_GetObjectItem(cJSON_GetArrayItem (item, i), "title")->valuestring;
+        char *body = cJSON_GetObjectItem(cJSON_GetArrayItem (item, i), "body")->valuestring;
+       // printf ("'body' is %s\n", body);
+        char *type = cJSON_GetObjectItem(cJSON_GetArrayItem (item, i), "post_type")->valuestring;
+        //unsigned userID = cJSON_GetObjectItem(cJSON_GetObjectItem(cJSON_GetArrayItem (item, i), "owner"), "user_id")->valueint;
+        */
+        cJSON *current = cJSON_GetArrayItem (item, i);
+        if (current == NULL)
+        {
+            total = totalPosts;
+
+    cJSON_Delete (json);
+    cJSON_Delete (item);
+
+    return posts;
+        }
+        unsigned long postID = cJSON_GetObjectItem (cJSON_GetArrayItem (item, i), "post_id")->valueint;
+        totalPosts = i;
+        /*cJSON *current = cJSON_GetArrayItem (item, i);
+        unsigned userID = cJSON_GetObjectItem (cJSON_GetObjectItem (current, "owner"), "user_id")->valueint;
+
+        posts [i] = createPost(title, body, postID, strcmp(type, "answer") == 0, userID);*/
+        posts [i] = getPostByID (bot, postID);
+        if (posts [i] == NULL)
+        {
+            total = totalPosts;
+
+            cJSON_Delete (json);
+            cJSON_Delete (item);
+
+            return posts;
+        }
+    }
+    total = totalPosts;
+
+    cJSON_Delete (json);
+    cJSON_Delete (item);
+
+    return posts;
 }
 
 void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed) {
@@ -928,18 +1084,22 @@ char *getUsernameByID (ChatBot *bot, unsigned long userID)
             free(str);
         }
 
-        char *username = cJSON_GetObjectItem (json, "display_name")->valuestring;
+        cJSON *userJSON = cJSON_GetArrayItem(cJSON_GetObjectItem(json, "items"), 0);
+        if (userJSON == NULL) {
+            cJSON_Delete(json);
+            return NULL;
+        }
+
+        char *username = cJSON_GetObjectItem (userJSON, "display_name")->valuestring;
 
         cJSON_Delete (json);
 
         if (username == NULL)
         {
-            return 0;
+            return NULL;
         }
         return username;
-    //}
 
-    return NULL;
 }
 
 char **getTagsByID (ChatBot *bot, unsigned long postID)
@@ -958,8 +1118,10 @@ char **getTagsByID (ChatBot *bot, unsigned long postID)
     char request [max];
 
     snprintf (request, max,
-              "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=%s",
-              postID, bot->apiFilter);
+              "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=default",
+              postID);
+
+    printf ("API request is %s\n", request);
 
     curl_easy_setopt(curl, CURLOPT_URL, request);
 
@@ -971,6 +1133,7 @@ char **getTagsByID (ChatBot *bot, unsigned long postID)
     pthread_mutex_unlock(&bot->room->clientLock);
 
     cJSON *json = cJSON_Parse(buffer.data);
+    puts (buffer.data);
 
     free(buffer.data);
 
@@ -989,14 +1152,23 @@ char **getTagsByID (ChatBot *bot, unsigned long postID)
         postMessage(bot->room, str);
         free(str);
     }
-    char **tags = malloc (sizeof (char) * 256);
+    cJSON *tagJSON = cJSON_GetArrayItem (json, "tags");
+    //unsigned size = cJSON_GetArraySize (tagJSON);
+    unsigned size = 3;
+    char **tags;
+    for (unsigned i = 0; i < size; i ++)
+    {
+        tags [i] = malloc (sizeof (char) * 40);
+        //tags [i] = cJSON_GetObjectItem (tagJSON, i)->valuestring;
+        strcpy (tags [i], cJSON_GetObjectItem (tagJSON, i)->valuestring);
+    }
 
     //char **tags = cJSON_GetArrayItem (json, "tags");
 
     //char **tags = cJSON_GetObjectItem (json, "tags")->valuestring;
-    strcpy (tags [0], "java");
+    //strcpy (tags [0], "java");
 
-    cJSON_Delete (json);
+    //cJSON_Delete (json);
     return tags;
 }
 
@@ -1226,3 +1398,74 @@ Report **getReportsByFilter (ChatBot *bot, unsigned filterType, unsigned totalRe
     return reportsDetected;
 }
 
+int apiQuota (ChatBot *bot)
+{
+    pthread_mutex_lock(&bot->room->clientLock);
+    CURL *curl = bot->room->client->curl;
+
+    checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
+    OutBuffer buffer;
+    buffer.data = NULL;
+    checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
+
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip, deflate");
+
+    unsigned max = 256;
+    char request [max];
+
+    if (bot->apiFilter == NULL) {
+        checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
+                                   "api.stackexchange.com/2.2/filters/create"
+                                   "?include=post.title;post.body;question.tags;user.user_id;question.closed_reason;user.display_name&unsafe=false&key="API_KEY
+                                   ));
+        checkCURL(curl_easy_perform(curl));
+
+        cJSON *json = cJSON_Parse(buffer.data);
+        free(buffer.data);
+        buffer.data = NULL;
+
+        cJSON *items = cJSON_GetObjectItem(json, "items");
+        char *filter = cJSON_GetObjectItem(cJSON_GetArrayItem(items, 0), "filter")->valuestring;
+        bot->apiFilter = malloc(strlen(filter) + 1);
+        strcpy(bot->apiFilter, filter);
+        cJSON_Delete(json);
+    }
+
+    snprintf (request, max,
+              "api.stackexchange.com/2.2/info?site=stackoverflow&filter=%s&key="API_KEY,
+              bot->apiFilter);
+
+    curl_easy_setopt(curl, CURLOPT_URL, request);
+
+    checkCURL(curl_easy_perform(curl));
+
+    checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
+
+
+    pthread_mutex_unlock(&bot->room->clientLock);
+
+    cJSON *json = cJSON_Parse(buffer.data);
+
+    free(buffer.data);
+
+    if (!json || cJSON_GetObjectItem(json, "error_id")) {
+        if (json) {
+            cJSON_Delete(json);
+        }
+        puts("Error fetching post!");
+        return -1;
+    }
+
+    cJSON *backoff;
+    if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
+        char *str;
+        asprintf(&str, "Recieved backoff: %d", backoff->valueint);
+        postMessage(bot->room, str);
+        free(str);
+    }
+
+    int apiQuota = cJSON_GetObjectItem (json, "quota_remaining")->valueint;
+    cJSON_Delete (json);
+
+    return apiQuota;
+}

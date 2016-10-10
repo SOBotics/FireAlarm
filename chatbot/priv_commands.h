@@ -13,6 +13,8 @@ void addUserPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
 
+    PrivRequest **requests = bot->privUsers;
+
     if (command->argc != 2)
     {
         postReply (bot->room, "**Usage:** privilege user [user id] [group]", command->message);
@@ -27,6 +29,19 @@ void addUserPriv (RunningCommand *command, void *ctx)
     {
         postReply (bot->room, "Please enter a valid User ID.", command->message);
         return;
+    }
+    unsigned i;
+    //printf ("User ID is %lu\n", userID);
+    for (i = 0; i < bot->totalPrivRequests; i ++)
+    {
+        printf ("requests [%u]->userID = %lu\n", i, requests [i]->userID);
+        printf ("requests [%u]->groupType = %d\n", i, requests [i]->groupType);
+        if (requests [i]->userID == userID)
+        {
+            puts ("Deleting priv request..");
+            //postMessage (bot->room, "Deleting priv request..");
+            deletePrivRequest (bot, i);
+        }
     }
 
     PrivUser **users = bot->privUsers;
@@ -45,10 +60,17 @@ void addUserPriv (RunningCommand *command, void *ctx)
     }
 
     char *messageString;
+    char *username = getUsernameByID(bot, userID);
+    char *noSpaces = malloc (strlen (username) + 1);
+    strcpy (noSpaces, username);
+    removeSpaces (noSpaces);
 
-    asprintf (&messageString, "Added %s privileges to user ID %lu.", privType, userID);
+    asprintf (&messageString, "Added %s privileges to user %s (ID %lu) (cc @%s).", privType, username, userID, noSpaces);
 
     postReply (bot->room, messageString, command->message);
+    free (messageString);
+    free (username);
+    free (noSpaces);
 
     return;
 }
@@ -79,10 +101,17 @@ void removeUserPriv (RunningCommand *command, void *ctx)
     }
 
     char *messageString;
+    char *username = getUsernameByID (bot, userID);
+    char *noSpaces = malloc (strlen (username) + 1);
+    strcpy (noSpaces, username);
+    removeSpaces (noSpaces);
 
-    asprintf (&messageString, "Removed %s privileges from user ID %lu.", privType, userID);
+    asprintf (&messageString, "Removed %s privileges from user %s (ID %lu) (cc @%s).", privType, username, userID, noSpaces);
 
     postReply (bot->room, messageString, command->message);
+    free (messageString);
+    free (username);
+    free (noSpaces);
 
     return;
 }
@@ -168,6 +197,7 @@ void approvePrivRequest (RunningCommand *command, void *ctx)
 
     char *username = getUsernameByID(bot, requests [priv_number - 1]->userID);
     char *message;
+    removeSpaces (username);
 
     asprintf (&message, "Privilege request number %d has been approved. (cc @%s)", priv_number, username);
     //free (username);
@@ -203,6 +233,7 @@ void rejectPrivRequest (RunningCommand *command, void *ctx)
 
     char *message;
     char *username = getUsernameByID(bot, requests [priv_number - 1]->userID);
+    removeSpaces (username);
 
     asprintf (&message, "Privilege request number %d has been rejected. (cc @%s)", priv_number, username);
     free (username);
@@ -219,14 +250,24 @@ void printPrivRequests (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
 
+    if (bot->totalPrivRequests < 1)
+    {
+        postReply (bot->room, "There are no privilege requests currently.", command->message);
+        return;
+    }
+
     const size_t maxMessage = bot->totalPrivRequests * 200 + 200;
     char *message = malloc (maxMessage);
 
     postReply (bot->room, "The current privilege requests are: ", command->message);
 
     snprintf (message, maxMessage,
-              "    Request Num   |     Username    |     Privilege Request Type    \n"
-              "--------------------------------------------------------------------\n"
+              "        Request Number    |"
+              "      Username      |"
+              "    Privilege Request Type    \n"
+              "    -------------------"
+              "------------------"
+              "-------------------------------\n"
               );
 
     char *messageString = malloc (200);
@@ -238,12 +279,14 @@ void printPrivRequests (RunningCommand *command, void *ctx)
         strcpy(groupType, getPrivilegeGroups()[requests [i]->groupType]);
 
         char *username = getUsernameByID(bot, requests [i]->userID);
-        snprintf (messageString, 200,
-                  "       %d         |  %s             |        %s                     \n",
+        snprintf (message + strlen (message), 200,
+                  "              %d           |"
+                  "   %s   |"
+                  "        %6s                     \n",
                   i + 1, username, groupType);
         free(username);
 
-        sprintf (message + strlen (message), "%s", messageString);
+        //sprintf (message + strlen (message), "%s", messageString);
     }
 
     postMessage (bot->room, message);

@@ -21,13 +21,14 @@
 #include "cJSON.h"
 #include "Notifications.h"
 #include "Modes.h"
+#include "Logs.h"
 
 typedef struct _PrivUser PrivUser;
 typedef struct _PrivRequest PrivRequest;
 
 extern long THRESHOLD;
 
-#define REPORT_MEMORY 1000
+#define REPORT_MEMORY 50
 
 typedef enum {
     ACTION_NONE = 0,
@@ -59,6 +60,8 @@ typedef struct _ChatBot {
     unsigned numOfPrivUsers;
     PrivRequest **privRequests;
     unsigned totalPrivRequests;
+    Log **log;
+    unsigned totalLogs;
     Modes *modes;
     Notify **notify;
     unsigned totalNotifications;
@@ -76,7 +79,8 @@ ChatBot *createChatBot(
                        PrivUser **users,
                        PrivRequest **requests,
                        Modes *modes,
-                       Notify **notify
+                       Notify **notify,
+                       Log **logs
                        );
 StopAction runChatBot(ChatBot *chatbot);
 Post *getPostByID(ChatBot *bot, unsigned long postID);
@@ -95,5 +99,6 @@ int isValidTag (ChatBot *bot, char *tag);
 unsigned isKeywordInFilter (ChatBot *bot, char *keyword);
 Filter *getFilterByKeyword (ChatBot *bot, char *keyword);
 Report **getReportsByFilter (ChatBot *bot, unsigned filterType, unsigned totalReports);
+int apiQuota (ChatBot *bot);
 
 #endif /* ChatBot_h */

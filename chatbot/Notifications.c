@@ -131,7 +131,7 @@ char *getNotificationString (ChatBot *bot, Post *post)
     *str = 0;
 
     Notify **notify = bot->notify;
-    char **postTags = getTagsByID (bot, post->postID);
+    char **postTags = getTagsByID (bot, post->postID); //The problem lies here. The function 'getTagsByID' is not working properly..
 
     for (int i = 0; i < bot->totalNotifications; i ++)
     {

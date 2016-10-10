@@ -15,3 +15,4 @@ int postHasTags (ChatBot *bot, Post *post, char *tag);
 /* unsigned isTagInFilter (ChatBot *bot, char *tag);
 void removeChar (char *str, char c); */
 unsigned isStringContainingNumbers2 (char *str);
+unsigned isFileEmpty (FILE *file);

@@ -17,40 +17,94 @@
 void checkPostCallback(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
 
-    printf ("In function 'checkPostCallback'.");
-    long postID = strtol(command->argv[0], NULL, 10);
+    //printf ("In function 'checkPostCallback'.");
+    char *arg = removeAllChars (command->argv [0]);
+    //arg [37] = '\0';
+    arg [8] = '\0';
+    long postID = strtol(arg, NULL, 10);
     int check;
 
-    printf ("Starting first if....");
+    //printf ("Starting first if....");
     if (postID <= 0) {
         postReply(bot->room, "Please enter a number greater than 0.", command->message);
         return;
     }
-    printf ("Completed first if.");
+    //printf ("Completed first if.");
 
     Post *post = getPostByID(bot, postID);
 
-    printf ("Starting second if.");
+    //printf ("Starting second if.");
     if (post == NULL) {
         postReply(bot->room, "Please enter the ID of a valid post.", command->message);
+        char *str;
+        asprintf (&str, "The postID is %ld.", postID);
+        postMessage (bot->room, str);
+        free (str);
         return;
     }
-    printf ("Finished second if.");
+    //printf ("Finished second if.");
 
     pthread_mutex_lock(&bot->detectorLock);
-    printf ("mutex locked.");
+    //printf ("mutex locked.");
     check = checkPost(bot, post);
-    printf ("post checked.");
+    //printf ("post checked.");
     pthread_mutex_unlock(&bot->detectorLock);
 
-    printf ("mutex unlocked.");
+    //printf ("mutex unlocked.");
     /*if (check == 1)
     {
         postReply (bot->room, "The post did not match the filters.", command->message);
     }*/
 
-    printf ("finished function.");
+    //printf ("finished function.");
 
+    return;
+}
+
+void manualGetPosts (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    postReply (bot->room, "Checking posts...", command->message);
+    printf ("checking posts...");
+
+    int *totalPosts;
+    Post **posts = getPosts (bot, totalPosts);
+    unsigned i;
+
+    if (posts == NULL)
+    {
+        puts ("Posts is NULL!\n");
+        postMessage (bot->room, "Posts is NULL!");
+        return;
+    }
+
+    char *str;
+    asprintf (&str, "Total Posts is %d.", totalPosts);
+    printf ("\n%s\n", str);
+    postMessage (bot->room, str);
+    for (i = 0; i < 45; i ++)
+    {
+        printf ("\ni is %d\n", i);
+        if (posts [i] == NULL)
+        {
+            asprintf (&str, "Posts %u is NULL!", i);
+            printf ("\n%s\n", str);
+    postMessage (bot->room, str);
+    //free (str);
+    //free (posts);
+        }
+        else
+        {
+        asprintf (&str, "Manually checking post %lu.", posts [i]->postID);
+        printf ("\n%s\n", str);
+        postMessage (bot->room, str);
+        checkPost (bot, posts [i]);
+        }
+    }
+    printf ("Finished manually checking.\n");
+    postMessage (bot->room, "Finished manually checking.");
+    free (str);
+    //free (posts);
     return;
 }
 
@@ -175,7 +229,8 @@ void statistics (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
 
-    char message [200];
+    char *message = malloc (sizeof (char) * 256);
+    //registerMalloc ("registering malloc", "message", "statistics", "sizeof (char) * 256");
     unsigned int i = 0;
     unsigned int truePositives = 0;
     unsigned int falsePositives = 0;
@@ -246,6 +301,8 @@ void statistics (RunningCommand *command, void *ctx)
              numStats, truePositives, falsePositives, unconfirmed, accuracy);
 
     postReply (bot->room, message, command->message);
+    free (message);
+    //registerFree ("freeing", "message", "statistics");
 
     return;
 }
