@@ -10,7 +10,7 @@ import Foundation
 
 class CommandStatus: Command {
 	override class func usage() -> [String] {
-		return ["alive", "status"]
+		return ["alive", "status", "version"]
 	}
 	
 	override func run() throws {
