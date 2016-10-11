@@ -317,7 +317,7 @@ void connectWebSocket(WebSocket *socket, const char *host, const char *path) {
     Client *c = socket->client;
     addWebsocket(c, socket);
 
-    /*struct lws_client_connect_info info;
+    struct lws_client_connect_info info;
     memset(&info, 0, sizeof(info));
 
     info.context = c->wsContext;
@@ -329,7 +329,7 @@ void connectWebSocket(WebSocket *socket, const char *host, const char *path) {
     info.origin = NULL;
     info.protocol = NULL;
 
-    struct lws *ws = libwebsocket_client_connect_via_info(&info);*/
+    struct lws *ws = lws_client_connect_via_info(&info);
     //struct libwebsocket_context
 
     /* struct lws *ws = libwebsocket_client_connect(
@@ -344,7 +344,7 @@ void connectWebSocket(WebSocket *socket, const char *host, const char *path) {
                                         -1
                                         );*/
 
-    struct lws *ws = libwebsocket_client_connect(
+    /*struct lws *ws = libwebsocket_client_connect(
                                         c->wsContext,
                                         host,
                                         80,
@@ -354,12 +354,9 @@ void connectWebSocket(WebSocket *socket, const char *host, const char *path) {
                                         NULL,
                                         NULL,
                                         -1
-                                        );
+                                        );*/
 
 
-    puts ("Created (maybe) a websocket\n");
-    printf ("host is %s\n", host);
-    printf ("path is %s\n", path);
 
     if (ws == NULL) {
         fputs("Failed to create websocket!\n", stderr);
@@ -376,14 +373,6 @@ WebSocket *webSocketWithLWS(Client *c, struct lws *ws) {
 
     return NULL;
 }
-
-struct libwebsocket_context *getContext (const struct lws *wsi)
-{
-    return wsi->context;
-}
-
-/*enum lws_callback_reasons {
-        LWS_CALLBACK_ESTABLISHED                                =  0};*/
 
 int websocketCallback(struct lws *ws,
                       enum lws_callback_reasons reason,
@@ -402,7 +391,8 @@ int websocketCallback(struct lws *ws,
     //const struct libwebsocket *check = ws;
     if (ws) {
         //c = (Client *)libwebsocket_context_user(ws->context);
-         c = (Client *)ws->user_space;
+         //c = (Client *)ws->user_space;
+         c = (Client*)lws_context_user (lws_get_context (ws));
     }
     WebSocket *socket = NULL;
     //socket->user = malloc (sizeof (*(socket->user)));
@@ -415,26 +405,11 @@ int websocketCallback(struct lws *ws,
         printf ("USER IS NOT NULL!!!!!!\N USER: %02x\n", (uint8_t*) user);
     }*/
     if (user) {
-        //socket = *(WebSocket**)user;
-        //socket->user = user;
-        //socket->user = user;
-        //void *check = user;
-       // printf ("user is %02x\n", (uint8_t*)user);
-        //socket=*(struct WebSocket**)user;
+        socket = *(WebSocket**)user;
     }
-    /*if (reason == 210375232 || reason == 210763792)
-    {
-        reason = 3;
-    }
-    /*printf ("LWS_CALLBACK_CLIENT_ESTABLISHED is %d\n", LWS_CALLBACK_CLIENT_ESTABLISHED);
-    printf ("LWS_CALLBACK_CLIENT_RECEIVE is %d\n", LWS_CALLBACK_CLIENT_RECEIVE);
-    printf ("LWS_CALLBACK_CLOSED is %d\n", LWS_CALLBACK_CLOSED);
-    printf ("LWS_CALLBACK_CLIENT_CONNECTION_ERROR is %d\n", LWS_CALLBACK_CLIENT_CONNECTION_ERROR);
-    printf ("reason is %d\n", reason);*/
     int i;
     switch (reason) {
         case LWS_CALLBACK_CLIENT_ESTABLISHED:
-        //case 210375232:
             puts("Connection established");
             for (i = 0; i < c->socketCount; i++) {
                 if (c->sockets[i]->isSetUp == 0) {
@@ -450,7 +425,6 @@ int websocketCallback(struct lws *ws,
             }
             break;
         case LWS_CALLBACK_CLIENT_RECEIVE:
-        //case 210428000:
             puts ("Received item...");
             data = malloc((strlen(in) + 1) * sizeof(char));
             strcpy(data, in);
@@ -471,53 +445,18 @@ int websocketCallback(struct lws *ws,
             puts("Connection error");
             break;
         default:
-       // puts ("in default :(");
             break;
     }
-    /*if (c != NULL)
-    printf ("c->socketCount is %zu\n", c->socketCount);
-    if (globalVar == 0)
-    {
-        puts("Connection established");
-        if (c == NULL)
-        {
 
-        }
-            for (i = 0; i < c->socketCount; i++) {
-                if (c->sockets[i]->isSetUp == 0) {
-                    socket = c->sockets[i];
-                    socket->isSetUp = 1;
-                    break;
-                }
-            }
-            *(WebSocket**)user = socket;
-            socket->ws = ws;
-            if (socket->openCallback != NULL) {
-                socket->openCallback(socket);
-            }
-    }
-    else if (globalVar > 0)
-    {
-        puts ("Received item...");
-            data = malloc((strlen(in) + 1) * sizeof(char));
-            strcpy(data, in);
-
-            if (socket->recieveCallback != NULL) {
-                socket->recieveCallback(socket, data, strlen(in));
-            }
-
-            free(data);
-    }
-    globalVar ++;*/
     return 0;
 }
 
 void setupWebsocketContext(Client *c) {
     puts("Starting libwebsockets...");
     struct lws_context_creation_info info;
-    //struct lws_protocols *protocols = malloc(sizeof(struct lws_protocols) * 3);
-    //struct lws_protocols protocols [10000];
     struct lws_protocols *protocols = malloc(sizeof(struct lws_protocols) * 3);
+    //struct lws_protocols protocols [10000];
+    //struct lws_protocols *protocols = malloc(sizeof(struct lws_protocols) * 3);
 
     memset(&info, 0, sizeof(info));
     info.port = CONTEXT_PORT_NO_LISTEN;
@@ -560,7 +499,7 @@ void setupWebsocketContext(Client *c) {
 
 
 
-    c->wsContext = libwebsocket_create_context(&info);
+    c->wsContext = lws_create_context(&info);
     if (c->wsContext == NULL) {
         fputs("Failed to create websocket context!\n", stderr);
         exit(EXIT_FAILURE);
@@ -570,7 +509,7 @@ void setupWebsocketContext(Client *c) {
 }
 
 void serviceWebsockets(Client *client) {
-    libwebsocket_service(client->wsContext, 50);
+    lws_service(client->wsContext, 50);
 }
 
 ///Sends data across the websocket.
@@ -584,7 +523,7 @@ unsigned sendDataOnWebsocket(struct lws *socket, void *data, size_t len) {
     unsigned char *buf = malloc(LWS_SEND_BUFFER_PRE_PADDING + len + LWS_SEND_BUFFER_POST_PADDING);
     memcpy(buf + LWS_SEND_BUFFER_PRE_PADDING, data, len);
 
-    int ret = libwebsocket_write(socket, buf + LWS_SEND_BUFFER_PRE_PADDING, len, LWS_WRITE_TEXT);
+    int ret = lws_write(socket, buf + LWS_SEND_BUFFER_PRE_PADDING, len, LWS_WRITE_TEXT);
 
     free(buf);
     return ret;
