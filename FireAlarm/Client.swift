@@ -212,7 +212,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 			print(error)
 			throw error
 		}
-		
+		//print(response.allHeaderFields)
 		var headers = [String:String]()
 		for (k, v) in response.allHeaderFields {
 			headers[String(describing: k)] = String(describing: v)

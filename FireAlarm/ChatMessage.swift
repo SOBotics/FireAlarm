@@ -12,10 +12,12 @@ open class ChatMessage {
     open let user: ChatUser
     open let content: String
     open let id: Int?
-    
-    public init(user: ChatUser, content: String, id: Int?) {
+	open let replyID: Int?
+	
+	public init(user: ChatUser, content: String, id: Int?, replyID: Int? = nil) {
         self.user = user
         self.content = content
         self.id = id
+		self.replyID = replyID
     }
 }

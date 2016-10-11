@@ -370,19 +370,33 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 			case .messagePosted, .messageEdited:
 				guard
 					let userID = event["user_id"] as? Int,
-					let messageID = event["message_id"] as? Int/*,
-					let content = (event["content"] as? String)?.stringByDecodingHTMLEntities*/ else {
+					let messageID = event["message_id"] as? Int,
+					let rendered = (event["content"] as? String)?.stringByDecodingHTMLEntities else {
 						throw EventError.jsonParsingFailed(json: String(describing: events))
 				}
 				
-				let content: String = try client.get("https://chat.stackoverflow.com/message/\(messageID)?plain=true")
+				var replyID: Int? = nil
+				
+				var content: String = try client.get("https://chat.stackoverflow.com/message/\(messageID)?plain=true")
+				
+				if let parent = event["parent_id"] as? Int {
+					replyID = parent
+					//replace the reply markdown with the rendered ping
+					var components = content.components(separatedBy: CharacterSet.whitespaces)
+					let renderedComponents = rendered.components(separatedBy: CharacterSet.whitespaces)
+					
+					if !components.isEmpty && !rendered.isEmpty {
+						components[0] = renderedComponents[0]
+						content = components.joined(separator: " ")
+					}
+				}
 				
 				//look up the user instead of getting their name to make sure they're in the DB
 				let user = userWithID(userID)
 				
 				print("\(user): \(content)")
 				
-				let message = ChatMessage(user: user, content: content, id: messageID)
+				let message = ChatMessage(user: user, content: content, id: messageID, replyID: replyID)
 				if let d = delegate {
 					d.chatRoomMessage(self, message: message, isEdit: type == .messageEdited)
 				}
