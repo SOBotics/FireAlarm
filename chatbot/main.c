@@ -201,7 +201,7 @@ void webSocketOpened(WebSocket *ws) {
 
 void wsRecieved(WebSocket *ws, char *data, size_t len) {
     cJSON *json = cJSON_Parse(data);
-    printf ("\n%s\n", data);
+    //printf ("\n%s\n", data);
     cJSON *post = cJSON_Parse(cJSON_GetObjectItem(json, "data")->valuestring);
     if (strcmp(cJSON_GetObjectItem(post, "apiSiteParameter")->valuestring, "stackoverflow")) {
         //if this isn't SO
@@ -212,7 +212,7 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     ChatBot *bot = (ChatBot*)ws->user;
     Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
     if (p != NULL) {
-        printf ("checking post: %lu", p->postID);
+        //printf ("checking post: %lu", p->postID);
         checkPost(bot, p);
     }
     else {

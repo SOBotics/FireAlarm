@@ -171,7 +171,7 @@ void analyzeReports(ChatBot *bot) {
         }
     }
 
-    //Now coming to analyzing the tag filter
+    /*//Now coming to analyzing the tag filter
     char **tagsCaught;
     int j = 0;
     unsigned trueOccurences = 0;
@@ -261,7 +261,7 @@ void analyzeReports(ChatBot *bot) {
         printf("%16s\t%4f\t%4d\t%4d\n", newTags [i], tpRate [i], tps [i], fps [i]);
     }
 
-    free (desc);
+    free (desc);*/
     return;
 }
 
@@ -539,10 +539,10 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
 
 unsigned int checkPost(ChatBot *bot, Post *post) {
 
-    /*if (!bot->modes->reportMode)
+    if (!bot->modes->reportMode)
     {
         return 0;
-    }*/
+    }
     if (post == NULL)
     {
         puts ("\nNULL post!\n");
@@ -571,8 +571,6 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
     {
         for (int i = 0; i < bot->filterCount; i++) {
             unsigned start, end;
-            if (bot->filters[i]->type != 2)
-            {
             if (postMatchesFilter(bot, post, bot->filters[i], &start, &end)) {
 
                 const char *desc = bot->filters[i]->desc;
@@ -584,7 +582,6 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
 
                 const float truePositives = bot->filters[i]->truePositives;
                 likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
-            }
             }
         }
     }
@@ -643,73 +640,11 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         free (messageBuf);
         return 0;
     }
-   /* else if (bodyLength != 1 && (recentlyReported (post->postID, bot) == 0))
-    {
-        const size_t maxMessage = 256;
-        char *message = malloc(maxMessage);
-        snprintf (message, maxMessage,
-                  REPORT_HEADER " : [%s](http://stackoverflow.com/%s/%lu) (body length %d) %s",
-                  post->title, post->isAnswer ? "a" : "q", post->postID, bodyLength, getNotificationString (bot));
-
-        postMessage (bot->room, message);
-
-        if (bot->latestReports[REPORT_MEMORY-1]) {
-            free(bot->latestReports[REPORT_MEMORY-1]->post);
-            free(bot->latestReports[REPORT_MEMORY-1]);
-        }
-
-        int i = REPORT_MEMORY;
-
-        while(--i) {
-            bot->latestReports[i] = bot->latestReports[i-1];
-        }
-
-        Report *report = malloc (sizeof(Report));
-
-        report->post = post;
-        report->confirmation = -1;
-        report->likelihood = 0;
-        report->bodyLength = bodyLength;
-        bot->latestReports[0] = report;
-        free (message);
-        return 0;
-    }*/
-    /*else if (postMatchesTagFilter (post) && (recentlyReported (post->postID, bot) == 0))
-    {
-        const char *notifString = getNotificationString(bot);
-        sprintf (messageBuf, "bad tags in body");
-        const size_t maxMessage = strlen(messageBuf) + strlen(post->title) + strlen(notifString) + strlen(REPORT_HEADER) + 256;
-        char *message = malloc(maxMessage);
-        char *notif = getNotificationString(bot);
-        snprintf(message, maxMessage,
-                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) %s",
-                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, notif);
-        free(notif);
-
-        postMessage(bot->room, message);
-
-        if (bot->latestReports[REPORT_MEMORY-1]) {
-            free(bot->latestReports[REPORT_MEMORY-1]->post);
-            free(bot->latestReports[REPORT_MEMORY-1]);
-        }
-        int i = REPORT_MEMORY;
-        while(--i) {
-            bot->latestReports[i] = bot->latestReports[i-1];
-        }
-        Report *report = malloc(sizeof(Report));
-        report->post = post;
-        report->confirmation = -1;
-        //report->likelihood = likelihood;
-        bot->latestReports[0] = report;
-        free(message);
-        free (messageBuf);
-        return 0;
-    }
     else {
         deletePost(post);
         free (messageBuf);
         return 1;
-    }*/
+    }
     free (messageBuf);
 }
 

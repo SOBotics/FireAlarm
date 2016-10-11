@@ -425,7 +425,6 @@ int websocketCallback(struct lws *ws,
             }
             break;
         case LWS_CALLBACK_CLIENT_RECEIVE:
-            puts ("Received item...");
             data = malloc((strlen(in) + 1) * sizeof(char));
             strcpy(data, in);
 
