@@ -15,6 +15,7 @@
 		AB8FCBB51DA057D8003ADCD5 /* CommandOptIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBB41DA057D8003ADCD5 /* CommandOptIn.swift */; };
 		AB8FCBB71DA05B6A003ADCD5 /* CommandOptOut.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBB61DA05B6A003ADCD5 /* CommandOptOut.swift */; };
 		AB8FCBB91DA05CD9003ADCD5 /* CommandCheckNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBB81DA05CD9003ADCD5 /* CommandCheckNotification.swift */; };
+		ABA8FDD01DAD904B0048DDC4 /* NSStringHTMLDecoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA8FDCF1DAD904B0048DDC4 /* NSStringHTMLDecoding.swift */; };
 		ABAE420F1D725E090018DF57 /* ChatRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE420E1D725E090018DF57 /* ChatRoom.swift */; };
 		ABAE421C1D72620C0018DF57 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE421B1D72620C0018DF57 /* WebSocket.swift */; };
 		ABAE421E1D7262630018DF57 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = ABAE421D1D7262630018DF57 /* libz.tbd */; };
@@ -53,6 +54,7 @@
 		AB8FCBB41DA057D8003ADCD5 /* CommandOptIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandOptIn.swift; sourceTree = "<group>"; };
 		AB8FCBB61DA05B6A003ADCD5 /* CommandOptOut.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandOptOut.swift; sourceTree = "<group>"; };
 		AB8FCBB81DA05CD9003ADCD5 /* CommandCheckNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandCheckNotification.swift; sourceTree = "<group>"; };
+		ABA8FDCF1DAD904B0048DDC4 /* NSStringHTMLDecoding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSStringHTMLDecoding.swift; sourceTree = "<group>"; };
 		ABAE420E1D725E090018DF57 /* ChatRoom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatRoom.swift; sourceTree = "<group>"; };
 		ABAE421B1D72620C0018DF57 /* WebSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
 		ABAE421D1D7262630018DF57 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
@@ -104,6 +106,7 @@
 		ABAE421F1D7262690018DF57 /* Support */ = {
 			isa = PBXGroup;
 			children = (
+				ABA8FDCF1DAD904B0048DDC4 /* NSStringHTMLDecoding.swift */,
 				ABAE421B1D72620C0018DF57 /* WebSocket.swift */,
 				ABAE421D1D7262630018DF57 /* libz.tbd */,
 			);
@@ -247,6 +250,7 @@
 				ABAE421C1D72620C0018DF57 /* WebSocket.swift in Sources */,
 				ABD01E501D721D4F00B1A7F8 /* Client.swift in Sources */,
 				AB8FCBB51DA057D8003ADCD5 /* CommandOptIn.swift in Sources */,
+				ABA8FDD01DAD904B0048DDC4 /* NSStringHTMLDecoding.swift in Sources */,
 				ABD01E491D721B1800B1A7F8 /* main.swift in Sources */,
 				AB8FCBAD1D9ED444003ADCD5 /* CommandKill.swift in Sources */,
 				AB8FCBAB1D9EBE90003ADCD5 /* update.swift in Sources */,
