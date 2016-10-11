@@ -11,7 +11,7 @@ import Dispatch
 
 let commands: [Command.Type] = [
 	CommandTest.self, CommandSay.self,
-	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self,
+	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self, CommandStatus.self,
 	CommandCheckPost.self,
 	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self
 ]
@@ -156,11 +156,14 @@ func saveFileNamed(_ name: String) -> URL {
 let saveDirURL = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".firealarm", isDirectory: true)
 
 
+public var startTime: Date!
 
 fileprivate var bot: ChatBot!
 
 func main() throws {
 	print("FireAlarm starting...")
+	
+	startTime = Date()
 	
 	//Save the working directory & change to the chatbot directory.
 	let originalWorkingDirectory = FileManager.default.currentDirectoryPath

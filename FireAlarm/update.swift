@@ -9,18 +9,16 @@
 import Foundation
 
 #if os(Linux)
-	
-	func launchProcess(path: String, arguments: [String]) -> Task {
-		return Task.launchedTaskWithLaunchPath(path, arguments: arguments)
-	}
-	
-#else
-	
-	func launchProcess(path: String, arguments: [String]) -> Process {
-		return Process.launchedProcess(launchPath: path, arguments: arguments)
-	}
-	
+	typealias Process = Task
 #endif
+
+func launchProcess(path: String, arguments: [String]) -> Process {
+	#if os(Linux)
+		return Process.launchedTaskWithLaunchPath(path, arguments: arguments)
+	#else
+		return Process.launchedProcess(launchPath: path, arguments: arguments)
+	#endif
+}
 
 func installUpdate() -> Bool {
 	do {
@@ -54,7 +52,20 @@ func installUpdate() -> Bool {
 	return false
 }
 
-var currentVersion = (try? String(contentsOfFile: "version.txt").replacingOccurrences(of: "\n", with: "")) ?? ""
+var _version: String? = (try? String(contentsOfFile: "version.txt").replacingOccurrences(of: "\n", with: ""))
+
+var currentVersion: String {
+get {
+	return _version ?? ""
+}
+set {
+	_version = newValue
+}
+}
+
+public var version: String {
+	return _version ?? "<unknown version>"
+}
 
 func prepareUpdate(_ bot: ChatBot) {
 	bot.room.postMessage("Installing update...")
