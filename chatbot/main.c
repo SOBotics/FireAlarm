@@ -187,7 +187,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
     }*/
 
 
-    //postReply(bot->room, message, command->message);
+    postReply(bot->room, message, command->message);
 
     free(str);
     free (message);
@@ -451,7 +451,7 @@ Notify **loadNotifications ()
         long userID = cJSON_GetObjectItem (n, "user_id")->valueint;
         int type = cJSON_GetObjectItem (n, "type")->valueint;
 
-        notify [i] = createNotification (type, userID, NULL, 0);
+        notify [i] = createNotification (type, userID);
     }
 
     notify[total] = NULL;
@@ -825,10 +825,10 @@ int main(int argc, const char * argv[]) {
         createCommand("amiprivileged", 0, amiPrivileged),
         createCommand("mode * * ...", 2, changeMode),
         createCommand("check mode", 0, printCurrentMode),
-        createCommand("opt in *", 0, optIn),
-        createCommand("opt out *", 0, optOut),
-        createCommand("notify me *", 0, notifyMe),
-        createCommand("unnotify me *", 0, unnotifyMe),
+        createCommand("opt in", 0, optIn),
+        createCommand("opt out", 0, optOut),
+        createCommand("notify me", 0, notifyMe),
+        createCommand("unnotify me", 0, unnotifyMe),
         createCommand("say ...", 0, say),
         createCommand("aminotified", 0, amINotified),
         createCommand("is notified *", 0, isNotified),

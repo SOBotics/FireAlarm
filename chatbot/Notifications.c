@@ -13,14 +13,14 @@
 #include "Post.h"
 
 
-Notify *createNotification (int type, long userID, char *tag, int totalTags)
+Notify *createNotification (int type, long userID)
 {
     Notify *n = malloc (sizeof (Notify));
 
     n->type = type;
     n->userID = userID;
-    n->tags [totalTags -1] = tag;
-    n->totalTags = totalTags;
+    /*n->tags [totalTags -1] = tag;
+    n->totalTags = totalTags;*/
 
     return n;
 }
@@ -29,7 +29,7 @@ void deleteNotification (ChatBot *bot, Notify *notify)
 {
     Notify **n = bot->notify;
 
-    for (int i = bot->totalNotifications -1; i < bot->totalNotifications; i ++)
+    for (int i = bot->totalNotifications - 1; i < bot->totalNotifications; i ++)
     {
         n[i] = n[i + 1];
     }
@@ -39,7 +39,7 @@ void deleteNotification (ChatBot *bot, Notify *notify)
     return;
 }
 
-void addTagNotification (Notify *notify, char *tag)
+/*void addTagNotification (Notify *notify, char *tag)
 {
     char **tags = notify->tags;
 
@@ -76,7 +76,7 @@ void deleteTagNotification (Notify *notify, char *tag)
     notify->totalTags --;
 
     return;
-}
+}*/
 
 Notify *getNotificationByID (ChatBot *bot, long userID)
 {
@@ -95,7 +95,8 @@ Notify *getNotificationByID (ChatBot *bot, long userID)
 
 char *getNotificationString (ChatBot *bot, Post *post)
 {
-    /*char *str = malloc (bot->totalNotifications * 50);
+    //char *str = malloc (bot->totalNotifications * 50);
+    char *str = malloc (sizeof (char) * 50 * bot->totalNotifications);
     *str = 0;
 
     Notify **notify = bot->notify;
@@ -125,9 +126,9 @@ char *getNotificationString (ChatBot *bot, Post *post)
 
     removeSpaces (str);
 
-    return str;*/
+    return str;
 
-    char *str = malloc ((bot->totalNotifications * 50) + 50);
+    /*char *str = malloc ((bot->totalNotifications * 50) + 50);
     *str = 0;
 
     Notify **notify = bot->notify;
@@ -188,10 +189,10 @@ char *getNotificationString (ChatBot *bot, Post *post)
         }
     }
 
-    return str;
+    return str;*/
 }
 
-int postHaveNotifyTag (Notify *notify, char **postTags)
+/*int postHaveNotifyTag (Notify *notify, char **postTags)
 {
     char **notifyTags = notify->tags;
 
@@ -224,4 +225,4 @@ int isTagInNotification (Notify *notify, char *tag)
     }
 
     return 0;
-}
+}*/

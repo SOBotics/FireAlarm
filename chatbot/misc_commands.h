@@ -108,6 +108,21 @@ void checkThreshold (RunningCommand *command, void *ctx)
 void optIn (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    unsigned long userID = command->message->user->userID;
+    Notify *n = getNotificationByID(bot, userID);
+
+    if (n != NULL)
+    {
+        postReply (bot->room, "You are already opted-in.", command->message);
+        return;
+    }
+
+    Notify **notify = bot->notify = realloc (bot->notify, ++bot->totalNotifications * sizeof (Notify*));
+    notify [bot->totalNotifications - 1] = createNotification(0, userID);
+
+    postReply (bot->room, "You will now be pinged for reports whenever you are in the room.", command->message);
+    return;
+   /* ChatBot *bot = ctx;
     int check = 0;
     char *arg;
     long userID = command->message->user->userID;
@@ -170,12 +185,27 @@ void optIn (RunningCommand *command, void *ctx)
 
     postReply (bot->room, "Opt-in successful. You will now be pinged for reports.", command->message);
 
-    return;
+    return;*/
 }
 
 void notifyMe (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    unsigned long userID = command->message->user->userID;
+    Notify *n = getNotificationByID(bot, userID);
+
+    if (n != NULL)
+    {
+        postReply (bot->room, "You are already in the notification list.", command->message);
+        return;
+    }
+
+    Notify **notify = bot->notify = realloc (bot->notify, ++bot->totalNotifications * sizeof (Notify*));
+    notify [bot->totalNotifications - 1] = createNotification(1, userID);
+
+    postReply (bot->room, "You will now be pinged for reports.", command->message);
+    return;
+    /*ChatBot *bot = ctx;
     int check = 0;
     char *arg;
     long userID = command->message->user->userID;
@@ -239,12 +269,25 @@ void notifyMe (RunningCommand *command, void *ctx)
 
     postReply (bot->room, "Notify submission successful. You will now be notified for reports.", command->message);
 
-    return;
+    return;*/
 }
 
 void optOut (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    unsigned long userID = command->message->user->userID;
+    Notify *n = getClosedReasonByID(bot, userID);
+
+    if (n == NULL)
+    {
+        postReply (bot->room, "You are already opted-out.", command->message);
+        return;
+    }
+
+    deleteNotification(bot, n);
+    postReply (bot->room, "You will no longer be pinged for reports.", command->message);
+    return;
+    /*ChatBot *bot = ctx;
     int check = 0;
     char *arg = NULL;
 
@@ -308,12 +351,25 @@ void optOut (RunningCommand *command, void *ctx)
 
     postReply (bot->room, "Opt-out successful. You will now not be pinged for reports.", command->message);
 
-    return;
+    return*/
 }
 
 void unnotifyMe (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
+    unsigned long userID = command->message->user->userID;
+    Notify *n = getClosedReasonByID(bot, userID);
+
+    if (n == NULL)
+    {
+        postReply (bot->room, "You are already not in the notification list.", command->message);
+        return;
+    }
+
+    deleteNotification(bot, n);
+    postReply (bot->room, "You will no longer be pinged for reports.", command->message);
+    return;
+    /*ChatBot *bot = ctx;
     int check = 0;
     char *arg = NULL;
 
@@ -378,7 +434,7 @@ void unnotifyMe (RunningCommand *command, void *ctx)
 
     postReply (bot->room, "You will now not be notified for any reports.", command->message);
 
-    return;
+    return;*/
 }
 
 void say(RunningCommand *command, void *ctx) {
@@ -403,7 +459,7 @@ void amINotified (RunningCommand *command, void *ctx)
 
     Notify *notify = getNotificationByID (bot, userID);
 
-    /*if (notify == NULL)
+    if (notify == NULL)
     {
         postReply (bot->room, "You are not currently in the notification list.", command->message);
     }
@@ -414,9 +470,10 @@ void amINotified (RunningCommand *command, void *ctx)
     else if (notify->type == 1)
     {
         postReply (bot->room, "You are currently notified of all reports.", command->message);
-    }*/
+    }
+    return;
 
-    int i;
+    /*int i;
     if (notify == NULL)
     {
         postReply (bot->room, "You are currently not in the notification list.", command->message);
@@ -475,7 +532,7 @@ void amINotified (RunningCommand *command, void *ctx)
             free (message);
             return;
         }
-    }
+    }*/
 }
 
 void isNotified (RunningCommand *command, void *ctx)
@@ -506,7 +563,7 @@ void isNotified (RunningCommand *command, void *ctx)
 
     if (notify == NULL)
     {
-        postReply (bot->room, "That user is no currently in the notification list.", command->message);
+        postReply (bot->room, "That user is not currently in the notification list.", command->message);
     }
     else if (notify->type == 0)
     {
@@ -524,8 +581,10 @@ void printNotifiedUsers (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
 
-    char *message = malloc (sizeof (127));
-    char *messageString = malloc (sizeof (127 * (bot->totalNotifications + 2)));
+    //char *message = malloc (sizeof (127));
+    //char *messageString = malloc (sizeof (127 * (bot->totalNotifications + 2)));
+    char *message = malloc (sizeof (char) * 127);
+    char *messageString = malloc (sizeof (char) * 64 * (bot->totalNotifications + 2));
 
     snprintf (message, 127, "There are %d total notified users: ", bot->totalNotifications);
     postReply (bot->room, message, command->message);

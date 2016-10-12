@@ -567,8 +567,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
 
 
 
-    //if (bot->modes->keywordFilter)
-    {
+
         for (int i = 0; i < bot->filterCount; i++) {
             unsigned start, end;
             if (postMatchesFilter(bot, post, bot->filters[i], &start, &end)) {
@@ -584,31 +583,21 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
                 likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
             }
         }
-    }
 
-    /*if (bot->modes->lengthFilter)
-    {
-        if (strlen (post->body) < 200)
-        {
-            bodyLength = (unsigned)strlen (post->body);
-        }
-    }*/
-
-    //printf ("Post %lu likelihood: %u\n", post->postID, likelihood);
 
     if (likelihood > THRESHOLD && (recentlyReported (post->postID, bot) == 0)) {
         //puts ("Preparing report...\n");
-        //char *notifString = getNotificationString(bot, post);
+        char *notifString = getNotificationString(bot, post);
         //puts ("Completed line 576.");
-        const size_t maxMessage = strlen(messageBuf) + strlen(post->title) + strlen(REPORT_HEADER) + 256;
+        const size_t maxMessage = strlen(messageBuf) + strlen(post->title) + strlen(REPORT_HEADER) + strlen (notifString) + 256;
         //puts ("Completed line 578.");
         char *message = malloc(maxMessage);
        // puts ("Completed line 580.");
         //char *notif = getNotificationString(bot, post);
         //puts ("Completed line 582.");
         snprintf(message, maxMessage,
-                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) ",
-                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood);
+                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) %s",
+                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, notifString);
         //puts ("Completed preparing report.");
         //free(notif);
         //if (notifString != NULL)
@@ -986,7 +975,7 @@ char *getUsernameByID (ChatBot *bot, unsigned long userID)
         char request [max];
 
         snprintf (request, max,
-                  "http://api.stackexchange.com/2.2/users/%lu?order=desc&sort=reputation&site=stackoverflow", userID);
+                  "http://api.stackexchange.com/2.2/users/%lu?order=desc&sort=reputation&site=stackoverflow&key="API_KEY, userID);
 
         curl_easy_setopt(curl, CURLOPT_URL, request);
 
