@@ -70,7 +70,7 @@
          <EnvironmentVariable
             key = "DEVELOPMENT"
             value = "123602"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>
       <AdditionalOptions>
