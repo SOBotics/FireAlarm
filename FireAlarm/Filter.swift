@@ -133,6 +133,11 @@ class Filter: WebSocketDelegate {
 		//print("Checking \(id).")
 		let post = try bot.room.client.questionWithID(id)
 		
+		//if the post ist more than a day old, don't report it
+		if post.creationDate < post.lastActivityDate - 60 * 60 * 24 {
+			return
+		}
+		
 		//if !post.tags.contains("ios") {
 		//	return
 		//}

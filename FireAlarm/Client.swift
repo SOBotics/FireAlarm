@@ -11,9 +11,9 @@ import Dispatch
 
 extension String {
 	var urlEncodedString: String {
-		var allowed = CharacterSet(charactersIn: "+&")
-		allowed.formUnion(CharacterSet.urlQueryAllowed)
-		return self.addingPercentEncoding(withAllowedCharacters: allowed as CharacterSet)!
+		var allowed = CharacterSet.urlQueryAllowed
+		allowed.remove(charactersIn: "&+")
+		return self.addingPercentEncoding(withAllowedCharacters: allowed)!
 	}
 	
 	init(urlParameters: [String:Any]) {
@@ -369,7 +369,15 @@ open class Client: NSObject, URLSessionDataDelegate {
 			throw APIError.badJSON(json: String(describing: response))
 		}
 		
-		return Post(id: id, title: title.stringByDecodingHTMLEntities, body: body.stringByDecodingHTMLEntities, tags: tags)
+		return Post(
+			id: id,
+			title: title.stringByDecodingHTMLEntities,
+			body: body.stringByDecodingHTMLEntities,
+			tags: tags,
+			creationDate: (response["creation_date"] as? Int) ?? -1,
+			lastActivityDate: (response["last_activity_date"] as? Int) ?? -1
+		)
+		
 	}
 	
 	
