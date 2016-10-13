@@ -422,7 +422,7 @@ Notify **loadNotifications ()
     puts ("Loading Notifications...");
     FILE *file = fopen ("notifications.json", "r");
 
-    if (!file)
+    if (!file || isFileEmpty(file))
     {
         puts ("notifications.json does not exist. Returning an empty list...");
         Notify **list = malloc(sizeof(Notify*));

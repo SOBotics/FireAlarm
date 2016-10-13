@@ -21,7 +21,7 @@ typedef struct {
 }Notify;
 
 Notify *createNotification (int type, long userID);
-void deleteNotification (ChatBot *bot, Notify *notify);
+unsigned deleteNotification (ChatBot *bot, Notify *notify);
 Notify *getNotificationByID (ChatBot *bot, long userID);
 char *getNotificationString (ChatBot *bot, Post *post);
 

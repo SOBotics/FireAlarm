@@ -25,18 +25,33 @@ Notify *createNotification (int type, long userID)
     return n;
 }
 
-void deleteNotification (ChatBot *bot, Notify *notify)
+unsigned deleteNotification (ChatBot *bot, Notify *notify)
 {
-    Notify **n = bot->notify;
+   Notify **n = bot->notify;
+   int index = -1;
+   unsigned i;
 
-    for (int i = bot->totalNotifications - 1; i < bot->totalNotifications; i ++)
-    {
-        n[i] = n[i + 1];
-    }
+   for (i = 0; i < bot->totalNotifications; i ++)
+   {
+       if (n [i]->userID == notify->userID)
+       {
+           index = i;
+       }
+   }
 
-    bot->totalNotifications --;
+   if (index == -1)
+   {
+       return 0;
+   }
 
-    return;
+   for (i = index; i < bot->totalNotifications - 1; i ++)
+   {
+       n [i] = n [i + 1];
+   }
+
+   n [bot->totalNotifications - 1] = NULL;
+   bot->totalNotifications --;
+   return 1;
 }
 
 /*void addTagNotification (Notify *notify, char *tag)

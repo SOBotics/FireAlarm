@@ -581,6 +581,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
 
                 const float truePositives = bot->filters[i]->truePositives;
                 likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
+                //likelihood = 1001;
             }
         }
 
