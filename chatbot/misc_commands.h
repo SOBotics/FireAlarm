@@ -276,7 +276,7 @@ void optOut (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     unsigned long userID = command->message->user->userID;
-    Notify *n = getClosedReasonByID(bot, userID);
+    Notify *n = getNotificationByID(bot, userID);
 
     if (n == NULL)
     {
@@ -358,7 +358,7 @@ void unnotifyMe (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     unsigned long userID = command->message->user->userID;
-    Notify *n = getClosedReasonByID(bot, userID);
+    Notify *n = getNotificationByID(bot, userID);
 
     if (n == NULL)
     {
