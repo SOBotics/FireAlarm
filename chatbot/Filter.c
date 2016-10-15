@@ -11,7 +11,7 @@
 
 #include "Filter.h"
 
-Filter *createFilter(const char *desc, const char *filter, FilterType type, unsigned truePositives, unsigned falsePositives) {
+Filter *createFilter(const char *desc, const char *filter, FilterType type, unsigned truePositives, unsigned falsePositives, unsigned isDisabled) {
     Filter *f = malloc(sizeof(Filter));
     f->desc = malloc(strlen(desc) + 1);
     strcpy(f->desc, desc);
@@ -21,6 +21,7 @@ Filter *createFilter(const char *desc, const char *filter, FilterType type, unsi
     f->type = type;
     f->truePositives = truePositives;
     f->falsePositives = falsePositives;
+    f->isDisabled = isDisabled;
 
     int error;
     if (type == FILTER_REGEX && (error = regcomp(&f->regex, f->filter, REG_ICASE))) {
@@ -31,6 +32,31 @@ Filter *createFilter(const char *desc, const char *filter, FilterType type, unsi
         exit(EXIT_FAILURE);
     }
     return f;
+}
+
+int filterNamed (char *name)
+{
+    if (!strcmp (name, "keyword") || !strcmp (name, "keywords"))
+    {
+        return FILTER_TEXT;
+    }
+    else if (!strcmp (name, "length") || !strcmp (name, "body"))
+    {
+        return FILTER_SHORTBODY;
+    }
+    else if (!strcmp (name, "tag") || !strcmp (name, "tags"))
+    {
+        return FILTER_TAG;
+    }
+    else if (!strcmp (name, "cap") || !strcmp (name, "caps"))
+    {
+        return FILTER_CAPS;
+    }
+    else if (!strcmp (name, "textwall") || !strcmp (name, "wall"))
+    {
+        return FILTER_TEXTWALL;
+    }
+    return -1;
 }
 
 unsigned char matchRegexFilter(Post *post, Filter *f, unsigned *outStart, unsigned *outEnd) {
@@ -53,11 +79,12 @@ unsigned char matchRegexFilter(Post *post, Filter *f, unsigned *outStart, unsign
 
 unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsigned *outStart, unsigned *outEnd) {
     unsigned titleLength;
-    /*if (post->body == NULL)
+
+    if (filter->isDisabled)
     {
-        puts ("In 'postMacthesFilter'.. post->body is NULL!\n");
         return 0;
-    }*/
+    }
+
     switch (filter->type) {
         case FILTER_TEXT:
             ;char *start = strstr(post->body, filter->filter);
@@ -103,15 +130,30 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
             unsigned bodyLength = strlen (post->body);
             unsigned totalCaps = 0;
             totalCaps = getCapsInString (post->title);
-            if ((totalCaps/titleLength) * 100 > 40)
+            if ((totalCaps/titleLength) * 100 > 25)
+            {
+                puts ("Too many caps in title!");
+                printf ("%d\n", (totalCaps/titleLength) * 100);
                 return 1;
+            }
             totalCaps = getCapsInString (post->body);
-            if ((totalCaps/bodyLength) * 100 > 30)
+            if ((totalCaps/bodyLength) * 100 > 20)
+            {
+                puts ("Too many caps in body!");
+                printf ("%d\n", (totalCaps/bodyLength) * 100);
                 return 1;
+            }
+            return 0;
+        case FILTER_TEXTWALL:
+            if (!strstr (post->body, "<code>"))
+            {
+                return 1;
+            }
             return 0;
         default:
             fprintf(stderr, "Invalid filter type %d\n", filter->type);
-            exit(EXIT_FAILURE);
+            //exit(EXIT_FAILURE);
+            return 0;
     }
 }
 

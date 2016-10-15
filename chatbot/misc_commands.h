@@ -683,7 +683,7 @@ void addKeywordToFilter (RunningCommand *command, void *ctx)
     Filter **filters = bot->filters;
 
     filters = realloc (filters, ++bot->filterCount * sizeof (Filter *));
-    filters [bot->filterCount - 1] = createFilter (keyword, keyword, 0, truePositives, falsePositives);
+    filters [bot->filterCount - 1] = createFilter (keyword, keyword, 0, truePositives, falsePositives, 0);
 
     char *message;
     asprintf (&message, "Keyword \"%s\" added to the filters.", keyword);
@@ -727,7 +727,7 @@ void addTagToFilter (RunningCommand *command, void *ctx)
     Filter **filters = bot->filters;
 
     filters = realloc (filters, ++bot->filterCount * sizeof (Filter *));
-    filters [bot->filterCount - 1] = createFilter (desc, tag, 3, truePositives, falsePositives);
+    filters [bot->filterCount - 1] = createFilter (desc, tag, 3, truePositives, falsePositives, 0);
     free (desc);
 
     char *str;
@@ -1309,6 +1309,44 @@ void printFilters (RunningCommand *command, void *ctx)
 
     postReply (bot->room, "All the filters used by the bot are: ", command->message);
     postMessage (bot->room, str);
+    free (str);
+    return;
+}
+
+void disableFilter (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    Filter **filters = bot->filters;
+
+    if (command->argc < 2)
+    {
+        postReply (bot->room, "Expected at least 1 argument. [See the commands page for more information.](https://git.io/vP6aq)", command->message);
+        return;
+    }
+
+    char *toDisable = command->argv [0];
+    int filterType = filterNamed(toDisable);
+
+    if (filterType == -1)
+    {
+        char *msg;
+        asprintf (&msg, "`%s` is an invalid argument. [See the commands page for more information.](https://git.io/vP6aq)", toDisable);
+        postReply (bot->room, msg, command->message);
+        free (msg);
+        return;
+    }
+
+    for (unsigned i = 0; i < bot->filterCount; i ++)
+    {
+        if (filters [i]->type == filterType)
+        {
+            filters [i]->isDisabled = 1;
+        }
+    }
+
+    char *str;
+    asprintf (&str, "Filter `%s` has been disabled. ", toDisable);
+    postReply(bot->room, str, command->message);
     free (str);
     return;
 }

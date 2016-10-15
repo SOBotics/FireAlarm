@@ -20,7 +20,8 @@ typedef enum {
     FILTER_REGEX = 1,
     FILTER_SHORTBODY = 2,
     FILTER_TAG = 3,
-    FILTER_CAPS = 4
+    FILTER_CAPS = 4,
+    FILTER_TEXTWALL = 5
 }FilterType;
 
 typedef struct {
@@ -30,10 +31,12 @@ typedef struct {
     unsigned truePositives;
     unsigned falsePositives;
     char *desc;
+    unsigned isDisabled; //1 if the filter is disabled, 0 if the filter is enabled
 }Filter;
 
 
-Filter *createFilter(const char *desc, const char *filter, FilterType type, unsigned truePositives, unsigned falsePositives);
+Filter *createFilter(const char *desc, const char *filter, FilterType type, unsigned truePositives, unsigned falsePositives, unsigned isDisabled);
+int filterNamed (char *name);
 unsigned postMatchestagFilter (ChatBot *bot, Post *post);
 unsigned char matchRegexFilter (Post *post, Filter *filter, unsigned *outStart, unsigned *outEnd);
 unsigned matchTagFilter (ChatBot *bot, Post *post, Filter *filter);

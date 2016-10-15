@@ -320,12 +320,13 @@ Filter **loadFilters() {
     puts("Loading filters...");
     FILE *file = fopen("filters.json", "r");
     if (!file || isFileEmpty (file)) {
-        puts("Could not read from ~/.chatbot/filters.json.  Creating a skeleton filter list.");
+        puts("Could not read from ~/.chatbot/filters.json.  Creating a skeleton filter list...");
         Filter **filters = malloc(sizeof(Filter*) * 2);
         filters[0] = createFilter(
                                   "Example filter",
                                   "Regular expression to test against ^",   //^ is so this doesn't match anything
                                   FILTER_REGEX,
+                                  0,
                                   0,
                                   0
                                   );
@@ -363,7 +364,7 @@ Filter **loadFilters() {
                 falsePositives = 0;
             }
         }
-        filters[i] = createFilter(desc, expr, type, truePositives, falsePositives);
+        filters[i] = createFilter(desc, expr, type, truePositives, falsePositives, 0);
     }
     filters[filterCount] = NULL;
 
@@ -839,19 +840,14 @@ int main(int argc, const char * argv[]) {
         createCommand("api quota", 0, printApiQuota),
         createCommand("filter modify threshold *", 2, modifyFilterThreshold),
         createCommand("filter add keyword * * *", 2, addKeywordToFilter),
-        createCommand("filter add tag * * *", 2, addTagToFilter),
-        createCommand("filter view tags", 0, printTagsInFilter),
         createCommand("filter view keywords", 0, printKeywordsInFilter),
         createCommand("filter view keyword", 0, printKeywordsInFilter),
         createCommand("filter modify keyword * * *", 2, modifyKeywordFilter),
         createCommand("filter info * *", 0, filterInfo),
-        createCommand("filter view accuracy * *", 0, printAccuracyOfFilter),
         createCommand("filter view reports * ... ...", 0, printReportsByFilter),
         createCommand("filter view filters", 0, printFilters),
-        createCommand("get posts", 0, manualGetPosts),
         createCommand("error logs", 0, printErrorLogs),
         createCommand("clear error logs", 2, clearErrorLogs),
-        createCommand("get tags *", 0, getTagsTest),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify, logs);
@@ -866,8 +862,8 @@ int main(int argc, const char * argv[]) {
 
     puts("Fire Alarm started.");
     postMessage (bot->room, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started.");
-    registerError (bot, "main.c/main", "test error", "main");
-    registerError (bot, "main.c/main", "test error 2", "main");
+    //registerError (bot, "main.c/main", "test error", "main");
+    //registerError (bot, "main.c/main", "test error 2", "main");
 
     unsigned char reboot = 0;
     time_t saveTime = time(NULL) + SAVE_INTERVAL;
@@ -907,10 +903,7 @@ int main(int argc, const char * argv[]) {
     curl_easy_cleanup(client->curl);
 
     if (reboot) {
-        //execv(argv[0], (char*const*)argv);  //Reload the program.
-        //goto reboot;
-        sleep (5);
-        system ("valgrind ../FireBackup/./firealarm");
+        execv(argv[0], (char*const*)argv);  //Reload the binaries which will restart the program.
     }
 
     return 0;

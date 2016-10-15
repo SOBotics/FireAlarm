@@ -163,7 +163,7 @@ void analyzeReports(ChatBot *bot) {
                 }
             }
             if (!matchesExistingFilter && strlen(text) > 2) {
-                Filter *newFilter = createFilter(text, text, 0, trueOccurences, falseOccurences);
+                Filter *newFilter = createFilter(text, text, 0, trueOccurences, falseOccurences, 0);
                 bot->filters = realloc(bot->filters, ++bot->filterCount * sizeof(Filter*));
                 bot->filters[bot->filterCount - 1] = newFilter;
                 printf("%16s\t%4f\t%4d\t%4d\n", text, trueRate, trueOccurences, falseOccurences);
