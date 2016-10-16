@@ -623,8 +623,8 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         bot->reportsWaiting++;
         bot->reportsUntilAnalysis--;
         if (bot->reportsUntilAnalysis == 0) {
+            //analyzeReports(bot);
             bot->reportsUntilAnalysis = REPORT_MEMORY;
-            analyzeReports(bot);
         }
         free(message);
         free (messageBuf);

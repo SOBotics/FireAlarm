@@ -211,8 +211,8 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     }
     ChatBot *bot = (ChatBot*)ws->user;
     Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
-    if (p != NULL) {
-        //printf ("checking post: %lu", p->postID);
+    if (p != NULL && !p->isAnswer) {
+        printf ("checking post: %lu", p->postID);
         checkPost(bot, p);
     }
     else {

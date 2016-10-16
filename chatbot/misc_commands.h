@@ -1351,4 +1351,42 @@ void disableFilter (RunningCommand *command, void *ctx)
     return;
 }
 
+void enableFilter (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    Filter **filters = bot->filters;
+
+    if (command->argc < 2)
+    {
+        postReply (bot->room, "Expected at least 1 argument. ", command->message);
+        return;
+    }
+
+    char *toEnable = command->argv [0];
+    int filterType = filterNamed (toEnable);
+
+    if (filterType == -1)
+    {
+        char *msg;
+        asprintf (&msg, "`%s` is an invalid argument. [See the commands page for more information.](https://git.io/vP6aq)", toEnable);
+        postReply (bot->room, msg, command->message);
+        free (msg);
+        return;
+    }
+
+    for (unsigned i = 0; i < bot->filterCount; i ++)
+    {
+        if (filters [i]->type == filterType)
+        {
+            filters [i]->isDisabled = 0;
+        }
+    }
+
+    char *str;
+    asprintf (&str, "Filter `%s` has been enabled. ", toEnable);
+    postReply(bot->room, str, command->message);
+    free (str);
+    return;
+}
+
 #endif /* misc_commands_h */

@@ -82,6 +82,7 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
 
     if (filter->isDisabled)
     {
+        puts ("Filter is disabled!");
         return 0;
     }
 
