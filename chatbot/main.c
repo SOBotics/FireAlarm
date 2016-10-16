@@ -28,6 +28,7 @@
 #include "Logs.h"
 
 #define SAVE_INTERVAL 60
+#define REPO_URL "https://git.io/vPis7"
 //long postMessage = 1;
 
 void unrecognizedCommand(RunningCommand *command, void *ctx) {
@@ -358,13 +359,14 @@ Filter **loadFilters() {
         FilterType type = cJSON_GetObjectItem(filter, "type")->valueint;
         unsigned truePositives = cJSON_GetObjectItem(filter, "truePositives")->valueint;
         int falsePositives = cJSON_GetObjectItem(filter, "falsePositives")->valueint;
+        unsigned isDisabled = cJSON_GetObjectItem (filter, "isDisabled")->valueint;
         if (falsePositives == -1) {
             falsePositives = 25 - truePositives;
             if (falsePositives < 0) {
                 falsePositives = 0;
             }
         }
-        filters[i] = createFilter(desc, expr, type, truePositives, falsePositives, 0);
+        filters[i] = createFilter(desc, expr, type, truePositives, falsePositives, isDisabled);
     }
     filters[filterCount] = NULL;
 
@@ -612,6 +614,7 @@ void saveFilters(Filter **filters, unsigned filterCount) {
         cJSON_AddItemToObject(object, "type", cJSON_CreateNumber(filter->type));
         cJSON_AddItemToObject(object, "truePositives", cJSON_CreateNumber(filter->truePositives));
         cJSON_AddItemToObject(object, "falsePositives", cJSON_CreateNumber(filter->falsePositives));
+        cJSON_AddItemToObject(object, "isDisabled", cJSON_CreateNumber (filter->isDisabled));
 
         cJSON_AddItemToArray(json, object);
     }
@@ -846,6 +849,8 @@ int main(int argc, const char * argv[]) {
         createCommand("filter info * *", 0, filterInfo),
         createCommand("filter view reports * ... ...", 0, printReportsByFilter),
         createCommand("filter view filters", 0, printFilters),
+        createCommand("filter disable *", 2, disableFilter),
+        createCommand("filter enable *", 2, enableFilter),
         createCommand("error logs", 0, printErrorLogs),
         createCommand("clear error logs", 2, clearErrorLogs),
         NULL

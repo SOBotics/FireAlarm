@@ -10,8 +10,9 @@ void printErrorLogs (RunningCommand *command, void *ctx)
     ChatBot *bot = ctx;
     Log **logs = bot->log;
     unsigned i;
-    char *message = malloc (sizeof (char) * bot->totalLogs * 512);
-    message [0] = '\0';
+    char *message = malloc (sizeof (char) * bot->totalLogs * 512 + 256);
+    sprintf (message, "     The error logs are:\n");
+   // message [0] = '\0';
 
     for (i = 0; i < bot->totalLogs; i ++)
     {
@@ -20,7 +21,7 @@ void printErrorLogs (RunningCommand *command, void *ctx)
         if (log->type == 1)
         {
             snprintf (message + strlen (message), 512,
-                      "    In %s/%s at %s: %s    \n\n",
+                      "     In %s/%s at %s     : %s    \n",
                       log->location, log->funcCaller, log->time, log->message);
         }
     }
@@ -32,7 +33,7 @@ void printErrorLogs (RunningCommand *command, void *ctx)
         return;
     }
 
-    postReply (bot->room, "The error logs are:", command->message);
+    //postReply (bot->room, "The error logs are:", command->message);
     postMessage (bot->room, message);
     free (message);
     return;

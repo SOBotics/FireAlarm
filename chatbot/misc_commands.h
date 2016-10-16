@@ -1318,7 +1318,7 @@ void disableFilter (RunningCommand *command, void *ctx)
     ChatBot *bot = ctx;
     Filter **filters = bot->filters;
 
-    if (command->argc < 2)
+    if (command->argc < 1)
     {
         postReply (bot->room, "Expected at least 1 argument. [See the commands page for more information.](https://git.io/vP6aq)", command->message);
         return;
@@ -1356,7 +1356,7 @@ void enableFilter (RunningCommand *command, void *ctx)
     ChatBot *bot = ctx;
     Filter **filters = bot->filters;
 
-    if (command->argc < 2)
+    if (command->argc < 1)
     {
         postReply (bot->room, "Expected at least 1 argument. ", command->message);
         return;
