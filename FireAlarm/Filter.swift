@@ -129,22 +129,10 @@ class Filter: WebSocketDelegate {
 		return trueProbability * 1e45 > falseProbability
 	}
 	
-	func checkAndReportPost(_ id: Int) throws {
-		//print("Checking \(id).")
-		let post = try bot.room.client.questionWithID(id)
-		
-		//if the post ist more than a day old, don't report it
-		if post.creationDate < post.lastActivityDate - 60 * 60 * 24 {
-			return
-		}
-		
-		//if !post.tags.contains("ios") {
-		//	return
-		//}
-		
+	func checkAndReportPost(_ post: Post) throws {
 		let bad = checkPost(post)
 		if bad {
-			print("Reporting question \(id).")
+			print("Reporting question \(post.id).")
 			reportPost(post)
 		}
 	}
@@ -210,8 +198,14 @@ class Filter: WebSocketDelegate {
 					throw QuestionProcessingError.noQuestionID(json: string)
 				}
 				
+				let post = try bot.room.client.questionWithID(id)
 				
-				try checkAndReportPost(id)
+				//don't report posts that are more than a day old
+				if post.creationDate < post.lastActivityDate - 60 * 60 * 24 {
+					return
+				}
+				
+				try checkAndReportPost(post)
 			} catch Client.APIError.noItems {
 				//do nothing
 			} catch let error as Client.APIError {
