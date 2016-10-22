@@ -350,7 +350,8 @@ void printLatestReports (RunningCommand *command, void *ctx)
 
     postReply (bot->room, message, command->message);
 
-    for (i = 0; i < numReports; i ++)
+    //Commented the below code as link formatting in messages which are more than one line are broken
+    /*for (i = 0; i < numReports; i ++)
     {
         Report *report = reports [i];
 
@@ -383,6 +384,43 @@ void printLatestReports (RunningCommand *command, void *ctx)
             snprintf(messageString + strlen(messageString), maxLineSize,
                      "%s: [%s](http://stackoverflow.com/%s/%lu) (%s)\n",
                      confirmation, report->post->title, postType, report->post->postID, reportLink
+                     );
+        }
+    }*/
+
+    for (i = 0; i < numReports; i ++)
+    {
+        Report *report = reports [i];
+
+        sprintf (reportLink,
+                 "http://chat.stackoverflow.com/transcript/message/%lu#%lu",
+                 report->messageID, report->messageID);
+
+        char *confirmation;
+
+        int shouldPrint = 0;
+        if (typePrinted == NULL) {
+            shouldPrint = 1;
+        }
+        else if (report->confirmation == 1) {
+            shouldPrint = !strcmp(typePrinted, "true");
+        }
+        else if (report->confirmation == 0) {
+            shouldPrint = !strcmp(typePrinted, "false");
+        }
+        else {
+            shouldPrint = (!strcmp(typePrinted, "unconfirmed") || !strcmp(typePrinted, "unknown"));
+        }
+
+        if (shouldPrint) {
+            if (report->confirmation == 1) confirmation = "True positive";
+            else if (report->confirmation == 0) confirmation = "False positive";
+            else confirmation = "Unconfirmed";
+
+            char *postType = report->post->isAnswer ? "a" :"q";
+            snprintf(messageString + strlen(messageString), maxLineSize,
+                     "%s: http://stackoverflow.com/%s/%lu (%s)\n",
+                     confirmation, postType, report->post->postID, reportLink
                      );
         }
     }

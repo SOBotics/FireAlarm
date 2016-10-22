@@ -188,7 +188,7 @@ void unrecognizedCommand(RunningCommand *command, void *ctx) {
     }*/
 
 
-    postReply(bot->room, message, command->message);
+    //postReply(bot->room, message, command->message);
 
     free(str);
     free (message);
@@ -767,7 +767,7 @@ int main(int argc, const char * argv[]) {
 
     //ChatRoom *roomPostTrue = createChatRoom (client, 773); //773 is room number of LQPHQ
 
-    ChatRoom *room = createChatRoom(client, 123602); // 68414 is room number of SOCVR Testing Facility
+    ChatRoom *room = createChatRoom(client, 111347); // 111347 is SOBotics; 123602 is FA Dev
 
     enterChatRoom(room);
     //enterChatRoom (roomPostTrue);

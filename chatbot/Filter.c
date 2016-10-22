@@ -151,6 +151,12 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
                 return 1;
             }
             return 0;
+        case FILTER_NOQUESTION:
+            if (!strstr (post->body, "?"))
+            {
+                return 1;
+            }
+            return 0;
         default:
             fprintf(stderr, "Invalid filter type %d\n", filter->type);
             //exit(EXIT_FAILURE);

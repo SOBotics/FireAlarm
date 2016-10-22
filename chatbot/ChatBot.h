@@ -28,7 +28,7 @@ typedef struct _PrivRequest PrivRequest;
 
 extern long THRESHOLD;
 
-#define REPORT_MEMORY 50
+#define REPORT_MEMORY 2500
 
 typedef enum {
     ACTION_NONE = 0,
