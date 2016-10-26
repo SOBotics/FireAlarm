@@ -15,39 +15,6 @@ TODO:
 #include "ChatBot.h"
 unsigned errorKey = 0;
 
-char *getCurrentTime ()
-{
-    time_t t;
-    time (&t);
-    return asctime (localtime (&t));
-}
-
-/*void registerMalloc (char *message, char *var, char *func, size_t size)
-{
-    /*char *cmd = malloc (sizeof (char) * 1024);
-    snprintf (cmd, 1023,
-              "echo -e 'REGISTERING MALLOC \n%s \nMessage:%s \nVariable:%s \nFunction:%s \nSize:%zu' >> memory.log",
-              getCurrentTime (), message, var, func, size);
-
-    system (cmd);  // I know using 'system' is not preferable, but I'm using it joust for now. will replace it later
-    free (cmd);
-    return;*/
-
-
-//}
-
-
-void registerFree (char *message, char *var, char *func)
-{
-    char *cmd = malloc (sizeof (char) * 1024);
-    snprintf (cmd, 1023,
-              "echo 'REGISTERING FREE %s Message:%s Variable:%s Function:%s' >> memory.log",
-              getCurrentTime (), message, var, func);
-    system (cmd);
-    free (cmd);
-    return;
-}
-
 Log *createLog (unsigned type, const char *funcCaller, const char *location, size_t size, unsigned key, char *message, char *time)
 {
     Log *log = malloc (sizeof (Log));
@@ -75,4 +42,83 @@ void registerError (ChatBot *bot, char *location, char *message, char *func)
     bot->log = realloc (bot->log, bot->totalLogs * sizeof (Log*));
     bot->log [bot->totalLogs - 1] = createLog (1, func, location, 0, ++errorKey, message, getCurrentTime ());
     return;
+}
+
+void initLog (char *name)
+{
+    //setlogmask (LOG_UPTO (priority));
+    openlog (name, LOG_PID, LOG_LOCAL1);
+}
+
+char *getPriorityStrByNum (unsigned priority)
+{
+    if (priority == LOG_ERR)
+    {
+        return ERROR_STR;
+    }
+    else if (priority == LOG_ALERT)
+    {
+        return ALERT_STR;
+    }
+    else if (priority == LOG_INFO)
+    {
+        return INFO_STR;
+    }
+    else if (priority == LOG_DEBUG)
+    {
+        return DEBUG_STR;
+    }
+    else
+    {
+        initLog (ERROR_STR);
+        syslog (LOG_ERR, "Invalid priority passed in 'getPriorityStrByNum': %u!", priority);
+        closelog();
+        return NULL;
+    }
+}
+
+unsigned getStandardPriorityValue (unsigned priority)
+{
+    if (priority == ERROR_LOG)
+    {
+        return LOG_ERR;
+    }
+    else if (priority == INFO_LOG)
+    {
+        return LOG_INFO;
+    }
+    else if (priority == ALERT_LOG)
+    {
+        return LOG_ALERT;
+    }
+    else if (priority == DEBUG_LOG)
+    {
+        return LOG_DEBUG;
+    }
+    else
+    {
+        initLog (ERROR_STR);
+        syslog (LOG_ERR, "Invalid priority passed in 'getStandardPriorityValue': %u!", priority);
+        closelog();
+        return 0;
+    }
+}
+
+void registerLog (unsigned priority, char *str)
+{
+    char *logName = getPriorityStrByNum(priority);
+    unsigned standardPriority = getStandardPriorityValue(priority);
+
+    if (!standardPriority)
+    {
+        fprintf (stderr, "Invalid priority in 'registerLog': %u!", priority);
+        initLog (ERROR_STR);
+        syslog (LOG_ERR, "Invalid priority in 'registerLog': %u!", priority);
+        closelog();
+        return;
+    }
+
+    initLog (logName);
+    syslog (standardPriority, str);
+    closelog();
 }

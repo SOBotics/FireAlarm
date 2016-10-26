@@ -7,7 +7,7 @@
 
 void printErrorLogs (RunningCommand *command, void *ctx)
 {
-    ChatBot *bot = ctx;
+    /*ChatBot *bot = ctx;
     Log **logs = bot->log;
     unsigned i;
     char *message = malloc (sizeof (char) * bot->totalLogs * 512 + 256);
@@ -36,7 +36,19 @@ void printErrorLogs (RunningCommand *command, void *ctx)
     //postReply (bot->room, "The error logs are:", command->message);
     postMessage (bot->room, message);
     free (message);
-    return;
+    return;*/
+
+    ChatBot *bot = ctx;
+    char *str;
+    asprintf (&str, "cat /var/log/syslog | grep "ERROR_STR" > logs");
+    system (str);
+    free (str);
+    FILE *file = fopen ("logs", "r");
+    char *logs = malloc (sizeof (char) * 256);
+    char line [256];
+    //while (fgets(line, sizeof (line), file) != NULL);
+    fclose (file);
+    free (logs);
 }
 
 void clearErrorLogs (RunningCommand *command, void *ctx)

@@ -109,7 +109,7 @@ unsigned commandPrivCheck (RunningCommand *command, ChatBot *bot)
     int commandPriv = command->command->privileges;
 
     if ((isPrivileged & commandPriv) != commandPriv) {
-        postReply(bot->room, "You do not have priveleges to run that command", command->message);
+        postReply(bot->room, "You do not have privileges to run that command.", command->message);
         return 0;
     }
 

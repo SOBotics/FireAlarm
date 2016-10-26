@@ -301,3 +301,24 @@ while (i != strlen (str))
 str = temp;
 }
 
+char *getCurrentTime ()
+{
+    time_t t;
+    time (&t);
+    return asctime (localtime (&t));
+}
+
+char *readLine (FILE *file, int lineNum)
+{
+    char *line = malloc (sizeof (char) * 256);
+    unsigned i;
+    for (i = 0; fgets(line, sizeof (line), file) != NULL; i ++)
+    {
+        if (i == lineNum)
+        {
+            break;
+        }
+    }
+    return line;
+}
+

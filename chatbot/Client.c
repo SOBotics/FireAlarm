@@ -125,7 +125,6 @@ Client *createClient(const char *host, const char *cookiefile) {
 void getFkey(Client *client, char *data) {
     //Find the fkey
     char *fkeyLocation = strstr(data, "name=\"fkey\"");
-    //printf ("FUNCTION GETFKEY CALLED>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>\n");
     //printf ("\n%s\n", data);
     if (fkeyLocation == NULL) {
         client->fkey = NULL;
