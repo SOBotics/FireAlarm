@@ -21,7 +21,8 @@
 #include "Filter.h"
 //#include "Logs.h"
 
-#define REPORT_HEADER "Potentially bad question"
+//#define REPORT_HEADER "Potentially bad question"
+#define REPORT_HEADER "[ [FireAlarm](https://github.com/NobodyNada/FireAlarm) ] Potentially bad question"
 //#define THRESHOLD 1000
 
 long THRESHOLD = 1000;
@@ -434,7 +435,8 @@ void processMessage(ChatBot *bot, ChatMessage *message) {
         prepareCommand(bot, message, messageText);
 
     }
-    else if (bot->reportsWaiting != -1 && strstr(messageText, REPORT_HEADER)) {
+    //else if (bot->reportsWaiting != -1 && strstr(messageText, REPORT_HEADER)) {
+    else if (bot->reportsWaiting != -1 && strstr(messageText, "[ <a href=\"https://github.com/NobodyNada/FireAlarm\" rel=\"nofollow noopener noreferrer\">FireAlarm</a> ]")) {
         bot->latestReports[bot->reportsWaiting--]->messageID = message->id;
         deleteChatMessage(message);
     }
