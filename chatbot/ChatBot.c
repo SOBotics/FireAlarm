@@ -22,7 +22,7 @@
 //#include "Logs.h"
 
 //#define REPORT_HEADER "Potentially bad question"
-#define REPORT_HEADER "[ [FireAlarm](https://github.com/NobodyNada/FireAlarm) ] Potentially bad question"
+#define REPORT_HEADER "[ [FireAlarm](https://github.com/NobodyNada/FireAlarm) ] "
 //#define THRESHOLD 1000
 
 long THRESHOLD = 1000;
@@ -531,7 +531,18 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     char *title = cJSON_GetObjectItem(postJSON, "title")->valuestring;
     char *body = cJSON_GetObjectItem(postJSON, "body")->valuestring;
     char *type = cJSON_GetObjectItem(postJSON, "post_type")->valuestring;
-    unsigned userID = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "user_id")->valueint;
+    unsigned userID;
+
+    //Checking if OP is deleted
+    if (strcmp (cJSON_GetObjectItem (cJSON_GetObjectItem (postJSON, "owner"), "user_type")->valuestring, "does_not_exist"))
+    {
+        userID = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "user_id")->valueint;
+    }
+    else
+    {
+        puts ("OP is deleted!");
+        userID = -1;
+    }
 
     Post *p = createPost(title, body, postID, strcmp(type, "answer") == 0, userID);
 
@@ -595,12 +606,13 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         const size_t maxMessage = strlen(messageBuf) + strlen(post->title) + strlen(REPORT_HEADER) + strlen (notifString) + 256;
         //puts ("Completed line 578.");
         char *message = malloc(maxMessage);
+        char *tag = getTagsByID(bot, post->postID);
        // puts ("Completed line 580.");
         //char *notif = getNotificationString(bot, post);
         //puts ("Completed line 582.");
         snprintf(message, maxMessage,
-                 REPORT_HEADER " (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) %s",
-                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, notifString);
+                 REPORT_HEADER " [tag:%s] Potentially bad post (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) %s",
+                 tag, messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, notifString);
         //puts ("Completed preparing report.");
         //free(notif);
         //if (notifString != NULL)
@@ -1029,7 +1041,7 @@ char *getUsernameByID (ChatBot *bot, unsigned long userID)
 
 }
 
-char **getTagsByID (ChatBot *bot, unsigned long postID)
+char *getTagsByID (ChatBot *bot, unsigned long postID)
 {
     pthread_mutex_lock(&bot->room->clientLock);
     CURL *curl = bot->room->client->curl;
@@ -1045,7 +1057,7 @@ char **getTagsByID (ChatBot *bot, unsigned long postID)
     char request [max];
 
     snprintf (request, max,
-              "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=default",
+              "https://api.stackexchange.com/2.2/questions/%lu?order=desc&sort=activity&site=stackoverflow&filter=default&key="API_KEY,
               postID);
 
     printf ("API request is %s\n", request);
@@ -1079,24 +1091,104 @@ char **getTagsByID (ChatBot *bot, unsigned long postID)
         postMessage(bot->room, str);
         free(str);
     }
-    cJSON *tagJSON = cJSON_GetArrayItem (json, "tags");
-    //unsigned size = cJSON_GetArraySize (tagJSON);
-    unsigned size = 3;
-    char **tags;
-    for (unsigned i = 0; i < size; i ++)
+    char **tags = malloc (sizeof (char) * 6 * 64);
+    tags [0] = 0;
+    char *str = cJSON_Print (json);
+    //char tag [64];
+    char *tag = malloc (sizeof (char) * 64);
+    tag [0] = 0;
+    str = strstr (str, "tags");
+    puts (str);
+    str = strstr (str, "[");
+    str = strstr (str, "\"");
+    str ++;
+    unsigned i;
+    for (i = 0; str [i] != '"'; i ++)
     {
-        tags [i] = malloc (sizeof (char) * 40);
-        //tags [i] = cJSON_GetObjectItem (tagJSON, i)->valuestring;
-        strcpy (tags [i], cJSON_GetObjectItem (tagJSON, i)->valuestring);
+        //printf ("%c", str [i]);
+        //sprintf (tag + strlen (tag), "%c", str [i]);
+        printf ("%c\n", str [i]);
+        tag [i] = str [i];
+    }
+    //puts ("\n");
+    tag [strlen (tag)] = 0;
+    /*removeSpaces(tag);
+    removeSubstring(tag, "<br>");
+    removeChar(tag, "�");
+    removeChar(tag, "@");
+    removeSpaces (tag);*/
+    puts (tag);
+    /*if (isValidTag(bot, tag))
+    {
+        return tag;
+    }
+    else
+    {
+        while (!isValidTag (bot, tag))
+        {
+            tag [strlen (tag) - 1];
+        }
+        return tag;
+    }*/
+    return tag;
+    sprintf (tags, "%s\n", tag);
+    memset(tag, 0, sizeof (tag));
+    str = strstr (str, ",");
+    str = strstr (str, "\"");
+    str ++;
+    for (i = 0; str [i] != '"'; i ++)
+    {
+        //printf ("%c", str [i]);
+        sprintf (tag + strlen (tag), "%c", str [i]);
+    }
+        //sprintf (tag + strlen (tag), "\n");
+        sprintf (tags [1], "%s\n", tag);
+        memset(tag, 0, sizeof (tag));
+    //puts ("\n");
+    str = strstr (str, ",");
+    str = strstr (str, "\"");
+    str ++;
+    for (i = 0; str [i] != '"'; i ++)
+    {
+        //printf ("%c", str [i]);
+        sprintf (tag + strlen (tag), "%c", str [i]);
+    }
+    //puts ("\n");
+        //sprintf (tag + strlen (tag), "\n");
+        sprintf (tags [2], "%s\n", tag);
+    memset (tag, 0, sizeof (tag));
+    str = strstr (str, ",");
+    str = strstr (str, "\"");
+    str ++;
+    for (i = 0; str [i] != '"'; i ++)
+    {
+        //printf ("%c", str [i]);
+        sprintf (tag + strlen (tag), "%c", str [i]);
+    }
+    //puts ("\n");
+        //sprintf (tag + strlen (tag), "\n");
+    sprintf (tags [3], "%s\n", tag);
+        memset(tag, 0, sizeof (tag));
+
+    str = strstr (str, ",");
+    str = strstr (str, "\"");
+    str ++;
+    for (i = 0; str [i] != '"'; i ++)
+    {
+        //printf ("%c", str [i]);
+        sprintf (tag + strlen (tag), "%c", str [i]);
+    }
+    //puts ("\n");
+        //sprintf (tag + strlen (tag), "\n");
+        sprintf (tags [4], "%s\n", tag);
+        memset(tag, 0, sizeof (tag));
+
+    for (i = 0; i < 5; i ++)
+    {
+        puts (tags [i]);
     }
 
-    //char **tags = cJSON_GetArrayItem (json, "tags");
-
-    //char **tags = cJSON_GetObjectItem (json, "tags")->valuestring;
-    //strcpy (tags [0], "java");
-
-    //cJSON_Delete (json);
-    return tags;
+        //return tags;
 }
 
 Filter *getFilterByTag (ChatBot *bot, char *tag)
@@ -1196,7 +1288,7 @@ int isValidTag (ChatBot *bot, char *tag)
     char request [max];
 
     snprintf (request, max,
-              "https://api.stackexchange.com/2.2/tags/%s/info?order=desc&sort=popular&site=stackoverflow&filter=default",
+              "https://api.stackexchange.com/2.2/tags/%s/info?order=desc&sort=popular&site=stackoverflow&filter=default&key="API_KEY,
               tag);
 
     curl_easy_setopt(curl, CURLOPT_URL, request);
@@ -1228,11 +1320,11 @@ int isValidTag (ChatBot *bot, char *tag)
         free(str);
     }
 
-    /*cJSON *tagJSON = cJSON_GetArrayItem(cJSON_GetObjectItem(json, "items"), 0);
+    cJSON *tagJSON = cJSON_GetArrayItem(cJSON_GetObjectItem(json, "items"), 0);
     if (tagJSON == NULL) {
         cJSON_Delete(json);
         return 0;
-    }*/
+    }
 
     cJSON_Delete (json);
     return 1;

@@ -293,7 +293,7 @@ int main(int argc, const char * argv[]) {
 
     //ChatRoom *roomPostTrue = createChatRoom (client, 773); //773 is room number of LQPHQ
 
-    ChatRoom *room = createChatRoom(client, 111347); // 111347 is SOBotics; 123602 is FA Dev
+    ChatRoom *room = createChatRoom(client, 123602); // 111347 is SOBotics; 123602 is FA Dev
 
     enterChatRoom(room);
     //enterChatRoom (roomPostTrue);
@@ -308,7 +308,7 @@ int main(int argc, const char * argv[]) {
 
     Command *commands[] = {
         createCommand("I can put anything I want here; the first command runs when no other commands match", 0, unrecognizedCommand),
-        createCommand("test1", 0, test1Callback),
+        createCommand("test1 ...", 0, test1Callback),
         createCommand("test1 test2 ...", 0, testVarCallback),
         createCommand("test1 * test3", 0, testArgCallback),
         createCommand("test", 0, test2Callback),

@@ -82,7 +82,7 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
 
     if (filter->isDisabled)
     {
-        puts ("Filter is disabled!");
+       // puts ("Filter is disabled!");
         return 0;
     }
 
@@ -153,6 +153,12 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
             return 0;
         case FILTER_NOQUESTION:
             if (!strstr (post->body, "?"))
+            {
+                return 1;
+            }
+            return 0;
+        case FILTER_LINK:
+            if (strstr (post->body, "https://") || strstr (post->body, "http://"))
             {
                 return 1;
             }

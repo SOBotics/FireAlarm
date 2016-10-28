@@ -9,10 +9,22 @@
 #ifndef test_commands_h
 #define test_commands_h
 
+void getTagsTest (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    unsigned long postID = strtol (command->argv [0], NULL, 10);
+
+    char *tags = getTagsByID (bot, postID);
+    char *str;
+    asprintf (&str, "The tags are: %s", tags);
+    postMessage (bot->room, str);
+    free (str);
+    return;
+}
 
 void test1Callback(RunningCommand *command, void *ctx) {
     puts("Test 1");
-    sleep(10);
+    getTagsTest (command, ctx);
 }
 
 void testVarCallback(RunningCommand *command, void *ctx) {
@@ -33,19 +45,6 @@ void test2Callback(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
     char *str;
     asprintf (&str, "bot->reportsUntilAnalysis is %d", bot->reportsUntilAnalysis);
-    postMessage (bot->room, str);
-    free (str);
-    return;
-}
-
-void getTagsTest (RunningCommand *command, void *ctx)
-{
-    ChatBot *bot = ctx;
-    unsigned long postID = strtol (command->argv [0], NULL, 10);
-
-    char **tags = getTagsByID (bot, postID);
-    char *str;
-    asprintf (&str, "The tags are: %s %s %s", tags [0], tags [1], tags [2]);
     postMessage (bot->room, str);
     free (str);
     return;

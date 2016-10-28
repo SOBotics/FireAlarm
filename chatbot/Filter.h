@@ -22,7 +22,8 @@ typedef enum {
     FILTER_TAG = 3,
     FILTER_CAPS = 4,
     FILTER_TEXTWALL = 5,
-    FILTER_NOQUESTION = 6
+    FILTER_NOQUESTION = 6,
+    FILTER_LINK = 7
 }FilterType;
 
 typedef struct {
