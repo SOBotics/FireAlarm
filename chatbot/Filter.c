@@ -56,6 +56,10 @@ int filterNamed (char *name)
     {
         return FILTER_TEXTWALL;
     }
+    else if (!strcmp (name, "exclamation"))
+    {
+        return FILTER_OVEREXCLAMATION;
+    }
     return -1;
 }
 
@@ -79,10 +83,16 @@ unsigned char matchRegexFilter(Post *post, Filter *f, unsigned *outStart, unsign
 
 unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsigned *outStart, unsigned *outEnd) {
     unsigned titleLength;
+    char *body;
 
     if (filter->isDisabled)
     {
        // puts ("Filter is disabled!");
+        return 0;
+    }
+
+    if (getUserRepByID(bot, post->userID) > 500)
+    {
         return 0;
     }
 
@@ -98,32 +108,7 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
         case FILTER_REGEX:
             return matchRegexFilter(post, filter, outStart, outEnd);
         case FILTER_SHORTBODY:
-            /*if (post == NULL)
-            {
-                puts ("Post is NULL!\n");
-                return 0;
-            }*/
-            /*if (post->body == NULL)
-            {
-                printf ("post body is NULL!\n");
-                return 0;
-            }
-            for (unsigned i = 0; i < 202; i ++)
-            {
-                if (post->body [i] == '\0')
-                {
-                    return 1;
-                }
-            }
-            return 0;*/
-            //printf ("\nPost length: %ld\n", strlen (post->body));
-            //printf ("Post body is %s\n", post->body);
-            //return strlen(post->body) < 500;
-            if (strlen (post->body) < 500)
-            {
-                return 1;
-            }
-            return 0;
+            return strlen(post->body) < 500;
         case FILTER_TAG:
             return matchTagFilter (bot, post, filter);
         case FILTER_CAPS:
@@ -146,7 +131,7 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
             }
             return 0;
         case FILTER_TEXTWALL:
-            if (!strstr (post->body, "<code>"))
+            if (!strstr (post->body, "<code>") && post->body > 50)
             {
                 return 1;
             }
@@ -158,10 +143,31 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
             }
             return 0;
         case FILTER_LINK:
-            if (strstr (post->body, "https://") || strstr (post->body, "http://"))
+            if ((strstr (post->body, "https://") || strstr (post->body, "http://")) && !strstr (post->body, "<code>"))
             {
                 return 1;
             }
+            return 0;
+        case FILTER_OVEREXCLAMATION:
+            body = malloc (post->body + 1);
+            strcpy (body, post->body);
+            char *i = body;
+            char *j = body;
+            while(*j != 0)
+            {
+                *i = *j++;
+                if(*i == '!')
+                    i++;
+            }
+            *i = 0;
+
+            unsigned length = strlen (body);
+            if (length > 4 && !strstr (post->body, "<code>"))
+            {
+                free (body);
+                return 1;
+            }
+            free (body);
             return 0;
         default:
             fprintf(stderr, "Invalid filter type %d\n", filter->type);

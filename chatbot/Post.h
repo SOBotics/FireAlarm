@@ -17,6 +17,7 @@ typedef struct {
     unsigned long postID;
     unsigned char isAnswer;
     unsigned long userID;
+    unsigned userRep;
 }Post;
 
 Post *createPost(const char *title, const char *body, unsigned long postID, unsigned char isAnswer, unsigned long userID);

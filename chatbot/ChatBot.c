@@ -463,7 +463,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     if (bot->apiFilter == NULL) {
         checkCURL(curl_easy_setopt(curl, CURLOPT_URL,
                                    "api.stackexchange.com/2.2/filters/create"
-                                   "?include=post.title;post.body;question.tags;user.user_id;question.closed_reason&unsafe=false&key="API_KEY
+                                   "?include=question.title;question.body;question.tags;user.user_id;user.user_type;question.closed_reason&unsafe=false&key="API_KEY
                                    ));
         checkCURL(curl_easy_perform(curl));
 
@@ -483,7 +483,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
     unsigned max = 256;
     char request[max];
     snprintf(request, max,
-             "https://api.stackexchange.com/posts/%lu?site=stackoverflow&filter=%s&key="API_KEY,
+             "https://api.stackexchange.com/questions/%lu?site=stackoverflow&filter=%s&key="API_KEY,
              postID, bot->apiFilter
              );
     curl_easy_setopt(curl, CURLOPT_URL, request);
@@ -530,18 +530,20 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
 
     char *title = cJSON_GetObjectItem(postJSON, "title")->valuestring;
     char *body = cJSON_GetObjectItem(postJSON, "body")->valuestring;
-    char *type = cJSON_GetObjectItem(postJSON, "post_type")->valuestring;
-    unsigned userID;
+    char *type = "question";
+    unsigned long userID;
+    unsigned userRep;
 
     //Checking if OP is deleted
-    if (strcmp (cJSON_GetObjectItem (cJSON_GetObjectItem (postJSON, "owner"), "user_type")->valuestring, "does_not_exist"))
+    if (strcmp (cJSON_GetObjectItem (cJSON_GetObjectItem (postJSON, "owner"), "user_type")->valuestring, "does_not_exist") == 0)
     {
-        userID = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "user_id")->valueint;
+        puts ("OP is deleted!");
+        userID = 0;
     }
     else
     {
-        puts ("OP is deleted!");
-        userID = -1;
+        userID = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "user_id")->valueint;
+        //userRep = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "reputation")->valueint;
     }
 
     Post *p = createPost(title, body, postID, strcmp(type, "answer") == 0, userID);
@@ -561,17 +563,6 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         puts ("\nNULL post!\n");
         return 0;
     }
-    /*else if (post->body == NULL)
-    {
-        puts ("Post->body is NULL!");
-        return 0;
-    }*/
-    //else if (post->isAnswer == 1)
-   /* {
-        puts ("Checking answer :p\n");
-        return 0;
-    }*/
-    //printf ("Checking post: %lu\n", post->postID);
 
     unsigned likelihood = 0;
     unsigned bodyLength = 1;
@@ -1415,6 +1406,67 @@ Report **getReportsByFilter (ChatBot *bot, unsigned filterType, unsigned totalRe
     }
 
     return reportsDetected;
+}
+
+unsigned getUserRepByID (ChatBot *bot, unsigned long userID)
+{
+    pthread_mutex_lock(&bot->room->clientLock);
+        CURL *curl = bot->room->client->curl;
+
+        checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
+        OutBuffer buffer;
+        buffer.data = NULL;
+        checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
+
+        curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip, deflate");
+
+        unsigned max = 256;
+        char request [max];
+
+        snprintf (request, max,
+                  "http://api.stackexchange.com/2.2/users/%lu?order=desc&sort=reputation&site=stackoverflow&key="API_KEY, userID);
+
+        curl_easy_setopt(curl, CURLOPT_URL, request);
+
+
+
+        checkCURL(curl_easy_perform(curl));
+
+        checkCURL(curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""));
+
+
+        pthread_mutex_unlock(&bot->room->clientLock);
+
+        cJSON *json = cJSON_Parse(buffer.data);
+
+        free(buffer.data);
+
+        if (!json || cJSON_GetObjectItem(json, "error_id")) {
+            if (json) {
+                cJSON_Delete(json);
+            }
+            puts("Error fetching post!");
+            return 0;
+        }
+
+        cJSON *backoff;
+        if ((backoff = cJSON_GetObjectItem(json, "backoff"))) {
+            char *str;
+            asprintf(&str, "Recieved backoff: %d", backoff->valueint);
+            postMessage(bot->room, str);
+            free(str);
+        }
+
+        cJSON *userJSON = cJSON_GetArrayItem(cJSON_GetObjectItem(json, "items"), 0);
+        if (userJSON == NULL) {
+            cJSON_Delete(json);
+            return NULL;
+        }
+
+        unsigned reputation = cJSON_GetObjectItem (userJSON, "reputation")->valueint;
+
+        cJSON_Delete (json);
+        return reputation;
 }
 
 int apiQuota (ChatBot *bot)
