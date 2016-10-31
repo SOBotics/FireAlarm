@@ -46,6 +46,40 @@ void removeSpaces(char* source)
     return;
 }
 
+//Copied from http://stackoverflow.com/a/784455/5735775
+void reverseString(char *str)
+{
+    /* skip null */
+    if (str == 0)
+    {
+    	return;
+    }
+
+    /* skip empty string */
+    if (*str == 0)
+    {
+    	return;
+    }
+
+    /* get range */
+    char *start = str;
+    char *end = start + strlen(str) - 1; /* -1 for \0 */
+    char temp;
+
+    /* reverse */
+    while (end > start)
+    {
+    	/* swap */
+    	temp = *start;
+    	*start = *end;
+    	*end = temp;
+
+    	/* move */
+    	++start;
+    	--end;
+    }
+}
+
 int isTagProgrammingRelated (char *tag)
 {
     char *progTags[] = {

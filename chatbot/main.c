@@ -291,7 +291,7 @@ int main(int argc, const char * argv[]) {
         }
     }
 
-    //ChatRoom *roomPostTrue = createChatRoom (client, 773); //773 is room number of LQPHQ
+    //ChatRoom *roomPostTrue = createChatRoom (client, 111347); //773 is room number of LQPHQ
 
     ChatRoom *room = createChatRoom(client, 123602); // 111347 is SOBotics; 123602 is FA Dev
 
@@ -419,6 +419,7 @@ int main(int argc, const char * argv[]) {
     }
 
     leaveRoom(bot->room);
+    //leaveRoom(bot->roomPostTrue);
 
     puts("Saving data...");
     saveFilters(bot->filters, bot->filterCount);

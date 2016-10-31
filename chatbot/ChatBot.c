@@ -22,7 +22,6 @@
 //#include "Logs.h"
 
 //#define REPORT_HEADER "Potentially bad question"
-#define REPORT_HEADER "[ [FireAlarm](https://github.com/NobodyNada/FireAlarm) ] "
 //#define THRESHOLD 1000
 
 long THRESHOLD = 1000;
@@ -514,7 +513,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
         char *str;
         asprintf(&str, "Recieved backoff: %d", backoff->valueint);
         postMessage(bot->room, str);
-        //sleep (backoff->valueint);
+        sleep (backoff->valueint);
         free(str);
         //return getPostByID (bot, postID);
     }
@@ -1080,6 +1079,7 @@ char *getTagsByID (ChatBot *bot, unsigned long postID)
         char *str;
         asprintf(&str, "Recieved backoff: %d", backoff->valueint);
         postMessage(bot->room, str);
+        sleep (backoff->valueint);
         free(str);
     }
     char **tags = malloc (sizeof (char) * 6 * 64);
@@ -1087,6 +1087,7 @@ char *getTagsByID (ChatBot *bot, unsigned long postID)
     char *str = cJSON_Print (json);
     //char tag [64];
     char *tag = malloc (sizeof (char) * 64);
+    char lastChar;
     tag [0] = 0;
     str = strstr (str, "tags");
     puts (str);
@@ -1099,6 +1100,7 @@ char *getTagsByID (ChatBot *bot, unsigned long postID)
         //printf ("%c", str [i]);
         //sprintf (tag + strlen (tag), "%c", str [i]);
         printf ("%c\n", str [i]);
+        lastChar = str [i];
         tag [i] = str [i];
     }
     //puts ("\n");
@@ -1108,6 +1110,11 @@ char *getTagsByID (ChatBot *bot, unsigned long postID)
     removeChar(tag, "�");
     removeChar(tag, "@");
     removeSpaces (tag);*/
+    reverseString(tag);
+    char *someStr;
+    asprintf (&someStr, "%c", lastChar);
+    tag = strstr (tag, someStr);
+    reverseString (tag);
     puts (tag);
     /*if (isValidTag(bot, tag))
     {

@@ -17,3 +17,4 @@ void removeChar (char *str, char c); */
 unsigned isStringContainingNumbers2 (char *str);
 unsigned isFileEmpty (FILE *file);
 char *getCurrentTime ();
+void reverseString(char *str);

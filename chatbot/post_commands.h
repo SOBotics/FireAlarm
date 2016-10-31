@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include "Post.h"
+#include "ChatBot.h"
 
 void checkPostCallback(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
@@ -111,6 +112,7 @@ void manualGetPosts (RunningCommand *command, void *ctx)
 unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) {
     ChatBot *bot = ctx;
     Post *post;
+    Report *report;
     char messageString [256];
     char type [32];
     char type2 [32];
@@ -140,10 +142,11 @@ unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) 
 
         bot->latestReports[0]->confirmation = confirm;
         post = bot->latestReports[0]->post;
+        report = bot->latestReports [0];
         //editFilter (bot, post, confirm);
     }
     else {
-        Report *report = reportWithMessage(bot, command->message->replyID);
+        report = reportWithMessage(bot, command->message->replyID);
 
         if (report) {
             if ((report->confirmation == 0 || report->confirmation == 1) &&
@@ -177,7 +180,8 @@ unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) 
 
     if (confirm == 1)
     {
-        sprintf (messageString, "**Bad Post:** [%s](http://stackoverflow.com/%s/%lu)", post->title, post->isAnswer ? "a" : "q", post->postID);
+        sprintf (messageString, REPORT_HEADER" [True Positive](http://chat.stackoverflow.com/transcript/message/%lu#%lu) report: [%s](http://stackoverflow.com/%s/%lu)",
+                                                report->messageID, report->messageID, post->title, post->isAnswer ? "a" : "q", post->postID);
         //postMessage (bot->roomPostTrue, messageString);
         //not going to post to LQPHQ until the bot is more accurate
     }

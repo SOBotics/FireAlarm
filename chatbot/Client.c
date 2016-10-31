@@ -564,6 +564,16 @@ unsigned long connectClientToRoom(Client *client, unsigned roomID) {
         fputs("Could not find fkey!\n", stderr);
         exit(EXIT_FAILURE);
     }
+    /*while (client->fkey == NULL && i < 10)
+    {
+        fputs ("Could not find fkey!\n", stderr);
+        getFkey(client, buffer.data);
+        //free(buffer.data);
+        //buffer.data = NULL;
+    }*/
+
+    //free (buffer.data);
+    //buffer.data = NULL;
 
     setupWebsocketContext(client);
     //client->ws = connectWebsocket(client, "qa.sockets.stackexchange.com", "/");
