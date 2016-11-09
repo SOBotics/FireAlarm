@@ -382,8 +382,8 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 				if let parent = event["parent_id"] as? Int {
 					replyID = parent
 					//replace the reply markdown with the rendered ping
-					var components = content.components(separatedBy: CharacterSet.whitespaces)
-					let renderedComponents = rendered.components(separatedBy: CharacterSet.whitespaces)
+					var components = content.components(separatedBy: .whitespaces)
+					let renderedComponents = rendered.components(separatedBy: .whitespaces)
 					
 					if !components.isEmpty && !rendered.isEmpty {
 						components[0] = renderedComponents[0]

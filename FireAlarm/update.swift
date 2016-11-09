@@ -27,7 +27,7 @@ func installUpdate() -> Bool {
 			"cd update && " +
 			"swiftc -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk " +
 			"-target x86_64-macosx10.11 -lz -lc++ -o ../FireAlarm FireAlarm/*.swift && " +
-			"git log --pretty=format:'%h' -n 1 > ../version-new.txt && " +
+			"git log --pretty=format:'oneline' -n 1 > ../version-new.txt && " +
 			"cd .. && " +
 			"rm -rf update) || " +
 			"(popd; " +
@@ -63,9 +63,17 @@ set {
 }
 }
 
+public func getShortVersion(_ version: String) -> String {
+	return version.characters.count > 8 ?
+		String(version.characters[version.characters.startIndex..<version.characters.index(version.characters.startIndex, offsetBy: 8)]) :
+	"<unknown version>"
+}
+
 public var version: String {
 	return _version ?? "<unknown version>"
 }
+
+public
 
 func prepareUpdate(_ bot: ChatBot) {
 	bot.room.postMessage("Installing update...")
@@ -75,7 +83,7 @@ func prepareUpdate(_ bot: ChatBot) {
 func update(_ bot: ChatBot) -> Bool {
 	
 	
-	let versionScript = "git ls-remote https://github.com/NobodyNada/FireAlarm swift | cut -c1-7 > available_version.txt"
+	let versionScript = "git ls-remote https://github.com/NobodyNada/FireAlarm swift | cut -d ' ' -f1 > available_version.txt"
 	
 	
 	
@@ -85,7 +93,9 @@ func update(_ bot: ChatBot) -> Bool {
 		let process = launchProcess(path: "/bin/bash", arguments: ["get_version.sh"])
 		process.waitUntilExit()
 		
-		let availableVersion = try String(contentsOfFile: "available_version.txt").replacingOccurrences(of: "\n", with: "")
+		let versionContents = try String(contentsOfFile: "available_version.txt").replacingOccurrences(of: "\n", with: " ")
+		let components = versionContents.components(separatedBy: " ")
+		let availableVersion = components.first ?? ""
 		
 		if currentVersion != availableVersion {
 			prepareUpdate(bot)
