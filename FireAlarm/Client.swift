@@ -255,15 +255,6 @@ open class Client: NSObject, URLSessionDataDelegate {
 		var error: NSError!
 		
 		queue.async {
-			#if os(Linux)
-				self.session.uploadTask(
-					with: request,
-					fromData: String(urlParameters: data).data(using: String.Encoding.utf8),
-					completionHandler: {inData, inResp, inError in
-						(responseData, resp, error) = (inData, inResp, inError as NSError!)
-						sema.signal()
-				}) .resume()
-			#else
 				self.session.uploadTask(
 					with: request,
 					from: String(urlParameters: data).data(using: String.Encoding.utf8),
@@ -271,8 +262,6 @@ open class Client: NSObject, URLSessionDataDelegate {
 						(responseData, resp, error) = (inData, inResp, inError as NSError!)
 						sema.signal()
 				}) .resume()
-			#endif
-			
 		}
 		
 		sema.wait()
