@@ -35,7 +35,7 @@ class CommandStatus: Command {
 		let pipe = Pipe()
 		let process = Process()
 		process.launchPath = "/usr/bin/env"
-		process.arguments = ["uname", "-mpv"]
+		process.arguments = ["uname", "-srm"]
 		process.standardOutput = pipe
 		process.launch()
 		
@@ -53,7 +53,7 @@ class CommandStatus: Command {
 		
 		let _ = sema.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(5))
 		
-		let status = "[FireAlarm-Swift](\(githubLink)) version \(version), running for \(uptimeStrings.joined(separator: " ")) on `\(machineInfo)`"
+		let status = "[FireAlarm-Swift](\(githubLink)) version \(version), running for \(uptimeStrings.joined(separator: " ")) on \(machineInfo)"
 		bot.room.postReply(status, to: message)
 	}
 }
