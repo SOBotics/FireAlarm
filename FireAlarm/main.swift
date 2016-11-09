@@ -232,7 +232,7 @@ func main() throws {
 	let room: ChatRoom
 	let development: Bool
 	if let devString = env["DEVELOPMENT"], let devRoom = Int(devString) {
-		room = ChatRoom(client: client, roomID: devRoom)  //FireAlarm Development
+		room = ChatRoom(client: client, roomID: devRoom)
 		development = true
 	}
 	else {
@@ -254,7 +254,19 @@ func main() throws {
 		try! FileManager.default.removeItem(atPath: "update-failure")
 	}
 	else if let new = try? String(contentsOfFile: "version-new.txt") {
-		room.postMessage("Updated from \(currentVersion) to \(new).")
+		let components = new.components(separatedBy: " ")
+		let new = components.first ?? ""
+		let newShort = getShortVersion(new)
+		let newLink = "//github.com/NobodyNada/FireAlarm/commit/\(new)"
+		
+		let old = currentVersion
+		let oldShort = getShortVersion(old)
+		let oldLink = "//github.com/NobodyNada/FireAlarm/commit/\(old)"
+		
+		let message = components.count > 1 ? (" (" + components[1..<components.count].joined(separator: " ") + ")") : ""
+		
+		room.postMessage("Updated from [`\(oldShort)`](\(oldLink)) to [`\(newShort)`](\(newLink))\(message).")
+		
 		try! new.write(toFile: "version.txt", atomically: true, encoding: .utf8)
 		currentVersion = new
 		try! FileManager.default.removeItem(atPath: "version-new.txt")
