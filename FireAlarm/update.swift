@@ -27,7 +27,7 @@ func installUpdate() -> Bool {
 			"cd update && " +
 			"swiftc -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk " +
 			"-target x86_64-macosx10.11 -lz -lc++ -o ../FireAlarm FireAlarm/*.swift && " +
-			"git log --pretty=format:'oneline' -n 1 > ../version-new.txt && " +
+			"git log --format='oneline' -n 1 > ../version-new.txt && " +
 			"cd .. && " +
 			"rm -rf update) || " +
 			"(popd; " +
@@ -83,7 +83,7 @@ func prepareUpdate(_ bot: ChatBot) {
 func update(_ bot: ChatBot) -> Bool {
 	
 	
-	let versionScript = "git ls-remote https://github.com/NobodyNada/FireAlarm swift | cut -d ' ' -f1 > available_version.txt"
+	let versionScript = "git ls-remote https://github.com/NobodyNada/FireAlarm swift | cut -d '\t' -f1 > available_version.txt"
 	
 	
 	
