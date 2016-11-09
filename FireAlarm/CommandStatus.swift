@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Dispatch
 
 class CommandStatus: Command {
 	override class func usage() -> [String] {
