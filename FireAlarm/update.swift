@@ -23,10 +23,10 @@ func launchProcess(path: String, arguments: [String]) -> Process {
 func installUpdate() -> Bool {
 	do {
 		#if os(Linux)
+			let compile = "swiftc -l:libz.a -o ../FireAlarm FireAlarm/*.swift"
+		#else
 			let compile = "swiftc -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk " +
 			"-target x86_64-macosx10.11 -lz -lc++ -o ../FireAlarm FireAlarm/*.swift "
-		#else
-			let compile = "swiftc -l:libz.a -o ../FireAlarm FireAlarm/*.swift "
 		#endif
 		let updateScript = "rm -rf update;pushd .;" +
 			"(git clone -b swift \"https://github.com/NobodyNada/FireAlarm.git\" update && " +
