@@ -217,7 +217,7 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 	
 	var timestamp: Int = 0
 	
-	var messageQueue = [String]()
+	var messageQueue = [(String, ((Int) -> Void)?)]()
 	
 	init(client: Client, roomID: Int) {
 		self.client = client
@@ -263,10 +263,12 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 	fileprivate func messageQueueHandler() {
 		while messageQueue.count != 0 {
 			var result: String? = nil
+			let text = messageQueue[0].0
+			let completion = messageQueue[0].1
 			do {
 				result = try client.post(
 					"https://chat.\(client.host.rawValue)/chats/\(roomID)/messages/new",
-					["text":messageQueue[0], "fkey":client.fkey]
+					["text":text, "fkey":client.fkey]
 				)
 			}
 			catch {
@@ -274,8 +276,17 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 			}
 			do {
 				if let json = result {
-					let _ = try client.parseJSON(json)
-					messageQueue.removeFirst()
+					let data = try client.parseJSON(json)
+					if let id = (data as? [String:AnyObject])?["id"] as? Int {
+						messageQueue.removeFirst()
+					
+						if completion != nil {
+							completion!(id)
+						}
+					}
+					else if let r = result {
+						print(r)
+					}
 				}
 			}
 			catch {
@@ -290,11 +301,11 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 		}
 	}
 	
-	func postMessage(_ message: String) {
+	func postMessage(_ message: String, completion: ((Int) -> Void)? = nil) {
 		if message.characters.count == 0 {
 			return
 		}
-		messageQueue.append(message)
+		messageQueue.append((message, completion))
 		if messageQueue.count == 1 {
 			client.queue.async {
 				self.messageQueueHandler()
