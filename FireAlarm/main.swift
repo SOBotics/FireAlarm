@@ -257,11 +257,11 @@ func main() throws {
 		let components = new.components(separatedBy: " ")
 		let new = components.first ?? ""
 		let newShort = getShortVersion(new)
-		let newLink = "//github.com/NobodyNada/FireAlarm/commit/\(new)"
+		let newLink = getVersionLink(new)
 		
 		let old = currentVersion
 		let oldShort = getShortVersion(old)
-		let oldLink = "//github.com/NobodyNada/FireAlarm/commit/\(old)"
+		let oldLink = getVersionLink(old)
 		
 		let message = components.count > 1 ? (" (" + components[1..<components.count].joined(separator: " ") + ")") : ""
 		

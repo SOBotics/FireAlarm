@@ -54,7 +54,12 @@ class CommandStatus: Command {
 		
 		let _ = sema.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(5))
 		
-		let status = "[FireAlarm-Swift](\(githubLink)) version \(version), running for \(uptimeStrings.joined(separator: " ")) on \(machineInfo)"
+		let shortVersion = getShortVersion(version)
+		let link = getVersionLink(version)
+		
+		let status = "[FireAlarm-Swift](\(githubLink)) version [\(shortVersion)](\(link)), " +
+		"running for \(uptimeStrings.joined(separator: " ")) on \(machineInfo)"
+		
 		bot.room.postReply(status, to: message)
 	}
 }

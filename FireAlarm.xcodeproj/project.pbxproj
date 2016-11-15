@@ -27,6 +27,7 @@
 		ABAE422B1D73BA800018DF57 /* CommandTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE422A1D73BA800018DF57 /* CommandTest.swift */; };
 		ABAE422D1D73BA860018DF57 /* CommandHelp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE422C1D73BA860018DF57 /* CommandHelp.swift */; };
 		ABAE422F1D73BA8C0018DF57 /* CommandListRunning.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE422E1D73BA8C0018DF57 /* CommandListRunning.swift */; };
+		ABBC51871DD952BA00678B4E /* Levenshtein.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBC51861DD952BA00678B4E /* Levenshtein.swift */; };
 		ABD01E491D721B1800B1A7F8 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD01E481D721B1800B1A7F8 /* main.swift */; };
 		ABD01E501D721D4F00B1A7F8 /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD01E4F1D721D4F00B1A7F8 /* Client.swift */; };
 		ABF730B41D77A534002A606C /* CommandStop.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF730B31D77A534002A606C /* CommandStop.swift */; };
@@ -67,6 +68,7 @@
 		ABAE422A1D73BA800018DF57 /* CommandTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CommandTest.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		ABAE422C1D73BA860018DF57 /* CommandHelp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CommandHelp.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		ABAE422E1D73BA8C0018DF57 /* CommandListRunning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CommandListRunning.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		ABBC51861DD952BA00678B4E /* Levenshtein.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Levenshtein.swift; sourceTree = "<group>"; };
 		ABD01E451D721B1800B1A7F8 /* FireAlarm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FireAlarm; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABD01E481D721B1800B1A7F8 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		ABD01E4F1D721D4F00B1A7F8 /* Client.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 		ABAE421F1D7262690018DF57 /* Support */ = {
 			isa = PBXGroup;
 			children = (
+				ABBC51861DD952BA00678B4E /* Levenshtein.swift */,
 				ABA8FDCF1DAD904B0048DDC4 /* NSStringHTMLDecoding.swift */,
 				ABAE421B1D72620C0018DF57 /* WebSocket.swift */,
 				ABAE421D1D7262630018DF57 /* libz.tbd */,
@@ -260,6 +263,7 @@
 				AB8FCBAB1D9EBE90003ADCD5 /* update.swift in Sources */,
 				ABAE42211D73AAAE0018DF57 /* ChatUser.swift in Sources */,
 				ABAE422B1D73BA800018DF57 /* CommandTest.swift in Sources */,
+				ABBC51871DD952BA00678B4E /* Levenshtein.swift in Sources */,
 				ABFA23431D974B4D007C9EE4 /* Filter.swift in Sources */,
 				ABAE42231D73B7090018DF57 /* ChatBot.swift in Sources */,
 				AB8FCBB91DA05CD9003ADCD5 /* CommandCheckNotification.swift in Sources */,

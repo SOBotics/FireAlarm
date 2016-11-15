@@ -74,6 +74,10 @@ public func getShortVersion(_ version: String) -> String {
 	"<unknown version>"
 }
 
+public func getVersionLink(_ version: String) -> String {
+	return "//github.com/NobodyNada/FireAlarm/commit/\(version)"
+}
+
 public var version: String {
 	return _version ?? "<unknown version>"
 }

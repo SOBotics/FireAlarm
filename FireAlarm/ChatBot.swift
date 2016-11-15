@@ -53,10 +53,13 @@ open class ChatBot: ChatRoomDelegate {
 		
 		var args = [String]()
 		
+		var commandScores = [String:Int]()
+		
 		for command in commands {
 			let usages = command.usage()
 			
 			for i in 0..<usages.count {
+				var score = 0
 				let usage = usages[i]
 				args = []
 				
@@ -81,7 +84,7 @@ open class ChatBot: ChatRoomDelegate {
 				}
 				
 				
-				let minCount = usageComponents.last! == "..." ? lastIndex - 1 : lastIndex
+				let minCount = usageComponents.last! == "..." ? usageComponents.count - 1 : usageComponents.count
 				if components.count < minCount {
 					match = false
 				}
@@ -91,7 +94,74 @@ open class ChatBot: ChatRoomDelegate {
 					runCommand(command.init(bot: self, message: message, arguments: args, usageIndex: i))
 					return
 				}
+				else {
+					//Determine how similar the input was to this command.
+					//Higher score means more differences.
+					var availableComponents = components	//The components which have not been "used."
+					//Each component may only be matched once.
+					var availableUsageComponents = usageComponents.filter {
+						$0 != "*" && $0 != "..."
+					}
+					
+					//While there are unused components, iterate over all available components and remove the closest pairs.
+					
+					while !availableComponents.isEmpty && !availableUsageComponents.isEmpty {
+						var bestMatch: (score: Int, component: String, usageComponent: String)?
+						
+						for usageComponent in availableUsageComponents {
+							if usageComponent == "*" || usageComponent == "..." {
+								continue
+							}
+							
+							for component in availableComponents {
+								let distance = Levenshtein.distanceBetween(usageComponent, and: component)
+								let componentScore = min(distance, usageComponent.characters.count)
+								
+								if componentScore < bestMatch?.score ?? Int.max {
+									bestMatch = (score: componentScore, component: component, usageComponent: usageComponent)
+								}
+							}
+						}
+						
+						
+						if let (compScore, comp, usageComp) = bestMatch {
+							score += compScore
+							availableComponents.remove(at: availableComponents.index(of: comp)!)
+							availableUsageComponents.remove(at: availableUsageComponents.index(of: usageComp)!)
+						}
+					}
+					
+					
+					let args = usageComponents.filter {
+						$0 == "*" || $0 == "..."
+					}
+					for _ in args {
+						if !availableComponents.isEmpty {
+							availableComponents.removeFirst()
+						}
+					}
+					
+					for component in (availableComponents + availableUsageComponents) {
+						score += component.characters.count
+					}
+					
+					commandScores[usage] = score
+				}
 			}
+		}
+		
+		
+		
+		
+		var lowest: (command: String, score: Int)?
+		for (command, score) in commandScores {
+			if score < command.characters.count/2 && score < (lowest?.score ?? Int.max) {
+				lowest = (command, score)
+			}
+		}
+		
+		if let (command, _) = lowest {
+			room.postReply("Unrecognized command `\(components.joined(separator: " "))`; did you mean `\(command)`?", to: message)
 		}
 	}
 	
