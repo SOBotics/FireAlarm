@@ -33,6 +33,8 @@ class Filter: WebSocketDelegate {
 		self.bot = bot
 		client = bot.room.client
 		
+		print("Loading filter...")
+		
 		let data = try! Data(contentsOf: saveDirURL.appendingPathComponent("filter.json"))
 		let db = try! JSONSerialization.jsonObject(with: data, options: []) as! [String:Any]
 		initialProbability = db["initialProbability"] as! Double
@@ -40,11 +42,7 @@ class Filter: WebSocketDelegate {
 		for (word, probabilites) in db["wordProbabilities"] as! [String:[Double]] {
 			words[word] = Word(word, probabilites.first!, probabilites.last!)
 		}
-		/*words = (db["wordProbabilities"] as! [String:[Double]]).reduce([String:Word]()) {words, element in
-		var ret = words
-		ret[element.key] = Word(element.key, element.value.first!, element.value.last!)
-		return ret
-		}*/
+		
 		self.words = words
 	}
 	

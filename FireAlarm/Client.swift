@@ -5,6 +5,7 @@
 //  Created by NobodyNada on 8/27/16.
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
+//TODO: Refractor this class; it's kind of a mess.
 
 import Foundation
 import Dispatch
@@ -62,12 +63,21 @@ open class Client: NSObject, URLSessionDataDelegate {
 		return URL(string: domain)?.host ?? domain
 	}
 	
+	//Prints all of the cookies, for debugging.
+	private func printCookies(_ cookies: [HTTPCookie]) {
+		print(cookies.map { "\($0.domain)::\($0.name)::\($0.value)" }.joined(separator: "\n") + "\n\n")
+	}
+	
 	func addCookies(_ newCookies: [HTTPCookie], forHost host: String) {
 		var toAdd = newCookies.map {cookie -> HTTPCookie in
 			var properties = cookie.properties ?? [:]
 			properties[HTTPCookiePropertyKey.domain] = processCookieDomain(domain: cookie.domain)
 			return HTTPCookie(properties: properties) ?? cookie
 		}
+		
+		//print("Adding:")
+		//printCookies(newCookies)
+		
 		for i in 0..<cookies.count {	//for each existing cookie...
 			if let index = toAdd.index(where: {
 				$0.name == cookies[i].name && cookieHost(host, matchesDomain: cookies[i].domain)
@@ -78,6 +88,9 @@ open class Client: NSObject, URLSessionDataDelegate {
 			}
 		}
 		cookies.append(contentsOf: toAdd)
+		
+		//print("Cookies:")
+		//printCookies(cookies)
 	}
 	
 	func cookieHost(_ host: String, matchesDomain domain: String) -> Bool {
@@ -164,6 +177,80 @@ open class Client: NSObject, URLSessionDataDelegate {
 	enum RequestError: Error {
 		case invalidURL(url: String)
 		case notUTF8
+		case unknownError
+	}
+	
+	private class HTTPTask {
+		var task: URLSessionTask
+		var completion: (Data?, HTTPURLResponse?, Error?) -> Void
+		
+		var data: Data?
+		var response: HTTPURLResponse?
+		var error: Error?
+		
+		init(task: URLSessionTask, completion: @escaping (Data?, HTTPURLResponse?, Error?) -> Void) {
+			self.task = task
+			self.completion = completion
+		}
+	}
+	
+	private var tasks = [URLSessionTask:HTTPTask]()
+	
+	private var responseSemaphore: DispatchSemaphore?
+	
+	public func urlSession(
+		_ session: URLSession,
+		dataTask: URLSessionDataTask,
+		didReceive response: URLResponse,
+		completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+		
+		guard let task = tasks[dataTask] else {
+			print("\(dataTask) is not in client task list; cancelling")
+			completionHandler(.cancel)
+			return
+		}
+		
+		var headers = [String:String]()
+		for (k, v) in (response as? HTTPURLResponse)?.allHeaderFields ?? [:] {
+			headers[String(describing: k)] = String(describing: v)
+		}
+		
+		let url = response.url ?? URL(fileURLWithPath: "<invalid>")
+		
+		#if os(Linux)
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url), forHost: url.host ?? "")
+		#else
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url), forHost: url.host ?? "")
+		#endif
+		
+		task.response = response as? HTTPURLResponse
+		completionHandler(.allow)
+	}
+	
+	public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+		guard let task = tasks[dataTask] else {
+			print("\(dataTask) is not in client task list; ignoring")
+			return
+		}
+		
+		if task.data != nil {
+			task.data!.append(data)
+		}
+		else {
+			task.data = data
+		}
+	}
+	
+	public func urlSession(_ session: URLSession, task sessionTask: URLSessionTask, didCompleteWithError error: Error?) {
+		guard let task = tasks[sessionTask] else {
+			print("\(sessionTask) is not in client task list; ignoring")
+			return
+		}
+		task.error = error as? NSError
+		
+		task.completion(task.data, task.response, task.error)
+		
+		tasks[sessionTask] = nil
 	}
 	
 	public func urlSession(
@@ -171,7 +258,8 @@ open class Client: NSObject, URLSessionDataDelegate {
 		task: URLSessionTask,
 		willPerformHTTPRedirection response: HTTPURLResponse,
 		newRequest request: URLRequest,
-		completionHandler: @escaping (URLRequest?) -> Void) {
+		completionHandler: @escaping (URLRequest?) -> Void
+		) {
 		
 		var headers = [String:String]()
 		for (k, v) in response.allHeaderFields {
@@ -187,26 +275,33 @@ open class Client: NSObject, URLSessionDataDelegate {
 		completionHandler(request)
 	}
 	
+	private func performTask(_ task: URLSessionTask, completion: @escaping (Data?, HTTPURLResponse?, Error?) -> Void) {
+		tasks[task] = HTTPTask(task: task, completion: completion)
+		task.resume()
+	}
+	
 	func performRequest(_ request: URLRequest) throws -> (Data, HTTPURLResponse) {
 		var req = request
 		
 		let sema = DispatchSemaphore(value: 0)
 		var data: Data!
 		var resp: URLResponse!
-		var error: NSError!
+		var error: Error!
 		
 		let url = req.url ?? URL(fileURLWithPath: ("invalid"))
 		
 		for (key, val) in cookieHeaders(forURL: url) {
-			req.setValue(val, forHTTPHeaderField: key)
+			req.addValue(val, forHTTPHeaderField: key)
 		}
 		
+		
+		//TODO: I don't think this needs to be on the client queue anymore
 		queue.async {
-			
-			self.session.dataTask(with: req, completionHandler: {inData, inResp, inError in
-				(data, resp, error) = (inData, inResp, inError as NSError!)
+			let task = self.session.dataTask(with: req)
+			self.performTask(task) {inData, inResp, inError in
+				(data, resp, error) = (inData, inResp, inError)
 				sema.signal()
-			}) .resume()
+			}
 			
 		}
 		
@@ -216,16 +311,6 @@ open class Client: NSObject, URLSessionDataDelegate {
 			print(error)
 			throw error
 		}
-		//print(response.allHeaderFields)
-		var headers = [String:String]()
-		for (k, v) in response.allHeaderFields {
-			headers[String(describing: k)] = String(describing: v)
-		}
-		#if os(Linux)
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url), forHost: url.host ?? "")
-		#else
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url), forHost: url.host ?? "")
-		#endif
 		
 		return (data, response)
 	}
@@ -243,48 +328,40 @@ open class Client: NSObject, URLSessionDataDelegate {
 		guard let nsUrl = URL(string: url) else {
 			throw RequestError.invalidURL(url: url)
 		}
+		guard let data = String(urlParameters: data).data(using: String.Encoding.utf8) else {
+			throw RequestError.notUTF8
+		}
 		var request = URLRequest(url: nsUrl)
 		request.httpMethod = "POST"
-		//request.setValue(String(request.httpBody?.count ?? 0), forHTTPHeaderField: "Content-Length")
-		//request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type" )
+		
 		let url = request.url ?? URL(fileURLWithPath: ("invalid"))
 		for (key, val) in cookieHeaders(forURL: url ) {
-			request.setValue(val, forHTTPHeaderField: key)
+			request.addValue(val, forHTTPHeaderField: key)
 		}
 		
 		
 		let sema = DispatchSemaphore(value: 0)
-		var responseData: Data!
-		var resp: URLResponse!
-		var error: NSError!
+		
+		var responseData: Data?
+		var resp: HTTPURLResponse?
+		var responseError: Error?
 		
 		queue.async {
-				self.session.uploadTask(
-					with: request,
-					from: String(urlParameters: data).data(using: String.Encoding.utf8),
-					completionHandler: {inData, inResp, inError in
-						(responseData, resp, error) = (inData, inResp, inError as NSError!)
-						sema.signal()
-				}) .resume()
+			let task = self.session.uploadTask(with: request, from: data)
+			self.performTask(task) {data, response, error in
+				(responseData, resp, responseError) = (data, response, error)
+				sema.signal()
+			}
 		}
 		
 		sema.wait()
 		
-		guard let response = resp as? HTTPURLResponse , responseData != nil else {
-			print(error)
-			throw error
-		}
-		var headers = [String:String]()
-		for (k, v) in response.allHeaderFields {
-			headers[String(describing: k)] = String(describing: v)
-		}
-		#if os(Linux)
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url), forHost: url.host ?? "")
-		#else
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url), forHost: url.host ?? "")
-		#endif
 		
-		return (responseData, response)
+		guard let response = resp, responseData != nil else {
+			throw responseError ?? RequestError.unknownError
+		}
+		
+		return (responseData!, response)
 	}
 	
 	enum APIError: Error {
@@ -414,7 +491,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		
 		super.init()
 		
-		/*configuration.connectionProxyDictionary = [
+		configuration.connectionProxyDictionary = [
 		"HTTPEnable" : 1,
 		kCFNetworkProxiesHTTPProxy as AnyHashable : "192.168.1.234",
 		kCFNetworkProxiesHTTPPort as AnyHashable : 8080,
@@ -422,7 +499,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		"HTTPSEnable" : 1,
 		kCFNetworkProxiesHTTPSProxy as AnyHashable : "192.168.1.234",
 		kCFNetworkProxiesHTTPSPort as AnyHashable : 8080
-		]*/
+		]
 		
 		configuration.httpCookieStorage = nil
 		//clearCookies(configuration.httpCookieStorage!)
