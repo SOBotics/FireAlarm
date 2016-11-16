@@ -307,7 +307,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		
 		sema.wait()
 		
-		guard let response = resp as? HTTPURLResponse , data != nil else {
+		guard let response = resp as? HTTPURLResponse, data != nil else {
 			print(error)
 			throw error
 		}
@@ -504,9 +504,12 @@ open class Client: NSObject, URLSessionDataDelegate {
 		configuration.httpCookieStorage = nil
 		//clearCookies(configuration.httpCookieStorage!)
 		
+		let delegateQueue = OperationQueue()
+		delegateQueue.maxConcurrentOperationCount = 1
+		
 		session = URLSession(
 			configuration: configuration,
-			delegate: self, delegateQueue: nil
+			delegate: self, delegateQueue: delegateQueue
 		)
 	}
 	
