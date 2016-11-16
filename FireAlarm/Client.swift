@@ -69,9 +69,11 @@ open class Client: NSObject, URLSessionDataDelegate {
 			return HTTPCookie(properties: properties) ?? cookie
 		}
 		for i in 0..<cookies.count {	//for each existing cookie...
-			if let index = toAdd.index(where: { $0.name == cookies[i].name && $0.domain == cookies[i].domain }) {
+			if let index = toAdd.index(where: {
+				$0.name == cookies[i].name && cookieHost(host, matchesDomain: cookies[i].domain)
+			}) {
 				//if this cookie needs to be replaced, replace it
-				cookies[index] = toAdd[index]
+				cookies[i] = toAdd[index]
 				toAdd.remove(at: index)
 			}
 		}
