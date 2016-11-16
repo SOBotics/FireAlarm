@@ -277,9 +277,9 @@ open class Client: NSObject, URLSessionDataDelegate {
 			headers[String(describing: k)] = String(describing: v)
 		}
 		#if os(Linux)
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url), host: url.host ?? "")
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url), forHost: url.host ?? "")
 		#else
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url), host: url.host ?? "")
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url), forHost: url.host ?? "")
 		#endif
 		
 		return (responseData, response)
