@@ -17,7 +17,7 @@ open class ChatUser: CustomStringConvertible {
     fileprivate var _isRO: Bool?
 	
 	///Custom per-user persistent storage.  Must be serializable by JSONSerialization!
-	open var info: [String:AnyObject] = [:]
+	open var info: [String:Any] = [:]
     
     open var name: String {
         get {

@@ -62,7 +62,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		return URL(string: domain)?.host ?? domain
 	}
 	
-	func addCookies(_ newCookies: [HTTPCookie]) {
+	func addCookies(_ newCookies: [HTTPCookie], forHost host: String) {
 		var toAdd = newCookies.map {cookie -> HTTPCookie in
 			var properties = cookie.properties ?? [:]
 			properties[HTTPCookiePropertyKey.domain] = processCookieDomain(domain: cookie.domain)
@@ -175,10 +175,12 @@ open class Client: NSObject, URLSessionDataDelegate {
 		for (k, v) in response.allHeaderFields {
 			headers[String(describing: k)] = String(describing: v)
 		}
+		
+		let url = response.url ?? URL(fileURLWithPath: "invalid")
 		#if os(Linux)
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: response.url ?? URL(fileURLWithPath: "invalid")))
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url), forHost: url.host ?? "")
 		#else
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: response.url ?? URL(fileURLWithPath: "invalid")))
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url), forHost: url.host ?? "")
 		#endif
 		completionHandler(request)
 	}
@@ -218,9 +220,9 @@ open class Client: NSObject, URLSessionDataDelegate {
 			headers[String(describing: k)] = String(describing: v)
 		}
 		#if os(Linux)
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url))
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url), forHost: url.host ?? "")
 		#else
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url))
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url), forHost: url.host ?? "")
 		#endif
 		
 		return (data, response)
@@ -275,9 +277,9 @@ open class Client: NSObject, URLSessionDataDelegate {
 			headers[String(describing: k)] = String(describing: v)
 		}
 		#if os(Linux)
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url))
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, forURL: url), host: url.host ?? "")
 		#else
-			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url))
+			addCookies(HTTPCookie.cookies(withResponseHeaderFields: headers, for: url), host: url.host ?? "")
 		#endif
 		
 		return (responseData, response)
@@ -287,13 +289,13 @@ open class Client: NSObject, URLSessionDataDelegate {
 		case badURL(string: String)
 		case badJSON(json: String)
 		case apiError(id: Int?, name: String?, message: String?)
-		case noItems(response: [String:AnyObject])
-		case test(response: [String:AnyObject])
+		case noItems(response: [String:Any])
+		case test(response: [String:Any])
 	}
 	
 	var apiFilter: String!
 	
-	func api(_ request: String) throws -> [String:AnyObject] {
+	func api(_ request: String) throws -> [String:Any] {
 		var urlString = "https://api.stackexchange.com/2.2"
 		if request.hasPrefix("/") {
 			urlString.append(request)
@@ -323,7 +325,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 			throw APIError.badJSON(json: responseString)
 		}
 		
-		guard let response = try JSONSerialization.jsonObject(with: responseData, options: []) as? [String:AnyObject] else {
+		guard let response = try JSONSerialization.jsonObject(with: responseData, options: []) as? [String:Any] else {
 			throw APIError.badJSON(json: responseString)
 		}
 		
@@ -335,7 +337,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 			throw APIError.apiError(id: errorID, name: errorName, message: errorMessage)
 		}
 		
-		guard let item = (response["items"] as? [[String:AnyObject]])?.first else {
+		guard let item = (response["items"] as? [[String:Any]])?.first else {
 			throw APIError.noItems(response: response)
 		}
 		
