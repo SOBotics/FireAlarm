@@ -233,7 +233,7 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 		guard let time = (try client.parseJSON(client.post("https://chat.\(client.host.rawValue)/chats/\(roomID)/events", [
 			"roomid" : roomID,
 			"fkey": client.fkey
-			])) as? [String:AnyObject])?["time"] as? Int else {
+			])) as? [String:Any])?["time"] as? Int else {
 				throw RoomJoinError.roomInfoRetrievalFailed
 		}
 		timestamp = time
@@ -277,7 +277,7 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 			do {
 				if let json = result {
 					let data = try client.parseJSON(json)
-					if let id = (data as? [String:AnyObject])?["id"] as? Int {
+					if let id = (data as? [String:Any])?["id"] as? Int {
 						messageQueue.removeFirst()
 					
 						if completion != nil {
