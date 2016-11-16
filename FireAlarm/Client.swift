@@ -491,7 +491,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		
 		super.init()
 		
-		configuration.connectionProxyDictionary = [
+		/*configuration.connectionProxyDictionary = [
 		"HTTPEnable" : 1,
 		kCFNetworkProxiesHTTPProxy as AnyHashable : "192.168.1.234",
 		kCFNetworkProxiesHTTPPort as AnyHashable : 8080,
@@ -499,7 +499,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		"HTTPSEnable" : 1,
 		kCFNetworkProxiesHTTPSProxy as AnyHashable : "192.168.1.234",
 		kCFNetworkProxiesHTTPSPort as AnyHashable : 8080
-		]
+		]*/
 		
 		configuration.httpCookieStorage = nil
 		//clearCookies(configuration.httpCookieStorage!)
