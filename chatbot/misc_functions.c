@@ -362,3 +362,32 @@ char *readLine (FILE *file, int lineNum)
     return line;
 }
 
+long long getCurrentTimeInSeconds ()
+{
+    system ("date +%s > time.txt");
+    FILE *file = fopen ("time.txt", "r");
+    char *line = readLine (file, 1);
+    fclose (file);
+    long long time = strtoll (line, NULL, 10);
+    free (line);
+    return time;
+}
+
+char *getCurrentUTCTime ()
+{
+    struct tm *local;
+    time_t t;
+
+    t = time(NULL);
+    local = gmtime(&t);
+    return asctime (local);
+}
+
+char *concat (const char *s1, const char *s2)
+{
+    char *result = malloc (strlen(s1) + strlen(s2) + 1);
+    strcpy (result, s1);
+    strcat (result, s2);
+    return result;
+}
+

@@ -22,6 +22,8 @@
 #include "Notifications.h"
 #include "Modes.h"
 #include "Logs.h"
+#include "Api.h"
+//#include "Privileges.h"
 
 typedef struct _PrivUser PrivUser;
 typedef struct _PrivRequest PrivRequest;
@@ -65,6 +67,7 @@ typedef struct _ChatBot {
     unsigned totalLogs;
     Modes *modes;
     Notify **notify;
+    ApiCaller *api;
     unsigned totalNotifications;
     Report *latestReports[REPORT_MEMORY];   //index 0 is the most recent report, 1 is the second most, etc.
     int reportsWaiting; //The amount of reports that have not yet been assigned a message ID.
@@ -81,10 +84,11 @@ ChatBot *createChatBot(
                        PrivRequest **requests,
                        Modes *modes,
                        Notify **notify,
-                       Log **logs
+                       Log **logs,
+                       ApiCaller *caller
                        );
 StopAction runChatBot(ChatBot *chatbot);
-Post *getPostByID(ChatBot *bot, unsigned long postID);
+//Post *getPostByID(ChatBot *bot, unsigned long postID);
 unsigned int checkPost(ChatBot *bot, Post *post);   //This function is responsible for freeing post.
 void confirmPost(ChatBot *bot, Post *post, unsigned char confirmed);
 Report *reportWithMessage(ChatBot *bot, unsigned long messageID);

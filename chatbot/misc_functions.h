@@ -18,3 +18,7 @@ unsigned isStringContainingNumbers2 (char *str);
 unsigned isFileEmpty (FILE *file);
 char *getCurrentTime ();
 void reverseString(char *str);
+char *readLine (FILE *file, int lineNum);
+long long getCurrentTimeInSeconds ();
+char *getCurrentUTCTime ();
+char *concat (const char *s1, const char *s2);

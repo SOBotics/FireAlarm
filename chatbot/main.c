@@ -213,6 +213,7 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     }
     ChatBot *bot = (ChatBot*)ws->user;
     Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
+    //Post *p = NULL;
     if (p != NULL && !p->isAnswer) {
         printf ("checking post: %lu", p->postID);
         checkPost(bot, p);
@@ -300,6 +301,7 @@ int main(int argc, const char * argv[]) {
 
 
     Filter **filters = loadFilters();
+    ApiCaller *apiCaller = loadApiCaller ();
     PrivUser **users = loadPrivUsers();
     PrivRequest **requests = loadPrivRequests();
     Modes *modes = createMode (1, 1, 1, 1);
@@ -381,7 +383,7 @@ int main(int argc, const char * argv[]) {
         createCommand("clear error logs", 2, clearErrorLogs),
         NULL
     };
-    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify, logs);
+    ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify, logs, apiCaller);
 
 
     WebSocket *socket = createWebSocketWithClient(client);
@@ -391,10 +393,15 @@ int main(int argc, const char * argv[]) {
     socket->closeCallback = wsClosed;
     connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
 
+    bot->api->apiFilter = createApiFilter (bot, "question.title;question.body;question.tags;user.user_id;user.user_type;question.closed_reason");
+    bot->api->apiQuota = getApiQuota (bot);
+    //bot->api->apiQuota = 5;
+
+    char *startMessage;
+    asprintf (&startMessage, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started with api quota %d.", bot->api->apiQuota);
     puts("Fire Alarm started.");
-    postMessage (bot->room, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started.");
-    //registerError (bot, "main.c/main", "test error", "main");
-    //registerError (bot, "main.c/main", "test error 2", "main");
+    postMessage (bot->room, startMessage);
+    free (startMessage);
 
     unsigned char reboot = 0;
     time_t saveTime = time(NULL) + SAVE_INTERVAL;
@@ -428,9 +435,10 @@ int main(int argc, const char * argv[]) {
     savePrivRequests(bot->privRequests, bot->totalPrivRequests);
     saveNotifications (bot->notify, bot->totalNotifications);
     saveLogs (bot->log, bot->totalLogs);
+    saveApiCaller (bot->api);
 
     puts("Waiting (to allow networking to finish)...");
-    sleep(5);   //give background threads a bit of time
+    sleep(5);   //Give background threads a bit of time
 
     curl_easy_cleanup(client->curl);
 

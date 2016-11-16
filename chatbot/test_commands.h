@@ -41,12 +41,15 @@ void testArgCallback(RunningCommand *command, void *ctx) {
 }
 
 void test2Callback(RunningCommand *command, void *ctx) {
-    puts("Test 2");
     ChatBot *bot = ctx;
-    char *str;
-    asprintf (&str, "bot->reportsUntilAnalysis is %d", bot->reportsUntilAnalysis);
-    postMessage (bot->room, str);
-    free (str);
+    for ( int i = 0; i < 35; i ++)
+    {
+        int quota = getApiQuota (bot);
+        getApiQuota (bot);
+        getApiQuota (bot);
+        getApiQuota (bot);
+        //printf ("quota is %d\n", quota);
+    }
     return;
 }
 

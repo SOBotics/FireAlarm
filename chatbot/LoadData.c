@@ -7,6 +7,89 @@
 //
 
 #include "LoadData.h"
+//#include "ChatBot.h"
+//#include "Privileges.h"
+
+typedef struct _PrivUser {
+    long userID;
+    int privLevel;  // 1 if member, 2 if bot owner.
+}PrivUser;
+
+typedef struct  _PrivRequest {
+    long userID;
+    int groupType;  // 0 if user wants to join membeers, 1 if user wants to join bot owners.
+}PrivRequest;
+
+ApiCaller *loadApiCaller ()
+{
+    puts ("Loading Api Caller...");
+    FILE *file = fopen ("api.json", "r");
+    if (!file || isFileEmpty (file))
+    {
+        fputs ("Could not read from ~/.chatbot/api.json. Exiting the program...", stderr);
+        exit (EXIT_FAILURE);
+    }
+
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+
+    char *buf = malloc(size+1);
+    fread(buf, size, 1, file);
+    buf[size] = 0;
+
+    cJSON *json = cJSON_Parse (buf);
+    free (buf);
+
+    //First load backoff data
+    unsigned isBackoff = cJSON_GetObjectItem (json, "backoff_isbackoff")->valueint;
+    long int backoffTime = cJSON_GetObjectItem (json, "backoff_backofftime")->valueint;
+    long long backoffAt = cJSON_GetObjectItem (json, "backoff_backoffat")->valueint;
+    unsigned isError = cJSON_GetObjectItem (json, "backoff_iserror")->valueint;
+
+    Backoff *backoff = createBackoff (isBackoff, backoffTime, backoffAt, isError);
+
+    //Now loading the remaining data
+    char *apiFilter = cJSON_GetObjectItem (json, "api_filter")->valuestring;
+    char *apiKey = cJSON_GetObjectItem (json, "api_key")->valuestring;
+
+    ApiCaller *api = createApiCaller (apiFilter, apiKey, backoff, -1);
+
+    cJSON_Delete (json);
+    fclose (file);
+
+    return api;
+}
+
+void saveApiCaller (ApiCaller *caller)
+{
+    FILE *file = fopen ("api.json", "w");
+    if (!file)
+    {
+        fputs ("Could not save to 'api.json'!", stderr);
+        return;
+    }
+
+    cJSON *container = cJSON_CreateObject();
+
+    cJSON_AddItemToObject(container, "backoff_isbackoff", cJSON_CreateNumber(caller->backoff->isBackoff));
+    cJSON_AddItemToObject (container, "backoff_backofftime", cJSON_CreateNumber(caller->backoff->backoffTime));
+    cJSON_AddItemToObject(container, "backoff_backoffat", cJSON_CreateNumber(caller->backoff->backoffAt));
+    cJSON_AddItemToObject (container, "backoff_iserror", cJSON_CreateNumber (caller->backoff->isError));
+    cJSON_AddItemToObject(container, "api_filter", cJSON_CreateString(caller->apiFilter));
+    cJSON_AddItemToObject(container, "api_key", cJSON_CreateString (caller->apiKey));
+
+    char *str = cJSON_Print (container);
+    cJSON_Delete (container);
+
+    fwrite(str, strlen(str), 1, file);
+
+    fclose(file);
+
+    free(str);
+
+    return;
+}
 
 Log **loadLogs ()
 {
@@ -14,7 +97,7 @@ Log **loadLogs ()
     FILE *file = fopen ("logs.json", "r");
     if (!file || isFileEmpty (file))
     {
-        puts ("Could not read from ~/.chatbot/logs.json. Returning an empty lost...");
+        fputs ("Could not read from ~/.chatbot/logs.json. Returning an empty list...", stderr);
         Log **logs = malloc (sizeof (Log*));
         *logs = NULL;
         return logs;
@@ -59,18 +142,15 @@ Log **loadLogs ()
 void saveLogs (Log **logs, unsigned totalLogs)
 {
     FILE *file = fopen ("logs.json", "w");
-    printf ("bot->totalLogs is %d\n", totalLogs);
 
     if (!file)
     {
-        fputs ("Falied to open ~/.chatbot/logs.json/!", stderr);
+        fputs ("Failed to open ~/.chatbot/logs.json/!", stderr);
         return;
     }
 
     if (logs == NULL)
         return;
-
-    puts ("saving..");
 
     cJSON *json = cJSON_CreateArray ();
 
@@ -358,7 +438,7 @@ void savePrivUsers (PrivUser **users, unsigned privUsersCount)
     {
         PrivUser *user = users [i];
         cJSON *object = cJSON_CreateObject();
-        cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (user->userID));
+        cJSON_AddItemToObject (object, "user_id", cJSON_CreateNumber (users [i]->userID));
         cJSON_AddItemToObject (object, "priv_level", cJSON_CreateNumber (user->privLevel));
 
         cJSON_AddItemToArray(json, object);

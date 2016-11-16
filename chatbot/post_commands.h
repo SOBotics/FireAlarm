@@ -99,7 +99,7 @@ void manualGetPosts (RunningCommand *command, void *ctx)
         asprintf (&str, "Manually checking post %lu.", posts [i]->postID);
         printf ("\n%s\n", str);
         postMessage (bot->room, str);
-        checkPost (bot, posts [i]);
+        //checkPost (bot, posts [i]);
         }
     }
     printf ("Finished manually checking.\n");

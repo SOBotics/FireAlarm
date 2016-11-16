@@ -66,13 +66,13 @@ void getInfoForUsers(ChatRoom *r, ChatUser **users, unsigned userCount) {
              "chat.%s/user/info",
              r->client->host
              );
-    
+
     CURL *curl = r->client->curl;
     checkCURL(curl_easy_setopt(curl, CURLOPT_URL, url));
-    
+
     char *userIDs = malloc(1);
     *userIDs = 0;
-    
+
     for (int i = 0; i < userCount; i++) {
         ChatUser *user = users[i];
         if (user->userID == 0) {
@@ -81,35 +81,35 @@ void getInfoForUsers(ChatRoom *r, ChatUser **users, unsigned userCount) {
         char *newUser;
         asprintf(&newUser, "%lu%s", user->userID,
                  (i == (userCount - 1) || (i == (userCount - 2) && users[userCount-1]->userID == 0) ? "" : ","));
-        
+
         userIDs = realloc(userIDs, strlen(userIDs) + strlen(newUser) + 1);
         strcat(userIDs, newUser);
-        
+
         free(newUser);
     }
-    
+
     char *postFields;
     asprintf(&postFields, "ids=%s&roomId=%d", userIDs, r->roomID);
     free(userIDs);
-    
+
     checkCURL(curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, postFields));
     free(postFields);
-    
+
     OutBuffer buf;
     buf.data = NULL;
     checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf));
     checkCURL(curl_easy_perform(curl));
-    
+
     cJSON *json = cJSON_Parse(buf.data);
     free(buf.data);
-    
+
     cJSON *userDatas;
     if (json) {
         if ((userDatas = cJSON_GetObjectItem(json, "users"))) {
             for (int i = 0; i < cJSON_GetArraySize(userDatas); i++) {
                 cJSON *userData = cJSON_GetArrayItem(userDatas, i);
                 ChatUser *user = getUserByID(r, cJSON_GetObjectItem(userData, "id")->valueint);
-                
+
                 user->isModerator = (cJSON_GetObjectItem(userData, "is_moderator")->type == cJSON_True);
                 user->isRoomOwner = (cJSON_GetObjectItem(userData, "is_owner")->type == cJSON_True);
                 if (user->isModerator || user->isRoomOwner) {
@@ -138,7 +138,7 @@ void refreshUsers(ChatRoom *r) {
     console->isModerator = 1;
     console->isRoomOwner = 1;
     addUserToRoom(r, console);
-    
+
     const int maxUrlLength = 256;
     char url[maxUrlLength];
     url[0] = 0;
@@ -147,20 +147,20 @@ void refreshUsers(ChatRoom *r) {
              r->client->host,
              r->roomID
              );
-    
+
     CURL *curl = r->client->curl;
     checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
     checkCURL(curl_easy_setopt(curl, CURLOPT_URL, url));
     OutBuffer buffer;
     buffer.data = NULL;
     checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
-    
+
     checkCURL(curl_easy_perform(curl));
     cJSON *json = cJSON_Parse(buffer.data);
     free(buffer.data);
-    
+
     pthread_mutex_unlock(&r->clientLock);
-    
+
     const int userCount = cJSON_GetArraySize(json);
     const time_t requestTime = time(NULL);
     for (int i = 0; i < userCount; i++) {
@@ -175,7 +175,7 @@ void refreshUsers(ChatRoom *r) {
         }
     }
     cJSON_Delete(json);
-    
+
     getInfoForUsers(r, r->users, r->userCount);
 }
 
@@ -185,8 +185,8 @@ void enterChatRoom(ChatRoom *room) {
     printf("Joining chat room %d...\n", room->roomID);
     pthread_mutex_lock(&room->clientLock);
     room->lastUpdateTimestamp = connectClientToRoom(room->client, room->roomID);
-    
-    
+
+
     pthread_mutex_unlock(&room->clientLock);
     refreshUsers(room);
     room->lastEventTime = time(NULL);
@@ -238,21 +238,14 @@ typedef struct _PendingMessage {
 }PendingMessage;
 
 void postMessage(ChatRoom *r, const char *text) {
-    
-    //if (!postMessage)
-    //{
-    //    return;
-    //}
-    //^^^^^^^^^^^^^^^^^^what's that supposed to do?
-    
     //queue the message to avoid throttling
     pthread_mutex_lock(&r->pendingMessageLock);
-    
+
     PendingMessage *new = malloc(sizeof(PendingMessage));
     new->text = malloc(strlen(text) + 1);
     strcpy(new->text, text);
     new->next = NULL;
-    
+
     if (r->pendingMessageLinkedList) {
         PendingMessage *last = r->pendingMessageLinkedList;
         while (last->next) {
@@ -263,18 +256,11 @@ void postMessage(ChatRoom *r, const char *text) {
     else {
         r->pendingMessageLinkedList = new;
     }
-    
+
     pthread_mutex_unlock(&r->pendingMessageLock);
 }
 
 void postReply(ChatRoom *r, const char *text, ChatMessage *message) {
-    
-    //if (!postMessage)
-    //{
-    //    return;
-    //}
-    //^^^^^^^^^^^^^^^^^^ huh?
-    
     const size_t bufSize = strlen(text) + 16;
     char buf[bufSize];
     if (message->user->userID) {
@@ -297,16 +283,16 @@ void handleQueuedMessages(ChatRoom *r) {
         return;
     }
     pthread_mutex_lock(&r->pendingMessageLock);
-    
+
     PendingMessage *m;
     if ((m = r->pendingMessageLinkedList)) {
         PendingMessage *m = r->pendingMessageLinkedList;
         char *unescapedText = m->text;
-        
-        
+
+
         pthread_mutex_lock(&r->clientLock);
         printf("%s\n", unescapedText);
-        
+
         CURL *curl = r->client->curl;
         char *text = curl_easy_escape(curl, unescapedText, 0);
         const size_t maxRequestLength = strlen(text) + 256;
@@ -317,7 +303,7 @@ void handleQueuedMessages(ChatRoom *r) {
                  r->client->fkey, text
                  );
         curl_free((void*)text);
-        
+
         char url[maxRequestLength];
         url[0] = 0;
         snprintf(url, maxRequestLength,
@@ -325,14 +311,14 @@ void handleQueuedMessages(ChatRoom *r) {
                  r->client->host,
                  r->roomID
                  );
-        
+
         OutBuffer buf;
         buf.data = NULL;
         checkCURL(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf));
         checkCURL(curl_easy_setopt(curl, CURLOPT_POST, 1L));
         checkCURL(curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request));
         checkCURL(curl_easy_setopt(curl, CURLOPT_URL, url));
-        
+
 #ifndef DEBUG
         checkCURL(curl_easy_perform(curl));
         long http_code = 0;
@@ -345,16 +331,16 @@ void handleQueuedMessages(ChatRoom *r) {
         else {
             puts("Failed to post message; will try again soon.");
         }
-        
+
         free(buf.data);
 #else
-        
+
         r->pendingMessageLinkedList = m->next;
         free(unescapedText);
         free(m);
 #endif
-        
-        
+
+
         r->lastPostTimestamp = time(NULL);
         pthread_mutex_unlock(&r->clientLock);
     }
@@ -363,11 +349,11 @@ void handleQueuedMessages(ChatRoom *r) {
 
 ChatMessage *processChatEvent(ChatRoom *r, cJSON *event) {
     r->lastEventTime = time(NULL);
-    
+
     int eventType = cJSON_GetObjectItem(event, "event_type")->valueint;
-    
+
     ChatUser *user = NULL;
-    
+
     switch (eventType) {
         case MessagePosted:
         case MessageEdited:
@@ -376,7 +362,7 @@ ChatMessage *processChatEvent(ChatRoom *r, cJSON *event) {
             //A user posted, edited, or entered.  Register him if needed.
             unsigned long userID = cJSON_GetObjectItem(event, "user_id")->valueint;
             user = getUserByID(r, userID);
-            
+
             if (user == NULL) {
                 const char *username = cJSON_GetObjectItem(event, "user_name")->valuestring;
                 user = createUser(userID, username);
@@ -397,7 +383,7 @@ ChatMessage *processChatEvent(ChatRoom *r, cJSON *event) {
         default:
             printf("New event type: %d\n", eventType);
     }
-    
+
     if (eventType == 1 || eventType == 2) {
         //A user posted or edited.
         const char *content = cJSON_GetObjectItem(event, "content")->valuestring;
@@ -422,12 +408,12 @@ ChatMessage **processChatRoomEvents(ChatRoom *room) {
     unsigned interval = (timeDifference / 60.0) * 1000;
     if      (interval < 1000) interval = 1000;
     else if (interval > 5000) interval = 5000;
-    
+
     struct pollfd fd;
     fd.fd = STDIN_FILENO;
     fd.events = POLLIN;
     int stdinAvailable = poll(&fd, 1, interval);
-    
+
     if (stdinAvailable == -1) {
         fprintf(stderr, "Failed to poll stdin!\n");
     }
@@ -442,16 +428,16 @@ ChatMessage **processChatRoomEvents(ChatRoom *room) {
         messageBuffer[1] = NULL;
         return messageBuffer;
     }
-    
+
     handleQueuedMessages(room);
-    
-    
+
+
     pthread_mutex_lock(&room->clientLock);
     const int maxRequestLength = 256;
     char roomIDBuffer[maxRequestLength/4];
     char postBuffer[maxRequestLength];
     postBuffer[0] = 0;
-    
+
     OutBuffer buffer;
     buffer.data = NULL;
     snprintf(
@@ -472,9 +458,9 @@ ChatMessage **processChatRoomEvents(ChatRoom *room) {
     checkCURL(curl_easy_setopt(room->client->curl, CURLOPT_POST, 1L));
     checkCURL(curl_easy_setopt(room->client->curl, CURLOPT_POSTFIELDS, postBuffer));
     checkCURL(curl_easy_setopt(room->client->curl, CURLOPT_WRITEDATA, &buffer));
-    
+
     curl_easy_perform(room->client->curl);
-    
+
     cJSON *json = cJSON_Parse(buffer.data);
     free(buffer.data);
     pthread_mutex_unlock(&room->clientLock);
@@ -489,8 +475,8 @@ ChatMessage **processChatRoomEvents(ChatRoom *room) {
         room->lastUpdateTimestamp = time->valueint;
     }
     int eventCount = events ? cJSON_GetArraySize(events) : 0;
-    
-    
+
+
     ChatMessage **messageBuffer = NULL;
     size_t messageBufferSize = 0;
     for (int i = 0; i < eventCount; i++) {
@@ -503,15 +489,15 @@ ChatMessage **processChatRoomEvents(ChatRoom *room) {
     }
     messageBuffer = realloc(messageBuffer, ++messageBufferSize * sizeof(ChatMessage *));
     messageBuffer[messageBufferSize - 1] = NULL;
-    
+
     cJSON_Delete(json);
-    
+
     return messageBuffer;
 }
 
 void leaveRoom(ChatRoom *r) {
     pthread_mutex_lock(&r->clientLock);
-    
+
     const unsigned size = 256;
     char postBuffer[size];
     snprintf(postBuffer, size,
@@ -524,15 +510,15 @@ void leaveRoom(ChatRoom *r) {
              r->client->host, r->roomID
              );
     checkCURL(curl_easy_setopt(r->client->curl, CURLOPT_URL, postBuffer));
-    
+
     OutBuffer buf;
     buf.data = NULL;
     checkCURL(curl_easy_setopt(r->client->curl, CURLOPT_WRITEDATA, &buf));
-    
+
     checkCURL(curl_easy_perform(r->client->curl));
-    
+
     free(buf.data);
-    
-    
+
+
     pthread_mutex_unlock(&r->clientLock);
 }

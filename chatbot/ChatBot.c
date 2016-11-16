@@ -14,11 +14,11 @@
 #include <ctype.h>
 
 #include "ChatBot.h"
-#include "ChatMessage.h"
-#include "cJSON.h"
-#include "misc_functions.h"
-#include "Client.h"
-#include "Filter.h"
+//#include "ChatMessage.h"
+//#include "cJSON.h"
+//#include "misc_functions.h"
+//#include "Client.h"
+//#include "Filter.h"
 //#include "Logs.h"
 
 //#define REPORT_HEADER "Potentially bad question"
@@ -276,7 +276,7 @@ static Report **parseReports(ChatBot *bot, cJSON *json) {
     cJSON *array = cJSON_GetObjectItem(json, "latestReports");
 
     if (cJSON_GetArraySize(array) != REPORT_MEMORY) {
-        fputs("Report file doesn't have enough reports!  Ignoring report file.\n", stderr);
+        fputs("Report file doesn't have enough reports! Ignoring report file.\n", stderr);
         loadNullReports(reports);
         cJSON_Delete(json);
         return reports;
@@ -322,7 +322,8 @@ ChatBot *createChatBot(
                        PrivRequest **requests,
                        Modes *modes,
                        Notify **notify,
-                       Log **logs
+                       Log **logs,
+                       ApiCaller *caller
                        ) {
     ChatBot *c = malloc(sizeof(ChatBot));
     c->room = room;
@@ -333,6 +334,7 @@ ChatBot *createChatBot(
     c->runningCommandCount = 0;
     c->modes = modes;
     c->stopAction = ACTION_NONE;
+    c->api = caller;
     pthread_mutex_init(&c->runningCommandsLock, NULL);
     pthread_mutex_init(&c->detectorLock, NULL);
 
@@ -448,7 +450,7 @@ void processMessage(ChatBot *bot, ChatMessage *message) {
     free(messageText);
 }
 
-Post *getPostByID(ChatBot *bot, unsigned long postID) {
+/*Post *getPostByID(ChatBot *bot, unsigned long postID) {
     pthread_mutex_lock(&bot->room->clientLock);
     CURL *curl = bot->room->client->curl;
 
@@ -486,7 +488,6 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
              postID, bot->apiFilter
              );
     curl_easy_setopt(curl, CURLOPT_URL, request);
-
 
 
     checkCURL(curl_easy_perform(curl));
@@ -549,7 +550,7 @@ Post *getPostByID(ChatBot *bot, unsigned long postID) {
 
     cJSON_Delete(json);
     return p;
-}
+}*/
 
 unsigned int checkPost(ChatBot *bot, Post *post) {
 
@@ -596,13 +597,13 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         const size_t maxMessage = strlen(messageBuf) + strlen(post->title) + strlen(REPORT_HEADER) + strlen (notifString) + 256;
         //puts ("Completed line 578.");
         char *message = malloc(maxMessage);
-        char *tag = getTagsByID(bot, post->postID);
+        //char *tag = getTagsByID(bot, post->postID); //Commented for testing purposes
        // puts ("Completed line 580.");
         //char *notif = getNotificationString(bot, post);
         //puts ("Completed line 582.");
         snprintf(message, maxMessage,
-                 REPORT_HEADER " [tag:%s] Potentially bad post (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) %s",
-                 tag, messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, notifString);
+                 REPORT_HEADER " Potentially bad post (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) %s",
+                messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, notifString);
         //puts ("Completed preparing report.");
         //free(notif);
         //if (notifString != NULL)
@@ -1071,6 +1072,7 @@ char *getTagsByID (ChatBot *bot, unsigned long postID)
             cJSON_Delete(json);
         }
         puts("Error fetching post!");
+        sleep (10);
         return 0;
     }
 
@@ -1079,7 +1081,7 @@ char *getTagsByID (ChatBot *bot, unsigned long postID)
         char *str;
         asprintf(&str, "Recieved backoff: %d", backoff->valueint);
         postMessage(bot->room, str);
-        sleep (backoff->valueint);
+        sleep (backoff->valueint + 5);
         free(str);
     }
     char **tags = malloc (sizeof (char) * 6 * 64);
@@ -1478,7 +1480,7 @@ unsigned getUserRepByID (ChatBot *bot, unsigned long userID)
 
 int apiQuota (ChatBot *bot)
 {
-    pthread_mutex_lock(&bot->room->clientLock);
+    /*pthread_mutex_lock(&bot->room->clientLock);
     CURL *curl = bot->room->client->curl;
 
     checkCURL(curl_easy_setopt(curl, CURLOPT_HTTPGET, 1));
@@ -1545,5 +1547,12 @@ int apiQuota (ChatBot *bot)
     int apiQuota = cJSON_GetObjectItem (json, "quota_remaining")->valueint;
     cJSON_Delete (json);
 
+    return apiQuota;*/
+    char *request;
+    asprintf (&request, "api.stackexchange.com/2.2/info?site=stackoverflow&filter=%s&key=%s", bot->api->apiFilter, bot->api->apiKey);
+    cJSON *json = SE_apiGET (bot, request);
+    free (request);
+    int apiQuota = cJSON_GetObjectItem (json, "quota_remaining")->valueint;
+    cJSON_Delete (json);
     return apiQuota;
 }
