@@ -508,26 +508,6 @@ open class Client: NSObject, URLSessionDataDelegate {
 			configuration: configuration,
 			delegate: self, delegateQueue: nil
 		)
-		
-		//check if we're already logged in
-		let request = URLRequest(url: URL(string: "https://stackexchange.com/users/logout")!)
-		
-		let semaphore = DispatchSemaphore(value: 0)
-		
-		let task = session.dataTask(with: request, completionHandler: {data, resp, error in
-			guard let response = (resp as? HTTPURLResponse) , error == nil else {
-				self.loggedIn = false
-				semaphore.signal()
-				return
-			}
-			
-			self.loggedIn = response.statusCode == 200 && response.url?.lastPathComponent == "logout"
-			semaphore.signal()
-		})
-		
-		task.resume()
-		
-		semaphore.wait()
 	}
 	
 	enum LoginError: Error {
