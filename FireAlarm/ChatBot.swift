@@ -155,7 +155,7 @@ open class ChatBot: ChatRoomDelegate {
 		
 		var lowest: (command: String, score: Int)?
 		for (command, score) in commandScores {
-			if score < command.characters.count/2 && score < (lowest?.score ?? Int.max) {
+			if score <= command.characters.count/2 && score < (lowest?.score ?? Int.max) {
 				lowest = (command, score)
 			}
 		}
