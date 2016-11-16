@@ -182,7 +182,7 @@ class Filter: WebSocketDelegate {
 					throw QuestionProcessingError.noDataObject(json: string)
 				}
 				
-				guard let data = try JSONSerialization.jsonObject(with: dataObject, options: []) as? [String:AnyObject] else {
+				guard let data = try JSONSerialization.jsonObject(with: dataObject, options: []) as? [String:Any] else {
 					throw QuestionProcessingError.noDataObject(json: string)
 				}
 				
