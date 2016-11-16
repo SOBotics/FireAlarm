@@ -130,7 +130,6 @@ class Filter: WebSocketDelegate {
 	func checkAndReportPost(_ post: Post) throws {
 		let bad = checkPost(post)
 		if bad {
-			print("Reporting question \(post.id).")
 			reportPost(post)
 		}
 	}
@@ -146,8 +145,10 @@ class Filter: WebSocketDelegate {
 		}
 		
 		if recentlyReportedPosts.contains(where: { $0.id == post.id }) {
+			print("Not reporting \(post.id) because it was recently reported.")
 			return
 		}
+		print("Reporting question \(post.id).")
 		
 		recentlyReportedPosts.append((id: post.id, when: Date()))
 		bot.room.postMessage("[ [FireAlarm-Swift](\(githubLink)) ] " +
