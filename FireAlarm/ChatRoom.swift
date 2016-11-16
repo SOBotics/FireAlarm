@@ -70,7 +70,7 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 				]
 			)
 			
-			guard let results = try client.parseJSON(json) as? NSDictionary else {
+			guard let results = try client.parseJSON(json) as? [String:Any] else {
 				throw EventError.jsonParsingFailed(json: json)
 			}
 			
@@ -79,7 +79,7 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 			}
 			
 			for obj in users {
-				guard let user = obj as? NSDictionary else {
+				guard let user = obj as? [String:Any] else {
 					throw EventError.jsonParsingFailed(json: json)
 				}
 				
@@ -150,7 +150,7 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 		var users = userDB
 		
 		for item in db {
-			guard let info = (item as? NSDictionary) else {
+			guard let info = (item as? [String:Any]) else {
 				continue
 			}
 			guard let id = info["id"] as? Int else {
@@ -242,7 +242,7 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 		let wsAuth = try client.parseJSON(
 			client.post("https://chat.\(client.host.rawValue)/ws-auth", ["roomid":roomID, "fkey":client.fkey]
 			)
-			) as! NSDictionary
+			) as! [String:Any]
 		
 		let wsURL = wsAuth["url"] as! String
 		
@@ -367,7 +367,7 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 	
 	func handleEvents(_ events: NSArray) throws {
 		for e in events {
-			guard let event = e as? NSDictionary else {
+			guard let event = e as? [String:Any] else {
 				throw EventError.jsonParsingFailed(json: String(describing: events))
 			}
 			guard let typeCode = event["event_type"] as? Int else {
@@ -438,12 +438,12 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 	public func webSocketMessageText(_ text: String) {
 		recievedMessage = true
 		do {
-			guard let json = try client.parseJSON(text) as? NSDictionary else {
+			guard let json = try client.parseJSON(text) as? [String:Any] else {
 				throw EventError.jsonParsingFailed(json: text)
 			}
 			
 			let roomKey = "r\(roomID)"
-			guard let events = (json[roomKey] as? NSDictionary)?["e"] as? NSArray else {
+			guard let events = (json[roomKey] as? [String:Any])?["e"] as? NSArray else {
 				return  //no events
 			}
 			

@@ -246,7 +246,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 			print("\(sessionTask) is not in client task list; ignoring")
 			return
 		}
-		task.error = error as? NSError
+		task.error = error
 		
 		task.completion(task.data, task.response, task.error)
 		
