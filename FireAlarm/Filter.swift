@@ -127,14 +127,24 @@ class Filter: WebSocketDelegate {
 		return trueProbability * 1e45 > falseProbability
 	}
 	
-	func checkAndReportPost(_ post: Post) throws {
+	enum ReportResult {
+		case notBad	//the post was not bad
+		case alreadyReported
+		case reported
+	}
+	
+	@discardableResult func checkAndReportPost(_ post: Post) throws -> ReportResult {
 		let bad = checkPost(post)
 		if bad {
-			reportPost(post)
+			return reportPost(post)
+		}
+		else {
+			return .notBad
 		}
 	}
 	
-	func reportPost(_ post: Post) {
+	///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
+	func reportPost(_ post: Post) -> ReportResult {
 		if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
 			recentlyReportedPosts = recentlyReportedPosts.filter {
 				$0.when > minDate
@@ -146,7 +156,7 @@ class Filter: WebSocketDelegate {
 		
 		if recentlyReportedPosts.contains(where: { $0.id == post.id }) {
 			print("Not reporting \(post.id) because it was recently reported.")
-			return
+			return .alreadyReported
 		}
 		print("Reporting question \(post.id).")
 		
@@ -155,6 +165,8 @@ class Filter: WebSocketDelegate {
 			"[tag:\(post.tags.first ?? "tagless")] Potentially bad question: [\(post.title)](//stackoverflow.com/q/\(post.id)) " +
 			bot.room.notificationString(tags: post.tags)
 		)
+		
+		return .reported
 	}
 	
 	func webSocketMessageText(_ text: String) {
