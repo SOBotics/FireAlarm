@@ -74,7 +74,7 @@ open class ChatRoom: NSObject {
 				throw EventError.jsonParsingFailed(json: json)
 			}
 			
-			guard let users = results["users"] as? NSArray else {
+			guard let users = results["users"] as? [Any] else {
 				throw EventError.jsonParsingFailed(json: json)
 			}
 			
@@ -142,7 +142,7 @@ open class ChatRoom: NSObject {
 		guard let data = try? Data(contentsOf: saveFileNamed("users.json")) else {
 			return
 		}
-		guard let db = try JSONSerialization.jsonObject(with: data, options: []) as? NSArray else {
+		guard let db = try JSONSerialization.jsonObject(with: data, options: []) as? [Any] else {
 			return
 		}
 		
@@ -359,12 +359,12 @@ open class ChatRoom: NSObject {
 		
 		let _ = userWithID(0)   //add the Console to the database
 		let json: String = try client.get("https://chat.\(client.host.rawValue)/rooms/pingable/\(roomID)")
-		guard let users = try client.parseJSON(json) as? NSArray else {
+		guard let users = try client.parseJSON(json) as? [Any] else {
 			throw EventError.jsonParsingFailed(json: json)
 		}
 		
 		for userObj in users {
-			guard let user = userObj as? NSArray else {
+			guard let user = userObj as? [Any] else {
 				throw EventError.jsonParsingFailed(json: json)
 			}
 			guard let userID = user[0] as? Int else {
@@ -395,7 +395,7 @@ open class ChatRoom: NSObject {
 		case invalidEventType(type: Int)
 	}
 	
-	func handleEvents(_ events: NSArray) throws {
+	func handleEvents(_ events: [Any]) throws {
 		for e in events {
 			guard let event = e as? [String:Any] else {
 				throw EventError.jsonParsingFailed(json: String(describing: events))
@@ -474,7 +474,7 @@ open class ChatRoom: NSObject {
 			}
 			
 			let roomKey = "r\(roomID)"
-			guard let events = (json[roomKey] as? [String:Any])?["e"] as? NSArray else {
+			guard let events = (json[roomKey] as? [String:Any])?["e"] as? [Any] else {
 				return  //no events
 			}
 			
