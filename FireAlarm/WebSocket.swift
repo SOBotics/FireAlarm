@@ -100,17 +100,13 @@ private func websocketCallback(
 		}
 		ws.toWrite.removeFirst()
 		
-		//LWS_SEND_BUFFER_PRE_PADDING doesn't get exported to Swift, so we
-		//have to calculate it manually
-		let n: Int32 = 4 + 10
-		let padSize =  Int(((((n) % _LWS_PAD_SIZE) != 0 ) ? ((n) + (_LWS_PAD_SIZE - ((n) % _LWS_PAD_SIZE))) : (n)))
-		
-		let size = padSize + data.count + Int(LWS_SEND_BUFFER_POST_PADDING)
+		//SWIFT_LWS_PRE_PADDING and SWIFT_LWS_POST_PADDING are defined in my wrapper header "libwebsockets/lws.h"
+		let size = Int(SWIFT_LWS_PRE_PADDING) + data.count + Int(SWIFT_LWS_POST_PADDING)
 		
 		let ptr = malloc(size).bindMemory(to: UInt8.self, capacity: size)
 		
 		let buf = UnsafeMutableBufferPointer<UInt8>(
-			start: ptr.advanced(by: padSize), count: data.count + Int(LWS_SEND_BUFFER_POST_PADDING)
+			start: ptr.advanced(by: Int(SWIFT_LWS_PRE_PADDING)), count: data.count + Int(LWS_SEND_BUFFER_POST_PADDING)
 		)
 		
 		
