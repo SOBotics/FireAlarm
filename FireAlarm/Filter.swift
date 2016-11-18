@@ -20,7 +20,7 @@ class Word {
 	}
 }
 
-class Filter: WebSocketDelegate {
+class Filter {
 	let bot: ChatBot
 	let client: Client
 	
@@ -61,21 +61,41 @@ class Filter: WebSocketDelegate {
 	func start() throws {
 		_running = true
 		
-		let request = URLRequest(url: URL(string: "wss://qa.sockets.stackexchange.com/")!)
-		ws = WebSocket(request: request)
-		ws.eventQueue = bot.room.client.queue
-		ws.delegate = self
-		ws.open()
+		//let request = URLRequest(url: URL(string: "ws://qa.sockets.stackexchange.com/")!)
+		//ws = WebSocket(request: request)
+		//ws.eventQueue = bot.room.client.queue
+		//ws.delegate = self
+		//ws.open()
+		ws = try WebSocket("wss://qa.sockets.stackexchange.com/")
+		
+		ws.onOpen {socket in
+			self.webSocketOpen()
+		}
+		ws.onText {socket, text in
+			self.webSocketMessageText(text)
+		}
+		ws.onBinary {socket, data in
+			self.webSocketMessageData(data)
+		}
+		ws.onClose {socket in
+			self.webSocketClose(0, reason: "", wasClean: true)
+			self.webSocketEnd(0, reason: "", wasClean: true, error: socket.error)
+		}
+		ws.onError {socket in
+			self.webSocketEnd(0, reason: "", wasClean: true, error: socket.error)
+		}
+		
+		try ws.connect()
 	}
 	
 	func stop() {
 		_running = false
-		ws?.close()
+		ws?.disconnect()
 	}
 	
 	func webSocketOpen() {
 		print("Listening to active questions!")
-		ws.send("155-questions-active")
+		let _ = try? ws.write("155-questions-active")
 	}
 	
 	func webSocketClose(_ code: Int, reason: String, wasClean: Bool) {
@@ -250,7 +270,7 @@ class Filter: WebSocketDelegate {
 		} while !done
 	}
 	
-	func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: NSError?) {
+	func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: Error?) {
 		if let e = error {
 			print("Websocket error:\n\(e)")
 		}
