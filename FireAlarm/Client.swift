@@ -387,7 +387,8 @@ open class Client: NSObject, URLSessionDataDelegate {
 			urlString.append("/" + request)
 		}
 		
-		guard var components = URLComponents(string: urlString) else {
+		//this code seems to crash on Linux
+		/*guard var components = URLComponents(string: urlString) else {
 			throw APIError.badURL(string: urlString)
 		}
 		
@@ -400,9 +401,19 @@ open class Client: NSObject, URLSessionDataDelegate {
 		
 		guard let url = components.string else {
 			throw APIError.badURL(string: "how is the URL not a string")
+		}*/
+		
+		guard let url = URL(string: urlString) else {
+			throw APIError.badURL(string: urlString)
 		}
 		
-		let responseString: String = try get(url)
+		if url.query == nil {
+			urlString.append("?key=\(Client.apiKey)")
+		} else {
+			urlString.append("&key=\(Client.apiKey)")
+		}
+		
+		let responseString: String = try get(urlString)
 		
 		guard let responseData = responseString.data(using: .utf8) else {
 			throw APIError.badJSON(json: responseString)
