@@ -16,7 +16,18 @@ let commands: [Command.Type] = [
 	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self
 ]
 
+enum FileLoadingError: Error {
+	case notUFT8
+}
 
+func loadFile(_ path: String) throws -> String {
+	let data = try Data(contentsOf: URL(fileURLWithPath: path))
+	guard let str = String(data: data, encoding: .utf8) else {
+		throw FileLoadingError.notUFT8
+	}
+	
+	return str
+}
 
 func formatArray<T>(_ array: [T], conjunction: String) -> String {
 	var string = ""
@@ -253,7 +264,7 @@ func main() throws {
 		room.postMessage("Update failed!")
 		try! FileManager.default.removeItem(atPath: "update-failure")
 	}
-	else if let new = try? String(contentsOfFile: "version-new.txt").replacingOccurrences(of: "\n", with: "") {
+	else if let new = try? loadFile("version-new.txt").replacingOccurrences(of: "\n", with: "") {
 		let components = new.components(separatedBy: " ")
 		let new = components.first ?? ""
 		let newShort = getShortVersion(new)
