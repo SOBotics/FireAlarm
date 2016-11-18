@@ -1,5 +1,0 @@
-module libwebsockets [system] {
-    header "/usr/local/include/libwebsockets.h"
-    header "/usr/local/include/lws_config.h"
-    export *
-}

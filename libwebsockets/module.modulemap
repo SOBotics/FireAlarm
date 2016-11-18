@@ -1,0 +1,4 @@
+module libwebsockets [system] {
+    header "lws.h"
+    export *
+}

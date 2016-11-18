@@ -95,7 +95,7 @@ class Filter {
 	
 	func webSocketOpen() {
 		print("Listening to active questions!")
-		let _ = try? ws.write("155-questions-active")
+		ws.write("155-questions-active")
 	}
 	
 	func webSocketClose(_ code: Int, reason: String, wasClean: Bool) {

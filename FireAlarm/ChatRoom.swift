@@ -197,7 +197,7 @@ open class ChatRoom: NSObject {
 				else {
 					shouldNotify = true
 				}
-
+				
 				
 			}
 			
@@ -301,16 +301,21 @@ open class ChatRoom: NSObject {
 			}
 			do {
 				if let json = result {
-					let data = try client.parseJSON(json)
-					if let id = (data as? [String:Any])?["id"] as? Int {
-						messageQueue.removeFirst()
-					
-						if completion != nil {
-							completion!(id)
+					if let data = try client.parseJSON(json) as? [String:Any] {
+						if let id = data["id"] as? Int {
+							messageQueue.removeFirst()
+							
+							if completion != nil {
+								completion!(id)
+							}
+						}
+						else {
+							print("Could not post duplicate message")
+							messageQueue.removeFirst()
 						}
 					}
-					else if let r = result {
-						print(r)
+					else {
+						print(json)
 					}
 				}
 			}
