@@ -38,13 +38,13 @@ private func websocketCallback(
 		LWS_CALLBACK_CLIENT_FILTER_PRE_ESTABLISH,
 		LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER,
 		LWS_CALLBACK_CLIENT_CONFIRM_EXTENSION_SUPPORTED,
-		LWS_CALLBACK_LOCK_POLL,
+		LWS_CALLBACK_CLOSED,
+		/*LWS_CALLBACK_LOCK_POLL,
 		LWS_CALLBACK_UNLOCK_POLL,
 		LWS_CALLBACK_ADD_POLL_FD,
 		LWS_CALLBACK_DEL_POLL_FD,
 		LWS_CALLBACK_CHANGE_MODE_POLL_FD,
-		LWS_CALLBACK_CLOSED,
-		LWS_CALLBACK_GET_THREAD_ID
+		LWS_CALLBACK_GET_THREAD_ID*/
 	]
 	if !reasons.contains(where: {$0 == reason}) {
 		return 0
@@ -94,6 +94,36 @@ private func websocketCallback(
 		
 		
 		
+	case LWS_CALLBACK_CLIENT_WRITEABLE:
+		guard let (data, format) = ws.toWrite.first else {
+			break
+		}
+		ws.toWrite.removeFirst()
+		
+		//LWS_SEND_BUFFER_PRE_PADDING doesn't get exported to Swift, so we
+		//have to calculate it manually
+		let n: Int32 = 4 + 10
+		let padSize =  Int(((((n) % _LWS_PAD_SIZE) != 0 ) ? ((n) + (_LWS_PAD_SIZE - ((n) % _LWS_PAD_SIZE))) : (n)))
+		
+		let size = padSize + data.count + Int(LWS_SEND_BUFFER_POST_PADDING)
+		
+		let ptr = malloc(size).bindMemory(to: UInt8.self, capacity: size)
+		
+		let buf = UnsafeMutableBufferPointer<UInt8>(
+			start: ptr.advanced(by: padSize), count: data.count + Int(LWS_SEND_BUFFER_POST_PADDING)
+		)
+		
+		
+		
+		let _ = data.copyBytes(to: buf)
+		
+		guard lws_write(ws.ws, buf.baseAddress, data.count, format) != -1 else {
+			ws.state = .error
+			ws.error = WebSocket.WebSocketError.writeFailed
+			ws.errorHandler?(ws)
+			return -1
+		}
+		
 	case LWS_CALLBACK_CLOSED:
 		ws?.connectionClosed()
 		break
@@ -107,7 +137,7 @@ private func websocketCallback(
 	
 	
 	if ws != nil {
-		if ws.state == .disconnecting || ws.state == .disconnected {
+		if ws.state == .disconnecting {
 			return -1
 		}
 	}
@@ -147,7 +177,7 @@ public class WebSocket {
 	public let url: URL
 	public let secure: Bool
 	public var state: WebSocketState = .disconnected
-	public private(set) var error: WebSocketError?
+	public fileprivate(set) var error: WebSocketError?
 	
 	public var openHandler: ((WebSocket) -> Void)?
 	public var textHandler: ((WebSocket, String) -> Void)?
@@ -251,54 +281,41 @@ public class WebSocket {
 		}
 	}
 	
-	private func padSize() -> Int {
-		let n: Int32 = 4 + 10
-		return Int(((((n) % _LWS_PAD_SIZE) != 0 ) ? ((n) + (_LWS_PAD_SIZE - ((n) % _LWS_PAD_SIZE))) : (n)))
-	}
-	
 	///Sends a text message across the socket.
-	public func write(_ text: String) throws {
+	public func write(_ text: String) {
 		guard let data = text.data(using: .utf8) else {
-			throw WebSocketError.textNotUTF8(text: text)
+			print("text not UTF-8")
+			return
 		}
 		
-		try doWrite(data, LWS_WRITE_TEXT)
+		doWrite(data, LWS_WRITE_TEXT)
 	}
 	
 	
 	///Sends a binary message across the socket.
-	public func write(_ data: Data) throws {
-		try doWrite(data, LWS_WRITE_BINARY)
+	public func write(_ data: Data) {
+		doWrite(data, LWS_WRITE_BINARY)
 	}
 	
-	private func doWrite(_ data: Data, _ format: lws_write_protocol) throws {
-		//LWS_SEND_BUFFER_PRE_PADDING doesn't get exported to Swift, so we
-		//have to calculate it manually
-		let size = padSize() + data.count + Int(LWS_SEND_BUFFER_POST_PADDING)
+	private func doWrite(_ data: Data, _ format: lws_write_protocol) {
+		toWrite.append((data, format))
 		
-		let ptr = malloc(size).bindMemory(to: UInt8.self, capacity: size)
-		
-		let buf = UnsafeMutableBufferPointer<UInt8>(
-			start: ptr.advanced(by: padSize()), count: data.count + Int(LWS_SEND_BUFFER_POST_PADDING)
-		)
-		
-		
-		
-		let _ = data.copyBytes(to: buf)
-		
-		guard lws_write(ws, buf.baseAddress, data.count, format) != -1 else {
-			throw WebSocketError.writeFailed
-		}
+		lws_callback_on_writable(ws)
 	}
 	
 	public func disconnect() {
 		state = .disconnecting
 		//force a callback so LWS knows to close the connection
-		lws_callback_all_protocol(WebSocket.context, WebSocket.protocols, Int32(LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION.rawValue))
+		//lws_callback_all_protocol(WebSocket.context, WebSocket.protocols, Int32(LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION.rawValue))
+		lws_callback_on_writable(ws)
 	}
 	
 	
-	private var ws: OpaquePointer?
+	fileprivate var ws: OpaquePointer?
+	
+	fileprivate var toWrite = [(Data, lws_write_protocol)]()
+	fileprivate var requestedClose = false
+	private var incomingData: Data?
 	
 	fileprivate static var sockets = [WebSocket]()
 	
@@ -322,11 +339,22 @@ public class WebSocket {
 	
 	fileprivate func received(data: UnsafePointer<UInt8>, length: Int) {
 		let data = Data(bytes: data, count: length)
-		if lws_frame_is_binary(ws) == 0, let text = binToStr(data) {
-			textHandler?(self, text)
+		if incomingData == nil {
+			incomingData = data
 		}
 		else {
-			binaryHandler?(self, data)
+			incomingData!.append(data)
+		}
+		
+		
+		if lws_is_final_fragment(ws) != 0 {
+			if lws_frame_is_binary(ws) == 0, let text = binToStr(incomingData!) {
+				textHandler?(self, text)
+			}
+			else {
+				binaryHandler?(self, incomingData!)
+			}
+			incomingData = nil
 		}
 	}
 	
@@ -340,7 +368,9 @@ public class WebSocket {
 	
 	@objc static func runSockets() {
 		while !sockets.isEmpty {
-			lws_service(context, 1000)
+			//every 100ms, check for websocket events
+			lws_service(context, 100)
+			//usleep(100000)
 		}
 	}
 	

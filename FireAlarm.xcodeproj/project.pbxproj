@@ -20,7 +20,6 @@
 		ABA8FDD01DAD904B0048DDC4 /* NSStringHTMLDecoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA8FDCF1DAD904B0048DDC4 /* NSStringHTMLDecoding.swift */; };
 		ABA8FDD21DAD965A0048DDC4 /* CommandStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA8FDD11DAD965A0048DDC4 /* CommandStatus.swift */; };
 		ABAE420F1D725E090018DF57 /* ChatRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE420E1D725E090018DF57 /* ChatRoom.swift */; };
-		ABAE421E1D7262630018DF57 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = ABAE421D1D7262630018DF57 /* libz.tbd */; };
 		ABAE42211D73AAAE0018DF57 /* ChatUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE42201D73AAAE0018DF57 /* ChatUser.swift */; };
 		ABAE42231D73B7090018DF57 /* ChatBot.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE42221D73B7090018DF57 /* ChatBot.swift */; };
 		ABAE42251D73B7640018DF57 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE42241D73B7640018DF57 /* ChatMessage.swift */; };
@@ -58,11 +57,10 @@
 		AB8FCBB61DA05B6A003ADCD5 /* CommandOptOut.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandOptOut.swift; sourceTree = "<group>"; };
 		AB8FCBB81DA05CD9003ADCD5 /* CommandCheckNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandCheckNotification.swift; sourceTree = "<group>"; };
 		AB977E941DDE2977004649DF /* WebSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
-		AB977E971DDE2A87004649DF /* libwebsockets.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libwebsockets.9.dylib; path = ../../../../../usr/local/lib/libwebsockets.9.dylib; sourceTree = "<group>"; };
+		AB977E971DDE2A87004649DF /* libwebsockets.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libwebsockets.9.dylib; path = /usr/local/lib/libwebsockets.9.dylib; sourceTree = "<absolute>"; };
 		ABA8FDCF1DAD904B0048DDC4 /* NSStringHTMLDecoding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSStringHTMLDecoding.swift; sourceTree = "<group>"; };
 		ABA8FDD11DAD965A0048DDC4 /* CommandStatus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandStatus.swift; sourceTree = "<group>"; };
 		ABAE420E1D725E090018DF57 /* ChatRoom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatRoom.swift; sourceTree = "<group>"; };
-		ABAE421D1D7262630018DF57 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		ABAE42201D73AAAE0018DF57 /* ChatUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ChatUser.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		ABAE42221D73B7090018DF57 /* ChatBot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ChatBot.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		ABAE42241D73B7640018DF57 /* ChatMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ChatMessage.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -85,7 +83,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AB977E991DDE4891004649DF /* libwebsockets.9.dylib in Frameworks */,
-				ABAE421E1D7262630018DF57 /* libz.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,23 +107,13 @@
 			name = Notifications;
 			sourceTree = "<group>";
 		};
-		AB977E961DDE2A87004649DF /* Libraries */ = {
-			isa = PBXGroup;
-			children = (
-				ABAE421D1D7262630018DF57 /* libz.tbd */,
-				AB977E971DDE2A87004649DF /* libwebsockets.9.dylib */,
-			);
-			name = Libraries;
-			path = ..;
-			sourceTree = "<group>";
-		};
 		ABAE421F1D7262690018DF57 /* Support */ = {
 			isa = PBXGroup;
 			children = (
 				ABBC51861DD952BA00678B4E /* Levenshtein.swift */,
 				ABA8FDCF1DAD904B0048DDC4 /* NSStringHTMLDecoding.swift */,
 				AB977E941DDE2977004649DF /* WebSocket.swift */,
-				AB977E961DDE2A87004649DF /* Libraries */,
+				AB977E971DDE2A87004649DF /* libwebsockets.9.dylib */,
 			);
 			name = Support;
 			sourceTree = "<group>";
@@ -327,7 +314,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = /usr/local/opt/openssl/include;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/opt/openssl/include,
+					/usr/local/include,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -370,7 +360,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = /usr/local/opt/openssl/include;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/opt/openssl/include,
+					/usr/local/include,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
