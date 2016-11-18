@@ -269,7 +269,7 @@ public class WebSocket {
 		
 		WebSocket.sockets.append(self)
 		if WebSocket.sockets.count == 1 {
-			Thread.detachNewThreadSelector(#selector(WebSocket.runSockets), toTarget: WebSocket.self, with: nil)
+			WebSocket.runSockets()
 		}
 		
 		guard ws != nil else {
@@ -362,12 +362,44 @@ public class WebSocket {
 		throw error
 	}
 	
-	@objc static func runSockets() {
+	private static func _runSockets() {
 		while !sockets.isEmpty {
 			//every 100ms, check for websocket events
 			lws_service(context, 100)
 			//usleep(100000)
 		}
+	}
+	
+	#if os(macOS)
+	
+	@objc private static func _runSockets_thunk() {
+		_runSockets()
+	}
+	
+	private static func runSockets_selector() {
+		Thread.detachNewThreadSelector(#selector(_runSockets_thunk), toTarget: self, with: nil)
+	}
+	
+	#endif
+	
+	@available(OSX 10.12, *)
+	private static func runSockets_block() {
+		Thread.detachNewThread {
+			_runSockets()
+		}
+	}
+	
+	static func runSockets() {
+		#if os(Linux)
+			runSockets_block()
+		#else
+			if #available(OSX 10.12, *) {
+				runSockets_block()
+			}
+			else {
+				runSockets_selector()
+			}
+		#endif
 	}
 	
 	private static var _context: OpaquePointer?
