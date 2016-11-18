@@ -313,6 +313,7 @@ public class WebSocket {
 	}
 	
 	fileprivate func connectionClosed() {
+		state = .disconnected
 		closeHandler?(self)
 		if let index = WebSocket.sockets.index(where: { $0 === self }) {
 			WebSocket.sockets.remove(at: index)
