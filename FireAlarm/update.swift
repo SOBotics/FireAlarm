@@ -58,7 +58,7 @@ func installUpdate() -> Bool {
 	return false
 }
 
-var _version: String? = (try? String(contentsOfFile: "version.txt").replacingOccurrences(of: "\n", with: ""))
+var _version: String? = (try? loadFile("version.txt").replacingOccurrences(of: "\n", with: ""))
 
 var currentVersion: String {
 get {
@@ -103,7 +103,7 @@ func update(_ bot: ChatBot) -> Bool {
 		let process = launchProcess(path: "/bin/bash", arguments: ["get_version.sh"])
 		process.waitUntilExit()
 		
-		let versionContents = try String(contentsOfFile: "available_version.txt").replacingOccurrences(of: "\n", with: " ")
+		let versionContents = try loadFile("available_version.txt").replacingOccurrences(of: "\n", with: " ")
 		let components = versionContents.components(separatedBy: " ")
 		let availableVersion = components.first ?? ""
 		
