@@ -250,7 +250,7 @@ public class WebSocket {
 		origin.map {origin in
 			let originSize = origin.lengthOfBytes(using: .utf8)
 			originBuf = malloc(originSize + 1).bindMemory(to: Int8.self, capacity: originSize + 1)
-			strcpy(originBuf, origin)
+			strcpy(originBuf!, origin)
 		}
 		
 		
