@@ -13,7 +13,7 @@ protocol ChatRoomDelegate {
 	func chatRoomMessage(_ room: ChatRoom, message: ChatMessage, isEdit: Bool)
 }
 
-open class ChatRoom: NSObject, WebSocketDelegate {
+open class ChatRoom: NSObject {
 	enum ChatEvent: Int {
 		case messagePosted = 1
 		case messageEdited = 2
@@ -244,20 +244,45 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 			)
 			) as! [String:Any]
 		
-		let wsURL = wsAuth["url"] as! String
+		let wsURL = (wsAuth["url"] as! String)
 		
 		let url = URL(string: "\(wsURL)?l=\(timestamp)")!
-		var request = URLRequest(url: url)
+		//var request = URLRequest(url: url)
 		
-		request.setValue("https://chat.\(client.host.rawValue)", forHTTPHeaderField: "Origin")
+		//request.setValue("https://chat.\(client.host.rawValue)", forHTTPHeaderField: "Origin")
+		//for (header, value) in client.cookieHeaders(forURL: url) {
+		//	request.setValue(value, forHTTPHeaderField: header)
+		//}
+		
+		//ws = WebSocket(request: request)
+		let origin = "chat.\(client.host.rawValue)"
+		var headers = ""
 		for (header, value) in client.cookieHeaders(forURL: url) {
-			request.setValue(value, forHTTPHeaderField: header)
+			headers += "\(header): \(value)\u{0d}\u{0a}"
+		}
+		ws = try WebSocket(url, origin: origin, headers: headers)
+		//ws.eventQueue = client.queue
+		//ws.delegate = self
+		//ws.open()
+		
+		ws.onOpen {socket in
+			self.webSocketOpen()
+		}
+		ws.onText {socekt, text in
+			self.webSocketMessageText(text)
+		}
+		ws.onBinary {socket, data in
+			self.webSocketMessageData(data)
+		}
+		ws.onClose {socket in
+			self.webSocketClose(0, reason: "", wasClean: true)
+			self.webSocketEnd(0, reason: "", wasClean: true, error: socket.error)
+		}
+		ws.onError {socket in
+			self.webSocketEnd(0, reason: "", wasClean: true, error: socket.error)
 		}
 		
-		ws = WebSocket(request: request)
-		ws.eventQueue = client.queue
-		ws.delegate = self
-		ws.open()
+		try ws.connect()
 	}
 	
 	fileprivate func messageQueueHandler() {
@@ -354,8 +379,8 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 		//...right?
 		inRoom = false
 		let _ = try? client.post("https://chat.\(client.host.rawValue)/chats/leave/\(roomID)", ["quiet":"true","fkey":client.fkey]) as String
-		ws.close()
-		while ws.readyState == .closing {
+		ws.disconnect()
+		while ws.state == .disconnecting {
 			sleep(1)
 		}
 	}
@@ -419,10 +444,11 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 	
 	public func webSocketOpen() {
 		print("Websocket opened!")
+		//let _ = try? ws.write("hello")
 		wsRetries = 0
 		DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.seconds(5)) {
 			if !self.recievedMessage {
-				self.ws.close()
+				self.ws.disconnect()
 			}
 		}
 	}
@@ -431,7 +457,7 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 		//do nothing -- we'll handle this in webSocketEnd
 	}
 	
-	public func webSocketError(_ error: NSError) {
+	public func webSocketError(_ error: Error) {
 		//do nothing -- we'll handle this in webSocketEnd
 	}
 	
@@ -474,7 +500,7 @@ open class ChatRoom: NSObject, WebSocketDelegate {
 		} while !done
 	}
 	
-	public func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: NSError?) {
+	public func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: Error?) {
 		if let e = error {
 			print("Websocket error:\n\(e)")
 		}
