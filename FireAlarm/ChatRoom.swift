@@ -291,10 +291,16 @@ open class ChatRoom: NSObject {
 			let text = messageQueue[0].0
 			let completion = messageQueue[0].1
 			do {
-				result = try client.post(
+				let (data, response) = try client.post(
 					"https://chat.\(client.host.rawValue)/chats/\(roomID)/messages/new",
 					["text":text, "fkey":client.fkey]
 				)
+				if response.statusCode == 500 {
+					print("500 error while posting message")
+				}
+				else {
+					result = String(data: data, encoding: .utf8)
+				}
 			}
 			catch {
 				handleError(error)
