@@ -291,10 +291,11 @@ func main() throws {
 	//Run background tasks
 	
 	func autoUpdate() {
-		while true {
+		var updated = false
+		while !updated {
 			sleep(60)
 			//wait one minute
-			let _ = update(bot)
+			updated = update(bot)
 		}
 	}
 	
