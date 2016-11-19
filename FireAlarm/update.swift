@@ -30,7 +30,7 @@ func installUpdate() -> Bool {
 				"-lz -lc++ -lwebsockets -o ../FireAlarm FireAlarm/*.swift "
 		#endif
 		let updateScript = "rm -rf update;pushd .;" +
-			"(git clone -b swift \"https://github.com/NobodyNada/FireAlarm.git\" update && " +
+			"(git clone -b swift \"git://github.com/NobodyNada/FireAlarm.git\" update && " +
 			"cd update && " +
 			compile + "&& " +
 			"git log --format='oneline' -n 1 > ../version-new.txt && " +
@@ -80,7 +80,7 @@ public func getVersionLink(_ version: String) -> String {
 }
 
 public var version: String {
-	return _version ?? "<unknown version>"
+	return _version ?? "unknown version"
 }
 
 public
@@ -90,10 +90,14 @@ func prepareUpdate(_ bot: ChatBot) {
 	bot.stop(.update)
 }
 
-func update(_ bot: ChatBot) -> Bool {
+func update(_ bot: ChatBot, force: Bool = false) -> Bool {
+	if force {
+		prepareUpdate(bot)
+		return true
+	}
 	
 	
-	let versionScript = "git ls-remote https://github.com/NobodyNada/FireAlarm swift | cut -d '\t' -f1 > available_version.txt"
+	let versionScript = "git ls-remote git://github.com/NobodyNada/FireAlarm swift | cut -d '\t' -f1 > available_version.txt"
 	
 	
 	

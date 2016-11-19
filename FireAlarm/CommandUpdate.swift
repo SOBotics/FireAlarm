@@ -10,11 +10,11 @@ import Foundation
 
 class CommandUpdate: Command {
 	override class func usage() -> [String] {
-		return ["update"]
+		return ["update", "update force"]
 	}
 	
 	override func run() throws {
-		if !update(bot) {
+		if !update(bot, force: (usageIndex == 1)) {
 			bot.room.postReply("No new update available.", to: message)
 		}
 	}
