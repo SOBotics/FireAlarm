@@ -23,7 +23,7 @@ func launchProcess(path: String, arguments: [String]) -> Process {
 func installUpdate() -> Bool {
 	do {
 		#if os(Linux)
-			let compile = "swiftc -lwebsockets -I ./libwebsockets -o ../FireAlarm FireAlarm/*.swift"
+			let compile = "swiftc -lwebsockets -I ./libwebsockets -I /usr/local/include -L /usr/local/lib -o ../FireAlarm FireAlarm/*.swift"
 		#else
 			let compile = "swiftc -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk " +
 			"-target x86_64-macosx10.11 -I ./libwebsockets -I /usr/local/opt/openssl/include -I /usr/local/include -L /usr/local/lib " +
