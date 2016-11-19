@@ -110,7 +110,7 @@ class Filter {
 		case textNotUTF8(text: String)
 		
 		case jsonNotDictionary(json: String)
-		case jsonParsingError(json: String, error: NSError)
+		case jsonParsingError(json: String, error: Error)
 		case noDataObject(json: String)
 		case noQuestionID(json: String)
 		case noSite(json: String)
@@ -119,11 +119,28 @@ class Filter {
 	func checkPost(_ post: Post) -> Bool {
 		var trueProbability = Double(0.263)
 		var falseProbability = Double(1 - trueProbability)
+		var postWords = [String]()
 		var checkedWords = [String]()
 		
 		let body = post.body
 		
-		for postWord in body.lowercased().components(separatedBy: CharacterSet.alphanumerics.inverted) {
+		var currentWord: String = ""
+		let set = CharacterSet.alphanumerics.inverted
+		for character in body.lowercased().characters {
+			if !set.contains(String(character).unicodeScalars.first!) {
+				currentWord.append(character)
+			}
+			else if !currentWord.isEmpty {
+				postWords.append(currentWord)
+				currentWord = ""
+			}
+		}
+		
+		if !currentWord.isEmpty {
+			postWords.append(currentWord)
+		}
+		
+		for postWord in postWords {
 			if postWord.isEmpty {
 				continue
 			}
@@ -237,13 +254,14 @@ class Filter {
 				}
 				
 				try checkAndReportPost(post)
-			} catch Client.APIError.noItems {
-				//do nothing
-			} catch let error as Client.APIError {
-				throw error
-			}
-			catch let error as NSError {
-				throw QuestionProcessingError.jsonParsingError(json: string, error: error)
+			} catch {
+				if case Client.APIError.noItems = error {
+					//do nothing
+				} else if error is Client.APIError {
+					throw error
+				}else {
+					throw QuestionProcessingError.jsonParsingError(json: string, error: error)
+				}
 			}
 		}
 		catch {
