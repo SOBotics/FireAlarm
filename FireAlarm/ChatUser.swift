@@ -18,6 +18,10 @@ open class ChatUser: CustomStringConvertible {
 	
 	///Custom per-user persistent storage.  Must be serializable by JSONSerialization!
 	open var info: [String:Any] = [:]
+	
+	/*public struct Question {
+		public let 
+	}*/
     
     open var name: String {
         get {
