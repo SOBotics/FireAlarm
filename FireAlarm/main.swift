@@ -343,8 +343,11 @@ func main() throws {
 			}
 			room.leave()
 			
-			
+			do {
 			try room.saveUserDB()
+			} catch {
+				handleError(error, "while saving the user database")
+			}
 			
 			if update {
 				if installUpdate() {
