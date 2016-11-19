@@ -45,8 +45,7 @@ class CommandStatus: Command {
 		let sema = DispatchSemaphore(value: 0)
 		
 		process.terminationHandler = {process in
-			if	process.terminationReason == .exit && process.terminationStatus == 0,
-				let info = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) {
+			if let info = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) {
 				machineInfo = info.trimmingCharacters(in: .whitespacesAndNewlines)
 			}
 			sema.signal()
