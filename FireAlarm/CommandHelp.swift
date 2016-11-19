@@ -14,7 +14,6 @@ class CommandHelp: Command {
     }
     
     override func run() throws {
-        bot.room.postReply("I'm  [FireAlarm](https://github.com/NobodyNada/chatbot), a bot which detects questions that need closing. [My command list is available here](https://github.com/NobodyNada/chatbot/wiki/Commands).", to: message)
-        bot.room.postMessage("(Note: Most of those commands have not yet been implemented in this Swift rewrite.)")
+        bot.room.postReply("I'm  [FireAlarm-Swift](\(githubLink)), a bot which detects questions that need closing. [My command list is available here](https://github.com/NobodyNada/FireAlarm/wiki/CommandsSwift).", to: message)
     }
 }
