@@ -49,13 +49,13 @@ func formatArray<T>(_ array: [T], conjunction: String) -> String {
 
 
 #if os(macOS)
-func clearCookies(_ storage: HTTPCookieStorage) {
-	if let cookies = storage.cookies {
-		for cookie in cookies {
-			storage.deleteCookie(cookie)
+	func clearCookies(_ storage: HTTPCookieStorage) {
+		if let cookies = storage.cookies {
+			for cookie in cookies {
+				storage.deleteCookie(cookie)
+			}
 		}
 	}
-}
 #endif
 
 public var githubLink = "//github.com/NobodyNada/FireAlarm/tree/swift"
@@ -344,7 +344,7 @@ func main() throws {
 			room.leave()
 			
 			do {
-			try room.saveUserDB()
+				try room.saveUserDB()
 			} catch {
 				handleError(error, "while saving the user database")
 			}
