@@ -309,6 +309,9 @@ func main() throws {
 			if let input = readLine() {
 				backgroundTasks.append(.handleInput(input: input))
 				backgroundSemaphore.signal()
+			} else {
+				//if EOF is reached,
+				return
 			}
 		} while true
 	}
