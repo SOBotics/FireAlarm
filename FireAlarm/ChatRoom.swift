@@ -295,8 +295,8 @@ open class ChatRoom: NSObject {
 					"https://chat.\(client.host.rawValue)/chats/\(roomID)/messages/new",
 					["text":text, "fkey":client.fkey]
 				)
-				if response.statusCode == 500 {
-					print("500 error while posting message")
+				if (500..<600).contains(response.statusCode) {
+					print("Server error while posting message")
 				}
 				else {
 					result = String(data: data, encoding: .utf8)
