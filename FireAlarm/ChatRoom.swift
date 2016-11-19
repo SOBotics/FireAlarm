@@ -167,7 +167,7 @@ open class ChatRoom: NSObject {
 	}
 	
 	func saveUserDB() throws {
-		let db: [String:Any]
+		let db: [[String:Any]]
 		#if os(Linux)
 			db = userDB.map {
 				[
