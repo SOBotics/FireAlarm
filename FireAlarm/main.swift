@@ -392,7 +392,8 @@ func handleError(_ error: Error, _ context: String? = nil) {
 		room.postMessage(message1 + "\n    " + message2.replacingOccurrences(of: "\n", with: "\n    "))
 	}
 	else {
-		fatalError("\(message1)\n\(message2)")
+		print("\(message1)\n\(message2)")
+		exit(1)
 	}
 }
 
