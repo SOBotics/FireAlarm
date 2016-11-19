@@ -11,7 +11,7 @@ import Dispatch
 
 let commands: [Command.Type] = [
 	CommandTest.self, CommandSay.self,
-	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandUpdate.self, CommandStatus.self,
+	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self,
 	CommandCheckPost.self,
 	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self
 ]
