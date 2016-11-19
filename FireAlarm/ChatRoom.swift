@@ -167,13 +167,13 @@ open class ChatRoom: NSObject {
 	}
 	
 	func saveUserDB() throws {
-		let db: [[String:Any]]
+		let db: Any
 		#if os(Linux)
 			db = userDB.map {
 				[
 					"id":$0.id,
 					"info":$0.info._bridgeToObjectiveC()
-				]
+				]._bridgeToObjectiveC()
 			}
 		#else
 			db = userDB.map {
