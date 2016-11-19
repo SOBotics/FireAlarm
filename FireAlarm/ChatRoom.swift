@@ -451,7 +451,8 @@ open class ChatRoom: NSObject {
 		print("Websocket opened!")
 		//let _ = try? ws.write("hello")
 		wsRetries = 0
-		DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.seconds(5)) {
+		DispatchQueue.global().async {
+			sleep(5)	//asyncAfter doesn't seem to work on Linux
 			if !self.recievedMessage {
 				self.ws.disconnect()
 			}
