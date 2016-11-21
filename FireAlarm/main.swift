@@ -348,7 +348,6 @@ func main() throws {
 			while !room.messageQueue.isEmpty {
 				sleep(1)
 			}
-			room.leave()
 			
 			do {
 				try room.saveUserDB()
@@ -364,6 +363,8 @@ func main() throws {
 					shouldReboot = true
 				}
 			}
+			
+			room.leave()
 			
 			if shouldReboot {
 				//Change to the old working directory.
