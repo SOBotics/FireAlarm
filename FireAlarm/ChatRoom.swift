@@ -187,7 +187,7 @@ open class ChatRoom: NSObject {
 			}
 		#endif
 		let data = try JSONSerialization.data(withJSONObject: db, options: .prettyPrinted)
-		try? data.write(to: saveFileNamed("users.json"), options: [.atomic])
+		try data.write(to: saveFileNamed("users.json"), options: [.atomic])
 	}
 	
 	func notificationString(tags: [String]) -> String {

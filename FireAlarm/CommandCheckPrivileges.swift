@@ -17,7 +17,7 @@ class CommandCheckPrivileges: Command {
 	override func run() throws {
 		let privs = message.user.privileges.names
 		if privs.isEmpty {
-			reply("You do not have any privileges")
+			reply("You do not have any privileges.")
 		} else {
 			reply("You have the \(formatArray(privs, conjunction: "and")) \(pluralize(privs.count, "privilege")).")
 		}
