@@ -399,9 +399,9 @@ func handleError(_ error: Error, _ context: String? = nil) {
 	
 	#if os(Linux)
 		let errorAsAny = unsafeBitCast(error, to: Any.self)
-		if type(of: error) == NSError.self {
+		if type(of: errorAsAny) == NSError.self {
 			errorType = "NSError"
-			errorDetails = unsafeBitCast(error, to: NSError.self).localizedDescription
+			errorDetails = unsafeBitCast(errorAsAny, to: NSError.self).localizedDescription
 		} else {
 			errorType = String(reflecting: type(of: error))
 			errorDetails = String(describing: error)
