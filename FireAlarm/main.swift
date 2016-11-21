@@ -392,7 +392,7 @@ func handleError(_ error: Error, _ context: String? = nil) {
 		let errorAsAny = unsafeBitCast(error, to: AnyObject.self)
 		if type(of: errorAsAny) == NSError.self {
 			errorType = "NSError"
-			errorDetails = String(describing: unsafeBitCast(errorAsAny, to: NSError.self))
+			unsafeBitCast(errorAsAny, to: NSError.self).debugDescription
 		} else {
 			errorType = String(reflecting: type(of: error))
 			errorDetails = String(describing: error)
