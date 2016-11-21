@@ -158,10 +158,10 @@ open class ChatUser: CustomStringConvertible {
     }
 	
 	public func has(privileges required: Privileges) -> Bool {
-		return isMod || isRO || privileges.has(privileges: required)
+		return isMod || isRO || id == 0 || privileges.has(privileges: required)
 	}
 	
 	public func missing(from required: Privileges) -> Privileges {
-		return (isMod || isRO) ? [] : privileges.missing(from: required)
+		return (isMod || isRO || id == 0) ? [] : privileges.missing(from: required)
 	}
 }
