@@ -392,12 +392,13 @@ func halt(reboot: Bool = false, update: Bool = false) {
 	backgroundSemaphore.signal()
 }
 
-func handleError(_ error: Any, _ context: String? = nil) {
+func handleError(_ error: Error, _ context: String? = nil) {
 	let contextStr: String
 	let errorType: String
 	let errorDetails: String
 	
 	#if os(Linux)
+		let errorAsAny = unsafeBitCast(error, to: Any.self)
 		if type(of: error) == NSError.self {
 			errorType = "NSError"
 			errorDetails = unsafeBitCast(error, to: NSError.self).localizedDescription
