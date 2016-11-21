@@ -13,7 +13,8 @@ let commands: [Command.Type] = [
 	CommandTest.self, CommandSay.self,
 	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self,
 	CommandCheckPost.self,
-	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self
+	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self,
+	CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
 ]
 
 enum FileLoadingError: Error {
@@ -45,6 +46,21 @@ func formatArray<T>(_ array: [T], conjunction: String) -> String {
 		}
 	}
 	return string
+}
+
+func pluralize(_ n: Int, _ singular: String, _ plural: String? = nil) -> String {
+	let resultPlural: String
+	if let p = plural {
+		resultPlural = p
+	} else {
+		resultPlural = singular + "s"
+	}
+	
+	if n == 1 {
+		return singular
+	} else {
+		return resultPlural
+	}
 }
 
 
@@ -378,6 +394,17 @@ func halt(reboot: Bool = false, update: Bool = false) {
 
 func handleError(_ error: Error, _ context: String? = nil) {
 	let contextStr: String
+	let errorType: String
+	let errorDetails: String
+	
+	if type(of: error) == NSError.self {
+		errorType = "NSError"
+		errorDetails = (error as NSError).localizedDescription
+	} else {
+		errorType = String(reflecting: type(of: error))
+		errorDetails = String(describing: error)
+	}
+	
 	if context != nil {
 		contextStr = " \(context!)"
 	}
@@ -385,14 +412,13 @@ func handleError(_ error: Error, _ context: String? = nil) {
 		contextStr = ""
 	}
 	
-	let message1 = "    An error (\(String(reflecting: type(of: error)))) occured\(contextStr):"
-	let message2 = String(describing: error)
+	let message1 = "    An error (\(errorType)) occured\(contextStr):"
 	
 	if let room = errorRoom {
-		room.postMessage(message1 + "\n    " + message2.replacingOccurrences(of: "\n", with: "\n    "))
+		room.postMessage(message1 + "\n    " + errorDetails.replacingOccurrences(of: "\n", with: "\n    "))
 	}
 	else {
-		print("\(message1)\n\(message2)")
+		print("\(message1)\n\(errorDetails)")
 		exit(1)
 	}
 }

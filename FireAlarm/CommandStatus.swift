@@ -2,7 +2,7 @@
 //  CommandStatus.swift
 //  FireAlarm
 //
-//  Created by Jonathan Keller on 10/11/16.
+//  Created by NobodyNada on 10/11/16.
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
@@ -59,6 +59,6 @@ class CommandStatus: Command {
 		let status = "[FireAlarm-Swift](\(githubLink)) version [\(shortVersion)](\(link)), " +
 		"running for \(uptimeStrings.joined(separator: " ")) on \(machineInfo)"
 		
-		bot.room.postReply(status, to: message)
+		reply(status)
 	}
 }

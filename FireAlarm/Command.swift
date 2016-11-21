@@ -13,6 +13,10 @@ open class Command {
     open class func usage() -> [String] {
         fatalError("usage() must be overriden")
     }
+	
+	open class func privileges() -> ChatUser.Privileges {
+		return []
+	}
     
     ///The message that triggered this command.
     open let message: ChatMessage
@@ -26,6 +30,17 @@ open class Command {
     ///Which usage of the command was run.  Useful for implementing
     ///commands that share most of their code, like shutdown/reboot.
     open let usageIndex: Int
+	
+	
+	///Replies to the message.
+	open func reply(_ reply: String) {
+		bot.room.postReply(reply, to: message)
+	}
+	
+	open func post(_ message: String) {
+		bot.room.postMessage(message)
+	}
+		
     
     open func run() throws {
         fatalError("run() must be overridden")

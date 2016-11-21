@@ -15,14 +15,14 @@ class CommandCheckNotification: Command {
 	
 	override func run() throws {
 		if !message.user.notified {
-			bot.room.postReply("You will not notified of any reports.", to: message)
+			reply("You will not notified of any reports.")
 		}
 		else if message.user.notificationTags.isEmpty {
-			bot.room.postReply("You will be notified of all reports.", to: message)
+			reply("You will be notified of all reports.")
 		}
 		else {
 			let formatted = formatArray(message.user.notificationTags.map { "[tag:\($0)]" }, conjunction: "or")
-			bot.room.postReply("You will be notified of reports tagged \(formatted).", to: message)
+			reply("You will be notified of reports tagged \(formatted).")
 		}
 
 	}

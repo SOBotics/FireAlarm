@@ -13,6 +13,10 @@ class CommandKill: Command {
 		return ["kill"]
 	}
 	
+	override class func privileges() -> ChatUser.Privileges {
+		return [.owner]
+	}
+	
 	override func run() throws {
 		abort()
 	}
