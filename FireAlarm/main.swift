@@ -239,17 +239,8 @@ func main() throws {
 			try client.loginWithEmail(email, password: password)
 		}
 		catch {
-			print("Login failed with error \(error).\nClearing cookies and retrying.")
-			//#if os(macOS)
-			//clearCookies(client.cookieStorage)
-			//#endif
-			do {
-				try client.loginWithEmail(email, password: password)
-			}
-			catch {
-				print("Failed to log in!")
-				exit(EXIT_FAILURE)
-			}
+			handleError(error, "while logging in")
+			exit(EXIT_FAILURE)
 		}
 	}
 	
