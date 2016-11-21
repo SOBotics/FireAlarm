@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AB80FFC31DE2B1560037914E /* CommandCheckPrivileges.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB80FFC21DE2B1560037914E /* CommandCheckPrivileges.swift */; };
+		AB80FFC51DE2B2160037914E /* CommandPrivilege.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB80FFC41DE2B2160037914E /* CommandPrivilege.swift */; };
+		AB80FFC71DE396F00037914E /* CommandUnprivilege.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB80FFC61DE396F00037914E /* CommandUnprivilege.swift */; };
 		AB8FCBA91D9EB9B5003ADCD5 /* CommandUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBA81D9EB9B5003ADCD5 /* CommandUpdate.swift */; };
 		AB8FCBAB1D9EBE90003ADCD5 /* update.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBAA1D9EBE90003ADCD5 /* update.swift */; };
 		AB8FCBAD1D9ED444003ADCD5 /* CommandKill.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBAC1D9ED444003ADCD5 /* CommandKill.swift */; };
@@ -48,6 +51,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AB80FFC21DE2B1560037914E /* CommandCheckPrivileges.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandCheckPrivileges.swift; sourceTree = "<group>"; };
+		AB80FFC41DE2B2160037914E /* CommandPrivilege.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandPrivilege.swift; sourceTree = "<group>"; };
+		AB80FFC61DE396F00037914E /* CommandUnprivilege.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandUnprivilege.swift; sourceTree = "<group>"; };
 		AB8FCBA81D9EB9B5003ADCD5 /* CommandUpdate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandUpdate.swift; sourceTree = "<group>"; };
 		AB8FCBAA1D9EBE90003ADCD5 /* update.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = update.swift; sourceTree = "<group>"; };
 		AB8FCBAC1D9ED444003ADCD5 /* CommandKill.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandKill.swift; sourceTree = "<group>"; };
@@ -89,6 +95,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AB80FFC81DE398700037914E /* Privileges */ = {
+			isa = PBXGroup;
+			children = (
+				AB80FFC21DE2B1560037914E /* CommandCheckPrivileges.swift */,
+				AB80FFC41DE2B2160037914E /* CommandPrivilege.swift */,
+				AB80FFC61DE396F00037914E /* CommandUnprivilege.swift */,
+			);
+			name = Privileges;
+			sourceTree = "<group>";
+		};
 		AB8FCBAE1D9EDC59003ADCD5 /* Reports */ = {
 			isa = PBXGroup;
 			children = (
@@ -125,6 +141,7 @@
 				ABAE42321D73BB190018DF57 /* Utilities */,
 				AB8FCBAE1D9EDC59003ADCD5 /* Reports */,
 				AB8FCBB31DA05566003ADCD5 /* Notifications */,
+				AB80FFC81DE398700037914E /* Privileges */,
 			);
 			name = Commands;
 			sourceTree = "<group>";
@@ -248,6 +265,8 @@
 				ABA8FDD21DAD965A0048DDC4 /* CommandStatus.swift in Sources */,
 				ABAE422D1D73BA860018DF57 /* CommandHelp.swift in Sources */,
 				AB8FCBB71DA05B6A003ADCD5 /* CommandOptOut.swift in Sources */,
+				AB80FFC71DE396F00037914E /* CommandUnprivilege.swift in Sources */,
+				AB80FFC31DE2B1560037914E /* CommandCheckPrivileges.swift in Sources */,
 				AB977E951DDE2977004649DF /* WebSocket.swift in Sources */,
 				ABF730B41D77A534002A606C /* CommandStop.swift in Sources */,
 				ABAE42251D73B7640018DF57 /* ChatMessage.swift in Sources */,
@@ -262,6 +281,7 @@
 				AB8FCBAD1D9ED444003ADCD5 /* CommandKill.swift in Sources */,
 				AB8FCBAB1D9EBE90003ADCD5 /* update.swift in Sources */,
 				ABAE42211D73AAAE0018DF57 /* ChatUser.swift in Sources */,
+				AB80FFC51DE2B2160037914E /* CommandPrivilege.swift in Sources */,
 				ABAE422B1D73BA800018DF57 /* CommandTest.swift in Sources */,
 				ABBC51871DD952BA00678B4E /* Levenshtein.swift in Sources */,
 				ABFA23431D974B4D007C9EE4 /* Filter.swift in Sources */,

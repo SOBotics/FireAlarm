@@ -66,7 +66,7 @@ open class ChatRoom: NSObject {
 				"https://chat.\(client.host.rawValue)/user/info",
 				[
 					"ids" : ids.joined(separator: ","),
-					"roomID" : "1"
+					"roomID" : "\(roomID)"
 				]
 			)
 			
@@ -159,6 +159,7 @@ open class ChatRoom: NSObject {
 			
 			let user = userWithID(id)
 			user.info = (info["info"] as? [String:Any]) ?? [:]
+			user.privileges = (info["privileges"] as? UInt64).map { ChatUser.Privileges(rawValue: $0) } ?? []
 			
 			users.append(user)
 		}
@@ -172,14 +173,16 @@ open class ChatRoom: NSObject {
 			db = userDB.map {
 				[
 					"id":$0.id,
-					"info":$0.info._bridgeToObjectiveC()
+					"info":$0.info._bridgeToObjectiveC(),
+					"privileges":$0.privileges.rawValue
 				]._bridgeToObjectiveC()
 			}
 		#else
 			db = userDB.map {
 				[
 					"id":$0.id,
-					"info":$0.info
+					"info":$0.info,
+					"privileges":$0.privileges.rawValue
 				]
 			}
 		#endif

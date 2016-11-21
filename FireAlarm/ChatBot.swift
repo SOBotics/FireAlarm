@@ -32,6 +32,20 @@ open class ChatBot: ChatRoomDelegate {
 	fileprivate var pendingStopAction = StopAction.run
 	
 	fileprivate func runCommand(_ command: Command) {
+		let required = type(of: command).privileges()
+		let missing = command.message.user.missing(from: required)
+		
+		
+		guard missing.isEmpty else {
+			let message = "You need the \(formatArray(missing.names, conjunction: "and")) " +
+			"\(pluralize(missing.names.count, "privilege")) to run that command."
+			
+			room.postReply(message, to: command.message)
+			return
+		}
+		
+		
+		
 		runningCommands.append(command)
 		commandQueue.async {
 			do {
@@ -203,7 +217,7 @@ open class ChatBot: ChatRoomDelegate {
 		}
 	}
 	
-	func postIDFromURL(_ url: URL) -> Int? {
+	func postIDFromURL(_ url: URL, isUser: Bool = false) -> Int? {
 		if url.host != "stackoverflow.com" && url.host != "www.stackoverflow.com" {
 			return nil
 		}
@@ -224,7 +238,10 @@ open class ChatBot: ChatRoomDelegate {
 		}
 		component = url.pathComponents[componentIndex]
 		
-		if component == "q" || component == "questions" {
+		if (isUser && (component == "u" || component == "users")) ||
+			(!isUser && (component == "q" || component == "questions" ||
+				component == "a" || component == "answers" ||
+				component == "p" || component == "posts")) {
 			return Int(url.pathComponents[componentIndex + 1])
 		}
 		return nil

@@ -15,7 +15,7 @@ class CommandUpdate: Command {
 	
 	override func run() throws {
 		if !update(bot, force: (usageIndex == 0)) {
-			bot.room.postReply("No new update available.", to: message)
+			reply("No new update available.")
 		}
 	}
 }

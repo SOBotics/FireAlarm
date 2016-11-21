@@ -13,6 +13,10 @@ class CommandStop: Command {
     override class func usage() -> [String] {
         return ["stop", "halt", "shutdown", "shut down", "restart", "reboot"]
     }
+	
+	override class func privileges() -> ChatUser.Privileges {
+		return [.owner]
+	}
     
     override func run() throws {
         let action: ChatBot.StopAction
@@ -25,7 +29,7 @@ class CommandStop: Command {
             action = .reboot
             reply = "Rebooting..."
         }
-        bot.room.postReply(reply, to: message)
+        self.reply(reply)
         bot.stop(action)
     }
 }

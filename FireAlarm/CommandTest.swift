@@ -14,6 +14,6 @@ class CommandTest: Command {
     }
     
     override func run() throws {
-        bot.room.postReply("Test", to: message)
+        reply("Test")
     }
 }

@@ -22,16 +22,16 @@ class CommandCheckPost: Command {
 			questionID = id
 		}
 		else {
-			bot.room.postReply("Please enter a valid post ID or URL.", to: message)
+			reply("Please enter a valid post ID or URL.")
 			return
 		}
 		
 		let result = try bot.filter.checkAndReportPost(bot.room.client.questionWithID(questionID))
 		switch result {
 		case .notBad:
-			bot.room.postReply("That post was not caught by the filter.", to: message)
+			reply("That post was not caught by the filter.")
 		case .alreadyReported:
-			bot.room.postReply("That post was already reported.", to: message)
+			reply("That post was already reported.")
 		case .reported:
 			break
 		}

@@ -24,11 +24,11 @@ class CommandOptIn: Command {
 		
 		if arguments.count == 0 {
 			message.user.notificationTags = []
-			bot.room.postReply("You will now be notified of all reports.", to: message)
+			reply("You will now be notified of all reports.")
 		}
 		else {
 			let formatted = formatArray(message.user.notificationTags.map { "[tag:\($0)]" }, conjunction: "or")
-			bot.room.postReply("You will now be notified of reports tagged \(formatted).", to: message)
+			reply("You will now be notified of reports tagged \(formatted).")
 		}
 	}
 }
