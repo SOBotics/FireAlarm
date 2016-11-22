@@ -279,18 +279,24 @@ func main() throws {
 	
 	//Run background tasks
 	
-	func autoUpdate() {
+	func autosaveAndUpdate() {
 		var updated = false
-		while !updated {
-			sleep(60)
+		while true {
 			//wait one minute
-			updated = update(bot)
+			sleep(60)
+			if !updated && !development {
+				updated = update(bot)
+			}
+			
+			do {
+				try room.saveUserDB()
+			} catch {
+				handleError(error, "while saving the user database")
+			}
 		}
 	}
 	
-	if !development {
-		DispatchQueue.global().async { autoUpdate() }
-	}
+	DispatchQueue.global().async { autosaveAndUpdate() }
 	
 	
 	func inputMonitor() {
