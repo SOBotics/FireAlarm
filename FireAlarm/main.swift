@@ -378,7 +378,7 @@ func handleError(_ error: Error, _ context: String? = nil) {
 			errorDetails = unsafeBitCast(errorAsAny, to: NSError.self).debugDescription
 		} else {
 			errorType = String(reflecting: type(of: error))
-			errorDetails = String(describing: error)
+			errorDetails = "\(e.domain) code \(e.code) \(e.userInfo)"
 		}
 	#else
 		errorType = String(reflecting: type(of: error))

@@ -22,9 +22,9 @@ open class ChatUser: CustomStringConvertible {
 	open var info: [String:Any] = [:]
 	
 	public struct Privileges: OptionSet {
-		public let rawValue: UInt64
+		public let rawValue: UInt
 		
-		public init(rawValue: UInt64) {
+		public init(rawValue: Privileges.RawValue) {
 			self.rawValue = rawValue
 		}
 		
@@ -47,7 +47,7 @@ open class ChatUser: CustomStringConvertible {
 			
 			
 			while raw != 0 {
-				let priv = Privileges(rawValue: (raw << UInt64(shifts)) & UInt64(1 << shifts))
+				let priv = Privileges(rawValue: (raw << Privileges.RawValue(shifts)) & Privileges.RawValue(1 << shifts))
 				if priv.rawValue != 0 {
 					result.append(Privileges.name(of: priv))
 				}
