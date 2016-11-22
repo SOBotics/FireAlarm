@@ -234,7 +234,7 @@ open class ChatRoom: NSObject {
 	fileprivate func connectWS() throws {
 		//get the timestamp
 		guard let time = (try client.parseJSON(client.post("https://chat.\(client.host.rawValue)/chats/\(roomID)/events", [
-			"roomid" : roomID,
+			"roomid" : String(roomID),
 			"fkey": client.fkey
 			])) as? [String:Any])?["time"] as? Int else {
 				throw RoomJoinError.roomInfoRetrievalFailed
@@ -243,7 +243,7 @@ open class ChatRoom: NSObject {
 		
 		//get the auth code
 		let wsAuth = try client.parseJSON(
-			client.post("https://chat.\(client.host.rawValue)/ws-auth", ["roomid":roomID, "fkey":client.fkey]
+			client.post("https://chat.\(client.host.rawValue)/ws-auth", ["roomid":String(roomID), "fkey":client.fkey]
 			)
 			) as! [String:Any]
 		
