@@ -126,9 +126,9 @@ func makeTable(_ heading: [String], contents: [String]...) -> String {
 extension ChatUser {
 	var notified: Bool {
 		get {
-			return (info["notified"] as? Bool) ?? false
+			return ((info["notified"] as? Int) ?? 0) == 1 ? true : false
 		} set {
-			info["notified"] = newValue
+			info["notified"] = (newValue ? 1 : 0)
 		}
 	}
 	var notificationTags: [String] {
