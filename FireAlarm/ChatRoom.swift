@@ -169,23 +169,13 @@ open class ChatRoom: NSObject {
 	
 	func saveUserDB() throws {
 		let db: Any
-		#if os(Linux)
-			db = userDB.map {
-				[
-					"id":$0.id,
-					"info":$0.info._bridgeToObjectiveC(),
-					"privileges":$0.privileges.rawValue
-				]._bridgeToObjectiveC()
-			}
-		#else
-			db = userDB.map {
-				[
-					"id":$0.id,
-					"info":$0.info,
-					"privileges":$0.privileges.rawValue
-				]
-			}
-		#endif
+		db = userDB.map {
+			[
+				"id":$0.id,
+				"info":$0.info,
+				"privileges":$0.privileges.rawValue
+			]
+		}
 		let data = try JSONSerialization.data(withJSONObject: db, options: .prettyPrinted)
 		try data.write(to: saveFileNamed("users.json"), options: [.atomic])
 	}
