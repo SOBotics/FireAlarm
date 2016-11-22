@@ -159,7 +159,7 @@ open class ChatRoom: NSObject {
 			
 			let user = userWithID(id)
 			user.info = (info["info"] as? [String:Any]) ?? [:]
-			user.privileges = (info["privileges"] as? UInt64).map { ChatUser.Privileges(rawValue: $0) } ?? []
+			user.privileges = (info["privileges"] as? ChatUser.Privileges.RawValue).map { ChatUser.Privileges(rawValue: $0) } ?? []
 			
 			users.append(user)
 		}
