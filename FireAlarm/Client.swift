@@ -17,11 +17,11 @@ extension String {
 		return self.addingPercentEncoding(withAllowedCharacters: allowed)!
 	}
 	
-	init(urlParameters: [String:Any]) {
+	init(urlParameters: [String:String]) {
 		var result = [String]()
 		
 		for (key, value) in urlParameters {
-			result.append("\(key.urlEncodedString)=\(String(describing: value).urlEncodedString)")
+			result.append("\(key.urlEncodedString)=\(value.urlEncodedString)")
 		}
 		
 		self.init(result.joined(separator: "&"))!
@@ -324,7 +324,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		return try performRequest(request)
 	}
 	
-	func post(_ url: String, _ data: [String:Any]) throws -> (Data, HTTPURLResponse) {
+	func post(_ url: String, _ data: [String:String]) throws -> (Data, HTTPURLResponse) {
 		guard let nsUrl = URL(string: url) else {
 			throw RequestError.invalidURL(url: url)
 		}
@@ -482,7 +482,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 		return string
 	}
 	
-	func post(_ url: String, _ fields: [String:Any]) throws -> String {
+	func post(_ url: String, _ fields: [String:String]) throws -> String {
 		let (data, _) = try post(url, fields)
 		guard let string = String(data: data, encoding: String.Encoding.utf8) else {
 			throw RequestError.notUTF8
@@ -584,7 +584,7 @@ open class Client: NSObject, URLSessionDataDelegate {
 			throw LoginError.loginDataNotFound
 		}
 		
-		let fields: [String:Any] = [
+		let fields: [String:String] = [
 			"email":email,
 			"password":password,
 			"affId" : hiddenInputs["affId"]!,
