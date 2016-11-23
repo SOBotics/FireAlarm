@@ -28,7 +28,6 @@ func handleError(_ error: Error, _ context: String? = nil) {
 	#if os(Linux)
 		if let e = errorAsNSError(error) {
 			errorType = "NSError"
-			let e = unsafeBitCast(errorAsAny, to: NSError.self)
 			errorDetails = "\(e.domain) code \(e.code) \(e.userInfo)"
 		} else {
 			errorType = String(reflecting: type(of: error))
