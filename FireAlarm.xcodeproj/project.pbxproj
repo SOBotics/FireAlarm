@@ -10,6 +10,7 @@
 		AB80FFC31DE2B1560037914E /* CommandCheckPrivileges.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB80FFC21DE2B1560037914E /* CommandCheckPrivileges.swift */; };
 		AB80FFC51DE2B2160037914E /* CommandPrivilege.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB80FFC41DE2B2160037914E /* CommandPrivilege.swift */; };
 		AB80FFC71DE396F00037914E /* CommandUnprivilege.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB80FFC61DE396F00037914E /* CommandUnprivilege.swift */; };
+		AB80FFCA1DE53FE90037914E /* ErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB80FFC91DE53FE90037914E /* ErrorHandler.swift */; };
 		AB8FCBA91D9EB9B5003ADCD5 /* CommandUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBA81D9EB9B5003ADCD5 /* CommandUpdate.swift */; };
 		AB8FCBAB1D9EBE90003ADCD5 /* update.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBAA1D9EBE90003ADCD5 /* update.swift */; };
 		AB8FCBAD1D9ED444003ADCD5 /* CommandKill.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8FCBAC1D9ED444003ADCD5 /* CommandKill.swift */; };
@@ -54,6 +55,7 @@
 		AB80FFC21DE2B1560037914E /* CommandCheckPrivileges.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandCheckPrivileges.swift; sourceTree = "<group>"; };
 		AB80FFC41DE2B2160037914E /* CommandPrivilege.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandPrivilege.swift; sourceTree = "<group>"; };
 		AB80FFC61DE396F00037914E /* CommandUnprivilege.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandUnprivilege.swift; sourceTree = "<group>"; };
+		AB80FFC91DE53FE90037914E /* ErrorHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorHandler.swift; sourceTree = "<group>"; };
 		AB8FCBA81D9EB9B5003ADCD5 /* CommandUpdate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandUpdate.swift; sourceTree = "<group>"; };
 		AB8FCBAA1D9EBE90003ADCD5 /* update.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = update.swift; sourceTree = "<group>"; };
 		AB8FCBAC1D9ED444003ADCD5 /* CommandKill.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandKill.swift; sourceTree = "<group>"; };
@@ -188,6 +190,7 @@
 			isa = PBXGroup;
 			children = (
 				ABD01E481D721B1800B1A7F8 /* main.swift */,
+				AB80FFC91DE53FE90037914E /* ErrorHandler.swift */,
 				AB8FCBAA1D9EBE90003ADCD5 /* update.swift */,
 				ABAE42221D73B7090018DF57 /* ChatBot.swift */,
 				ABFA23421D974B4D007C9EE4 /* Filter.swift */,
@@ -280,6 +283,7 @@
 				ABD01E491D721B1800B1A7F8 /* main.swift in Sources */,
 				AB8FCBAD1D9ED444003ADCD5 /* CommandKill.swift in Sources */,
 				AB8FCBAB1D9EBE90003ADCD5 /* update.swift in Sources */,
+				AB80FFCA1DE53FE90037914E /* ErrorHandler.swift in Sources */,
 				ABAE42211D73AAAE0018DF57 /* ChatUser.swift in Sources */,
 				AB80FFC51DE2B2160037914E /* CommandPrivilege.swift in Sources */,
 				ABAE422B1D73BA800018DF57 /* CommandTest.swift in Sources */,
