@@ -483,7 +483,7 @@ open class ChatRoom: NSObject {
 				throw EventError.jsonParsingFailed(json: text)
 			}
 			
-			if json["action"] == "hb" {
+			if (json["action"] as? String) == "hb" {
 				//heartbeat
 				ws.write("{\"action\":\"hb\",\"data\":\"hb\"}")
 				return
