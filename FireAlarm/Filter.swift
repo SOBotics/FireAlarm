@@ -110,7 +110,7 @@ class Filter {
 		case textNotUTF8(text: String)
 		
 		case jsonNotDictionary(json: String)
-		case jsonParsingError(json: String, error: Error)
+		case jsonParsingError(json: String, error: String)
 		case noDataObject(json: String)
 		case noQuestionID(json: String)
 		case noSite(json: String)
@@ -255,15 +255,15 @@ class Filter {
 				
 				try checkAndReportPost(post)
 			} catch {
-				if let _ = errorAsNSError(error) {
-					throw QuestionProcessingError.jsonParsingError(json: string, error: error)
+				if let e = errorAsNSError(error) {
+					throw QuestionProcessingError.jsonParsingError(json: string, error: formatNSError(e))
 				}
 				else if case Client.APIError.noItems = error {
 					//do nothing
 				} else if error is Client.APIError {
 					throw error
 				}else {
-					throw QuestionProcessingError.jsonParsingError(json: string, error: error)
+					throw QuestionProcessingError.jsonParsingError(json: string, error: String(describing: error))
 				}
 			}
 		}
