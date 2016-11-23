@@ -255,7 +255,7 @@ class Filter {
 				
 				try checkAndReportPost(post)
 			} catch {
-				if unsafeBitCast(error, to: AnyObject.self) is NSError {
+				if type(of: unsafeBitCast(error, to: AnyObject.self)) == NSError.self {
 					throw QuestionProcessingError.jsonParsingError(json: string, error: error)
 				}
 				else if case Client.APIError.noItems = error {
