@@ -141,7 +141,6 @@ extension ChatUser {
 }
 
 
-private var errorRoom: ChatRoom?
 private enum BackgroundTask {
 	case handleInput(input: String)
 	case shutDown(reboot: Bool, update: Bool)
@@ -373,43 +372,6 @@ func halt(reboot: Bool = false, update: Bool = false) {
 	backgroundSemaphore.signal()
 }
 
-func handleError(_ error: Error, _ context: String? = nil) {
-	let contextStr: String
-	let errorType: String
-	let errorDetails: String
-	
-	#if os(Linux)
-		let errorAsAny = unsafeBitCast(error, to: AnyObject.self)
-		if type(of: errorAsAny) == NSError.self {
-			errorType = "NSError"
-			let e = unsafeBitCast(errorAsAny, to: NSError.self)
-			errorDetails = "\(e.domain) code \(e.code) \(e.userInfo)"
-		} else {
-			errorType = String(reflecting: type(of: error))
-			errorDetails = String(describing: error)
-		}
-	#else
-		errorType = String(reflecting: type(of: error))
-		errorDetails = String(describing: error)
-	#endif
-	
-	if context != nil {
-		contextStr = " \(context!)"
-	}
-	else {
-		contextStr = ""
-	}
-	
-	let message1 = "    An error (\(errorType)) occured\(contextStr):"
-	
-	if let room = errorRoom {
-		room.postMessage(message1 + "\n    " + errorDetails.replacingOccurrences(of: "\n", with: "\n    "))
-	}
-	else {
-		print("\(message1)\n\(errorDetails)")
-		exit(1)
-	}
-}
 
 
 
