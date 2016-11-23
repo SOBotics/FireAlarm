@@ -49,7 +49,7 @@ func handleError(_ error: Error, _ context: String? = nil) {
 		contextStr = ""
 	}
 	
-	let message1 = "    An error (\(errorType)) occured\(contextStr):"
+	let message1 = "    An error (\(errorType)) occured\(contextStr) (cc @NobodyNada):"
 	
 	if let room = errorRoom {
 		room.postMessage(message1 + "\n    " + errorDetails.replacingOccurrences(of: "\n", with: "\n    "))
