@@ -226,6 +226,14 @@ class Filter {
 					throw QuestionProcessingError.jsonNotDictionary(json: string)
 				}
 				
+				guard json["action"] == "155-questions-active" else {
+					if json["action"] == "hb" {
+						//heartbeat
+						ws.write("{\"action\":\"hb\",\"data\":\"hb\"}")
+					}
+					return
+				}
+				
 				guard let dataObject = json["data"]?.data(using: .utf8) else {
 					throw QuestionProcessingError.noDataObject(json: string)
 				}

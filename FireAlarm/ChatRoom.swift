@@ -483,6 +483,12 @@ open class ChatRoom: NSObject {
 				throw EventError.jsonParsingFailed(json: text)
 			}
 			
+			if json["action"] == "hb" {
+				//heartbeat
+				ws.write("{\"action\":\"hb\",\"data\":\"hb\"}")
+				return
+			}
+			
 			let roomKey = "r\(roomID)"
 			guard let events = (json[roomKey] as? [String:Any])?["e"] as? [Any] else {
 				return  //no events
