@@ -20,6 +20,10 @@ func errorAsNSError(_ error: Error) -> NSError? {
 	#endif
 }
 
+func formatNSError(_ e: NSError) -> String {
+	return "\(e.domain) code \(e.code) \(e.userInfo)"
+}
+
 func handleError(_ error: Error, _ context: String? = nil) {
 	let contextStr: String
 	let errorType: String
@@ -28,7 +32,7 @@ func handleError(_ error: Error, _ context: String? = nil) {
 	#if os(Linux)
 		if let e = errorAsNSError(error) {
 			errorType = "NSError"
-			errorDetails = "\(e.domain) code \(e.code) \(e.userInfo)"
+			errorDetails = formatNSError(e)
 		} else {
 			errorType = String(reflecting: type(of: error))
 			errorDetails = String(describing: error)
