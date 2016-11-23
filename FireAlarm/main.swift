@@ -379,7 +379,7 @@ func handleError(_ error: Error, _ context: String? = nil) {
 	
 	#if os(Linux)
 		let errorAsAny = unsafeBitCast(error, to: AnyObject.self)
-		if type(of: errorAsAny) == NSError.self {
+		if errorAsAny is NSError {
 			errorType = "NSError"
 			let e = unsafeBitCast(errorAsAny, to: NSError.self)
 			errorDetails = "\(e.domain) code \(e.code) \(e.userInfo)"
