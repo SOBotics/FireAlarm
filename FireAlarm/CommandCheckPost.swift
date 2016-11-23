@@ -26,7 +26,7 @@ class CommandCheckPost: Command {
 			return
 		}
 		
-		let result = try bot.filter.checkAndReportPost(bot.room.client.questionWithID(questionID))
+		let result = try bot.filter.checkAndReportPost(message.room.client.questionWithID(questionID))
 		switch result {
 		case .notBad:
 			reply("That post was not caught by the filter.")

@@ -446,7 +446,7 @@ open class ChatRoom: NSObject {
 				
 				print("\(user): \(content)")
 				
-				let message = ChatMessage(user: user, content: content, id: messageID, replyID: replyID)
+				let message = ChatMessage(room: self, user: user, content: content, id: messageID, replyID: replyID)
 				if let d = delegate {
 					d.chatRoomMessage(self, message: message, isEdit: type == .messageEdited)
 				}

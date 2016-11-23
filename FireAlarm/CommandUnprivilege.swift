@@ -56,7 +56,7 @@ class CommandUnprivilege: Command {
 		}
 		
 		//search for the user in the user database
-		for chatUser in bot.room.userDB {
+		for chatUser in message.room.userDB {
 			if chatUser.id == Int(user) ||
 				chatUser.name.replacingOccurrences(of: " ", with: "").lowercased() == user.lowercased() ||
 				chatUser.id == idFromURL {

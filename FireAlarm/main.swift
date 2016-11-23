@@ -324,6 +324,7 @@ func main() throws {
 			bot.chatRoomMessage(
 				room,
 				message: ChatMessage(
+					room: room,
 					user: room.userWithID(0),
 					content: input,
 					id: nil
