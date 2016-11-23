@@ -22,6 +22,6 @@ class CommandListRunning: Command {
         }
         
         reply("Running commands:")
-        bot.room.postMessage(makeTable(["User", "Command"], contents: users, commands))
+        message.room.postMessage(makeTable(["User", "Command"], contents: users, commands))
     }
 }

@@ -34,11 +34,11 @@ open class Command {
 	
 	///Replies to the message.
 	open func reply(_ reply: String) {
-		bot.room.postReply(reply, to: message)
+		message.room.postReply(reply, to: message)
 	}
 	
 	open func post(_ message: String) {
-		bot.room.postMessage(message)
+		self.message.room.postMessage(message)
 	}
 		
     
