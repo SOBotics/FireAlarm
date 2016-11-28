@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftChatSE
 
 class CommandHelp: Command {
     override class func usage() -> [String] {
