@@ -198,7 +198,7 @@ class Filter {
 		print("Reporting question \(post.id).")
 		
 		recentlyReportedPosts.append((id: post.id, when: Date()))
-		listener.room.postMessage("[ [FireAlarm-Swift](\(githubLink)) ] " +
+		listener.room.postMessage("[ [\(botName)](\(githubLink)) ] " +
 			"[tag:\(post.tags.first ?? "tagless")] Potentially bad question: [\(post.title)](//stackoverflow.com/q/\(post.id)) " +
 			listener.room.notificationString(tags: post.tags)
 		)

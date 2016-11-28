@@ -56,7 +56,7 @@ class CommandStatus: Command {
 		let shortVersion = getShortVersion(version)
 		let link = getVersionLink(version)
 		
-		let status = "[FireAlarm-Swift](\(githubLink)) version [\(shortVersion)](\(link)), " +
+		let status = "[\(botName)](\(githubLink)) version [\(shortVersion)](\(link)), " +
 		"running for \(uptimeStrings.joined(separator: " ")) on \(machineInfo)"
 		
 		reply(status)
