@@ -21,7 +21,7 @@ class Word {
 }
 
 class Filter {
-	let bot: ChatBot
+	let listener: ChatListener
 	let client: Client
 	
 	let initialProbability: Double
@@ -29,9 +29,9 @@ class Filter {
 	
 	var recentlyReportedPosts = [(id: Int, when: Date)]()
 	
-	init(_ bot: ChatBot) {
-		self.bot = bot
-		client = bot.room.client
+	init(_ listener: ChatListener) {
+		self.listener = listener
+		client = listener.room.client
 		
 		print("Loading filter...")
 		
@@ -63,7 +63,7 @@ class Filter {
 		
 		//let request = URLRequest(url: URL(string: "ws://qa.sockets.stackexchange.com/")!)
 		//ws = WebSocket(request: request)
-		//ws.eventQueue = bot.room.client.queue
+		//ws.eventQueue = listener.room.client.queue
 		//ws.delegate = self
 		//ws.open()
 		ws = try WebSocket("wss://qa.sockets.stackexchange.com/")
@@ -188,7 +188,7 @@ class Filter {
 			}
 		}
 		else {
-			bot.room.postMessage("Failed to calculate minimum report date!")
+			listener.room.postMessage("Failed to calculate minimum report date!")
 		}
 		
 		if recentlyReportedPosts.contains(where: { $0.id == post.id }) {
@@ -198,9 +198,9 @@ class Filter {
 		print("Reporting question \(post.id).")
 		
 		recentlyReportedPosts.append((id: post.id, when: Date()))
-		bot.room.postMessage("[ [FireAlarm-Swift](\(githubLink)) ] " +
+		listener.room.postMessage("[ [FireAlarm-Swift](\(githubLink)) ] " +
 			"[tag:\(post.tags.first ?? "tagless")] Potentially bad question: [\(post.title)](//stackoverflow.com/q/\(post.id)) " +
-			bot.room.notificationString(tags: post.tags)
+			listener.room.notificationString(tags: post.tags)
 		)
 		
 		return .reported
@@ -254,7 +254,7 @@ class Filter {
 					throw QuestionProcessingError.noQuestionID(json: string)
 				}
 				
-				let post = try bot.room.client.questionWithID(id)
+				let post = try listener.room.client.questionWithID(id)
 				
 				//don't report posts that are more than a day old
 				if post.creationDate < post.lastActivityDate - 60 * 60 * 24 {
@@ -285,7 +285,7 @@ class Filter {
 		repeat {
 			do {
 				if wsRetries >= wsMaxRetries {
-					bot.room.postMessage(
+					listener.room.postMessage(
 						"Realtime questions websocket died; failed to reconnect!  Active posts will not be reported until a reboot.  (cc @NobodyNada)"
 					)
 					return
