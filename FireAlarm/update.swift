@@ -85,14 +85,14 @@ public var version: String {
 
 public
 
-func prepareUpdate(_ bot: ChatBot) {
-	bot.room.postMessage("Installing update...")
-	bot.stop(.update)
+func prepareUpdate(_ listener: ChatListener) {
+	listener.room.postMessage("Installing update...")
+	listener.stop(.update)
 }
 
-func update(_ bot: ChatBot, force: Bool = false) -> Bool {
+func update(_ listener: ChatListener, force: Bool = false) -> Bool {
 	if force {
-		prepareUpdate(bot)
+		prepareUpdate(listener)
 		return true
 	}
 	
@@ -112,7 +112,7 @@ func update(_ bot: ChatBot, force: Bool = false) -> Bool {
 		let availableVersion = components.first ?? ""
 		
 		if currentVersion != availableVersion {
-			prepareUpdate(bot)
+			prepareUpdate(listener)
 			return true
 		}
 	}

@@ -123,6 +123,39 @@ func makeTable(_ heading: [String], contents: [String]...) -> String {
 }
 
 
+
+func postIDFromURL(_ url: URL, isUser: Bool = false) -> Int? {
+	if url.host != "stackoverflow.com" && url.host != "www.stackoverflow.com" {
+		return nil
+	}
+	
+	let componentIndex: Int
+	let component: String
+	if url.pathComponents.first == "/" {
+		if url.pathComponents.count < 3 {
+			return nil
+		}
+		componentIndex = 1
+	}
+	else {
+		if url.pathComponents.count < 2 {
+			return nil
+		}
+		componentIndex = 0
+	}
+	component = url.pathComponents[componentIndex]
+	
+	if (isUser && (component == "u" || component == "users")) ||
+		(!isUser && (component == "q" || component == "questions" ||
+			component == "a" || component == "answers" ||
+			component == "p" || component == "posts")) {
+		return Int(url.pathComponents[componentIndex + 1])
+	}
+	return nil
+}
+
+
+
 extension ChatUser {
 	var notified: Bool {
 		get {
@@ -166,7 +199,7 @@ let saveDirURL = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(
 
 public var startTime: Date!
 
-fileprivate var bot: ChatBot!
+fileprivate var listener: ChatListener!
 
 func main() throws {
 	print("FireAlarm starting...")
@@ -240,11 +273,11 @@ func main() throws {
 	}
 	try room.loadUserDB()
 	errorRoom = room
-	bot = ChatBot(room, commands: commands)
-	room.delegate = bot
+	listener = ChatListener(room, commands: commands)
+	room.delegate = listener
 	try room.join()
 	
-	try bot.filter.start()
+	try listener.filter.start()
 	
 	
 	//Startup finished
@@ -284,7 +317,7 @@ func main() throws {
 			//wait one minute
 			sleep(60)
 			if !updated && !development {
-				updated = update(bot)
+				updated = update(listener)
 			}
 			
 			do {
@@ -320,7 +353,7 @@ func main() throws {
 		
 		switch backgroundTasks.removeFirst() {
 		case .handleInput(let input):
-			bot.chatRoomMessage(
+			listener.chatRoomMessage(
 				room,
 				message: ChatMessage(
 					room: room,

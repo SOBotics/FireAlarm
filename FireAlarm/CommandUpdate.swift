@@ -14,7 +14,7 @@ class CommandUpdate: Command {
 	}
 	
 	override func run() throws {
-		if !update(bot, force: (usageIndex == 0)) {
+		if !update(listener, force: (usageIndex == 0)) {
 			reply("No new update available.")
 		}
 	}

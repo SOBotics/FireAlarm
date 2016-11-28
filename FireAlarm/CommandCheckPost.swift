@@ -18,7 +18,7 @@ class CommandCheckPost: Command {
 		if let id = Int(arguments[0]) {
 			questionID = id
 		}
-		else if let url = URL(string: arguments[0]), let id = bot.postIDFromURL(url) {
+		else if let url = URL(string: arguments[0]), let id = postIDFromURL(url) {
 			questionID = id
 		}
 		else {
@@ -26,7 +26,7 @@ class CommandCheckPost: Command {
 			return
 		}
 		
-		let result = try bot.filter.checkAndReportPost(message.room.client.questionWithID(questionID))
+		let result = try listener.filter.checkAndReportPost(message.room.client.questionWithID(questionID))
 		switch result {
 		case .notBad:
 			reply("That post was not caught by the filter.")

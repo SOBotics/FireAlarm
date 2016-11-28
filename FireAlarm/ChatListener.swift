@@ -1,5 +1,5 @@
 //
-//  ChatBot.swift
+//  ChatListener.swift
 //  FireAlarm
 //
 //  Created by NobodyNada on 8/28/16.
@@ -9,7 +9,7 @@
 import Foundation
 import Dispatch
 
-open class ChatBot: ChatRoomDelegate {
+open class ChatListener: ChatRoomDelegate {
 	open let room: ChatRoom
 	
 	open let commands: [Command.Type]
@@ -105,7 +105,7 @@ open class ChatBot: ChatRoomDelegate {
 				
 				
 				if match {
-					runCommand(command.init(bot: self, message: message, arguments: args, usageIndex: i))
+					runCommand(command.init(listener: self, message: message, arguments: args, usageIndex: i))
 					return
 				}
 				else {
@@ -215,36 +215,6 @@ open class ChatBot: ChatRoomDelegate {
 			}
 			handleCommand(message)
 		}
-	}
-	
-	func postIDFromURL(_ url: URL, isUser: Bool = false) -> Int? {
-		if url.host != "stackoverflow.com" && url.host != "www.stackoverflow.com" {
-			return nil
-		}
-		
-		let componentIndex: Int
-		let component: String
-		if url.pathComponents.first == "/" {
-			if url.pathComponents.count < 3 {
-				return nil
-			}
-			componentIndex = 1
-		}
-		else {
-			if url.pathComponents.count < 2 {
-				return nil
-			}
-			componentIndex = 0
-		}
-		component = url.pathComponents[componentIndex]
-		
-		if (isUser && (component == "u" || component == "users")) ||
-			(!isUser && (component == "q" || component == "questions" ||
-				component == "a" || component == "answers" ||
-				component == "p" || component == "posts")) {
-			return Int(url.pathComponents[componentIndex + 1])
-		}
-		return nil
 	}
 	
 	func stop(_ stopAction: StopAction) {

@@ -20,9 +20,9 @@ open class Command {
     
     ///The message that triggered this command.
     open let message: ChatMessage
-    open let bot: ChatBot
+    open let listener: ChatListener
     
-    ///Whether the command has completed execution.  Will be set to true automatically by ChatBot.
+    ///Whether the command has completed execution.  Will be set to true automatically by ChatListener.
     open internal(set) var finished = false
     
     open let arguments: [String]
@@ -46,8 +46,8 @@ open class Command {
         fatalError("run() must be overridden")
     }
     
-    public required init(bot: ChatBot, message: ChatMessage, arguments: [String], usageIndex: Int = 0) {
-        self.bot = bot
+    public required init(listener: ChatListener, message: ChatMessage, arguments: [String], usageIndex: Int = 0) {
+        self.listener = listener
         self.message = message
         self.arguments = arguments
         self.usageIndex = usageIndex

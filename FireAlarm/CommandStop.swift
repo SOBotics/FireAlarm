@@ -19,7 +19,7 @@ class CommandStop: Command {
 	}
     
     override func run() throws {
-        let action: ChatBot.StopAction
+        let action: ChatListener.StopAction
         let reply: String
         if usageIndex < REBOOT_INDEX {
             action = .halt
@@ -30,6 +30,6 @@ class CommandStop: Command {
             reply = "Rebooting..."
         }
         self.reply(reply)
-        bot.stop(action)
+        listener.stop(action)
     }
 }

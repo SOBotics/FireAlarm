@@ -16,7 +16,7 @@ class CommandListRunning: Command {
     override func run() throws {
         var users = [String]()
         var commands = [String]()
-        for command in bot.runningCommands {
+        for command in listener.runningCommands {
             users.append("\(command.message.user.name)")
             commands.append("\(command.message.content)")
         }

@@ -49,7 +49,7 @@ class CommandUnprivilege: Command {
 		
 		var targetUser: ChatUser?
 		let idFromURL: Int?
-		if let url = URL(string: user), let id = bot.postIDFromURL(url, isUser: true) {
+		if let url = URL(string: user), let id = postIDFromURL(url, isUser: true) {
 			idFromURL = id
 		} else {
 			idFromURL = nil
