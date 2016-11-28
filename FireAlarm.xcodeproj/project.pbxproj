@@ -29,7 +29,6 @@
 		ABAE42231D73B7090018DF57 /* ChatListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE42221D73B7090018DF57 /* ChatListener.swift */; };
 		ABAE42251D73B7640018DF57 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE42241D73B7640018DF57 /* ChatMessage.swift */; };
 		ABAE42271D73B9130018DF57 /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE42261D73B9130018DF57 /* Command.swift */; };
-		ABAE422B1D73BA800018DF57 /* CommandTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE422A1D73BA800018DF57 /* CommandTest.swift */; };
 		ABAE422D1D73BA860018DF57 /* CommandHelp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE422C1D73BA860018DF57 /* CommandHelp.swift */; };
 		ABAE422F1D73BA8C0018DF57 /* CommandListRunning.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE422E1D73BA8C0018DF57 /* CommandListRunning.swift */; };
 		ABBC51871DD952BA00678B4E /* Levenshtein.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBC51861DD952BA00678B4E /* Levenshtein.swift */; };
@@ -75,7 +74,6 @@
 		ABAE42221D73B7090018DF57 /* ChatListener.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ChatListener.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		ABAE42241D73B7640018DF57 /* ChatMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ChatMessage.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		ABAE42261D73B9130018DF57 /* Command.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Command.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		ABAE422A1D73BA800018DF57 /* CommandTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CommandTest.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		ABAE422C1D73BA860018DF57 /* CommandHelp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CommandHelp.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		ABAE422E1D73BA8C0018DF57 /* CommandListRunning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CommandListRunning.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		ABBC51861DD952BA00678B4E /* Levenshtein.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Levenshtein.swift; sourceTree = "<group>"; };
@@ -153,7 +151,6 @@
 		ABAE42311D73BB0F0018DF57 /* Test */ = {
 			isa = PBXGroup;
 			children = (
-				ABAE422A1D73BA800018DF57 /* CommandTest.swift */,
 				AB8FCBB11DA0516D003ADCD5 /* CommandSay.swift */,
 			);
 			name = Test;
@@ -290,7 +287,6 @@
 				AB80FFCA1DE53FE90037914E /* ErrorHandler.swift in Sources */,
 				ABAE42211D73AAAE0018DF57 /* ChatUser.swift in Sources */,
 				AB80FFC51DE2B2160037914E /* CommandPrivilege.swift in Sources */,
-				ABAE422B1D73BA800018DF57 /* CommandTest.swift in Sources */,
 				ABBC51871DD952BA00678B4E /* Levenshtein.swift in Sources */,
 				ABFA23431D974B4D007C9EE4 /* Filter.swift in Sources */,
 				ABAE42231D73B7090018DF57 /* ChatListener.swift in Sources */,
