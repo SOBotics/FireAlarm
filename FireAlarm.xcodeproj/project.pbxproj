@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AB1033EF1DECB4D900F71424 /* Utilites.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1033EE1DECB4D900F71424 /* Utilites.swift */; };
 		AB80FFC31DE2B1560037914E /* CommandCheckPrivileges.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB80FFC21DE2B1560037914E /* CommandCheckPrivileges.swift */; };
 		AB80FFC51DE2B2160037914E /* CommandPrivilege.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB80FFC41DE2B2160037914E /* CommandPrivilege.swift */; };
 		AB80FFC71DE396F00037914E /* CommandUnprivilege.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB80FFC61DE396F00037914E /* CommandUnprivilege.swift */; };
@@ -52,6 +53,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AB1033EE1DECB4D900F71424 /* Utilites.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilites.swift; sourceTree = "<group>"; };
 		AB80FFC21DE2B1560037914E /* CommandCheckPrivileges.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandCheckPrivileges.swift; sourceTree = "<group>"; };
 		AB80FFC41DE2B2160037914E /* CommandPrivilege.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CommandPrivilege.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		AB80FFC61DE396F00037914E /* CommandUnprivilege.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CommandUnprivilege.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -200,6 +202,7 @@
 				ABAE420E1D725E090018DF57 /* ChatRoom.swift */,
 				ABAE42201D73AAAE0018DF57 /* ChatUser.swift */,
 				ABD01E4F1D721D4F00B1A7F8 /* Client.swift */,
+				AB1033EE1DECB4D900F71424 /* Utilites.swift */,
 				ABAE42301D73BB0A0018DF57 /* Commands */,
 				ABAE421F1D7262690018DF57 /* Support */,
 			);
@@ -274,6 +277,7 @@
 				ABF730B41D77A534002A606C /* CommandStop.swift in Sources */,
 				ABAE42251D73B7640018DF57 /* ChatMessage.swift in Sources */,
 				ABAE420F1D725E090018DF57 /* ChatRoom.swift in Sources */,
+				AB1033EF1DECB4D900F71424 /* Utilites.swift in Sources */,
 				ABAE422F1D73BA8C0018DF57 /* CommandListRunning.swift in Sources */,
 				ABFA23451D9882E2007C9EE4 /* Post.swift in Sources */,
 				AB8FCBA91D9EB9B5003ADCD5 /* CommandUpdate.swift in Sources */,
