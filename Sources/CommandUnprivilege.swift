@@ -1,16 +1,17 @@
 //
-//  CommandPrivilege.swift
+//  CommandUnprivilege.swift
 //  FireAlarm
 //
-//  Created by NobodyNada on 11/20/16.
+//  Created by NobodyNada on 11/21/16.
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
 import Foundation
+import SwiftChatSE
 
-class CommandPrivilege: Command {
+class CommandUnprivilege: Command {
 	override class func usage() -> [String] {
-		return ["privilege * *"]
+		return ["unprivilege * *", "remove privilege * *"]
 	}
 	
 	override class func privileges() -> ChatUser.Privileges {
@@ -18,7 +19,11 @@ class CommandPrivilege: Command {
 	}
 	
 	private func usage() {
-		reply("Usage: privilege <user> <privilege>")
+		if usageIndex == 0 {
+			reply("Usage: unprivilege <user> <privilege>")
+		} else {
+			reply("Usage: remove privilege <user> <privilege>")
+		}
 	}
 	
 	override func run() throws {
@@ -67,12 +72,12 @@ class CommandPrivilege: Command {
 			return
 		}
 		
-		guard !u.privileges.contains(priv) else {
-			reply("That user already has that privilege.")
+		guard u.privileges.contains(priv) else {
+			reply("That user doesn't have that privilege.")
 			return
 		}
 		
-		u.privileges.update(with: priv)
-		reply("Given \(ChatUser.Privileges.name(of: priv)) privileges to [\(u.name)](//stackoverflow.com/u/\(u.id)).")
+		u.privileges.subtract(priv)
+		reply("Removed \(ChatUser.Privileges.name(of: priv)) privileges from [\(u.name)](//stackoverflow.com/u/\(u.id)).")
 	}
 }

@@ -1,5 +1,5 @@
 //
-//  CommandKill.swift
+//  CommandUpdate.swift
 //  FireAlarm
 //
 //  Created by NobodyNada on 9/30/16.
@@ -7,17 +7,16 @@
 //
 
 import Foundation
+import SwiftChatSE
 
-class CommandKill: Command {
+class CommandUpdate: Command {
 	override class func usage() -> [String] {
-		return ["kill"]
-	}
-	
-	override class func privileges() -> ChatUser.Privileges {
-		return [.owner]
+		return ["update force", "update"]
 	}
 	
 	override func run() throws {
-		abort()
+		if !update(listener, force: (usageIndex == 0)) {
+			reply("No new update available.")
+		}
 	}
 }

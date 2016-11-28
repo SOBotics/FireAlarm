@@ -8,6 +8,7 @@
 
 import Foundation
 import Dispatch
+import SwiftChatSE
 
 let commands: [Command.Type] = [
 	CommandSay.self,
@@ -17,6 +18,41 @@ let commands: [Command.Type] = [
 	CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
 ]
 
+extension ChatRoom {
+	
+	
+	func notificationString(tags: [String]) -> String {
+		var users = [ChatUser]()
+		for user in userDB {
+			var shouldNotify = false
+			
+			if user.notified {
+				
+				
+				if !user.notificationTags.isEmpty {
+					
+					for tag in tags {
+						if user.notificationTags.contains(tag) {
+							shouldNotify = true
+						}
+					}
+					
+				}
+				else {
+					shouldNotify = true
+				}
+				
+				
+			}
+			
+			if shouldNotify {
+				users.append(user)
+			}
+		}
+		
+		return users.map { "@" + $0.name.replacingOccurrences(of: " ", with: "") }.joined(separator: " ")
+	}
+}
 
 extension ChatUser {
 	var notified: Bool {
@@ -44,28 +80,16 @@ private enum BackgroundTask {
 private var backgroundTasks = [BackgroundTask]()
 private let backgroundSemaphore = DispatchSemaphore(value: 0)
 
-private var saveURL: URL!
-
-enum SaveFileAccessType {
-	case reading
-	case writing
-	case updating
-}
-
-func saveFileNamed(_ name: String) -> URL {
-	return saveURL.appendingPathComponent(name)
-}
-
 let saveDirURL = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".firealarm", isDirectory: true)
 
 
-public var startTime: Date!
 
 fileprivate var listener: ChatListener!
 
+var filter: Filter!
+
 func main() throws {
 	print("FireAlarm starting...")
-	
 	startTime = Date()
 	
 	//Save the working directory & change to the chatbot directory.
@@ -136,10 +160,13 @@ func main() throws {
 	try room.loadUserDB()
 	errorRoom = room
 	listener = ChatListener(room, commands: commands)
-	room.delegate = listener
+	listener.onShutdown { halt(reboot: $0, update: $1) }
+	room.onMessage { listener.processMessage(room, message: $0, isEdit: $1) }
+	
 	try room.join()
 	
-	try listener.filter.start()
+	filter = Filter(listener)
+	try filter.start()
 	
 	
 	//Startup finished
@@ -168,6 +195,7 @@ func main() throws {
 	else {
 		room.postMessage("[\(botName)](\(githubLink)) started.")
 	}
+	
 	
 	
 	
@@ -215,7 +243,7 @@ func main() throws {
 		
 		switch backgroundTasks.removeFirst() {
 		case .handleInput(let input):
-			listener.chatRoomMessage(
+			listener.processMessage(
 				room,
 				message: ChatMessage(
 					room: room,
@@ -227,8 +255,11 @@ func main() throws {
 			)
 		case .shutDown(let reboot, let update):
 			var shouldReboot = reboot
+			
+			filter.stop()
+			
 			//Wait for pending messages to be posted.
-			while !room.messageQueue.isEmpty {
+			while !room.messageQueue.isEmpty && !(filter.ws.state == .disconnected || filter.ws.state == .error) {
 				sleep(1)
 			}
 			

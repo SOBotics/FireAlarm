@@ -1,0 +1,44 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "FB7A4C3E5F6ABEDB051CAD8DA2909AE59CB279FE+++524010D",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++862FD82" : 9223372036854775807,
+    "FB7A4C3E5F6ABEDB051CAD8DA2909AE59CB279FE+++524010D" : 9223372036854775807,
+    "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++1C45907" : 9223372036854775807,
+    "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++8B77443" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "7EEBA651-F2C7-4E1D-97C4-0ADB177D0A01",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++862FD82" : "SwiftChatSE\/",
+    "FB7A4C3E5F6ABEDB051CAD8DA2909AE59CB279FE+++524010D" : "FireAlarm\/",
+    "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++1C45907" : "SwiftChatSE\/",
+    "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++8B77443" : "FireAlarm\/Packages\/SwiftChatSE-0.2.6\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "FireAlarm",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "FireAlarm.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/NobodyNada\/SwiftChatSE",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++1C45907"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "git:\/\/github.com\/NobodyNada\/SwiftChatSE",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++862FD82"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "git:\/\/github.com\/NobodyNada\/SwiftChatSE",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++8B77443"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "git:\/\/github.com\/NobodyNada\/FireAlarm",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "FB7A4C3E5F6ABEDB051CAD8DA2909AE59CB279FE+++524010D"
+    }
+  ]
+}

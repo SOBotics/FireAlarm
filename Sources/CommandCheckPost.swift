@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftChatSE
 
 class CommandCheckPost: Command {
 	override class func usage() -> [String] {
@@ -26,7 +27,7 @@ class CommandCheckPost: Command {
 			return
 		}
 		
-		let result = try listener.filter.checkAndReportPost(message.room.client.questionWithID(questionID))
+		let result = try filter.checkAndReportPost(message.room.client.questionWithID(questionID))
 		switch result {
 		case .notBad:
 			reply("That post was not caught by the filter.")

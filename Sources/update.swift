@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftChatSE
 
 #if os(Linux)
 	typealias Process = Task
@@ -22,13 +23,7 @@ func launchProcess(path: String, arguments: [String]) -> Process {
 
 func installUpdate() -> Bool {
 	do {
-		#if os(Linux)
-			let compile = "swiftc -g -lwebsockets -I ./libwebsockets -I /usr/local/include -L /usr/local/lib -o ../FireAlarm FireAlarm/*.swift"
-		#else
-			let compile = "swiftc -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk " +
-			"-target x86_64-macosx10.11 -I ./libwebsockets -I /usr/local/opt/openssl/include -I /usr/local/include -L /usr/local/lib " +
-				"-lz -lc++ -lwebsockets -o ../FireAlarm FireAlarm/*.swift "
-		#endif
+		let compile = "build.sh"
 		let updateScript = "rm -rf update;pushd .;" +
 			"(git clone -b swift \"git://github.com/NobodyNada/FireAlarm.git\" update && " +
 			"cd update && " +
@@ -60,9 +55,9 @@ func installUpdate() -> Bool {
 
 var _version: String? = (try? loadFile("version.txt").replacingOccurrences(of: "\n", with: ""))
 
-var currentVersion: String {
+var version: String {
 get {
-	return _version ?? ""
+	return _version ?? "<unknown version>"
 }
 set {
 	_version = newValue
@@ -76,14 +71,13 @@ public func getShortVersion(_ version: String) -> String {
 }
 
 public func getVersionLink(_ version: String) -> String {
-	return "//github.com/NobodyNada/FireAlarm/commit/\(version)"
+	if version == "<unknown version>" {
+		return githubLink
+	} else {
+		return "//github.com/NobodyNada/FireAlarm/commit/\(version)"
+	}
 }
 
-public var version: String {
-	return _version ?? "unknown version"
-}
-
-public
 
 func prepareUpdate(_ listener: ChatListener) {
 	listener.room.postMessage("Installing update...")

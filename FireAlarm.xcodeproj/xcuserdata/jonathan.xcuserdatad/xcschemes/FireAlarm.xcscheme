@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0800"
+   LastUpgradeVersion = "0810"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "ABD01E441D721B1800B1A7F8"
+               BlueprintIdentifier = "OBJ_90"
                BuildableName = "FireAlarm"
                BlueprintName = "FireAlarm"
                ReferencedContainer = "container:FireAlarm.xcodeproj">
@@ -32,7 +32,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "ABD01E441D721B1800B1A7F8"
+            BlueprintIdentifier = "OBJ_90"
             BuildableName = "FireAlarm"
             BlueprintName = "FireAlarm"
             ReferencedContainer = "container:FireAlarm.xcodeproj">
@@ -49,14 +49,13 @@
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
-      stopOnEveryThreadSanitizerIssue = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "ABD01E441D721B1800B1A7F8"
+            BlueprintIdentifier = "OBJ_90"
             BuildableName = "FireAlarm"
             BlueprintName = "FireAlarm"
             ReferencedContainer = "container:FireAlarm.xcodeproj">
@@ -87,7 +86,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "ABD01E441D721B1800B1A7F8"
+            BlueprintIdentifier = "OBJ_90"
             BuildableName = "FireAlarm"
             BlueprintName = "FireAlarm"
             ReferencedContainer = "container:FireAlarm.xcodeproj">
