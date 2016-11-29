@@ -91,10 +91,10 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
         return 0;
     }
 
-    if (getUserRepByID(bot, post->userID) > 500)
+    /*if (getUserRepByID(bot, post->userID) > 500)
     {
         return 0;
-    }
+    }*/
 
     switch (filter->type) {
         case FILTER_TEXT:

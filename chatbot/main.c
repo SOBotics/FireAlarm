@@ -215,7 +215,7 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
     //Post *p = NULL;
     if (p != NULL && !p->isAnswer) {
-        printf ("checking post: %lu", p->postID);
+        printf ("checking post: %lu\n", p->postID);
         checkPost(bot, p);
     }
     else {
@@ -400,6 +400,11 @@ int main(int argc, const char * argv[]) {
     char *startMessage;
     asprintf (&startMessage, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started with api quota %d.", bot->api->apiQuota);
     puts("Fire Alarm started.");
+    char *apiFilter;
+    asprintf (&apiFilter, "Api Filter is %s\n", bot->api->apiFilter);
+    puts (apiFilter);
+    postMessage (bot->room, apiFilter);
+    free (apiFilter);
     postMessage (bot->room, startMessage);
     free (startMessage);
 

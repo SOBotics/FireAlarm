@@ -102,20 +102,22 @@ cJSON *SE_apiGET (ChatBot *bot, char *request)
     //Backoff and error checking
     if (backoff->isError)
     {
-        return cJSON_NULL;
+        return NULL;
     }
     if (backoff->isBackoff)
     {
         long long currentTime = (long long) time (NULL);
         //Checking if the backoff is over
-        if ((currentTime - backoff->backoffAt) > backoff->backoffTime)
+        /*if ((currentTime - backoff->backoffAt) > backoff->backoffTime)
         {
             backoff->isBackoff = 0;
         }
         else
         {
-            return cJSON_NULL;
-        }
+            return NULL;
+        }*/
+        postMessage (bot->room, "Blocked by backoff!");
+        return NULL;
     }
 
     //Now we check if the api filter is NULL or not. If it is NULL, we set the filter to "default"
@@ -131,7 +133,7 @@ cJSON *SE_apiGET (ChatBot *bot, char *request)
     char *jsonInStr = cJSON_Print (json);
 
     //Checking if we violated a backoff
-    if (!strstr (jsonInStr, "quota_remaining"))
+    if (!strstr (jsonInStr, "quota_remaining") || strstr (jsonInStr, "error_id"))
     {
         backoff->isError = 1;
         free (jsonInStr);
@@ -141,7 +143,7 @@ cJSON *SE_apiGET (ChatBot *bot, char *request)
         fputs (message, stderr);
         postMessage (bot->room, message);
         free (message);
-        return cJSON_NULL;
+        return NULL;
     }
     free (jsonInStr);
 
@@ -157,7 +159,7 @@ cJSON *SE_apiGET (ChatBot *bot, char *request)
         puts (message);
         postMessage (bot->room, message);
         free (message);
-        return cJSON_NULL;
+        return NULL;
     }
 
     return json;
@@ -168,7 +170,7 @@ int getApiQuota (ChatBot *bot)
     char *request;
     asprintf (&request, "api.stackexchange.com/2.2/info?site=stackoverflow&filter=%s&key=%s", bot->api->apiFilter, bot->api->apiKey);
     cJSON *json = SE_apiGET (bot, request);
-    if (json == cJSON_NULL)
+    if (json == NULL)
     {
         return -1;
     }
@@ -183,7 +185,7 @@ int getApiQuota (ChatBot *bot)
 Post *getPostByID (ChatBot *bot, unsigned long postID)
 {
     char *request;
-    asprintf (&request, "https://api.stackexchange.com/questions/%lu?site=stackoverflow&filter=%s&key=%s", postID, bot->api->apiFilter, bot->api->apiKey);
+    asprintf (&request, "api.stackexchange.com/questions/%lu?site=stackoverflow&filter=%s&key=%s", postID, bot->api->apiFilter, bot->api->apiKey);
     cJSON *json = SE_apiGET (bot, request);
     free (request);
     if (json == cJSON_NULL || json == NULL)
@@ -194,7 +196,7 @@ Post *getPostByID (ChatBot *bot, unsigned long postID)
     bot->api->apiQuota = cJSON_GetObjectItem (json, "quota_remaining")->valueint;
 
     cJSON *postJSON = cJSON_GetArrayItem(cJSON_GetObjectItem(json, "items"), 0);
-    if (postJSON == NULL)
+    if (postJSON == NULL || postJSON == cJSON_NULL)
     {
         cJSON_Delete (json);
         return NULL;
@@ -220,4 +222,29 @@ Post *getPostByID (ChatBot *bot, unsigned long postID)
 
     cJSON_Delete(json);
     return p;
+}
+
+unsigned getUserRepByID (ChatBot *bot, unsigned long userID)
+{
+    char *request;
+    asprintf (&request, "api.stackexchange.com/2.2/users/%lu?site=stackoverflow&filter=default&key=%s", userID, bot->api->apiKey);
+    cJSON *json = SE_apiGET (bot, request);
+    free (request);
+    if (json == NULL)
+    {
+        return 1;
+    }
+
+    //Updating the latest api quota
+    bot->api->apiQuota = cJSON_GetObjectItem (json, "quota_remaining")->valueint;
+
+    cJSON *userJSON = cJSON_GetArrayItem(cJSON_GetObjectItem(json, "items"), 0);
+    if (userJSON == NULL) {
+        cJSON_Delete(json);
+        return 1;
+    }
+
+    unsigned userRep = cJSON_GetObjectItem (userJSON, "reputation")->valueint;
+    cJSON_Delete (json);
+    return userRep;
 }

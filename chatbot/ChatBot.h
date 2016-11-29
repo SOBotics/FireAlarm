@@ -104,7 +104,7 @@ int isValidTag (ChatBot *bot, char *tag);
 unsigned isKeywordInFilter (ChatBot *bot, char *keyword);
 Filter *getFilterByKeyword (ChatBot *bot, char *keyword);
 Report **getReportsByFilter (ChatBot *bot, unsigned filterType, unsigned totalReports);
-unsigned getUserRepByID (ChatBot *bot, unsigned long userID);
+//unsigned getUserRepByID (ChatBot *bot, unsigned long userID);
 int apiQuota (ChatBot *bot);
 
 #endif /* ChatBot_h */

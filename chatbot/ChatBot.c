@@ -1417,7 +1417,7 @@ Report **getReportsByFilter (ChatBot *bot, unsigned filterType, unsigned totalRe
     return reportsDetected;
 }
 
-unsigned getUserRepByID (ChatBot *bot, unsigned long userID)
+/*unsigned getUserRepByID (ChatBot *bot, unsigned long userID)
 {
     pthread_mutex_lock(&bot->room->clientLock);
         CURL *curl = bot->room->client->curl;
@@ -1476,7 +1476,7 @@ unsigned getUserRepByID (ChatBot *bot, unsigned long userID)
 
         cJSON_Delete (json);
         return reputation;
-}
+}*/
 
 int apiQuota (ChatBot *bot)
 {

@@ -18,6 +18,12 @@ typedef struct _ChatUser {
     int isRoomOwner;
 }ChatUser;
 
+typedef struct _SOUser {
+    char *username;
+    unsigned long userID;
+    unsigned userRep;
+}SOUser;
+
 ChatUser *createUser(unsigned long userID, const char *username);
 void deleteUser(ChatUser *user);
 

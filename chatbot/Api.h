@@ -37,5 +37,7 @@ char *createApiFilter (ChatBot *bot, char *filter);
 cJSON *makeApiCall (ChatBot *bot, char *request);
 cJSON *SE_apiGET (ChatBot *bot, char *request);
 int getApiQuota (ChatBot *bot);
+Post *getPostByID (ChatBot *bot, unsigned long postID);
+unsigned getUserRepByID (ChatBot *bot, unsigned long userID);
 
 #endif /* Api.h */
