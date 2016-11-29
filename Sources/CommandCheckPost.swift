@@ -27,6 +27,13 @@ class CommandCheckPost: Command {
 			return
 		}
 		
+		if filter == nil {
+			reply("Just a moment; the filter is still loading...")
+			repeat {
+				sleep(1)
+			} while filter == nil
+		}
+		
 		let result = try filter.checkAndReportPost(message.room.client.questionWithID(questionID))
 		switch result {
 		case .notBad:

@@ -165,11 +165,8 @@ func main() throws {
 	
 	try room.join()
 	
-	filter = Filter(listener)
-	try filter.start()
-	
-	
-	//Startup finished
+	//Post the startup message
+	currentVersion = getCurrentVersion()
 	if FileManager.default.fileExists(atPath: "update-failure") {
 		room.postMessage("Update failed!")
 		try! FileManager.default.removeItem(atPath: "update-failure")
@@ -195,6 +192,12 @@ func main() throws {
 	else {
 		room.postMessage("[\(botName)](\(githubLink)) started.")
 	}
+	
+	
+	
+	//Load the filter
+	filter = Filter(listener)
+	try filter.start()
 	
 	
 	
