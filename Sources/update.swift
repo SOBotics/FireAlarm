@@ -58,15 +58,8 @@ func installUpdate() -> Bool {
 	return false
 }
 
-var _version: String? = (try? loadFile("version.txt").replacingOccurrences(of: "\n", with: ""))
-
-var version: String {
-get {
-	return _version ?? "<unknown version>"
-}
-set {
-	_version = newValue
-}
+func getCurrentVersion() -> String {
+	return (try? loadFile("version.txt").replacingOccurrences(of: "\n", with: "")) ?? "<unknown version>"
 }
 
 public func getShortVersion(_ version: String) -> String {

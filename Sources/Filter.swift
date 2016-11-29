@@ -45,6 +45,7 @@ class Filter {
 		}
 		
 		self.words = words
+		print("Filter loaded.")
 	}
 	
 	var ws: WebSocket!
