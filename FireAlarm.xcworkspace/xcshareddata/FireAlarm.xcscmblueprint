@@ -6,6 +6,7 @@
   "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
     "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++862FD82" : 9223372036854775807,
     "FB7A4C3E5F6ABEDB051CAD8DA2909AE59CB279FE+++524010D" : 9223372036854775807,
+    "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++88D9F58" : 9223372036854775807,
     "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++1C45907" : 9223372036854775807,
     "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++8B77443" : 9223372036854775807
   },
@@ -13,6 +14,7 @@
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
     "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++862FD82" : "SwiftChatSE\/",
     "FB7A4C3E5F6ABEDB051CAD8DA2909AE59CB279FE+++524010D" : "FireAlarm\/",
+    "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++88D9F58" : "FireAlarm\/Packages\/SwiftChatSE-1.1.1\/",
     "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++1C45907" : "SwiftChatSE\/",
     "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++8B77443" : "FireAlarm\/Packages\/SwiftChatSE-0.2.6\/"
   },
@@ -29,6 +31,11 @@
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "git:\/\/github.com\/NobodyNada\/SwiftChatSE",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++862FD82"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "git:\/\/github.com\/NobodyNada\/SwiftChatSE",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0F9496D5C5E4304C9BD0E2F6B8B47BF68F9F1071+++88D9F58"
     },
     {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "git:\/\/github.com\/NobodyNada\/SwiftChatSE",
