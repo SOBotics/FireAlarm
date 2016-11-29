@@ -23,11 +23,16 @@ func launchProcess(path: String, arguments: [String]) -> Process {
 
 func installUpdate() -> Bool {
 	do {
-		let compile = "build.sh"
+		#if os(Linux)
+			let compile = "build-nopm.sh"	//Swift Package Manager does not work on Raspberry Pi
+		#else
+			let compile = "build.sh"
+		#endif
 		let updateScript = "rm -rf update;pushd .;" +
 			"(git clone -b swift \"git://github.com/NobodyNada/FireAlarm.git\" update && " +
 			"cd update && " +
 			compile + "&& " +
+			"mv FireAlarm .. && " +
 			"git log --format='oneline' -n 1 > ../version-new.txt && " +
 			"cd .. && " +
 			"rm -rf update) || " +
