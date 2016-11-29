@@ -28,7 +28,7 @@ class CommandCheckPost: Command {
 		}
 		
 		if filter == nil {
-			reply("Just a moment; the filter is still loading...")
+			reply("Waiting for the filter to load...")
 			repeat {
 				sleep(1)
 			} while filter == nil
