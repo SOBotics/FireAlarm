@@ -192,6 +192,8 @@ func main() throws {
 	else {
 		room.postMessage("[\(botName)](\(githubLink)) started.")
 	}
+	shortVersion = getShortVersion(currentVersion)
+	versionLink = getVersionLink(currentVersion)
 	
 	
 	
