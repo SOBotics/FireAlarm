@@ -265,6 +265,7 @@ int main(int argc, const char * argv[]) {
     }
 
     chdir(resolvedPath);
+    char *location;
 
     Client *client = createClient("stackoverflow.com", "cookies");
     if (!client->isLoggedIn) {
@@ -290,6 +291,11 @@ int main(int argc, const char * argv[]) {
             loginWithEmailAndPassword(client, env_email, env_pass);
             memset(env_pass, 0, strlen(env_pass));
         }
+    }
+
+    if ((location = getenv ("ChatBotLocation")) == NULL)
+    {
+        asprintf (&location, "no_location");
     }
 
     //ChatRoom *roomPostTrue = createChatRoom (client, 111347); //773 is room number of LQPHQ
@@ -398,7 +404,8 @@ int main(int argc, const char * argv[]) {
     //bot->api->apiQuota = 5;
 
     char *startMessage;
-    asprintf (&startMessage, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started with api quota %d.", bot->api->apiQuota);
+    asprintf (&startMessage, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started with api quota %d on %s.", bot->api->apiQuota, location);
+    free (location);
     puts("Fire Alarm started.");
     char *apiFilter;
     asprintf (&apiFilter, "Api Filter is %s\n", bot->api->apiFilter);
