@@ -27,14 +27,21 @@ class Filter {
 	
 	let initialProbability: Double
 	let words: [String:Word]
+	var blacklistedUsernames: [String]
 	
 	var recentlyReportedPosts = [(id: Int, when: Date)]()
+	
+	
+	enum UsernameLoadingError: Error {
+		case NotArrayOfStrings
+	}
 	
 	init(_ listener: ChatListener) {
 		self.listener = listener
 		client = listener.room.client
 		
 		print("Loading filter...")
+		blacklistedUsernames = []
 		
 		let data = try! Data(contentsOf: saveDirURL.appendingPathComponent("filter.json"))
 		let db = try! JSONSerialization.jsonObject(with: data, options: []) as! [String:Any]
@@ -45,6 +52,28 @@ class Filter {
 		}
 		
 		self.words = words
+		
+		let usernameURL = saveDirURL.appendingPathComponent("blacklisted_users.json")
+		
+		do {
+			let usernameData = try Data(contentsOf: usernameURL)
+			guard let usernames = try JSONSerialization.jsonObject(with: usernameData, options: []) as? [String] else {
+				throw UsernameLoadingError.NotArrayOfStrings
+			}
+			blacklistedUsernames = usernames
+			
+		} catch {
+			handleError(error, "while loading blacklisted usernames.")
+			print("Loading an empty username database.")
+			if FileManager.default.fileExists(atPath: usernameURL.path) {
+				print("Backing up blacklisted_users.json.")
+				do {
+					try FileManager.default.moveItem(at: usernameURL, to: saveDirURL.appendingPathComponent("blacklisted_users.json.bak"))
+				} catch {
+					handleError(error, "while backing up the blacklisted usernames.")
+				}
+			}
+		}
 		print("Filter loaded.")
 	}
 	
@@ -118,7 +147,7 @@ class Filter {
 		case noSite(json: String)
 	}
 	
-	func checkPost(_ post: Post) -> Bool {
+	func runBayesianFilter(_ post: Post) -> Bool {
 		var trueProbability = Double(0.263)
 		var falseProbability = Double(1 - trueProbability)
 		var postWords = [String]()
@@ -166,16 +195,42 @@ class Filter {
 		return trueProbability * 1e45 > falseProbability
 	}
 	
+	func runUsernameFilter(_ post: Post) -> Bool {
+		let name = post.username
+		for regex in blacklistedUsernames {
+			if name.range(of: regex, options: [.regularExpression, .caseInsensitive]) != nil {
+				return true
+			}
+		}
+		
+		
+		return false
+	}
+	
+	func checkPost(_ post: Post) -> ReportReason? {
+		if runUsernameFilter(post) {
+			return .blacklistedUsername
+		}else if runBayesianFilter(post) {
+			return .bayesianFilter
+		} else {
+			return nil
+		}
+	}
+	
+	enum ReportReason {
+		case bayesianFilter
+		case blacklistedUsername
+	}
+	
 	enum ReportResult {
 		case notBad	//the post was not bad
 		case alreadyReported
-		case reported
+		case reported(reason: ReportReason)
 	}
 	
 	@discardableResult func checkAndReportPost(_ post: Post) throws -> ReportResult {
-		let bad = checkPost(post)
-		if bad {
-			return reportPost(post)
+		if let reason = checkPost(post) {
+			return report(post: post, reason: reason)
 		}
 		else {
 			return .notBad
@@ -183,7 +238,7 @@ class Filter {
 	}
 	
 	///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
-	func reportPost(_ post: Post) -> ReportResult {
+	func report(post: Post, reason: ReportReason) -> ReportResult {
 		if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
 			recentlyReportedPosts = recentlyReportedPosts.filter {
 				$0.when > minDate
@@ -199,13 +254,26 @@ class Filter {
 		}
 		print("Reporting question \(post.id).")
 		
+		let header: String
+		switch reason {
+		case .bayesianFilter:
+			header = "Potentially bad question:"
+		case .blacklistedUsername:
+			header = "Blacklisted username:"
+		}
+		
 		recentlyReportedPosts.append((id: post.id, when: Date()))
 		listener.room.postMessage("[ [\(botName)](\(githubLink)) ] " +
-			"[tag:\(post.tags.first ?? "tagless")] Potentially bad question: [\(post.title)](//stackoverflow.com/q/\(post.id)) " +
+			"[tag:\(post.tags.first ?? "tagless")] \(header) [\(post.title)](//stackoverflow.com/q/\(post.id)) " +
 			listener.room.notificationString(tags: post.tags)
 		)
 		
-		return .reported
+		return .reported(reason: reason)
+	}
+	
+	func saveUsernameBlacklist() throws {
+		let data = try JSONSerialization.data(withJSONObject: blacklistedUsernames, options: .prettyPrinted)
+		try data.write(to: saveDirURL.appendingPathComponent("blacklisted_users.json"))
 	}
 	
 	func webSocketMessageText(_ text: String) {
