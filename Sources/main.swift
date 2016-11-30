@@ -14,9 +14,29 @@ let commands: [Command.Type] = [
 	CommandSay.self,
 	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self,
 	CommandCheckPost.self,
+	CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
 	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self,
 	CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
 ]
+
+
+
+extension ChatUser {
+	var notified: Bool {
+		get {
+			return ((info["notified"] as? Int) ?? 0) == 1 ? true : false
+		} set {
+			info["notified"] = (newValue ? 1 : 0)
+		}
+	}
+	var notificationTags: [String] {
+		get {
+			return (info["notificationTags"] as? [String]) ?? []
+		} set {
+			info["notificationTags"] = newValue
+		}
+	}
+}
 
 extension ChatRoom {
 	
@@ -54,22 +74,11 @@ extension ChatRoom {
 	}
 }
 
-extension ChatUser {
-	var notified: Bool {
-		get {
-			return ((info["notified"] as? Int) ?? 0) == 1 ? true : false
-		} set {
-			info["notified"] = (newValue ? 1 : 0)
-		}
-	}
-	var notificationTags: [String] {
-		get {
-			return (info["notificationTags"] as? [String]) ?? []
-		} set {
-			info["notificationTags"] = newValue
-		}
-	}
+extension ChatUser.Privileges {
+	static let blacklist = ChatUser.Privileges(rawValue: 1 << 1)
 }
+
+ChatUser.Privileges.add(name: "Blacklist", for: .blacklist)
 
 
 private enum BackgroundTask {
@@ -205,6 +214,18 @@ func main() throws {
 	
 	
 	//Run background tasks
+	func save() {
+		do {
+			try room.saveUserDB()
+		} catch {
+			handleError(error, "while saving the user database")
+		}
+		do {
+			try filter.saveUsernameBlacklist()
+		} catch {
+			handleError(error, "while saving the username blacklist")
+		}
+	}
 	
 	func autosaveAndUpdate() {
 		var updated = false
@@ -215,11 +236,7 @@ func main() throws {
 				updated = update(listener)
 			}
 			
-			do {
-				try room.saveUserDB()
-			} catch {
-				handleError(error, "while saving the user database")
-			}
+			save()
 		}
 	}
 	
@@ -268,11 +285,7 @@ func main() throws {
 				sleep(1)
 			}
 			
-			do {
-				try room.saveUserDB()
-			} catch {
-				handleError(error, "while saving the user database")
-			}
+			save()
 			
 			if update {
 				if installUpdate() {
