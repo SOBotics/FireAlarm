@@ -5,7 +5,7 @@ echo "Building SwiftChatSE..."
 [[ -d SwiftChatSE ]] && rm -rf SwiftChatSE
 git clone git://github.com/NobodyNada/SwiftChatSE || exit 1
 pushd SwiftChatSE || exit 1
-build-nopm.sh || (popd; exit 1)
+./build-nopm.sh || (popd; exit 1)
 popd
 
 
