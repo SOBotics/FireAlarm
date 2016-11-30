@@ -145,7 +145,7 @@ func main() throws {
 		}
 		
 		do {
-			try client.loginWithEmail(email, password: password)
+			try client.login(email: email, password: password)
 		}
 		catch {
 			handleError(error, "while logging in")
