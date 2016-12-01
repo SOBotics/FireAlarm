@@ -77,7 +77,7 @@ Client *createClient(const char *host, const char *cookiefile) {
     checkCURL(curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curlErrorBuf));
 
     //Uncomment this to pass all requests through mitmproxy, for debugging.
-    checkCURL(curl_easy_setopt(curl, CURLOPT_PROXY, "https://127.0.0.1:8080"));
+    //checkCURL(curl_easy_setopt(curl, CURLOPT_PROXY, "https://127.0.0.1:8080"));
 
 #ifdef DEBUG
     checkCURL(curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, curlDebug));
