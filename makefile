@@ -1,3 +1,2 @@
 all:
-	clang chatbot/*.c -lcurl -lwebsockets -lpthread -lm -o firealarm -ferror-limit=100
-
+	clang chatbot/*.c -lcurl -lwebsockets -lpthread -lm -o firealarm 
