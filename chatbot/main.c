@@ -243,6 +243,11 @@ int main(int argc, const char * argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    //Get the original working directory to be used later
+    //http://stackoverflow.com/a/298518/5735775
+    char *originaldir [1024];
+    getcwd (originaldir, sizeof(originaldir));
+
 
     //Get the chatbot directory path.
     //http://stackoverflow.com/a/26696759/3476191
