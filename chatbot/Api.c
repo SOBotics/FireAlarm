@@ -206,6 +206,8 @@ Post *getPostByID (ChatBot *bot, unsigned long postID)
     char *body = cJSON_GetObjectItem(postJSON, "body")->valuestring;
     char *type = "question";
     unsigned long userID = 0;
+    unsigned userRep = 0;
+    char *username = NULL;
 
     //Checking if OP is deleted
     if (strcmp (cJSON_GetObjectItem (cJSON_GetObjectItem (postJSON, "owner"), "user_type")->valuestring, "does_not_exist") == 0)
@@ -216,10 +218,10 @@ Post *getPostByID (ChatBot *bot, unsigned long postID)
     else
     {
         userID = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "user_id")->valueint;
+        userRep = cJSON_GetObjectItem (cJSON_GetObjectItem (postJSON, "owner"), "reputation")->valueint;
+        username = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "display_name")->valuestring;
     }
 
-    unsigned userRep = cJSON_GetObjectItem (cJSON_GetObjectItem (postJSON, "owner"), "reputation")->valueint;
-    char *username = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "display_name")->valuestring;
     SOUser *user = createSOUser(userID, username, userRep);
 
     Post *p = createPost(title, body, postID, strcmp(type, "answer") == 0, user);

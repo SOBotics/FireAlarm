@@ -203,12 +203,16 @@ void webSocketOpened(WebSocket *ws) {
 
 void wsRecieved(WebSocket *ws, char *data, size_t len) {
     cJSON *json = cJSON_Parse(data);
-    //printf ("\n%s\n", data);
     puts ("Getting data...");
     cJSON *post = cJSON_Parse(cJSON_GetObjectItem(json, "data")->valuestring);
     puts ("Checking if SO..");
+    if (post == NULL || post == cJSON_NULL)
+    {
+        puts ("post is NULL!!!");
+        return;
+    }
     if (strcmp(cJSON_GetObjectItem(post, "apiSiteParameter")->valuestring, "stackoverflow")) {
-        //if this isn't SO
+        //If this isn't SO
         cJSON_Delete(json);
         cJSON_Delete(post);
         return;
@@ -309,7 +313,7 @@ int main(int argc, const char * argv[]) {
 
     //ChatRoom *roomPostTrue = createChatRoom (client, 111347); //773 is room number of LQPHQ
 
-    ChatRoom *room = createChatRoom(client, 123602); // 111347 is SOBotics; 123602 is FA Dev
+    ChatRoom *room = createChatRoom(client, 111347); // 111347 is SOBotics; 123602 is FA Dev
 
     enterChatRoom(room);
     //enterChatRoom (roomPostTrue);
@@ -331,7 +335,7 @@ int main(int argc, const char * argv[]) {
         createCommand("test", 0, test2Callback),
         createCommand("running commands", 0, listCommands),
         createCommand("stop", 2, stopBot),
-        createCommand("reboot", 1, rebootBot),
+        createCommand("reboot", 2, rebootBot),
         createCommand("kill", 2, forceStopBot),
         createCommand("check post *", 0, checkPostCallback),
         createCommand("tp ...", 1, truePositive),
