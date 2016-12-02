@@ -90,11 +90,10 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
        // puts ("Filter is disabled!");
         return 0;
     }
-
-    /*if (getUserRepByID(bot, post->userID) > 500)
+    if (post->owner->userRep > 500)
     {
         return 0;
-    }*/
+    }
 
     switch (filter->type) {
         case FILTER_TEXT:

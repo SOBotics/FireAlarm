@@ -204,13 +204,16 @@ void webSocketOpened(WebSocket *ws) {
 void wsRecieved(WebSocket *ws, char *data, size_t len) {
     cJSON *json = cJSON_Parse(data);
     //printf ("\n%s\n", data);
+    puts ("Getting data...");
     cJSON *post = cJSON_Parse(cJSON_GetObjectItem(json, "data")->valuestring);
+    puts ("Checking if SO..");
     if (strcmp(cJSON_GetObjectItem(post, "apiSiteParameter")->valuestring, "stackoverflow")) {
         //if this isn't SO
         cJSON_Delete(json);
         cJSON_Delete(post);
         return;
     }
+    puts ("Getting post...");
     ChatBot *bot = (ChatBot*)ws->user;
     Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
     //Post *p = NULL;
@@ -219,6 +222,7 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
         checkPost(bot, p);
     }
     else {
+        puts ("Null post!!");
         printf("Got a null post: %d\n", cJSON_GetObjectItem(post, "id")->valueint);
     }
     cJSON_Delete(json);
@@ -404,7 +408,9 @@ int main(int argc, const char * argv[]) {
     socket->closeCallback = wsClosed;
     connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
 
-    bot->api->apiFilter = createApiFilter (bot, "question.title;question.body;question.tags;user.user_id;user.user_type;question.closed_reason");
+    bot->api->apiFilter = createApiFilter (bot,
+                                        "question.title;question.body;question.tags;user.user_id;user.user_type;question.closed_reason;"
+                                        );
     bot->api->apiQuota = getApiQuota (bot);
     //bot->api->apiQuota = 5;
 

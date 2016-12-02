@@ -329,33 +329,6 @@ void connectWebSocket(WebSocket *socket, const char *host, const char *path) {
     info.protocol = NULL;
 
     struct lws *ws = lws_client_connect_via_info(&info);
-    //struct libwebsocket_context
-
-    /* struct lws *ws = libwebsocket_client_connect(
-                                        info.context,
-                                        info.address,
-                                        info.port,
-                                        info.ssl_connection,
-                                        info.path,
-                                        info.host,
-                                        info.origin,
-                                        info.protocol,
-                                        -1
-                                        );*/
-
-    /*struct lws *ws = libwebsocket_client_connect(
-                                        c->wsContext,
-                                        host,
-                                        80,
-                                        0,
-                                        path,
-                                        host,
-                                        NULL,
-                                        NULL,
-                                        -1
-                                        );*/
-
-
 
     if (ws == NULL) {
         fputs("Failed to create websocket!\n", stderr);

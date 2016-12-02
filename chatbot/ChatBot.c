@@ -294,6 +294,8 @@ static Report **parseReports(ChatBot *bot, cJSON *json) {
         unsigned long messageID = cJSON_GetObjectItem(data, "messageID")->valueint;
         unsigned long postID = cJSON_GetObjectItem(data, "postID")->valueint;
         unsigned long userID = cJSON_GetObjectItem(data, "userID")->valueint;
+        unsigned userRep = cJSON_GetObjectItem (data, "userRep")->valueint;
+        char *username = cJSON_GetObjectItem (data, "username")->valuestring;
         unsigned char isAnswer = cJSON_GetObjectItem(data, "isAnswer")->type == cJSON_True;
         int confirmation = cJSON_GetObjectItem(data, "confirmation")->valueint;
         const char *title = cJSON_GetObjectItem(data, "title")->valuestring;
@@ -302,7 +304,7 @@ static Report **parseReports(ChatBot *bot, cJSON *json) {
         Report *report = malloc(sizeof(Report));
 
         report->messageID = messageID;
-        report->post = createPost(title, body, postID, isAnswer, userID);
+        report->post = createPost(title, body, postID, isAnswer, createSOUser(userID, username, userRep));
         report->confirmation = confirmation;;
 
         reports[i] = report;
@@ -602,8 +604,8 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         //char *notif = getNotificationString(bot, post);
         //puts ("Completed line 582.");
         snprintf(message, maxMessage,
-                 REPORT_HEADER " Potentially bad post (%s): [%s](http://stackoverflow.com/%s/%lu) (likelihood %d) %s",
-                messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, likelihood, notifString);
+                 REPORT_HEADER " Potentially bad post (%s): [%s](http://stackoverflow.com/%s/%lu) (reputation %u) (likelihood %d) %s",
+                messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, post->owner->userRep, likelihood, notifString);
         //puts ("Completed preparing report.");
         //free(notif);
         //if (notifString != NULL)

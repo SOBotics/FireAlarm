@@ -539,7 +539,9 @@ void saveReports(Report *reports[], int reportsUntilAnalysis) {
         cJSON_AddItemToObject(item, "postID", cJSON_CreateNumber(post->postID));
         cJSON_AddItemToObject(item, "title", cJSON_CreateString(post->title));
         cJSON_AddItemToObject(item, "body", cJSON_CreateString(post->body));
-        cJSON_AddItemToObject(item, "userID", cJSON_CreateNumber(post->userID));
+        cJSON_AddItemToObject(item, "userID", cJSON_CreateNumber(post->owner->userID));
+        cJSON_AddItemToObject (item, "userRep", cJSON_CreateNumber (post->owner->userRep));
+        cJSON_AddItemToObject(item, "username", cJSON_CreateString(post->owner->username));
         cJSON_AddItemToObject(item, "isAnswer", cJSON_CreateBool(post->isAnswer));
 
         cJSON_AddItemToArray(json, item);

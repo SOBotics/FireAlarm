@@ -10,17 +10,17 @@
 #define Post_h
 
 typedef struct _ChatBot ChatBot;
+typedef struct _SOUser SOUser;
 
 typedef struct {
     char *title;
     char *body;
     unsigned long postID;
     unsigned char isAnswer;
-    unsigned long userID;
-    unsigned userRep;
+    SOUser *owner;
 }Post;
 
-Post *createPost(const char *title, const char *body, unsigned long postID, unsigned char isAnswer, unsigned long userID);
+Post *createPost(const char *title, const char *body, unsigned long postID, unsigned char isAnswer, SOUser *user);
 void deletePost(Post *p);
 int getCloseVotesByID (ChatBot *bot, unsigned long postID);
 int isPostClosed (ChatBot *bot, unsigned long postID);

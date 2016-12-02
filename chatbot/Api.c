@@ -218,7 +218,11 @@ Post *getPostByID (ChatBot *bot, unsigned long postID)
         userID = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "user_id")->valueint;
     }
 
-    Post *p = createPost(title, body, postID, strcmp(type, "answer") == 0, userID);
+    unsigned userRep = cJSON_GetObjectItem (cJSON_GetObjectItem (postJSON, "owner"), "reputation")->valueint;
+    char *username = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "display_name")->valuestring;
+    SOUser *user = createSOUser(userID, username, userRep);
+
+    Post *p = createPost(title, body, postID, strcmp(type, "answer") == 0, user);
 
     cJSON_Delete(json);
     return p;

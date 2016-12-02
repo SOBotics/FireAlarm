@@ -30,7 +30,7 @@ typedef struct _PrivRequest PrivRequest;
 
 extern long THRESHOLD;
 
-#define REPORT_MEMORY 2500
+#define REPORT_MEMORY 1000
 #define REPORT_HEADER "[ [FireAlarm](https://github.com/NobodyNada/FireAlarm) ] "
 
 typedef enum {

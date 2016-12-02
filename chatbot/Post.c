@@ -13,18 +13,17 @@
 #include <stdlib.h>
 #include <curl/curl.h>
 
-Post *createPost(const char *title, const char *body, unsigned long postID, unsigned char isAnswer, unsigned long userID) {
+Post *createPost(const char *title, const char *body, unsigned long postID, unsigned char isAnswer, SOUser *user) {
     Post *p = malloc(sizeof(Post));
     p->title = malloc(strlen(title) + 1);
     strcpy(p->title, title);
 
     p->body = malloc(strlen(body) + 1);
     strcpy(p->body, body);
-    //printf ("In function 'createPost'.. Body is %s\n", p->body);
 
     p->postID = postID;
     p->isAnswer = isAnswer;
-    p->userID = userID;
+    p->owner = user;
 
     return p;
 }
