@@ -2,8 +2,8 @@
 		"description":	"short body",
 		"expression":	"",
 		"type":	2,
-		"truePositives":	316,
-		"falsePositives":	98,
+		"truePositives":	322,
+		"falsePositives":	99,
 		"isDisabled":	0
 	}, {
 		"description":	"over exclamation",
@@ -16,22 +16,22 @@
 		"description":	"no question",
 		"expression":	"",
 		"type":	6,
-		"truePositives":	94,
-		"falsePositives":	27,
+		"truePositives":	97,
+		"falsePositives":	28,
 		"isDisabled":	0
 	}, {
 		"description":	"link in body",
 		"expression":	"",
 		"type":	7,
-		"truePositives":	40,
+		"truePositives":	45,
 		"falsePositives":	7,
 		"isDisabled":	0
 	}, {
 		"description":	"wall of text",
 		"expression":	"",
 		"type":	5,
-		"truePositives":	145,
-		"falsePositives":	40,
+		"truePositives":	153,
+		"falsePositives":	41,
 		"isDisabled":	0
 	}, {
 		"description":	"too many caps",
