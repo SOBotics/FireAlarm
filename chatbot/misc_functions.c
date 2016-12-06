@@ -391,3 +391,21 @@ char *concat (const char *s1, const char *s2)
     return result;
 }
 
+char *executeCommand (char *command)
+{
+    FILE *file;
+    char *output = malloc (2048);
+
+    //Open a pipe for executing the command
+    file = popen (command, "r");
+
+    fgets (output, 2048, file);
+
+    if (pclose (file) != 0)
+    {
+        fputs ("Failed to close command pipe!", stderr);
+        return NULL;
+    }
+    free (command);
+    return output;
+}

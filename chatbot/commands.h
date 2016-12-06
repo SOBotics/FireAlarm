@@ -16,5 +16,6 @@
 #include "priv_commands.h"
 #include "mode_commands.h"
 #include "log_commands.h"
+#include "github_commands.h"
 
 #endif /* commands_h */

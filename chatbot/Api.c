@@ -5,6 +5,8 @@
 //  Created by Ashish Ahuja on 11/05/16.
 //  Copyright © 2016 Fortunate-MAN (Ashish Ahuja). All rights reserved.
 //
+//  Note: Some of the code here has been taken from https://github.com/akheron/jansson/blob/2.9/doc/github_commits.c
+//
 
 //#include "Api.h"
 #include "ChatBot.h"
@@ -253,4 +255,111 @@ unsigned getUserRepByID (ChatBot *bot, unsigned long userID)
     unsigned userRep = cJSON_GetObjectItem (userJSON, "reputation")->valueint;
     cJSON_Delete (json);
     return userRep;
+}
+
+static size_t write_response(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+    struct write_result *result = (struct write_result *)stream;
+
+    if(result->pos + size * nmemb >= BUFFER_SIZE - 1)
+    {
+        fprintf(stderr, "error: too small buffer\n");
+        return 0;
+    }
+
+    memcpy(result->data + result->pos, ptr, size * nmemb);
+    result->pos += size * nmemb;
+
+    return size * nmemb;
+}
+
+char *makeGHApiCall (ChatBot *bot, const char *request)
+{
+    pthread_mutex_lock (&bot->room->clientLock);
+    CURL *curl = NULL;
+    curl = curl_easy_init();
+    CURLcode status;
+    struct curl_slist *headers = NULL;
+    long code;
+
+    char *data = malloc (BUFFER_SIZE);
+    struct write_result write_result = {
+        .data = data,
+        .pos = 0
+    };
+
+    curl_easy_setopt(curl, CURLOPT_URL, request);
+
+    /* GitHub commits API v3 requires a User-Agent header */
+    headers = curl_slist_append(headers, "User-Agent: FireAlarm");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_response);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &write_result);
+
+    status = curl_easy_perform(curl);
+    if (status != 0)
+    {
+        fprintf (stderr, "error: unable to request data from %s:\n", request);
+        return NULL;
+    }
+
+    //curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+    pthread_mutex_unlock (&bot->room->clientLock);
+    /*if(code != 200)
+    {
+        char *error;
+        asprintf (&error, "Error: Github server responded with code %ld!", code);
+        fprintf(stderr, "%s\n", error);
+        postMessage (bot->room, error);
+        free (error);
+        return NULL;
+    }*/
+    curl_easy_cleanup (curl);
+    curl_slist_free_all (headers);
+
+    /* zero-terminate the result */
+    data[write_result.pos] = '\0';
+
+    return data;
+}
+
+cJSON *GH_apiGET (ChatBot *bot, const char *request)
+{
+    char *data = makeGHApiCall(bot, request);
+    if (!data)
+    {
+        return NULL;
+    }
+
+    cJSON *json = cJSON_Parse(data);
+    free (data);
+    puts (cJSON_Print (json));
+
+    return json;
+}
+
+char *getLatestCommit (ChatBot *bot)
+{
+    char url [256];
+    snprintf (url, 256, "api.github.com/repos/NobodyNada/FireAlarm/commits");
+    cJSON *json = GH_apiGET (bot, url);
+
+    if (json == NULL)
+    {
+        puts ("json is null!");
+        return NULL;
+    }
+
+    if (cJSON_GetArraySize (json) == 0)
+    {
+        fputs ("array size is 0!", stderr);
+        return NULL;
+    }
+    cJSON *data = cJSON_GetArrayItem (json, 0);
+
+    char *sha = cJSON_GetObjectItem (data, "sha")->valuestring;
+    puts ("putting sha..");
+    puts (sha);
+    return sha;
 }

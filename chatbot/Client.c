@@ -350,32 +350,12 @@ int websocketCallback(struct lws *ws,
                       enum lws_callback_reasons reason,
                       void *user,
                       void *in, size_t len) {
-    //puts ("'websocketCallback' function called.");
     char *data;
     Client *c = NULL;
-    //const struct lws *check = ws;
-    //struct libwebsocket_context *check =  ws->context;
-    //struct lws_context *check = ws->context;
-    /*if (check == NULL)
-    {
-        printf ("Check is NULL! Function: WebsocketCallback.");
-    }*/
-    //const struct libwebsocket *check = ws;
     if (ws) {
-        //c = (Client *)libwebsocket_context_user(ws->context);
-         //c = (Client *)ws->user_space;
          c = (Client*)lws_context_user (lws_get_context (ws));
     }
     WebSocket *socket = NULL;
-    //socket->user = malloc (sizeof (*(socket->user)));
-    /*if (user == NULL)
-    {
-        printf ("USER IS NULL!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-    }
-    else
-    {
-        printf ("USER IS NOT NULL!!!!!!\N USER: %02x\n", (uint8_t*) user);
-    }*/
     if (user) {
         socket = *(WebSocket**)user;
     }

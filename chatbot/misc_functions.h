@@ -22,3 +22,4 @@ char *readLine (FILE *file, int lineNum);
 long long getCurrentTimeInSeconds ();
 char *getCurrentUTCTime ();
 char *concat (const char *s1, const char *s2);
+char *executeCommand (char *command);

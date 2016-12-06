@@ -313,7 +313,7 @@ int main(int argc, const char * argv[]) {
 
     //ChatRoom *roomPostTrue = createChatRoom (client, 111347); //773 is room number of LQPHQ
 
-    ChatRoom *room = createChatRoom(client, 111347); // 111347 is SOBotics; 123602 is FA Dev
+    ChatRoom *room = createChatRoom(client, 123602); // 111347 is SOBotics; 123602 is FA Dev
 
     enterChatRoom(room);
     //enterChatRoom (roomPostTrue);
@@ -400,6 +400,7 @@ int main(int argc, const char * argv[]) {
         createCommand("filter enable *", 2, enableFilter),
         createCommand("error logs", 0, printErrorLogs),
         createCommand("clear error logs", 2, clearErrorLogs),
+        createCommand("rev", 2, latestCommit),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify, logs, apiCaller);
