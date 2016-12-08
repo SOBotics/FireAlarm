@@ -12,10 +12,10 @@
 void latestCommit (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
-    //char *sha = executeCommand("git ls-remote https://github.com/NobodyNada/FireAlarm | awk \"/master/ {print \$1}\"");
-    char *sha = executeCommand("git ls-remote https://github.com/NobodyNada/FireAlarm | awk '{ print $1 }'");
-    puts (sha);
-    postMessage (bot->room, sha);
+    char *message = malloc (sizeof (char) * 1024);
+    sprintf (message, "[%s](%s)", getShortSha ("master"), getLatestShaLink ("master"));
+    postMessage (bot->room, message);
+    free (message);
     return;
 }
 

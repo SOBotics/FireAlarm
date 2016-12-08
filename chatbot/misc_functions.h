@@ -2,7 +2,7 @@
 //  misc_functions.h
 //  chatbot
 //
-//  Created by Jonathan Keller on 5/31/16.
+//  Created on 5/31/16.
 //  Copyright © 2016 NobodyNada. All rights reserved.
 //
 
@@ -23,3 +23,4 @@ long long getCurrentTimeInSeconds ();
 char *getCurrentUTCTime ();
 char *concat (const char *s1, const char *s2);
 char *executeCommand (char *command);
+void stripNewlines(char *s);

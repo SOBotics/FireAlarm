@@ -409,3 +409,16 @@ char *executeCommand (char *command)
     free (command);
     return output;
 }
+
+//http://stackoverflow.com/a/1515208/5735775
+void stripNewlines(char *s) {
+    char *p2 = s;
+    while(*s != '\0') {
+        if(*s != '\t' && *s != '\n') {
+            *p2++ = *s++;
+        } else {
+            ++s;
+        }
+    }
+    *p2 = '\0';
+}

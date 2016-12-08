@@ -23,6 +23,7 @@
 #include "Modes.h"
 #include "Logs.h"
 #include "Api.h"
+#include "GitManager.h"
 //#include "Privileges.h"
 
 typedef struct _PrivUser PrivUser;
