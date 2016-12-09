@@ -406,7 +406,6 @@ char *executeCommand (char *command)
         fputs ("Failed to close command pipe!", stderr);
         return NULL;
     }
-    free (command);
     return output;
 }
 

@@ -13,9 +13,42 @@ void latestCommit (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     char *message = malloc (sizeof (char) * 1024);
-    sprintf (message, "[%s](%s)", getShortSha ("master"), getLatestShaLink ("master"));
+    sprintf (message, "[%s](%s) (%s)", getShortSha ("master"), getLatestShaLink ("master"), getLatestCommitText ("master"));
     postMessage (bot->room, message);
     free (message);
+    return;
+}
+
+void status (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+    char *message;
+    unsigned status = getCurrentStatus ("master");
+    if (status == PULL)
+    {
+        asprintf (&message, "Need to pull.");
+    }
+    else if (status == PUSH)
+    {
+        asprintf (&message, "Need to push.");
+    }
+    else if (status == LATEST)
+    {
+        asprintf (&message, "Up to date.");
+    }
+    else if (status == DIVERGED)
+    {
+        asprintf (&message, "Status diverged!");
+    }
+    else if (status == 0)
+    {
+        asprintf (&message, "error!");
+    }
+
+    puts (message);
+    postReply (bot->room, message, command->message);
+    free (message);
+
     return;
 }
 

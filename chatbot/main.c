@@ -277,7 +277,12 @@ int main(int argc, const char * argv[]) {
         mkdir(resolvedPath, 0700);
     }
 
-    chdir(resolvedPath);
+    //chdir(resolvedPath);
+    if (chdir ("firealarm.files/") == 1)
+    {
+        fputs ("Could not change directory to 'firealarm.files'!", stderr);
+        exit (EXIT_FAILURE);
+    }
     char *location;
 
     Client *client = createClient("stackoverflow.com", "cookies");
@@ -401,6 +406,7 @@ int main(int argc, const char * argv[]) {
         createCommand("error logs", 0, printErrorLogs),
         createCommand("clear error logs", 2, clearErrorLogs),
         createCommand("rev", 2, latestCommit),
+        createCommand("status", 0, status),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify, logs, apiCaller);

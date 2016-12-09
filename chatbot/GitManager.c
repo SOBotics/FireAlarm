@@ -57,3 +57,57 @@ char *getLatestCommitLink (char *branch)
     sprintf (link, "[%s](%s)", getShortSha ("master"), getLatestShaLink ("master"));
     return link;
 }
+
+void remoteUpdate ()
+{
+    executeCommand ("git remote update");
+    return;
+}
+
+char *getLatestCommitText (char *branch)
+{
+    remoteUpdate ();
+    char *command;
+    asprintf (&command, "git show-branch %s", branch);
+    char *output = executeCommand(command);
+    free (command);
+    char *toRemove;
+    asprintf (&toRemove, "[%s] ", branch);
+    removeSubstring(output, toRemove);
+    free (toRemove);
+
+    stripNewlines(output);
+
+    return output;
+}
+
+unsigned getCurrentStatus (char *branch)
+{
+    remoteUpdate ();
+    char *status = executeCommand("./../shellscripts/currentstatus.sh");
+    stripNewlines(status);
+    puts ("in get..");
+    puts (status);
+    if (!strcmp (status, "Up-to-date"))
+    {
+        return LATEST;
+    }
+    else if (!strcmp (status, "Need to pull"))
+    {
+        return PULL;
+    }
+    else if (!strcmp (status, "Need to push"))
+    {
+        return PUSH;
+    }
+    else if (!strcmp (status, "Diverged"))
+    {
+        return DIVERGED;
+    }
+    else
+    {
+        fprintf (stderr, "%s is not a valid status type!\n", status);
+        free (status);
+        return 0;
+    }
+}
