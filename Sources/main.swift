@@ -167,7 +167,14 @@ func main() throws {
 		development = false
 	}
 	try room.loadUserDB()
+	
+	afterTooManyErrors = {
+		print("Too many errors; aborting...")
+		abort()
+	}
 	errorRoom = room
+	
+	
 	listener = ChatListener(room, commands: commands)
 	listener.onShutdown { halt(reboot: $0, update: $1) }
 	room.onMessage { listener.processMessage(room, message: $0, isEdit: $1) }
