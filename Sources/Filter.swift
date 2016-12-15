@@ -208,10 +208,68 @@ class Filter {
 		return false
 	}
 	
+	func runLinkFilter(_ post: Post) -> Bool {
+		do {
+			let regex = try NSRegularExpression(pattern:
+				"<a href=\"([^\"]*)\" rel=\"nofollow(?: noreferrer)?\">\\s*([^<\\s]*)(?=\\s*</a>)"
+			)
+			
+			#if os(Linux)
+				let nsString = post.body._bridgeToObjectiveC()
+			#else
+				let nsString = post.body as NSString
+			#endif
+			for match in regex.matches(in: post.body, range: NSMakeRange(0, nsString.length)) {
+				
+				
+				#if os(Linux)
+					let linkString = nsString.substring(with: match.rangeAt(1))._bridgeToSwift()
+					let textString = nsString.substring(with: match.rangeAt(2))._bridgeToSwift()
+				#else
+					
+					let linkString = nsString.substring(with: match.rangeAt(1)) as String
+					let textString = nsString.substring(with: match.rangeAt(2)) as String
+				#endif
+				guard
+					let link = URL(string: linkString),
+					let text = URL(string: textString),
+					let linkHost = link.host,
+					let textHost = text.host else {
+						continue
+				}
+				
+				
+				if (!textHost.isEmpty &&
+					textHost != linkHost &&
+					!linkHost.contains("rads.stackoverflow.com") &&
+					"www." + textHost != linkHost &&
+					"www." + linkHost != textHost &&
+					linkHost.contains(".") &&
+					textHost.contains(".") &&
+					!linkHost.trimmingCharacters(in: .whitespaces).contains(" ") &&
+					!textHost.trimmingCharacters(in: .whitespaces).contains(" ") &&
+					!linkHost.contains("//http") &&
+					!textHost.contains("//http")) {
+					
+					return true
+				}
+				
+				
+			}
+			return false
+			
+		} catch {
+			handleError(error, "while checking for misleading links")
+			return false
+		}
+	}
+	
 	func checkPost(_ post: Post) -> ReportReason? {
-		if runUsernameFilter(post) {
+		if runLinkFilter(post) {
+			return .misleadingLink
+		} else if runUsernameFilter(post) {
 			return .blacklistedUsername
-		}else if runBayesianFilter(post) {
+		} else if runBayesianFilter(post) {
 			return .bayesianFilter
 		} else {
 			return nil
@@ -221,6 +279,7 @@ class Filter {
 	enum ReportReason {
 		case bayesianFilter
 		case blacklistedUsername
+		case misleadingLink
 	}
 	
 	enum ReportResult {
@@ -261,12 +320,14 @@ class Filter {
 			header = "Potentially bad question:"
 		case .blacklistedUsername:
 			header = "Blacklisted username:"
+		case .misleadingLink:
+			header = "Misleading link:"
 		}
 		
 		recentlyReportedPosts.append((id: post.id, when: Date()))
 		listener.room.postMessage("[ [\(botName)](\(githubLink)) ] " +
 			"[tag:\(post.tags.first ?? "tagless")] \(header) [\(post.title)](//stackoverflow.com/q/\(post.id)) " +
-			listener.room.notificationString(tags: post.tags)
+			listener.room.notificationString(tags: post.tags, reason: reason)
 		)
 		
 		return .reported(reason: reason)

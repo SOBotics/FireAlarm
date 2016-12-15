@@ -36,32 +36,51 @@ extension ChatUser {
 			info["notificationTags"] = newValue
 		}
 	}
+	var notificationReasons: [String] {
+		get {
+			return (info["notificationReasons"] as? [String]) ?? []
+		} set {
+			info["notificationReasons"] = newValue
+		}
+	}
 }
 
 extension ChatRoom {
 	
 	
-	func notificationString(tags: [String]) -> String {
+	func notificationString(tags: [String], reason: Filter.ReportReason) -> String {
 		var users = [ChatUser]()
 		for user in userDB {
 			var shouldNotify = false
 			
 			if user.notified {
-				
-				
-				if !user.notificationTags.isEmpty {
-					
-					for tag in tags {
-						if user.notificationTags.contains(tag) {
-							shouldNotify = true
+				switch reason {
+				case .bayesianFilter:
+					if !user.notificationTags.isEmpty {
+						for tag in tags {
+							if user.notificationTags.contains(tag) {
+								shouldNotify = true
+							}
 						}
 					}
+					else {
+						shouldNotify = true
+					}
 					
+				case .blacklistedUsername:
+					if (user.notificationReasons.isEmpty && user.notificationTags.isEmpty)
+						|| user.notificationReasons.contains("username") {
+						
+						shouldNotify = true
+					}
+					
+				case .misleadingLink:
+					if (user.notificationReasons.isEmpty && user.notificationTags.isEmpty)
+						|| user.notificationReasons.contains("misleadingLink") {
+						
+						shouldNotify = true
+					}
 				}
-				else {
-					shouldNotify = true
-				}
-				
 				
 			}
 			
