@@ -211,7 +211,7 @@ class Filter {
 	func runLinkFilter(_ post: Post) -> Bool {
 		do {
 			let regex = try NSRegularExpression(pattern:
-				"<a href=\"([^\"]*)\" rel=\"nofollow(?: noreferrer)?\">\\s*([^<\\s]*)(?=\\s*</a>)"
+				"<a href=\"([^\"]*)\" rel=\"nofollow(?: noreferrer)?\">\\s*([^<\\s]*)(?=\\s*</a>)", options: []
 			)
 			
 			#if os(Linux)
