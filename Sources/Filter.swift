@@ -223,8 +223,8 @@ class Filter {
 				
 				
 				#if os(Linux)
-					let linkString = nsString.substring(with: match.range(at: 1))._bridgeToSwift()
-					let textString = nsString.substring(with: match.range(at: 2))._bridgeToSwift()
+					let linkString = nsString.substring(with: match.range(at: 1))
+					let textString = nsString.substring(with: match.range(at: 2))
 				#else
 					
 					let linkString = nsString.substring(with: match.rangeAt(1)) as String
