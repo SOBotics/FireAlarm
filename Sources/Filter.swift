@@ -219,7 +219,7 @@ class Filter {
 			#else
 				let nsString = post.body as NSString
 			#endif
-			for match in regex.matches(in: post.body, range: NSMakeRange(0, nsString.length)) {
+			for match in regex.matches(in: post.body, options: [], range: NSMakeRange(0, nsString.length)) {
 				
 				
 				#if os(Linux)
