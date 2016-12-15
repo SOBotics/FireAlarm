@@ -16,14 +16,25 @@ class CommandCheckNotification: Command {
 	
 	override func run() throws {
 		if !message.user.notified {
-			reply("You will not notified of any reports.")
+			reply("You will not be notified of any reports.")
 		}
-		else if message.user.notificationTags.isEmpty {
+		else if message.user.notificationTags.isEmpty && message.user.notificationReasons.isEmpty {
 			reply("You will be notified of all reports.")
 		}
 		else {
-			let formatted = formatArray(message.user.notificationTags.map { "[tag:\($0)]" }, conjunction: "or")
-			reply("You will be notified of reports tagged \(formatted).")
+			var reasons: [String] = []
+			if !message.user.notificationTags.isEmpty {
+				let formattedTags = formatArray(message.user.notificationTags.map { "[tag:\($0)]" }, conjunction: "or")
+				reasons.append("reports tagged "+formattedTags)
+			}
+			if message.user.notificationReasons.contains("username") {
+				reasons.append("blacklisted usernames")
+			}
+			if message.user.notificationReasons.contains("misleadingLink") {
+				reasons.append("misleading links")
+			}
+			let formatted = formatArray(reasons, conjunction: "or")
+			reply("You will be notified of \(formatted).")
 		}
 
 	}
