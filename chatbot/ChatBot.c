@@ -604,7 +604,7 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
         //char *notif = getNotificationString(bot, post);
         //puts ("Completed line 582.");
         snprintf(message, maxMessage,
-                 REPORT_HEADER " Potentially bad post (%s): [%s](http://stackoverflow.com/%s/%lu) (reputation %u) (likelihood %d) %s",
+                 REPORT_HEADER "%s: [%s](http://stackoverflow.com/%s/%lu) (reputation %u) (likelihood %d) %s",
                 messageBuf, post->title, post->isAnswer ? "a" : "q", post->postID, post->owner->userRep, likelihood, notifString);
         //puts ("Completed preparing report.");
         //free(notif);

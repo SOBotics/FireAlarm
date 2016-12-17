@@ -477,7 +477,8 @@ int main(int argc, const char * argv[]) {
     curl_easy_cleanup(client->curl);
 
     if (reboot) {
-        execv(argv[0], (char*const*)argv);  //Reload the binaries which will restart the program.
+        //execv(argv[0], (char*const*)argv);  //Reload the binaries which will restart the program.
+        main (argc, argv);
     }
 
     return 0;
