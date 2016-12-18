@@ -24,5 +24,9 @@ char *getLatestCommitLink (char *branch);
 void remoteUpdate ();
 char *getLatestCommitText (char *branch);
 unsigned getCurrentStatus (char *branch);
+void addForCommit (char *toAdd);
+void emailConfig (char *email);
+void commit (char *message);
+void push (char *email, char *pass);
 
 #endif /* GitManager.h */

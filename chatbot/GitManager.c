@@ -111,3 +111,44 @@ unsigned getCurrentStatus (char *branch)
         return 0;
     }
 }
+
+void addForCommit (char *toAdd)
+{
+    char *str;
+    asprintf (&str, "git add %s", toAdd);
+    executeCommand(str);
+    free (str);
+    return;
+}
+
+void emailConfig (char *email)
+{
+    char *str;
+    asprintf (&str, "git config --global user.email=\"%s\"", email);
+    executeCommand (str);
+    free (str);
+    return;
+}
+
+void commit (char *message)
+{
+    char *str;
+    asprintf (&str, "git commit -m \"%s\"", message);
+    executeCommand(str);
+    free (str);
+    return;
+}
+
+void push (char *email, char *pass)
+{
+    char *str;
+    puts ("EMAIL: ");
+    puts (email);
+    puts (pass);
+    asprintf (&str, "git push https://%s:%s@github.com/NobodyNada/FireAlarm.git", email, pass);
+    executeCommand(str);
+    puts ("IN PUSH:");
+    puts (str);
+    free (str);
+    return;
+}

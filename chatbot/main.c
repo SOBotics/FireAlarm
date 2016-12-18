@@ -246,6 +246,11 @@ int main(int argc, const char * argv[]) {
 #ifdef DEBUG
     puts("Debug mode is active.  Messages will not be posted to the chat room.");
 #endif
+    if (getenv("ChatBotEmail") == NULL || getenv("ChatBotPass") == NULL)
+    {
+        fputs ("Requires environment variables not found!", stderr);
+        exit(EXIT_FAILURE);
+    }
     if (curl_global_init(CURL_GLOBAL_ALL)) {
         fputs("Error initializing libcurl!", stderr);
         exit(EXIT_FAILURE);
@@ -284,6 +289,7 @@ int main(int argc, const char * argv[]) {
         exit (EXIT_FAILURE);
     }
     char *location;
+    //system ("rm cookies");
 
     Client *client = createClient("stackoverflow.com", "cookies");
     if (!client->isLoggedIn) {
@@ -303,6 +309,7 @@ int main(int argc, const char * argv[]) {
             char *password = getpass("Password: ");
             loginWithEmailAndPassword(client, email, password);
             //Overwrite the password so it doesn't stay in memory
+            emailConfig(email);
             memset(password, 0, strlen(password));
         }
         else {
@@ -470,6 +477,26 @@ int main(int argc, const char * argv[]) {
     saveNotifications (bot->notify, bot->totalNotifications);
     saveLogs (bot->log, bot->totalLogs);
     saveApiCaller (bot->api);
+
+    /* git push */
+    addForCommit("reports.json");
+    addForCommit("api.json");
+    addForCommit("filters.json");
+    addForCommit("notifications.json");
+    addForCommit("privRequest.json");
+    addForCommit("privUsers.json");
+
+    char *msg;
+    asprintf (&msg, "Auto commit on %s", executeCommand("date"));
+    commit (msg);
+    free (msg);
+
+    char *pass = malloc (sizeof (char) * 1024);
+    //pass = getenv("ChatBotPass");
+    strcpy (pass, getenv("ChatBotPass"));
+    replaceSubString(pass, " ", "\\ ");
+    push ("FireAlarmChatBot", pass);
+    //memcpy (pass, 0, strlen (pass));
 
     puts("Waiting (to allow networking to finish)...");
     sleep(5);   //Give background threads a bit of time

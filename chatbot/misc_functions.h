@@ -24,3 +24,4 @@ char *getCurrentUTCTime ();
 char *concat (const char *s1, const char *s2);
 char *executeCommand (char *command);
 void stripNewlines(char *s);
+void replaceSubString(char *target, const char *needle, const char *replacement);
