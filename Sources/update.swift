@@ -80,14 +80,14 @@ public func getVersionLink(_ version: String) -> String {
 }
 
 
-func prepareUpdate(_ listener: ChatListener) {
-	listener.room.postMessage("Installing update...")
+func prepareUpdate(_ listener: ChatListener, _ room: ChatRoom) {
+	room.postMessage("Installing update...")
 	listener.stop(.update)
 }
 
-func update(_ listener: ChatListener, force: Bool = false) -> Bool {
+func update(_ listener: ChatListener, _ room: ChatRoom, force: Bool = false) -> Bool {
 	if force {
-		prepareUpdate(listener)
+		prepareUpdate(listener, room)
 		return true
 	}
 	
@@ -107,7 +107,7 @@ func update(_ listener: ChatListener, force: Bool = false) -> Bool {
 		let availableVersion = components.first ?? ""
 		
 		if currentVersion != availableVersion {
-			prepareUpdate(listener)
+			prepareUpdate(listener, room)
 			return true
 		}
 	}
