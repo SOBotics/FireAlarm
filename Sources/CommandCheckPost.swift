@@ -34,7 +34,11 @@ class CommandCheckPost: Command {
 			} while filter == nil
 		}
 		
-		let result = try filter.checkAndReportPost(message.room.client.questionWithID(questionID))
+		guard let question = try apiClient.fetchQuestion(questionID).items?.first else {
+			reply("Could not fetch the question!")
+			return
+		}
+		let result = try filter.checkAndReportPost(question)
 		switch result {
 		case .notBad:
 			reply("That post was not caught by the filter.")

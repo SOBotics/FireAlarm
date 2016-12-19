@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftChatSE
+import SwiftStack
 
 class Word {
 	let text: String
@@ -21,9 +22,21 @@ class Word {
 	}
 }
 
+extension Post {
+	var id: Int? {
+		if let q = self as? Question, let id = q.question_id {
+			return id
+		} else if let a = self as? Answer, let id = a.answer_id {
+			return id
+		} else {
+			return post_id
+		}
+	}
+}
+
 class Filter {
-	let listener: ChatListener
 	let client: Client
+	let room: ChatRoom
 	
 	let initialProbability: Double
 	let words: [String:Word]
@@ -36,9 +49,9 @@ class Filter {
 		case NotArrayOfStrings
 	}
 	
-	init(_ listener: ChatListener) {
-		self.listener = listener
-		client = listener.room.client
+	init(_ room: ChatRoom) {
+		client = room.client
+		self.room = room
 		
 		print("Loading filter...")
 		blacklistedUsernames = []
@@ -95,7 +108,7 @@ class Filter {
 		
 		//let request = URLRequest(url: URL(string: "ws://qa.sockets.stackexchange.com/")!)
 		//ws = WebSocket(request: request)
-		//ws.eventQueue = listener.room.client.queue
+		//ws.eventQueue = room.client.queue
 		//ws.delegate = self
 		//ws.open()
 		ws = try WebSocket("wss://qa.sockets.stackexchange.com/")
@@ -154,7 +167,10 @@ class Filter {
 		var postWords = [String]()
 		var checkedWords = [String]()
 		
-		let body = post.body
+		guard let body = post.body else {
+			print("No body for \(post.id.map { String($0) } ?? "<no ID>")")
+			return false
+		}
 		
 		var currentWord: String = ""
 		let set = CharacterSet.alphanumerics.inverted
@@ -197,7 +213,10 @@ class Filter {
 	}
 	
 	func runUsernameFilter(_ post: Post) -> Bool {
-		let name = post.username
+		guard let name = post.owner?.display_name else {
+			print("No username for \(post.id.map { String($0) } ?? "<no ID>")!")
+			return false
+		}
 		for regex in blacklistedUsernames {
 			if name.range(of: regex, options: [.regularExpression, .caseInsensitive]) != nil {
 				return true
@@ -214,12 +233,17 @@ class Filter {
 				"<a href=\"([^\"]*)\" rel=\"nofollow(?: noreferrer)?\">\\s*([^<\\s]*)(?=\\s*</a>)", options: []
 			)
 			
+			guard let body = post.body else {
+				print("No body for \(post.id.map { String($0) } ?? "<no ID>")!")
+				return false
+			}
+			
 			#if os(Linux)
-				let nsString = post.body._bridgeToObjectiveC()
+				let nsString = body._bridgeToObjectiveC()
 			#else
-				let nsString = post.body as NSString
+				let nsString = body as NSString
 			#endif
-			for match in regex.matches(in: post.body, options: [], range: NSMakeRange(0, nsString.length)) {
+			for match in regex.matches(in: body, options: [], range: NSMakeRange(0, nsString.length)) {
 				
 				
 				#if os(Linux)
@@ -297,22 +321,38 @@ class Filter {
 		}
 	}
 	
+	func tags(for post: Post) -> [String] {
+		if let q = post as? Question {
+			return q.tags ?? []
+		} else if let a = post as? Answer {
+			return a.tags ?? []
+		} else {
+			return []
+		}
+	}
+	
 	///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
 	func report(post: Post, reason: ReportReason) -> ReportResult {
+		guard let id = post.id else {
+			print("No post ID!")
+			return .notBad
+		}
+		
+		
 		if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
 			recentlyReportedPosts = recentlyReportedPosts.filter {
 				$0.when > minDate
 			}
 		}
 		else {
-			listener.room.postMessage("Failed to calculate minimum report date!")
+			room.postMessage("Failed to calculate minimum report date!")
 		}
 		
-		if recentlyReportedPosts.contains(where: { $0.id == post.id }) {
-			print("Not reporting \(post.id) because it was recently reported.")
+		if recentlyReportedPosts.contains(where: { $0.id == id }) {
+			print("Not reporting \(id) because it was recently reported.")
 			return .alreadyReported
 		}
-		print("Reporting question \(post.id).")
+		print("Reporting question \(id).")
 		
 		let header: String
 		switch reason {
@@ -324,10 +364,10 @@ class Filter {
 			header = "Misleading link:"
 		}
 		
-		recentlyReportedPosts.append((id: post.id, when: Date()))
-		listener.room.postMessage("[ [\(botName)](\(githubLink)) ] " +
-			"[tag:\(post.tags.first ?? "tagless")] \(header) [\(post.title)](//stackoverflow.com/q/\(post.id)) " +
-			listener.room.notificationString(tags: post.tags, reason: reason)
+		recentlyReportedPosts.append((id: id, when: Date()))
+		room.postMessage("[ [\(botName)](\(githubLink)) ] " +
+			"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(post.title ?? "<no title>")](//stackoverflow.com/q/\(id)) " +
+			room.notificationString(tags: tags(for: post), reason: reason)
 		)
 		
 		return .reported(reason: reason)
@@ -386,10 +426,15 @@ class Filter {
 					throw QuestionProcessingError.noQuestionID(json: string)
 				}
 				
-				let post = try listener.room.client.questionWithID(id)
+				guard let post = try apiClient.fetchQuestion(id).items?.first else {
+					print("No items for \(id)!")
+					return
+				}
 				
 				//don't report posts that are more than a day old
-				if post.creationDate < post.lastActivityDate - 60 * 60 * 24 {
+				if (post.creation_date ?? Date()).timeIntervalSinceReferenceDate <
+					((post.last_activity_date ?? Date()).timeIntervalSinceReferenceDate - 60 * 60 * 24) {
+					
 					return
 				}
 				
@@ -397,10 +442,7 @@ class Filter {
 			} catch {
 				if let e = errorAsNSError(error) {
 					throw QuestionProcessingError.jsonParsingError(json: string, error: formatNSError(e))
-				}
-				else if case Client.APIError.noItems = error {
-					//do nothing
-				} else if error is Client.APIError {
+				} else if error is APIClient.APIError {
 					throw error
 				}else {
 					throw QuestionProcessingError.jsonParsingError(json: string, error: String(describing: error))
@@ -417,7 +459,7 @@ class Filter {
 		repeat {
 			do {
 				if wsRetries >= wsMaxRetries {
-					listener.room.postMessage(
+					room.postMessage(
 						"Realtime questions websocket died; failed to reconnect!  Active posts will not be reported until a reboot.  (cc @NobodyNada)"
 					)
 					return

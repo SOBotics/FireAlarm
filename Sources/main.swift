@@ -9,6 +9,7 @@
 import Foundation
 import Dispatch
 import SwiftChatSE
+import SwiftStack
 
 let commands: [Command.Type] = [
 	CommandSay.self,
@@ -19,7 +20,8 @@ let commands: [Command.Type] = [
 	CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
 ]
 
-
+//var apiClient = APIClient(proxyAddress: "127.0.0.1", proxyPort: 8080)
+var apiClient = APIClient()
 
 extension ChatUser {
 	var notified: Bool {
@@ -133,7 +135,8 @@ func main() throws {
 	
 	let _ = FileManager.default.changeCurrentDirectoryPath(saveDirURL.path)
 	
-	
+	apiClient.key = "HNA2dbrFtyTZxeHN6rThNg(("
+	apiClient.defaultFilter = "withbody"
 	
 	
 	//Log in
@@ -194,8 +197,8 @@ func main() throws {
 	errorRoom = room
 	
 	
-	listener = ChatListener(room, commands: commands)
-	listener.onShutdown { halt(reboot: $0, update: $1) }
+	listener = ChatListener(commands: commands)
+	listener.onShutdown { halt(reboot: $0 == .reboot, update: $0 == .update) }
 	room.onMessage { listener.processMessage(room, message: $0, isEdit: $1) }
 	
 	try room.join()
@@ -233,7 +236,7 @@ func main() throws {
 	
 	
 	//Load the filter
-	filter = Filter(listener)
+	filter = Filter(room)
 	try filter.start()
 	
 	
@@ -259,7 +262,7 @@ func main() throws {
 			//wait one minute
 			sleep(60)
 			if !updated && !development {
-				updated = update(listener)
+				updated = update(listener, room)
 			}
 			
 			save()
