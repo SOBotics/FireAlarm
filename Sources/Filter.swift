@@ -44,6 +44,10 @@ class Filter {
 	
 	var reportedPosts = [(id: Int, when: Date)]()
 	
+	var postsToCheck = [Int]()
+	
+	var queue = DispatchQueue(label: "Filter", attributes: [.concurrent])
+	
 	
 	enum FilterLoadingError: Error {
 		case UsernamesNotArrayOfStrings
@@ -162,6 +166,8 @@ class Filter {
 		}
 		
 		try ws.connect()
+		
+		doCheckPosts()
 	}
 	
 	func stop() {
@@ -350,7 +356,7 @@ class Filter {
 		else {
 			if (post.id ?? 1) % 10000 == 0 {
 				room.postMessage("[ [\(botName)](\(githubLink)) ] " +
-				"[tag:\(tags(for: post).first ?? "tagless")] Potentially bad question: " +
+					"[tag:\(tags(for: post).first ?? "tagless")] Potentially bad question: " +
 					"[\(post.title ?? "<no title>")](//youtube.com/watch?v=dQw4w9WgXcQ)"
 				)
 			}
@@ -472,31 +478,53 @@ class Filter {
 					throw QuestionProcessingError.noQuestionID(json: string)
 				}
 				
-				guard let post = try apiClient.fetchQuestion(id).items?.first else {
-					print("No items for \(id)!")
-					return
-				}
 				
-				//don't report posts that are more than a day old
-				if (post.creation_date ?? Date()).timeIntervalSinceReferenceDate <
-					((post.last_activity_date ?? Date()).timeIntervalSinceReferenceDate - 60 * 60 * 24) {
-					
-					return
-				}
+				postsToCheck.append(id)
+				//print("Another post has been recieved.  There are now \(postsToCheck.count) posts to check.")
 				
-				try checkAndReportPost(post)
 			} catch {
 				if let e = errorAsNSError(error) {
 					throw QuestionProcessingError.jsonParsingError(json: string, error: formatNSError(e))
-				} else if error is APIClient.APIError {
-					throw error
-				}else {
+				} else {
 					throw QuestionProcessingError.jsonParsingError(json: string, error: String(describing: error))
 				}
 			}
 		}
 		catch {
 			handleError(error, "while processing an active question")
+		}
+	}
+	
+	private func doCheckPosts() {
+		queue.async {
+			while true {
+				do {
+					let posts = self.postsToCheck
+					sleep(60)
+					if !self.running {
+						return
+					}
+					
+					guard !posts.isEmpty else {
+						continue
+					}
+					
+					//print("Checking \(posts.count) posts.")
+					self.postsToCheck = self.postsToCheck.filter {!posts.contains($0)}
+					for post in try apiClient.fetchQuestions(posts).items ?? [] {
+						//don't report posts that are more than a day old
+						if (post.creation_date ?? Date()).timeIntervalSinceReferenceDate <
+							((post.last_activity_date ?? Date()).timeIntervalSinceReferenceDate - 60 * 60 * 24) {
+							
+							return
+						}
+						
+						try self.checkAndReportPost(post)
+					}
+				} catch {
+					handleError(error, "while checking active posts.")
+				}
+			}
 		}
 	}
 	
