@@ -9,6 +9,7 @@
 import Foundation
 import SwiftChatSE
 import SwiftStack
+import Dispatch
 
 class Word {
 	let text: String
