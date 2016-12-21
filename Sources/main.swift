@@ -14,7 +14,7 @@ import SwiftStack
 let commands: [Command.Type] = [
 	CommandSay.self,
 	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self,
-	CommandCheckPost.self,
+	CommandCheckPost.self, CommandQuota.self,
 	CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
 	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self,
 	CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
@@ -253,6 +253,11 @@ func main() throws {
 			try filter.saveUsernameBlacklist()
 		} catch {
 			handleError(error, "while saving the username blacklist")
+		}
+		do {
+			try filter.saveReports()
+		} catch {
+			handleError(error, "while saving reports")
 		}
 	}
 	

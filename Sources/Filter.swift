@@ -42,11 +42,13 @@ class Filter {
 	let words: [String:Word]
 	var blacklistedUsernames: [String]
 	
-	var recentlyReportedPosts = [(id: Int, when: Date)]()
+	var reportedPosts = [(id: Int, when: Date)]()
 	
 	
-	enum UsernameLoadingError: Error {
-		case NotArrayOfStrings
+	enum FilterLoadingError: Error {
+		case UsernamesNotArrayOfStrings
+		case ReportsNotArrayOfDictionaries
+		case InvalidReport(report: [String:Any])
 	}
 	
 	init(_ room: ChatRoom) {
@@ -71,7 +73,7 @@ class Filter {
 		do {
 			let usernameData = try Data(contentsOf: usernameURL)
 			guard let usernames = try JSONSerialization.jsonObject(with: usernameData, options: []) as? [String] else {
-				throw UsernameLoadingError.NotArrayOfStrings
+				throw FilterLoadingError.UsernamesNotArrayOfStrings
 			}
 			blacklistedUsernames = usernames
 			
@@ -87,6 +89,35 @@ class Filter {
 				}
 			}
 		}
+		
+		let reportsURL = saveDirURL.appendingPathComponent("reports.json")
+		do {
+			let reportData = try Data(contentsOf: reportsURL)
+			guard let reports = try JSONSerialization.jsonObject(with: reportData, options: []) as? [[String:Any]] else {
+				throw FilterLoadingError.ReportsNotArrayOfDictionaries
+			}
+			
+			reportedPosts = try reports.map {
+				guard let id = $0["id"] as? Int, let when = $0["t"] as? Int else {
+					throw FilterLoadingError.InvalidReport(report: $0)
+				}
+				return (id: id, when: Date(timeIntervalSince1970: TimeInterval(when)))
+			}
+			
+		} catch {
+			handleError(error, "while loading reports.")
+			print("Loading an empty report list.")
+			if FileManager.default.fileExists(atPath: reportsURL.path) {
+				print("Backing up reports.json.")
+				do {
+					try FileManager.default.moveItem(at: usernameURL, to: saveDirURL.appendingPathComponent("reports.json.bak"))
+				} catch {
+					handleError(error, "while backing up the blacklisted usernames.")
+				}
+			}
+		}
+		
+		
 		print("Filter loaded.")
 	}
 	
@@ -317,6 +348,12 @@ class Filter {
 			return report(post: post, reason: reason)
 		}
 		else {
+			if (post.id ?? 1) % 10000 == 0 {
+				room.postMessage("[ [\(botName)](\(githubLink)) ] " +
+				"[tag:\(tags(for: post).first ?? "tagless")] Potentially bad question: " +
+					"[\(post.title ?? "<no title>")](//youtube.com/watch?v=dQw4w9WgXcQ)"
+				)
+			}
 			return .notBad
 		}
 	}
@@ -340,18 +377,19 @@ class Filter {
 		
 		
 		if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
-			recentlyReportedPosts = recentlyReportedPosts.filter {
+			let recentlyReportedPosts = reportedPosts.filter {
 				$0.when > minDate
+			}
+			if recentlyReportedPosts.contains(where: { $0.id == id }) {
+				print("Not reporting \(id) because it was recently reported.")
+				return .alreadyReported
 			}
 		}
 		else {
 			room.postMessage("Failed to calculate minimum report date!")
 		}
 		
-		if recentlyReportedPosts.contains(where: { $0.id == id }) {
-			print("Not reporting \(id) because it was recently reported.")
-			return .alreadyReported
-		}
+		
 		print("Reporting question \(id).")
 		
 		let header: String
@@ -364,7 +402,7 @@ class Filter {
 			header = "Misleading link:"
 		}
 		
-		recentlyReportedPosts.append((id: id, when: Date()))
+		reportedPosts.append((id: id, when: Date()))
 		room.postMessage("[ [\(botName)](\(githubLink)) ] " +
 			"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(post.title ?? "<no title>")](//stackoverflow.com/q/\(id)) " +
 			room.notificationString(tags: tags(for: post), reason: reason)
@@ -376,6 +414,14 @@ class Filter {
 	func saveUsernameBlacklist() throws {
 		let data = try JSONSerialization.data(withJSONObject: blacklistedUsernames, options: .prettyPrinted)
 		try data.write(to: saveDirURL.appendingPathComponent("blacklisted_users.json"))
+	}
+	
+	func saveReports() throws {
+		let data = try JSONSerialization.data(
+			withJSONObject: reportedPosts.map {["id":$0.id,"t":Int($0.when.timeIntervalSince1970)]}
+		)
+		
+		try data.write(to: saveDirURL.appendingPathComponent("reports.json"))
 	}
 	
 	func webSocketMessageText(_ text: String) {
