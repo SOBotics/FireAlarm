@@ -88,7 +88,11 @@ unsigned getCurrentStatus (char *branch)
     stripNewlines(status);
     puts ("in get..");
     puts (status);
-    if (!strcmp (status, "Up-to-date"))
+    if (strstr (executeCommand("git status -v"), "diff"))
+    {
+        return COMMIT;
+    }
+    else if (!strcmp (status, "Up-to-date"))
     {
         return LATEST;
     }
@@ -103,10 +107,6 @@ unsigned getCurrentStatus (char *branch)
     else if (!strcmp (status, "Diverged"))
     {
         return DIVERGED;
-    }
-    else if (strstr (executeCommand("git status -v"), "diff"))
-    {
-        return COMMIT;
     }
     else
     {
