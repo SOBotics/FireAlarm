@@ -16,6 +16,7 @@
 #define PULL 2
 #define DIVERGED 3
 #define LATEST 4
+#define COMMIT 5
 
 char *getLatestSha (char *branch);
 char *getLatestShaLink (char *branch);

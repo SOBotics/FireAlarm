@@ -23,8 +23,9 @@ void status (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     char *message;
+    addForCommit("../chatbot");
     unsigned status = getCurrentStatus ("master");
-    if (status == PULL)
+    /*if (status == PULL)
     {
         asprintf (&message, "Need to pull.");
     }
@@ -43,6 +44,26 @@ void status (RunningCommand *command, void *ctx)
     else if (status == 0)
     {
         asprintf (&message, "An error occurred!");
+    }*/
+
+    switch (status) {
+        case PULL:
+            asprintf (&message, "Need to pull.");
+            break;
+        case PUSH:
+            asprintf (&message, "Need to push.");
+            break;
+        case LATEST:
+            asprintf (&message, "Up to date.");
+            break;
+        case DIVERGED:
+            asprintf (&message, "Staus diverged!");
+            break;
+        case COMMIT:
+            asprintf (&message, "Need to commit.");
+            break;
+        default:
+            asprintf (&message, "Unknown status `%u` returned by `getCurrentStatus`!", status);
     }
 
     puts (message);

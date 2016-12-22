@@ -104,6 +104,10 @@ unsigned getCurrentStatus (char *branch)
     {
         return DIVERGED;
     }
+    else if (strstr (executeCommand("git status -v"), "diff"))
+    {
+        return COMMIT;
+    }
     else
     {
         fprintf (stderr, "%s is not a valid status type!\n", status);
