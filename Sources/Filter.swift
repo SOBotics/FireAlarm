@@ -514,10 +514,11 @@ class Filter {
 					self.postsToCheck = self.postsToCheck.filter {!posts.contains($0)}
 					for post in try apiClient.fetchQuestions(posts).items ?? [] {
 						//don't report posts that are more than a day old
-						if (post.creation_date ?? Date()).timeIntervalSinceReferenceDate <
-							((post.last_activity_date ?? Date()).timeIntervalSinceReferenceDate - 60 * 60 * 24) {
-							
-							return
+						let creation = (post.creation_date ?? Date()).timeIntervalSinceReferenceDate
+						let activity = (post.last_activity_date ?? Date()).timeIntervalSinceReferenceDate
+						
+						if creation < (activity - 60 * 60 * 24) {
+							continue
 						}
 						
 						try self.checkAndReportPost(post)
