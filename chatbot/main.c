@@ -496,7 +496,7 @@ int main(int argc, const char * argv[]) {
     strcpy (pass, getenv("ChatBotPass"));
     replaceSubString(pass, " ", "\\ ");
     push ("FireAlarmChatBot", pass);
-    //memcpy (pass, 0, strlen (pass));
+    free (pass);
 
     puts("Waiting (to allow networking to finish)...");
     sleep(5);   //Give background threads a bit of time

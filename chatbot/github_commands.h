@@ -42,7 +42,7 @@ void status (RunningCommand *command, void *ctx)
     }
     else if (status == 0)
     {
-        asprintf (&message, "error!");
+        asprintf (&message, "An error occurred!");
     }
 
     puts (message);
