@@ -88,6 +88,7 @@ unsigned getCurrentStatus (char *branch)
     stripNewlines(status);
     puts ("in get..");
     puts (status);
+    puts ("STATUS OUTPUT: ");
     puts (executeCommand("git status -v"));
 
     if (strstr (executeCommand("git status -v"), "diff"))
