@@ -89,7 +89,7 @@ unsigned getCurrentStatus (char *branch)
     puts ("in get..");
     puts (status);
 
-    if (executeCommand("git diff") != '\0')
+    if (executeCommand("git diff ../chatbot") != '\0')
     {
         return COMMIT;
     }
