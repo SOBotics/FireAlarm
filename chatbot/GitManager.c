@@ -86,14 +86,9 @@ unsigned getCurrentStatus (char *branch)
     remoteUpdate ();
     char *status = executeCommand("./../shellscripts/currentstatus.sh");
     stripNewlines(status);
-    puts ("in get..");
-    puts (status);
 
-    if (executeCommand("git diff ../chatbot") != '\0')
-    {
-        return COMMIT;
-    }
-    else if (!strcmp (status, "Up-to-date"))
+
+    if (!strcmp (status, "Up-to-date"))
     {
         return LATEST;
     }
