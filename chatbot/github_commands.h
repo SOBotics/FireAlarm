@@ -23,28 +23,7 @@ void status (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     char *message;
-    addForCommit("../chatbot");
     unsigned status = getCurrentStatus ("master");
-    /*if (status == PULL)
-    {
-        asprintf (&message, "Need to pull.");
-    }
-    else if (status == PUSH)
-    {
-        asprintf (&message, "Need to push.");
-    }
-    else if (status == LATEST)
-    {
-        asprintf (&message, "Up to date.");
-    }
-    else if (status == DIVERGED)
-    {
-        asprintf (&message, "Status diverged!");
-    }
-    else if (status == 0)
-    {
-        asprintf (&message, "An error occurred!");
-    }*/
 
     switch (status) {
         case PULL:
@@ -70,6 +49,42 @@ void status (RunningCommand *command, void *ctx)
     postReply (bot->room, message, command->message);
     free (message);
 
+    return;
+}
+
+void commandPull (RunningCommand *command, void *ctx)
+{
+    ChatBot *bot = ctx;
+
+    unsigned status = getCurrentStatus("master");
+
+    switch (status)
+    {
+        case PUSH:
+            postReply (bot->room, "Need to push locally, cannot pull.", command->message);
+            return;
+        case DIVERGED:
+            postReply (bot->room, "Status diverged. This is most probably bad.", command->message);
+            return;
+        case LATEST:
+            postReply (bot->room, "Nothing to pull.", command->message);
+            return;
+        case PULL:
+            pull ("master");
+            if (!build())
+            {
+                postReply (bot->room, "Compile error.", command->message);
+                return;
+            }
+            else if (build())
+            {
+                system ("./../run");
+            }
+            break;
+        default:
+            fprintf (stderr, "Unknown status: %u\n", status);
+            return;
+    }
     return;
 }
 

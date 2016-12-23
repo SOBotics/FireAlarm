@@ -29,5 +29,7 @@ void addForCommit (char *toAdd);
 void emailConfig (char *email);
 void commit (char *message);
 void push (char *email, char *pass);
+void pull (char *branch);
+unsigned build ();
 
 #endif /* GitManager.h */

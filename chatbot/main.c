@@ -479,6 +479,7 @@ int main(int argc, const char * argv[]) {
     saveApiCaller (bot->api);
 
     /* git push */
+    addForCommit("../chatbot");
     addForCommit("reports.json");
     addForCommit("api.json");
     addForCommit("filters.json");

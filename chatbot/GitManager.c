@@ -142,13 +142,31 @@ void commit (char *message)
 void push (char *email, char *pass)
 {
     char *str;
-    puts ("EMAIL: ");
-    puts (email);
-    puts (pass);
     asprintf (&str, "git push https://%s:%s@github.com/NobodyNada/FireAlarm.git", email, pass);
     executeCommand(str);
-    puts ("IN PUSH:");
-    puts (str);
     free (str);
     return;
+}
+
+void pull (char *branch)
+{
+    char *str;
+    asprintf (&str, "git pull origin %s", branch);
+    executeCommand (str);
+    free (str);
+    return;
+}
+
+unsigned build ()
+{
+    char *output = executeCommand("./compile.sh");
+    if (!strcmp (output, "fail"))
+    {
+        return 0;
+    }
+    else if (!strcmp (output, "success"))
+    {
+        return 1;
+    }
+    return 2;
 }
