@@ -78,7 +78,7 @@ void commandPull (RunningCommand *command, void *ctx)
             }
             else if (build())
             {
-                system ("./../run");
+                system ("cd ../ && valgrind ./firealarm");
             }
             break;
         default:

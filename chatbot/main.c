@@ -289,7 +289,6 @@ int main(int argc, const char * argv[]) {
         exit (EXIT_FAILURE);
     }
     char *location;
-    //system ("rm cookies");
 
     Client *client = createClient("stackoverflow.com", "cookies");
     if (!client->isLoggedIn) {
