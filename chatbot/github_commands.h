@@ -79,7 +79,7 @@ void commandPull (RunningCommand *command, void *ctx)
             else if (build())
             {
                 postMessage (bot->room, "@FireAlarm stop");
-                system ("valgrind ./firealarm");
+                system ("valgrind ./../firealarm");
             }
             break;
         default:
