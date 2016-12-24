@@ -79,7 +79,7 @@ void commandPull (RunningCommand *command, void *ctx)
             else if (build())
             {
                 postMessage (bot->room, "@FireAlarm stop");
-                system ("./compilerun.sh");
+                system ("./../shellscripts/compilerun.sh");
             }
             break;
         default:
