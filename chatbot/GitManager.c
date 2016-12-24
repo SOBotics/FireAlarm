@@ -159,7 +159,9 @@ void pull (char *branch)
 
 unsigned build ()
 {
-    char *output = executeCommand("./compile.sh");
+    char *output = executeCommand("./../shellscripts/compile.sh");
+    puts ("OUTPUT:");
+    puts (output);
     if (!strcmp (output, "fail"))
     {
         return 0;

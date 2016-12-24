@@ -414,6 +414,7 @@ int main(int argc, const char * argv[]) {
         createCommand("clear error logs", 2, clearErrorLogs),
         createCommand("rev", 2, latestCommit),
         createCommand("status", 0, status),
+        createCommand("pull", 0, commandPull),
         NULL
     };
     ChatBot *bot = createChatBot(room, NULL, commands, loadReports(), filters, users, requests, modes, notify, logs, apiCaller);
