@@ -80,6 +80,7 @@ void commandPull (RunningCommand *command, void *ctx)
             {
                 bot->stopAction = ACTION_STOP;
                 system ("cd ../ && valgrind ./firealarm");
+                exit (EXIT_FAILURE);
             }
             break;
         default:
