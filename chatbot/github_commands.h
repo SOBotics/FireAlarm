@@ -78,9 +78,8 @@ void commandPull (RunningCommand *command, void *ctx)
             }
             else if (build())
             {
-                bot->stopAction = ACTION_STOP;
-                system ("cd ../ && valgrind ./firealarm");
-                exit (EXIT_FAILURE);
+                postMessage (bot->room, "@FireAlarm stop");
+                system ("./compilerun.sh");
             }
             break;
         default:
