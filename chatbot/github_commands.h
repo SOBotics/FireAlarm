@@ -78,8 +78,8 @@ void commandPull (RunningCommand *command, void *ctx)
             }
             else if (build())
             {
-                system ("cd ../ && valgrind ./firealarm");
                 bot->stopAction = ACTION_STOP;
+                system ("cd ../ && valgrind ./firealarm");
             }
             break;
         default:
