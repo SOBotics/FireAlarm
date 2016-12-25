@@ -253,6 +253,7 @@ void rebootBot (char **arg)
     else if (childPID == 0)
     {
         puts ("Rebooting..");
+        chdir ("../");
         int status = execve (arg [0], arg, NULL);
         if (status == -1)
         {
