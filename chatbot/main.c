@@ -16,6 +16,7 @@
 #include <pwd.h>
 #include <sys/stat.h>
 #include <limits.h>
+#include <signal.h>
 
 #include "Privileges.h"
 #include "ChatRoom.h"
@@ -238,17 +239,44 @@ void wsClosed(WebSocket *socket) {
     postMessage(((ChatBot*)(socket->user))->room, "@FireAlarm reboot");
 }
 
-int main(int argc, const char * argv[]) {
+void rebootBot (char **arg)
+{
+    int childPID;
+
+    childPID = fork ();
+    if (childPID < 0)
+    {
+        perror ("Fork failed!");
+        exit (EXIT_FAILURE);
+    }
+    else if (childPID == 0)
+    {
+        puts ("Rebooting..");
+        int status = execve (arg [0], arg, NULL);
+        if (status == -1)
+        {
+            fputs ("'execve' failed!", stderr);
+            exit (EXIT_FAILURE);
+        }
+    }
+    else
+    {
+        sleep (1);
+        kill (getpid (), SIGTERM);
+    }
+}
+
+int main(int argc, const char ** argv) {
     // insert code here...
     reboot:
 
-    puts("Starting...");
+    printf("Starting with pid %d...\n", getpid ());
 #ifdef DEBUG
     puts("Debug mode is active.  Messages will not be posted to the chat room.");
 #endif
     if (getenv("ChatBotEmail") == NULL || getenv("ChatBotPass") == NULL)
     {
-        fputs ("Requires environment variables not found!", stderr);
+        fputs ("Required environment variables not found!", stderr);
         exit(EXIT_FAILURE);
     }
     if (curl_global_init(CURL_GLOBAL_ALL)) {
@@ -346,7 +374,7 @@ int main(int argc, const char * argv[]) {
         createCommand("test", 0, test2Callback),
         createCommand("running commands", 0, listCommands),
         createCommand("stop", 2, stopBot),
-        createCommand("reboot", 2, rebootBot),
+        createCommand("reboot", 2, commandRebootBot),
         createCommand("kill", 2, forceStopBot),
         createCommand("check post *", 0, checkPostCallback),
         createCommand("tp ...", 1, truePositive),
@@ -506,7 +534,8 @@ int main(int argc, const char * argv[]) {
 
     if (reboot) {
         //execv(argv[0], (char*const*)argv);  //Reload the binaries which will restart the program.
-        main (argc, argv);
+        //main (argc, argv);
+        rebootBot (argv);
     }
 
     return 0;

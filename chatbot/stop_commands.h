@@ -13,13 +13,13 @@
 
 void stopBot(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
-    
+
     postReply(bot->room, "Shutting down...", command->message);
     bot->stopAction
     = ACTION_STOP;
 }
 
-void rebootBot(RunningCommand *command, void *ctx) {
+void commandRebootBot(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
     postReply(bot->room, "Rebooting...", command->message);
     bot->stopAction = ACTION_REBOOT;

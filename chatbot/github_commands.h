@@ -36,7 +36,7 @@ void status (RunningCommand *command, void *ctx)
             asprintf (&message, "Up to date.");
             break;
         case DIVERGED:
-            asprintf (&message, "Staus diverged!");
+            asprintf (&message, "Status diverged. This is most probably bad.");
             break;
         case COMMIT:
             asprintf (&message, "Need to commit.");
@@ -78,7 +78,6 @@ void commandPull (RunningCommand *command, void *ctx)
             }
             else if (build())
             {
-                postMessage (bot->room, "@FireAlarm stop");
                 system ("valgrind ./../firealarm");
             }
             break;
