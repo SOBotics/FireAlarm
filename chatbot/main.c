@@ -242,6 +242,7 @@ void wsClosed(WebSocket *socket) {
 void rebootBot (char **arg)
 {
     int childPID;
+    puts (arg [0]);
 
     childPID = fork ();
     if (childPID < 0)
@@ -266,9 +267,11 @@ void rebootBot (char **arg)
     }
 }
 
-int main(int argc, const char ** argv) {
+int main(int argc, char ** argv) {
     // insert code here...
     reboot:
+
+    puts (argv [0]);
 
     printf("Starting with pid %d...\n", getpid ());
 #ifdef DEBUG
