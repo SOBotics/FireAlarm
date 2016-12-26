@@ -239,33 +239,10 @@ void wsClosed(WebSocket *socket) {
     postMessage(((ChatBot*)(socket->user))->room, "@FireAlarm reboot");
 }
 
-void rebootBot (char **arg)
+void rebootBot ()
 {
-    int childPID;
-    puts (arg [0]);
-
-    childPID = fork ();
-    if (childPID < 0)
-    {
-        perror ("Fork failed!");
-        exit (EXIT_FAILURE);
-    }
-    else if (childPID == 0)
-    {
-        puts ("Rebooting..");
-        chdir ("../");
-        int status = execve (arg [0], arg, NULL);
-        if (status == -1)
-        {
-            fputs ("'execve' failed!", stderr);
-            exit (EXIT_FAILURE);
-        }
-    }
-    else
-    {
-        sleep (1);
-        kill (getpid (), SIGTERM);
-    }
+    char *args [] = {"valgrind", "./firealarm", NULL};
+    execvp ("valgrind", args);
 }
 
 int main(int argc, char ** argv) {
@@ -544,10 +521,10 @@ int main(int argc, char ** argv) {
         chdir ("../");
         //execv(argv[0], (char*const*)argv);  //Reload the binaries which will restart the program.
         //execv ("/usr/bin/valgrind", "./firealarm");
-        char *args [] = {"valgrind", "./firealarm", NULL};
-        execvp ("valgrind", args);
+        //char *args [] = {"valgrind", "./firealarm", NULL};
+        //execvp ("valgrind", args);
         //main (argc, argv);
-        //rebootBot (argv);
+        rebootBot (argv);
     }
 
     return 0;
