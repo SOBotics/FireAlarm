@@ -9,7 +9,7 @@
 #ifndef github_commands_h
 #define github_commands_h
 
-void latestCommit (RunningCommand *command, void *ctx)test
+void latestCommit (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
     char *message = malloc (sizeof (char) * 1024);
@@ -79,6 +79,11 @@ void commandPull (RunningCommand *command, void *ctx)
             else if (buildStatus())
             {
                 build ();
+                char *str;
+                asprintf (&str, "REBOOT! %u is build status.", buildStatus());
+                puts (str);
+                postMessage (bot->room, str);
+                free (str);
                 bot->stopAction = ACTION_REBOOT;
             }
             break;
