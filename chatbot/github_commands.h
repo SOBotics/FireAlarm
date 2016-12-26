@@ -73,7 +73,7 @@ void commandPull (RunningCommand *command, void *ctx)
             pull ("master");
             if (!build())
             {
-                postReply (bot->room, "Compile error.", command->message);
+                postReply (bot->room, "Compile error!", command->message);
                 return;
             }
             else if (build())
