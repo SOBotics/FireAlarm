@@ -544,7 +544,7 @@ int main(int argc, char ** argv) {
         chdir ("../");
         //execv(argv[0], (char*const*)argv);  //Reload the binaries which will restart the program.
         //execv ("/usr/bin/valgrind", "./firealarm");
-        char *args [] = {"valgrind", "./a.out", NULL};
+        char *args [] = {"valgrind", "./firealarm", NULL};
         execvp ("valgrind", args);
         //main (argc, argv);
         //rebootBot (argv);
