@@ -78,7 +78,7 @@ void commandPull (RunningCommand *command, void *ctx)
             }
             else if (build())
             {
-                system ("valgrind ./../firealarm");
+                bot->stopAction = ACTION_REBOOT;
             }
             break;
         default:
