@@ -30,6 +30,7 @@ void emailConfig (char *email);
 void commit (char *message);
 void push (char *email, char *pass);
 void pull (char *branch);
+unsigned buildStatus ();
 unsigned build ();
 
 #endif /* GitManager.h */

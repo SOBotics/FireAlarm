@@ -71,13 +71,14 @@ void commandPull (RunningCommand *command, void *ctx)
             return;
         case PULL:
             pull ("master");
-            if (!build())
+            if (!buildStatus())
             {
-                postReply (bot->room, "Compile error!", command->message);test
+                postReply (bot->room, "Compile error!", command->message);
                 return;
             }
-            else if (build())
+            else if (buildStatus())
             {
+                build ();
                 bot->stopAction = ACTION_REBOOT;
             }
             break;

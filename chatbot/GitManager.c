@@ -157,11 +157,23 @@ void pull (char *branch)
     return;
 }
 
+unsigned buildStatus ()
+{
+    char *output = executeCommand("./../shellscripts/buildstatus.sh");
+    if (!strcmp (output, "fail"))
+    {
+        return 0;
+    }
+    else if (!strcmp (output, "success"))
+    {
+        return 1;
+    }
+    return 2;
+}
+
 unsigned build ()
 {
     char *output = executeCommand("./../shellscripts/compile.sh");
-    puts ("OUTPUT:");
-    puts (output);
     if (!strcmp (output, "fail"))
     {
         return 0;
