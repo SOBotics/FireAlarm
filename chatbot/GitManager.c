@@ -168,6 +168,7 @@ unsigned buildStatus ()
     {
         return 1;
     }
+    puts (output);
     return 2;
 }
 
