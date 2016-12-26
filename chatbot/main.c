@@ -275,8 +275,6 @@ int main(int argc, char ** argv) {
     puts (argv [0]);
 
     printf("Starting with pid %d...\n", getpid ());
-    puts (loadEmail);
-    puts (loadPassword);
 #ifdef DEBUG
     puts("Debug mode is active.  Messages will not be posted to the chat room.");
 #endif
@@ -323,6 +321,8 @@ int main(int argc, char ** argv) {
         exit (EXIT_FAILURE);
     }
     char *location;
+    puts (loadEmail());
+    puts (loadPassword());
 
     Client *client = createClient("stackoverflow.com", "cookies");
     if (!client->isLoggedIn) {
@@ -346,6 +346,8 @@ int main(int argc, char ** argv) {
             memset(password, 0, strlen(password));
         }
         else {
+            strcpy (env_pass, loadPassword());
+            strcpy (env_email, loadEmail());
             loginWithEmailAndPassword(client, env_email, env_pass);
             memset(env_pass, 0, strlen(env_pass));
         }
