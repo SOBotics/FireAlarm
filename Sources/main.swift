@@ -228,8 +228,8 @@ func main() throws {
 		try! FileManager.default.removeItem(atPath: "version-new.txt")
 	}
 	else {
-		//room.postMessage("[\(botName)](\(githubLink)) started.")
-		room.postMessage("Merry Christmas!")
+		room.postMessage("[\(botName)](\(githubLink)) started.")
+		//room.postMessage("Merry Christmas!")
 	}
 	shortVersion = getShortVersion(currentVersion)
 	versionLink = getVersionLink(currentVersion)
