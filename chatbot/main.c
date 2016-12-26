@@ -542,7 +542,8 @@ int main(int argc, char ** argv) {
 
     if (reboot) {
         chdir ("../");
-        execv(argv[0], (char*const*)argv);  //Reload the binaries which will restart the program.
+        //execv(argv[0], (char*const*)argv);  //Reload the binaries which will restart the program.
+        execv ("valgrind ./firealarm", (char*const*)argv);
         //main (argc, argv);
         //rebootBot (argv);
     }
