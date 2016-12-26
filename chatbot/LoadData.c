@@ -20,6 +20,62 @@ typedef struct  _PrivRequest {
     int groupType;  // 0 if user wants to join membeers, 1 if user wants to join bot owners.
 }PrivRequest;
 
+char *loadPassword ()
+{
+    FILE *file = fopen ("credential.json", "r");
+    if (!file || isFileEmpty(file))
+    {
+        fputs ("Could not read from 'credential.json'! Exiting..", stderr);
+        exit (EXIT_FAILURE);
+    }
+
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+
+    char *buf = malloc(size+1);
+    fread(buf, size, 1, file);
+    buf[size] = 0;
+
+    cJSON *json = cJSON_Parse (buf);
+    free (buf);
+
+    char *pass = cJSON_GetObjectItem(json, "password")->valuestring;
+
+    cJSON_Delete (json);
+    fclose (file);
+
+    return pass;
+}
+
+char *loadEmail ()
+{
+    FILE *file = fopen ("credential.json", "r");
+    if (!file || isFileEmpty(file))
+    {
+        fputs ("Could not read from 'credential.json'! Exiting..", stderr);
+        exit (EXIT_FAILURE);
+    }
+
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+
+    char *buf = malloc(size+1);
+    fread(buf, size, 1, file);
+    buf[size] = 0;
+
+    cJSON *json = cJSON_Parse (buf);
+    free (buf);
+
+    char *email = cJSON_GetObjectItem(json, "email")->valuestring;
+
+    cJSON_Delete (json);
+    fclose (file);
+
+    return email;
+}
+
 ApiCaller *loadApiCaller ()
 {
     puts ("Loading Api Caller...");

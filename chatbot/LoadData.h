@@ -17,6 +17,9 @@
 #include "Privileges.h"
 //#include "Notifications.h"
 
+char *loadPassword ();
+char *loadEmail ();
+
 Log **loadLogs ();
 void saveLogs (Log **logs, unsigned totalLogs);
 

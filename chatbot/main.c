@@ -275,6 +275,8 @@ int main(int argc, char ** argv) {
     puts (argv [0]);
 
     printf("Starting with pid %d...\n", getpid ());
+    puts (loadEmail);
+    puts (loadPassword);
 #ifdef DEBUG
     puts("Debug mode is active.  Messages will not be posted to the chat room.");
 #endif
@@ -537,9 +539,10 @@ int main(int argc, char ** argv) {
     curl_easy_cleanup(client->curl);
 
     if (reboot) {
-        //execv(argv[0], (char*const*)argv);  //Reload the binaries which will restart the program.
+        chdir ("../");
+        execv(argv[0], (char*const*)argv);  //Reload the binaries which will restart the program.
         //main (argc, argv);
-        rebootBot (argv);
+        //rebootBot (argv);
     }
 
     return 0;
