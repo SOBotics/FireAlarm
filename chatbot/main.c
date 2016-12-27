@@ -446,13 +446,13 @@ int main(int argc, char ** argv) {
     //bot->api->apiQuota = 5;
 
     char *startMessage;
-    asprintf (&startMessage, "[Fire Alarm](https://github.com/NobodyNada/chatbot) started with api quota %d on %s.", bot->api->apiQuota, location);
+    asprintf (&startMessage, "[Fire Alarm](https://git.io/vPis7) started running on [%s(%s)](%s) with api quota %d (filter %s) (%s)",
+              getShortSha ("master"), getLatestCommitText("master"), getLatestCommitLink("master"), bot->api->apiQuota, location);
     free (location);
     puts("Fire Alarm started.");
     char *apiFilter;
     asprintf (&apiFilter, "Api Filter is %s\n", bot->api->apiFilter);
     puts (apiFilter);
-    postMessage (bot->room, apiFilter);
     free (apiFilter);
     postMessage (bot->room, startMessage);
     free (startMessage);

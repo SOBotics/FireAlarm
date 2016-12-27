@@ -75,11 +75,6 @@ void commandPull (RunningCommand *command, void *ctx)
             if (buildStatus() == 1)
             {
                 build ();
-                char *str;
-                asprintf (&str, "REBOOT! %u is build status.", buildStatus());
-                puts (str);
-                postMessage (bot->room, str);
-                free (str);
                 bot->stopAction = ACTION_REBOOT;
             }
             else
