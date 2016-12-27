@@ -446,8 +446,8 @@ int main(int argc, char ** argv) {
     //bot->api->apiQuota = 5;
 
     char *startMessage;
-    asprintf (&startMessage, "[Fire Alarm](https://git.io/vPis7) started running on [%s(%s)](%s) with api quota %d (filter %s) (%s)",
-              getShortSha ("master"), getLatestCommitText("master"), getLatestCommitLink("master"), bot->api->apiQuota, location);
+    asprintf (&startMessage, "[Fire Alarm](https://git.io/vPis7) started running on [%s (%s) ](%s) with api quota %d (filter %s) (%s)",
+              getShortSha ("master"), getLatestCommitText("master"), getLatestShaLink("master"), bot->api->apiQuota, bot->api->apiFilter, location);
     free (location);
     puts("Fire Alarm started.");
     char *apiFilter;
