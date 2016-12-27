@@ -9,7 +9,7 @@
 #ifndef github_commands_h
 #define github_commands_h
 
-void latestCommit (RunningCommand *command, void *ctx)
+void latestCommit (RunningCommand *command, void *ctx)test
 {
     ChatBot *bot = ctx;
     char *message = malloc (sizeof (char) * 1024);
