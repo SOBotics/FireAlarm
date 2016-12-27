@@ -71,12 +71,8 @@ void commandPull (RunningCommand *command, void *ctx)
             return;
         case PULL:
             pull ("master");
-            if (!buildStatus())
-            {
-                postReply (bot->room, "Compile error!", command->message);
-                return;
-            }
-            else if (buildStatus() == 1)
+
+            if (buildStatus() == 1)
             {
                 build ();
                 char *str;
@@ -85,6 +81,11 @@ void commandPull (RunningCommand *command, void *ctx)
                 postMessage (bot->room, str);
                 free (str);
                 bot->stopAction = ACTION_REBOOT;
+            }
+            else
+            {
+                postReply(bot->room, "Compile error!", command->message);
+                return;
             }
             break;
         default:

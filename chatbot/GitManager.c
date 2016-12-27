@@ -160,13 +160,12 @@ void pull (char *branch)
 unsigned buildStatus ()
 {
     char *output = executeCommand("./../shellscripts/buildstatus.sh");
-    if (strstr (output, "fail"))
-    {
-        return 0;
-    }
-    else if (strstr (output, "success"))
+    if (!strcmp (output, "success"))
     {
         return 1;
+    }
+    else {
+        return 0;
     }
     puts (output);
     return 2;
