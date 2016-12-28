@@ -13,6 +13,13 @@
 		"falsePositives":	0,
 		"isDisabled":	1
 	}, {
+		"description":	"less punctuation",
+		"expression":	"",
+		"type":	9,
+		"truePositives":	20,
+		"falsePositives":	0,
+		"isDisabled":	0
+	}, {
 		"description":	"no question",
 		"expression":	"",
 		"type":	6,
@@ -23,14 +30,14 @@
 		"description":	"link in body",
 		"expression":	"",
 		"type":	7,
-		"truePositives":	52,
+		"truePositives":	53,
 		"falsePositives":	9,
 		"isDisabled":	0
 	}, {
 		"description":	"wall of text",
 		"expression":	"",
 		"type":	5,
-		"truePositives":	175,
+		"truePositives":	176,
 		"falsePositives":	45,
 		"isDisabled":	0
 	}, {

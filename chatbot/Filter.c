@@ -84,13 +84,18 @@ unsigned char matchRegexFilter(Post *post, Filter *f, unsigned *outStart, unsign
 unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsigned *outStart, unsigned *outEnd) {
     unsigned titleLength;
     char *body;
+    unsigned totalPunct;
 
     if (filter->isDisabled)
     {
        // puts ("Filter is disabled!");
         return 0;
     }
-    if (post->owner->userRep > 500)
+    if (post->owner->userRep > 10) //Aim at the users who are shown the "How to Ask" everytime.
+    {
+        return 0;
+    }
+    if (strstr (post->body, "<code>")) //Aim at questions without code
     {
         return 0;
     }
@@ -167,6 +172,13 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
                 return 1;
             }
             free (body);
+            return 0;
+        case FILTER_PUNCTUATION:
+            totalPunct = getTotalPunctuation(post->body);
+            if (totalPunct < 20)
+            {
+                return 1;
+            }
             return 0;
         default:
             fprintf(stderr, "Invalid filter type %d\n", filter->type);

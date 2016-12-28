@@ -455,3 +455,18 @@ void replaceSubString(char *target, const char *needle, const char *replacement)
     // write altered string back to target
     strcpy(target, buffer);
 }
+
+unsigned getTotalPunctuation (char *str)
+{
+    unsigned totalPunct = 0;
+
+    for (unsigned i = 0; i < strlen (str); i ++)
+    {
+        if (ispunct(str [i]))
+        {
+            totalPunct ++;
+        }
+    }
+
+    return totalPunct;
+}

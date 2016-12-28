@@ -440,7 +440,7 @@ int main(int argc, char ** argv) {
     connectWebSocket(socket, "qa.sockets.stackexchange.com", "/");
 
     bot->api->apiFilter = createApiFilter (bot,
-                                        "question.title;question.body;question.tags;user.user_id;user.user_type;question.closed_reason;"
+                                        "question.title;question.creation_date;question.body;question.tags;user.user_id;user.user_type;question.closed_reason;"
                                         );
     bot->api->apiQuota = getApiQuota (bot);
     //bot->api->apiQuota = 5;
