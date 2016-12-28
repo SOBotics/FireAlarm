@@ -175,7 +175,7 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
             return 0;
         case FILTER_PUNCTUATION:
             totalPunct = getTotalPunctuation(post->body);
-            if (totalPunct < 20)
+            if (totalPunct < 5)
             {
                 return 1;
             }
