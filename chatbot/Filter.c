@@ -180,6 +180,18 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
                 return 1;
             }
             return 0;
+        case FILTER_IMAGE:
+            if (strstr (post->body, "imgur.com"))
+            {
+                return 1;
+            }
+            return 0;
+        case FILTER_TITLE:
+            if (strlen (post->title) < 20)
+            {
+                return 1;
+            }
+            return 0;
         default:
             fprintf(stderr, "Invalid filter type %d\n", filter->type);
             //exit(EXIT_FAILURE);

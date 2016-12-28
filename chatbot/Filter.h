@@ -25,7 +25,9 @@ typedef enum {
     FILTER_NOQUESTION = 6,
     FILTER_LINK = 7,
     FILTER_OVEREXCLAMATION = 8,
-    FILTER_PUNCTUATION = 9
+    FILTER_PUNCTUATION = 9,
+    FILTER_IMAGE = 10,
+    FILTER_TITLE = 11
 }FilterType;
 
 typedef struct {
