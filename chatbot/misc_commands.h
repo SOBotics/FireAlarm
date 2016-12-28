@@ -627,7 +627,7 @@ void printApiQuota (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
 
-    int quota = apiQuota (bot);
+    int quota = bot->api->apiQuota;
 
     char *message;
 
