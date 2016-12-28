@@ -2,7 +2,7 @@
 		"description":	"short body",
 		"expression":	"",
 		"type":	2,
-		"truePositives":	343,
+		"truePositives":	344,
 		"falsePositives":	108,
 		"isDisabled":	0
 	}, {
@@ -13,17 +13,31 @@
 		"falsePositives":	0,
 		"isDisabled":	1
 	}, {
+		"description":	"short title length",
+		"expression":	"",
+		"type":	11,
+		"truePositives":	20,
+		"falsePositives":	0,
+		"isDisabled":	0
+	}, {
+		"description":	"image without code",
+		"expression":	"",
+		"type":	10,
+		"truePositives":	20,
+		"falsePositives":	0,
+		"isDisabled":	0
+	}, {
 		"description":	"less punctuation",
 		"expression":	"",
 		"type":	9,
-		"truePositives":	21,
+		"truePositives":	22,
 		"falsePositives":	0,
 		"isDisabled":	0
 	}, {
 		"description":	"no question",
 		"expression":	"",
 		"type":	6,
-		"truePositives":	108,
+		"truePositives":	109,
 		"falsePositives":	34,
 		"isDisabled":	0
 	}, {
@@ -37,7 +51,7 @@
 		"description":	"wall of text",
 		"expression":	"",
 		"type":	5,
-		"truePositives":	178,
+		"truePositives":	179,
 		"falsePositives":	45,
 		"isDisabled":	0
 	}, {
