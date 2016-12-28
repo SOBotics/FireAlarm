@@ -462,7 +462,7 @@ unsigned getTotalPunctuation (char *str)
 
     for (unsigned i = 0; i < strlen (str); i ++)
     {
-        if (ispunct(str [i]))
+        if (str [i] == '.' || str [i] == '?' || str [i] == '!' || str [i] == ';')
         {
             totalPunct ++;
         }
