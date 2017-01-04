@@ -15,6 +15,6 @@ class CommandHelp: Command {
     }
     
     override func run() throws {
-        reply("I'm  [\(botName)](\(githubLink)), a bot which detects questions that need closing. [My command list is available here](https://github.com/NobodyNada/FireAlarm/wiki/CommandsSwift).")
+        reply("I'm  [\(botName)](\(githubLink)), a bot which detects questions that need closing. [My command list is available here](https://github.com/SOBotics/FireAlarm/wiki/CommandsSwift).")
     }
 }
