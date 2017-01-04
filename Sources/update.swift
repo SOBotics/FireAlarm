@@ -25,14 +25,16 @@ func installUpdate() -> Bool {
 	do {
 		#if os(Linux)
 			let compile = "./build-nopm.sh"	//Swift Package Manager does not work on Raspberry Pi
+			let move = "mv FireAlarm .."
 		#else
 			let compile = "./build.sh"
+			let move = "mv ./.build/debug/FireAlarm .."
 		#endif
 		let updateScript = "rm -rf update;pushd .;" +
-			"(git clone -b swift \"git://github.com/NobodyNada/FireAlarm.git\" update && " +
+			"(git clone -b swift \"git://github.com/SOBotics/FireAlarm.git\" update && " +
 			"cd update && " +
 			compile + "&& " +
-			"mv FireAlarm .. && " +
+			move + " && " +
 			"git log --format='oneline' -n 1 > ../version-new.txt && " +
 			"cd .. && " +
 			"rm -rf update) || " +
@@ -75,7 +77,7 @@ public func getVersionLink(_ version: String) -> String {
 	if version == "<unknown version>" {
 		return githubLink
 	} else {
-		return "//github.com/NobodyNada/FireAlarm/commit/\(version)"
+		return "//github.com/SOBotics/FireAlarm/commit/\(version)"
 	}
 }
 
@@ -92,7 +94,7 @@ func update(_ listener: ChatListener, _ room: ChatRoom, force: Bool = false) -> 
 	}
 	
 	
-	let versionScript = "git ls-remote git://github.com/NobodyNada/FireAlarm swift | cut -d '\t' -f1 > available_version.txt"
+	let versionScript = "git ls-remote git://github.com/SOBotics/FireAlarm swift | cut -d '\t' -f1 > available_version.txt"
 	
 	
 	
