@@ -229,6 +229,7 @@ func main() throws {
 	}
 	else {
 		room.postMessage("[\(botName)](\(githubLink)) started.")
+		//room.postMessage("Merry Christmas!")
 	}
 	shortVersion = getShortVersion(currentVersion)
 	versionLink = getVersionLink(currentVersion)
