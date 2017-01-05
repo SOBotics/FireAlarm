@@ -2,7 +2,7 @@
 		"description":	"short body",
 		"expression":	"",
 		"type":	2,
-		"truePositives":	344,
+		"truePositives":	346,
 		"falsePositives":	108,
 		"isDisabled":	0
 	}, {
@@ -23,7 +23,7 @@
 		"description":	"image without code",
 		"expression":	"",
 		"type":	10,
-		"truePositives":	20,
+		"truePositives":	21,
 		"falsePositives":	0,
 		"isDisabled":	0
 	}, {
@@ -44,14 +44,14 @@
 		"description":	"link in body",
 		"expression":	"",
 		"type":	7,
-		"truePositives":	53,
+		"truePositives":	54,
 		"falsePositives":	9,
 		"isDisabled":	0
 	}, {
 		"description":	"wall of text",
 		"expression":	"",
 		"type":	5,
-		"truePositives":	180,
+		"truePositives":	182,
 		"falsePositives":	45,
 		"isDisabled":	0
 	}, {

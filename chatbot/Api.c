@@ -330,6 +330,7 @@ void requestsBatchCheck (ChatBot *bot)
 
         SOUser *user = createSOUser(userID, username, userRep);
         puts (title);
+        puts (body);
 
         Post *p = createPost(title, body, postID, strcmp(type, "answer") == 0, user);
         checkPost(bot, p);
