@@ -289,8 +289,9 @@ void requestsBatchCheck (ChatBot *bot)
         postMessage (bot->room, "Error making batch api call!");
         return;
     }
-
+    puts ("got got");
     bot->api->apiQuota = cJSON_GetObjectItem (json, "quota_remaining")->valueint;
+    puts ("got quota");
 
     cJSON *postsJSON = cJSON_GetObjectItem(json, "items");
     if (postsJSON == NULL)
@@ -301,6 +302,7 @@ void requestsBatchCheck (ChatBot *bot)
     for (unsigned i = 0; i < cJSON_GetArraySize(postsJSON); i ++)
     {
         int postID = bot->postsFetch [i];
+        printf ("Checking post id %d\n", postID);
         cJSON *postJSON = cJSON_GetArrayItem(postsJSON, i);
         char *title = cJSON_GetObjectItem(postJSON, "title")->valuestring;
         char *body = cJSON_GetObjectItem(postJSON, "body")->valuestring;

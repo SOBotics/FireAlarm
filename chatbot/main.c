@@ -29,7 +29,7 @@
 #include "Logs.h"
 #include "LoadData.h"
 
-#define SAVE_INTERVAL 60
+#define SAVE_INTERVAL 25
 #define REPO_URL "https://git.io/vPis7"
 //long postMessage = 1;
 
