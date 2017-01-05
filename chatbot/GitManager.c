@@ -32,7 +32,7 @@ char *getLatestShaLink (char *branch)
     len = 50 + len + 1;
     char *link = malloc (sizeof (char) * len);
     snprintf (link, len,
-              "https://github.com/NobodyNada/FireAlarm/commit/%s", sha);
+              "https://github.com/SOBotics/FireAlarm/commit/%s", sha);
     free (sha);
     stripNewlines(link);
     return link;
@@ -142,7 +142,7 @@ void commit (char *message)
 void push (char *email, char *pass)
 {
     char *str;
-    asprintf (&str, "git push https://%s:%s@github.com/NobodyNada/FireAlarm.git", email, pass);
+    asprintf (&str, "git push https://%s:%s@github.com/SOBotics/FireAlarm.git", email, pass);
     executeCommand(str);
     free (str);
     return;

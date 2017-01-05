@@ -5,8 +5,6 @@
 //  Created by Ashish Ahuja on 11/05/16.
 //  Copyright © 2016 Fortunate-MAN (Ashish Ahuja). All rights reserved.
 //
-//  Note: Some of the code here has been taken from https://github.com/akheron/jansson/blob/2.9/doc/github_commits.c
-//
 
 //#include "Api.h"
 #include "ChatBot.h"
@@ -257,109 +255,79 @@ unsigned getUserRepByID (ChatBot *bot, unsigned long userID)
     return userRep;
 }
 
-static size_t write_response(void *ptr, size_t size, size_t nmemb, void *stream)
+void requestsBatchCheck (ChatBot *bot)
 {
-    struct write_result *result = (struct write_result *)stream;
-
-    if(result->pos + size * nmemb >= BUFFER_SIZE - 1)
+    if (bot->postsUntilFetch == 0)
     {
-        fprintf(stderr, "error: too small buffer\n");
-        return 0;
+        return;
     }
 
-    memcpy(result->data + result->pos, ptr, size * nmemb);
-    result->pos += size * nmemb;
+    unsigned temp = bot->postsUntilFetch;
+    char *postIDs = malloc (sizeof (char) * temp * 24 + 1);
 
-    return size * nmemb;
-}
-
-char *makeGHApiCall (ChatBot *bot, const char *request)
-{
-    pthread_mutex_lock (&bot->room->clientLock);
-    CURL *curl = NULL;
-    curl = curl_easy_init();
-    CURLcode status;
-    struct curl_slist *headers = NULL;
-    long code;
-
-    char *data = malloc (BUFFER_SIZE);
-    struct write_result write_result = {
-        .data = data,
-        .pos = 0
-    };
-
-    curl_easy_setopt(curl, CURLOPT_URL, request);
-
-    /* GitHub commits API v3 requires a User-Agent header */
-    headers = curl_slist_append(headers, "User-Agent: FireAlarm");
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_response);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &write_result);
-
-    status = curl_easy_perform(curl);
-    if (status != 0)
+    for (unsigned i = 0; i < temp; i ++)
     {
-        fprintf (stderr, "error: unable to request data from %s:\n", request);
-        return NULL;
+        if (i == 0)
+        {
+            sprintf (postIDs, "%d", bot->postsFetch [i]);
+        }
+        else
+        {
+            sprintf (postIDs, "%3B%d", bot->postsFetch [i]);
+        }
     }
+    bot->postsUntilFetch = 0;
 
-    //curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
-    pthread_mutex_unlock (&bot->room->clientLock);
-    /*if(code != 200)
-    {
-        char *error;
-        asprintf (&error, "Error: Github server responded with code %ld!", code);
-        fprintf(stderr, "%s\n", error);
-        postMessage (bot->room, error);
-        free (error);
-        return NULL;
-    }*/
-    curl_easy_cleanup (curl);
-    curl_slist_free_all (headers);
+    char *request;
+    asprintf (&request, "api.stackexchange.com/2.2/questions/%s?key=%s&filter=%s&site=stackoverflow",
+                        postIDs, bot->api->apiKey, bot->api->apiFilter);
 
-    /* zero-terminate the result */
-    data[write_result.pos] = '\0';
-
-    return data;
-}
-
-cJSON *GH_apiGET (ChatBot *bot, const char *request)
-{
-    char *data = makeGHApiCall(bot, request);
-    if (!data)
-    {
-        return NULL;
-    }
-
-    cJSON *json = cJSON_Parse(data);
-    free (data);
-    puts (cJSON_Print (json));
-
-    return json;
-}
-
-char *getLatestCommit (ChatBot *bot)
-{
-    char url [256];
-    snprintf (url, 256, "api.github.com/repos/NobodyNada/FireAlarm/commits");
-    cJSON *json = GH_apiGET (bot, url);
-
+    free (postIDs);
+    cJSON *json = makeApiCall(bot, request);
     if (json == NULL)
     {
-        puts ("json is null!");
-        return NULL;
+        postMessage (bot->room, "Error making batch api call!");
+        return;
     }
 
-    if (cJSON_GetArraySize (json) == 0)
+    bot->api->apiQuota = cJSON_GetObjectItem (json, "quota_remaining")->valueint;
+
+    cJSON *postsJSON = cJSON_GetObjectItem(json, "items");
+    if (postsJSON == NULL)
     {
-        fputs ("array size is 0!", stderr);
-        return NULL;
+        postMessage (bot->room, "Error extracting items from json while batching requests!");
+        return;
     }
-    cJSON *data = cJSON_GetArrayItem (json, 0);
+    for (unsigned i = 0; i < cJSON_GetArraySize(postsJSON); i ++)
+    {
+        int postID = bot->postsFetch [i];
+        cJSON *postJSON = cJSON_GetArrayItem(postsJSON, i);
+        char *title = cJSON_GetObjectItem(postJSON, "title")->valuestring;
+        char *body = cJSON_GetObjectItem(postJSON, "body")->valuestring;
+        char *type = "question";
+        unsigned long userID = 0;
+        unsigned userRep = 0;
+        char *username = NULL;
 
-    char *sha = cJSON_GetObjectItem (data, "sha")->valuestring;
-    puts ("putting sha..");
-    puts (sha);
-    return sha;
+        //Checking if OP is deleted
+        if (strcmp (cJSON_GetObjectItem (cJSON_GetObjectItem (postJSON, "owner"), "user_type")->valuestring, "does_not_exist") == 0)
+        {
+            puts ("OP is deleted!");
+            userID = 0;
+        }
+        else
+        {
+            userID = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "user_id")->valueint;
+            userRep = cJSON_GetObjectItem (cJSON_GetObjectItem (postJSON, "owner"), "reputation")->valueint;
+            username = cJSON_GetObjectItem(cJSON_GetObjectItem(postJSON, "owner"), "display_name")->valuestring;
+        }
+
+        SOUser *user = createSOUser(userID, username, userRep);
+
+        Post *p = createPost(title, body, postID, strcmp(type, "answer") == 0, user);
+        checkPost(bot, p);
+    }
+
+    cJSON_Delete (json);
+    return;
 }

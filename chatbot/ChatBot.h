@@ -73,6 +73,8 @@ typedef struct _ChatBot {
     Report *latestReports[REPORT_MEMORY];   //index 0 is the most recent report, 1 is the second most, etc.
     int reportsWaiting; //The amount of reports that have not yet been assigned a message ID.
     int reportsUntilAnalysis;   //The number of reports left until the bot analyzes them to auto-generate filters.
+    int postsFetch [REPORT_MEMORY]; //The posts needed to be checked afterwards for batching of requests
+    unsigned postsUntilFetch; //The amount of posts that need to be requested from the api in batching requests
 }ChatBot;
 
 ChatBot *createChatBot(

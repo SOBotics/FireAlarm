@@ -337,6 +337,8 @@ ChatBot *createChatBot(
     c->modes = modes;
     c->stopAction = ACTION_NONE;
     c->api = caller;
+    c->postsUntilFetch = 0;
+    c->postsFetch [c->postsUntilFetch] = 0;
     pthread_mutex_init(&c->runningCommandsLock, NULL);
     pthread_mutex_init(&c->detectorLock, NULL);
 

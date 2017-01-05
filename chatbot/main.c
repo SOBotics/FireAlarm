@@ -220,16 +220,18 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     }
     puts ("Getting post...");
     ChatBot *bot = (ChatBot*)ws->user;
-    Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
+    //Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
+    bot->postsUntilFetch ++;
+    bot->postsFetch [bot->postsUntilFetch-1] = cJSON_GetObjectItem(post, "id")->valueint;
     //Post *p = NULL;
-    if (p != NULL && !p->isAnswer) {
+    /*if (p != NULL && !p->isAnswer) {
         printf ("checking post: %lu\n", p->postID);
         checkPost(bot, p);
     }
     else {
         puts ("Null post!!");
         printf("Got a null post: %d\n", cJSON_GetObjectItem(post, "id")->valueint);
-    }
+    }*/
     cJSON_Delete(json);
     cJSON_Delete(post);
 }
@@ -475,6 +477,9 @@ int main(int argc, char ** argv) {
             saveReports(bot->latestReports, bot->reportsUntilAnalysis);
             savePrivRequests(bot->privRequests, bot->totalPrivRequests);
             saveNotifications (bot->notify, bot->totalNotifications);
+
+            requestsBatchCheck(bot);
+
             saveTime = time(NULL) + SAVE_INTERVAL;
         }
     }
@@ -506,7 +511,6 @@ int main(int argc, char ** argv) {
     free (msg);
 
     char *pass = malloc (sizeof (char) * 1024);
-    //pass = getenv("ChatBotPass");
     strcpy (pass, getenv("ChatBotPass"));
     replaceSubString(pass, " ", "\\ ");
     push ("FireAlarmChatBot", pass);
@@ -519,11 +523,6 @@ int main(int argc, char ** argv) {
 
     if (reboot) {
         chdir ("../");
-        //execv(argv[0], (char*const*)argv);  //Reload the binaries which will restart the program.
-        //execv ("/usr/bin/valgrind", "./firealarm");
-        //char *args [] = {"valgrind", "./firealarm", NULL};
-        //execvp ("valgrind", args);
-        //main (argc, argv);
         rebootBot (argv);
     }
 
