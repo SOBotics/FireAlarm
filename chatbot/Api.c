@@ -273,7 +273,7 @@ void requestsBatchCheck (ChatBot *bot)
         }
         else
         {
-            sprintf (postIDs, "%3B%d", bot->postsFetch [i]);
+            sprintf (postIDs + strlen (postIDs), "%3B%d", bot->postsFetch [i]);
         }
     }
     bot->postsUntilFetch = 0;
@@ -281,9 +281,13 @@ void requestsBatchCheck (ChatBot *bot)
     char *request;
     asprintf (&request, "api.stackexchange.com/2.2/questions/%s?key=%s&filter=%s&site=stackoverflow",
                         postIDs, bot->api->apiKey, bot->api->apiFilter);
+    puts (request);
 
     free (postIDs);
     cJSON *json = makeApiCall(bot, request);
+    puts ("JSON:");
+    puts (cJSON_Print (json));
+    free (request);
     if (json == NULL)
     {
         postMessage (bot->room, "Error making batch api call!");

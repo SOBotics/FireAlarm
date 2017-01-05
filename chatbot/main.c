@@ -29,7 +29,7 @@
 #include "Logs.h"
 #include "LoadData.h"
 
-#define SAVE_INTERVAL 25
+#define SAVE_INTERVAL 60
 #define REPO_URL "https://git.io/vPis7"
 //long postMessage = 1;
 
@@ -221,6 +221,7 @@ void wsRecieved(WebSocket *ws, char *data, size_t len) {
     puts ("Getting post...");
     ChatBot *bot = (ChatBot*)ws->user;
     //Post *p = getPostByID(bot, cJSON_GetObjectItem(post, "id")->valueint);
+    puts ("SO Post!");
     bot->postsUntilFetch ++;
     bot->postsFetch [bot->postsUntilFetch-1] = cJSON_GetObjectItem(post, "id")->valueint;
     //Post *p = NULL;
@@ -477,6 +478,7 @@ int main(int argc, char ** argv) {
             saveReports(bot->latestReports, bot->reportsUntilAnalysis);
             savePrivRequests(bot->privRequests, bot->totalPrivRequests);
             saveNotifications (bot->notify, bot->totalNotifications);
+            printf ("\n%d is posts until fetch!", bot->postsUntilFetch);
 
             requestsBatchCheck(bot);
 
