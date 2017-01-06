@@ -279,7 +279,7 @@ void requestsBatchCheck (ChatBot *bot)
     bot->postsUntilFetch = 0;
 
     char *request;
-    asprintf (&request, "api.stackexchange.com/2.2/questions/%s?order=desc&key=%s&filter=%s&site=stackoverflow",
+    asprintf (&request, "api.stackexchange.com/2.2/questions/%s?order=desc&sort=activity&key=%s&filter=%s&site=stackoverflow",
                         postIDs, bot->api->apiKey, bot->api->apiFilter);
     puts (request);
 
