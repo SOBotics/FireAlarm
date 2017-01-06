@@ -308,6 +308,7 @@ void requestsBatchCheck (ChatBot *bot)
         int postID = bot->postsFetch [i];
         printf ("Checking post id %d\n", postID);
         cJSON *postJSON = cJSON_GetArrayItem(postsJSON, i);
+        postID = cJSON_GetObjectItem (postJSON, "question_id")->valueint;
         char *title = cJSON_GetObjectItem(postJSON, "title")->valuestring;
         char *body = cJSON_GetObjectItem(postJSON, "body")->valuestring;
         char *type = "question";
@@ -329,8 +330,6 @@ void requestsBatchCheck (ChatBot *bot)
         }
 
         SOUser *user = createSOUser(userID, username, userRep);
-        puts (title);
-        puts (body);
 
         Post *p = createPost(title, body, postID, strcmp(type, "answer") == 0, user);
         checkPost(bot, p);
