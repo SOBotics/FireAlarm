@@ -43,7 +43,7 @@ class Filter {
 	let words: [String:Word]
 	var blacklistedUsernames: [String]
 	
-	var reportedPosts = [(id: Int, when: Date)]()
+	var reportedPosts = [(id: Int, when: Date, difference: Int)]()
 	
 	var postsToCheck = [Int]()
 	
@@ -106,7 +106,8 @@ class Filter {
 				guard let id = $0["id"] as? Int, let when = $0["t"] as? Int else {
 					throw FilterLoadingError.InvalidReport(report: $0)
 				}
-				return (id: id, when: Date(timeIntervalSince1970: TimeInterval(when)))
+				let difference = ($0["d"] as? Int) ?? 0
+				return (id: id, when: Date(timeIntervalSince1970: TimeInterval(when)), difference: difference)
 			}
 			
 		} catch {
@@ -199,7 +200,7 @@ class Filter {
 		case noSite(json: String)
 	}
 	
-	func runBayesianFilter(_ post: Post) -> Bool {
+	func runBayesianFilter(_ post: Post) -> (Bool, Int) {
 		var trueProbability = Double(0.263)
 		var falseProbability = Double(1 - trueProbability)
 		var postWords = [String]()
@@ -207,7 +208,7 @@ class Filter {
 		
 		guard let body = post.body else {
 			print("No body for \(post.id.map { String($0) } ?? "<no ID>")")
-			return false
+			return (false, 0)
 		}
 		
 		var currentWord: String = ""
@@ -247,7 +248,9 @@ class Filter {
 			}
 		}
 		
-		return trueProbability * 1e45 > falseProbability
+		let difference = -log10(falseProbability - trueProbability)
+		
+		return (difference < 45, Int(difference.isNormal ? difference : 0))
 	}
 	
 	func runUsernameFilter(_ post: Post) -> Bool {
@@ -327,19 +330,20 @@ class Filter {
 	}
 	
 	func checkPost(_ post: Post) -> ReportReason? {
+		let bayesianResults = runBayesianFilter(post)
 		if runLinkFilter(post) {
 			return .misleadingLink
 		} else if runUsernameFilter(post) {
 			return .blacklistedUsername
-		} else if runBayesianFilter(post) {
-			return .bayesianFilter
+		} else if bayesianResults.0 {
+			return .bayesianFilter(difference: bayesianResults.1)
 		} else {
 			return nil
 		}
 	}
 	
 	enum ReportReason {
-		case bayesianFilter
+		case bayesianFilter(difference: Int)
 		case blacklistedUsername
 		case misleadingLink
 	}
@@ -400,8 +404,10 @@ class Filter {
 		print("Reporting question \(id).")
 		
 		let header: String
+		var difference: Int = 0
 		switch reason {
-		case .bayesianFilter:
+		case .bayesianFilter(let d):
+			difference = d
 			header = "Potentially bad question:"
 		case .blacklistedUsername:
 			header = "Blacklisted username:"
@@ -409,7 +415,7 @@ class Filter {
 			header = "Misleading link:"
 		}
 		
-		reportedPosts.append((id: id, when: Date()))
+		reportedPosts.append((id: id, when: Date(), difference: difference))
 		room.postMessage("[ [\(botName)](\(githubLink)) ] " +
 			"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(post.title ?? "<no title>")](//stackoverflow.com/q/\(id)) " +
 			room.notificationString(tags: tags(for: post), reason: reason)
@@ -425,7 +431,9 @@ class Filter {
 	
 	func saveReports() throws {
 		let data = try JSONSerialization.data(
-			withJSONObject: reportedPosts.map {["id":$0.id,"t":Int($0.when.timeIntervalSince1970)]}
+			withJSONObject: reportedPosts.map {
+				["id":$0.id,"t":Int($0.when.timeIntervalSince1970),"d":$0.difference]
+			}
 		)
 		
 		try data.write(to: saveDirURL.appendingPathComponent("reports.json"))
