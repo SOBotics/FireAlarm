@@ -414,7 +414,7 @@ void printPrivUser (RunningCommand *command, void *ctx)
         message = realloc(message, strlen(message) + 2);
         strcat(message, "\n");
     }
-    const char *modInfo = "Moderaters and room owners can run any command, regardless of privileges.";
+    const char *modInfo = "Moderators and room owners can run any command, regardless of privileges.";
     message = realloc(message, strlen(message) + strlen(modInfo) + 1);
     strcat(message, modInfo);
 
