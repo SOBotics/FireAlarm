@@ -13,7 +13,7 @@ void addUserPriv (RunningCommand *command, void *ctx)
 {
     ChatBot *bot = ctx;
 
-    PrivRequest **requests = bot->privUsers;
+    PrivRequest **requests = bot->privRequests;
 
     if (command->argc != 2)
     {

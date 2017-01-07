@@ -20,6 +20,9 @@
 char *loadPassword ();
 char *loadEmail ();
 
+ApiCaller *loadApiCaller ();
+void saveApiCaller (ApiCaller *caller);
+
 Log **loadLogs ();
 void saveLogs (Log **logs, unsigned totalLogs);
 

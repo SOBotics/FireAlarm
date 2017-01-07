@@ -62,53 +62,6 @@ void checkPostCallback(RunningCommand *command, void *ctx) {
     return;
 }
 
-void manualGetPosts (RunningCommand *command, void *ctx)
-{
-    ChatBot *bot = ctx;
-    postReply (bot->room, "Checking posts...", command->message);
-    printf ("checking posts...");
-
-    int *totalPosts;
-    Post **posts = getPosts (bot, totalPosts);
-    unsigned i;
-
-    if (posts == NULL)
-    {
-        puts ("Posts is NULL!\n");
-        postMessage (bot->room, "Posts is NULL!");
-        return;
-    }
-
-    char *str;
-    asprintf (&str, "Total Posts is %d.", totalPosts);
-    printf ("\n%s\n", str);
-    postMessage (bot->room, str);
-    for (i = 0; i < 45; i ++)
-    {
-        printf ("\ni is %d\n", i);
-        if (posts [i] == NULL)
-        {
-            asprintf (&str, "Posts %u is NULL!", i);
-            printf ("\n%s\n", str);
-    postMessage (bot->room, str);
-    //free (str);
-    //free (posts);
-        }
-        else
-        {
-        asprintf (&str, "Manually checking post %lu.", posts [i]->postID);
-        printf ("\n%s\n", str);
-        postMessage (bot->room, str);
-        //checkPost (bot, posts [i]);
-        }
-    }
-    printf ("Finished manually checking.\n");
-    postMessage (bot->room, "Finished manually checking.");
-    free (str);
-    //free (posts);
-    return;
-}
-
 unsigned int confirm(RunningCommand *command, void *ctx, unsigned char confirm) {
     ChatBot *bot = ctx;
     Post *post;

@@ -7,6 +7,7 @@
 //
 
 #define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <curl/curl.h>
@@ -17,6 +18,7 @@
 #include <sys/stat.h>
 #include <limits.h>
 #include <signal.h>
+#include <string.h>
 
 #include "Privileges.h"
 #include "ChatRoom.h"
@@ -270,7 +272,7 @@ int main(int argc, char ** argv) {
 
     //Get the original working directory to be used later
     //http://stackoverflow.com/a/298518/5735775
-    char *originaldir [1024];
+    char originaldir [1024];
     getcwd (originaldir, sizeof(originaldir));
 
 
@@ -347,7 +349,7 @@ int main(int argc, char ** argv) {
 
 
     Filter **filters = loadFilters();
-    ApiCaller *apiCaller = loadApiCaller ();
+    ApiCaller *apiCaller = (ApiCaller*)loadApiCaller ();
     PrivUser **users = loadPrivUsers();
     PrivRequest **requests = loadPrivRequests();
     Modes *modes = createMode (1, 1, 1, 1);
@@ -425,8 +427,6 @@ int main(int argc, char ** argv) {
         createCommand("filter view filters", 0, printFilters),
         createCommand("filter disable *", 2, disableFilter),
         createCommand("filter enable *", 2, enableFilter),
-        createCommand("error logs", 0, printErrorLogs),
-        createCommand("clear error logs", 2, clearErrorLogs),
         createCommand("rev", 2, latestCommit),
         createCommand("status", 0, status),
         createCommand("pull", 0, commandPull),
@@ -525,7 +525,7 @@ int main(int argc, char ** argv) {
 
     if (reboot) {
         chdir ("../");
-        rebootBot (argv);
+        rebootBot ();
     }
 
     return 0;
