@@ -2,7 +2,7 @@
 		"description":	"short body",
 		"expression":	"",
 		"type":	2,
-		"truePositives":	349,
+		"truePositives":	350,
 		"falsePositives":	108,
 		"isDisabled":	0
 	}, {
@@ -30,7 +30,7 @@
 		"description":	"less punctuation",
 		"expression":	"",
 		"type":	9,
-		"truePositives":	25,
+		"truePositives":	26,
 		"falsePositives":	0,
 		"isDisabled":	0
 	}, {
@@ -44,14 +44,14 @@
 		"description":	"link in body",
 		"expression":	"",
 		"type":	7,
-		"truePositives":	56,
+		"truePositives":	57,
 		"falsePositives":	9,
 		"isDisabled":	0
 	}, {
 		"description":	"wall of text",
 		"expression":	"",
 		"type":	5,
-		"truePositives":	186,
+		"truePositives":	187,
 		"falsePositives":	45,
 		"isDisabled":	0
 	}, {
