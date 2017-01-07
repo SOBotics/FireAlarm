@@ -953,7 +953,7 @@ void filterInfo (RunningCommand *command, void *ctx)
         {
             Filter *filter = getFilterByKeyword(bot, argTwo);
             char *message;
-            asprintf (&message, "Keyword '%s' is currently in the filter. It has %d true positives, %d false positives, and its true positive rate is %f.", filter->filter, filter->truePositives, filter->falsePositives, filter->truePositives / (filter->truePositives + filter->falsePositives));
+            asprintf (&message, "Keyword '%s' is currently in the filter. It has %d true positives, %d false positives, and its true positive rate is %u", filter->filter, filter->truePositives, filter->falsePositives, filter->truePositives / (filter->truePositives + filter->falsePositives));
             postReply (bot->room, message, command->message);
             free (message);
             return;
@@ -973,7 +973,7 @@ void filterInfo (RunningCommand *command, void *ctx)
         {
             Filter *filter = getFilterByTag(bot, argTwo);
             char *message;
-            asprintf (&message, "Tag [tag:%s] is currently in the filter. It has %d true positives, %d false positives, and its true positive rate is %f.", filter->filter, filter->truePositives, filter->falsePositives, filter->truePositives / (filter->truePositives + filter->falsePositives));
+            asprintf (&message, "Tag [tag:%s] is currently in the filter. It has %d true positives, %d false positives, and its true positive rate is %u.", filter->filter, filter->truePositives, filter->falsePositives, filter->truePositives / (filter->truePositives + filter->falsePositives));
             postReply (bot->room, message, command->message);
             free (message);
             return;

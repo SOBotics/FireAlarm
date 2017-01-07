@@ -19,10 +19,13 @@ void checkPostCallback(RunningCommand *command, void *ctx) {
     ChatBot *bot = ctx;
 
     //printf ("In function 'checkPostCallback'.");
-    char *arg = removeAllChars (command->argv [0]);
+    char *arg = malloc ((sizeof (char) * strlen (command->argv [0])) + 1);
+    strcpy (arg, command->argv [0]);
+    removeAllChars (arg);
     //arg [37] = '\0';
     arg [8] = '\0';
     long postID = strtol(arg, NULL, 10);
+    free (arg);
     int check;
 
     //printf ("Starting first if....");
