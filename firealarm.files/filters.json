@@ -2,7 +2,7 @@
 		"description":	"short body",
 		"expression":	"",
 		"type":	2,
-		"truePositives":	346,
+		"truePositives":	348,
 		"falsePositives":	108,
 		"isDisabled":	0
 	}, {
@@ -30,14 +30,14 @@
 		"description":	"less punctuation",
 		"expression":	"",
 		"type":	9,
-		"truePositives":	22,
+		"truePositives":	24,
 		"falsePositives":	0,
 		"isDisabled":	0
 	}, {
 		"description":	"no question",
 		"expression":	"",
 		"type":	6,
-		"truePositives":	110,
+		"truePositives":	112,
 		"falsePositives":	34,
 		"isDisabled":	0
 	}, {
@@ -51,7 +51,7 @@
 		"description":	"wall of text",
 		"expression":	"",
 		"type":	5,
-		"truePositives":	183,
+		"truePositives":	185,
 		"falsePositives":	45,
 		"isDisabled":	0
 	}, {
