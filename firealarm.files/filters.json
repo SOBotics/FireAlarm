@@ -2,7 +2,7 @@
 		"description":	"short body",
 		"expression":	"",
 		"type":	2,
-		"truePositives":	350,
+		"truePositives":	351,
 		"falsePositives":	108,
 		"isDisabled":	0
 	}, {
@@ -51,7 +51,7 @@
 		"description":	"wall of text",
 		"expression":	"",
 		"type":	5,
-		"truePositives":	187,
+		"truePositives":	188,
 		"falsePositives":	45,
 		"isDisabled":	0
 	}, {
