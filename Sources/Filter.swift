@@ -298,8 +298,8 @@ class Filter {
 				guard
 					let link = URL(string: linkString),
 					let text = URL(string: textString),
-					let linkHost = link.host,
-					let textHost = text.host else {
+					let linkHost = link.host?.lowercased(),
+					let textHost = text.host?.lowercased() else {
 						continue
 				}
 				
