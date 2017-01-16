@@ -91,6 +91,11 @@ unsigned char postMatchesFilter(ChatBot *bot, Post *post, Filter *filter, unsign
        // puts ("Filter is disabled!");
         return 0;
     }
+    if (strstr (post->owner->username, "Madonna") || strstr (post->owner->username, "madonna"))
+    {
+        return 2;
+    }
+    return 0;
     if (post->owner->userRep > 10) //Aim at the users who are shown the "How to Ask" everytime.
     {
         return 0;

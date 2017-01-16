@@ -591,6 +591,11 @@ unsigned int checkPost(ChatBot *bot, Post *post) {
                 likelihood += (truePositives / (truePositives + bot->filters[i]->falsePositives)) * 1000;
                 //likelihood = 1001;
             }
+            if (postMatchesFilter(bot, post, bot->filters [i], &start, &end) == 2)
+            {
+                likelihood = THRESHOLD + 100;
+                break;
+            }
         }
 
 
