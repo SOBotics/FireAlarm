@@ -358,8 +358,8 @@ class Filter {
 		if let reason = checkPost(post) {
 			return report(post: post, reason: reason)
 		}
-		else {
-			if (post.id ?? 1) % 10000 == 0 {
+		else if let q = post as? Question {
+			if (post.id ?? 1) % 10000 == 0 && q.creation_date == q.last_activity_date {
 				room.postMessage("[ [\(botName)](\(githubLink)) ] " +
 					"[tag:\(tags(for: post).first ?? "tagless")] Potentially bad question: " +
 					"[\(post.title ?? "<no title>")](//youtube.com/watch?v=dQw4w9WgXcQ)"
