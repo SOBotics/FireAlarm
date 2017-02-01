@@ -19,7 +19,7 @@ class CommandUpdate: Command {
 	}
 	
 	override func run() throws {
-		if !update(listener, message.room, force: (usageIndex == 0)) {
+		if !update(listener, [message.room], force: (usageIndex == 0)) {
 			reply("No new update available.")
 		}
 	}
