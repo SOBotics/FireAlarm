@@ -37,7 +37,7 @@ extension Post {
 
 class Filter {
 	let client: Client
-	let room: ChatRoom
+	let rooms: [ChatRoom]
 	
 	let initialProbability: Double
 	let words: [String:Word]
@@ -56,9 +56,9 @@ class Filter {
 		case InvalidReport(report: [String:Any])
 	}
 	
-	init(_ room: ChatRoom) {
-		client = room.client
-		self.room = room
+	init(_ rooms: [ChatRoom]) {
+		client = rooms.first!.client
+		self.rooms = rooms
 		
 		print("Loading filter...")
 		blacklistedUsernames = []
@@ -360,10 +360,10 @@ class Filter {
 		}
 		else if let q = post as? Question {
 			if (post.id ?? 1) % 10000 == 0 && q.creation_date == q.last_activity_date {
-				room.postMessage("[ [\(botName)](\(githubLink)) ] " +
+				rooms.forEach {$0.postMessage("[ [\(botName)](\(githubLink)) ] " +
 					"[tag:\(tags(for: post).first ?? "tagless")] Potentially bad question: " +
 					"[\(post.title ?? "<no title>")](//youtube.com/watch?v=dQw4w9WgXcQ)"
-				)
+					)}
 			}
 		}
 		return .notBad
@@ -397,7 +397,7 @@ class Filter {
 			}
 		}
 		else {
-			room.postMessage("Failed to calculate minimum report date!")
+			rooms.forEach {$0.postMessage("Failed to calculate minimum report date!")}
 		}
 		
 		
@@ -416,10 +416,13 @@ class Filter {
 		}
 		
 		reportedPosts.append((id: id, when: Date(), difference: difference))
-		room.postMessage("[ [\(botName)](\(githubLink)) ] " +
-			"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(post.title ?? "<no title>")](//stackoverflow.com/q/\(id)) " +
-			room.notificationString(tags: tags(for: post), reason: reason)
-		)
+		
+		for room in rooms {
+			let message = "[ [\(botName)](\(githubLink)) ] " +
+				"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(post.title ?? "<no title>")](//stackoverflow.com/q/\(id)) " +
+				room.notificationString(tags: tags(for: post), reason: reason)
+			room.postMessage(message)
+		}
 		
 		return .reported(reason: reason)
 	}
@@ -543,7 +546,7 @@ class Filter {
 		repeat {
 			do {
 				if wsRetries >= wsMaxRetries {
-					room.postMessage(
+					rooms.first!.postMessage(
 						"Realtime questions websocket died; failed to reconnect!  Active posts will not be reported until a reboot.  (cc @NobodyNada)"
 					)
 					return

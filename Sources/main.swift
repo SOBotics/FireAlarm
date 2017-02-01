@@ -178,35 +178,40 @@ func main() throws {
 	
 	
 	//Join the chat room
-	let room: ChatRoom
+	let rooms: [ChatRoom]
 	let development: Bool
 	if let devString = env["DEVELOPMENT"], let devRoom = Int(devString) {
-		room = ChatRoom(client: client, roomID: devRoom)
+		rooms = [ChatRoom(client: client, roomID: devRoom)]
 		development = true
 	}
 	else {
-		room = ChatRoom(client: client, roomID: 111347)  //SOBotics
-		development = false
+		rooms = [
+			ChatRoom(client: client, roomID: 111347), //SOBotics
+			]
+		        
+		development = true
 	}
-	try room.loadUserDB()
+	try rooms.forEach {try $0.loadUserDB()}
 	
 	afterTooManyErrors = {
 		print("Too many errors; aborting...")
 		abort()
 	}
-	errorRoom = room
+	errorRoom = rooms.first!
 	
 	
 	listener = ChatListener(commands: commands)
 	listener.onShutdown { halt(reboot: $0 == .reboot, update: $0 == .update) }
-	room.onMessage { listener.processMessage(room, message: $0, isEdit: $1) }
+	rooms.forEach {room in room.onMessage { listener.processMessage(room, message: $0, isEdit: $1) } }
 	
-	try room.join()
+	try rooms.forEach { try $0.join() }
 	
 	//Post the startup message
+	let startupMessage: String
+	
 	currentVersion = getCurrentVersion()
 	if FileManager.default.fileExists(atPath: "update-failure") {
-		room.postMessage("Update failed!")
+		startupMessage = "Update failed!"
 		try! FileManager.default.removeItem(atPath: "update-failure")
 	}
 	else if let new = try? loadFile("version-new.txt").replacingOccurrences(of: "\n", with: "") {
@@ -221,23 +226,25 @@ func main() throws {
 		
 		let message = components.count > 1 ? (" (" + components[1..<components.count].joined(separator: " ") + ")") : ""
 		
-		room.postMessage("Updated from [`\(oldShort)`](\(oldLink)) to [`\(newShort)`](\(newLink))\(message).")
+		startupMessage = "Updated from [`\(oldShort)`](\(oldLink)) to [`\(newShort)`](\(newLink))\(message)."
 		
 		try! new.write(toFile: "version.txt", atomically: true, encoding: .utf8)
 		currentVersion = new
 		try! FileManager.default.removeItem(atPath: "version-new.txt")
 	}
 	else {
-		room.postMessage("[\(botName)](\(githubLink)) started.")
-		//room.postMessage("Merry Christmas!")
+		startupMessage = "[\(botName)](\(githubLink)) started."
 	}
+	
+	rooms.forEach { $0.postMessage(startupMessage) }
+	
 	shortVersion = getShortVersion(currentVersion)
 	versionLink = getVersionLink(currentVersion)
 	
 	
 	
 	//Load the filter
-	filter = Filter(room)
+	filter = Filter(rooms)
 	try filter.start()
 	
 	
@@ -246,7 +253,7 @@ func main() throws {
 	//Run background tasks
 	func save() {
 		do {
-			try room.saveUserDB()
+			try rooms.forEach { try $0.saveUserDB() }
 		} catch {
 			handleError(error, "while saving the user database")
 		}
@@ -268,7 +275,7 @@ func main() throws {
 			//wait one minute
 			sleep(60)
 			if !updated && !development {
-				updated = update(listener, room)
+				updated = update(listener, rooms)
 			}
 			
 			save()
@@ -300,12 +307,40 @@ func main() throws {
 		
 		switch backgroundTasks.removeFirst() {
 		case .handleInput(let input):
+			var messageContent = input
+			
+			guard let firstComponent = input.components(separatedBy: .whitespaces).first else {
+				break
+			}
+			
+			let room: ChatRoom
+			if firstComponent.hasPrefix(">") {
+				let roomIDStr = firstComponent.substring(
+					from: firstComponent.characters.index(after: firstComponent.characters.startIndex)
+				)
+				guard let roomID = Int(roomIDStr) else {
+						print("Invalid room ID.")
+						break
+				}
+				
+				guard let roomIndex = rooms.index(where: { roomID == $0.roomID }) else {
+					print("I'm not  in that room.")
+					break
+				}
+				
+				room = rooms[roomIndex]
+				
+				messageContent = input.components(separatedBy: .whitespaces).dropFirst().joined(separator: " ")
+			} else {
+				room = rooms.first!
+			}
+			
 			listener.processMessage(
 				room,
 				message: ChatMessage(
 					room: room,
 					user: room.userWithID(0),
-					content: input,
+					content: messageContent,
 					id: nil
 				),
 				isEdit: false
@@ -316,7 +351,12 @@ func main() throws {
 			filter.stop()
 			
 			//Wait for pending messages to be posted.
-			while !room.messageQueue.isEmpty && !(filter.ws.state == .disconnected || filter.ws.state == .error) {
+			for room in rooms {
+				while !room.messageQueue.isEmpty {
+					sleep(1)
+				}
+			}
+			while !(filter.ws.state == .disconnected || filter.ws.state == .error) {
 				sleep(1)
 			}
 			
@@ -331,7 +371,7 @@ func main() throws {
 				}
 			}
 			
-			room.leave()
+			rooms.forEach { $0.leave() }
 			
 			if shouldReboot {
 				//Change to the old working directory.
