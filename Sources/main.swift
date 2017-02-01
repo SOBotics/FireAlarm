@@ -187,8 +187,8 @@ func main() throws {
 	else {
 		rooms = [
 			ChatRoom(client: client, roomID: 111347), //SOBotics
-			]
-		        
+		]
+		
 		development = true
 	}
 	try rooms.forEach {try $0.loadUserDB()}
@@ -301,6 +301,29 @@ func main() throws {
 	DispatchQueue.global().async(execute: inputMonitor)
 	
 	
+	func inputFileMonitor() {
+		do {
+			let manager = FileManager.default
+			let file = "input.txt"
+			repeat {
+				if manager.fileExists(atPath: file) {
+					let input = try String(contentsOfFile: file)
+					try manager.removeItem(atPath: file)
+					
+					backgroundTasks.append(.handleInput(input: input.trimmingCharacters(in: .whitespacesAndNewlines)))
+					backgroundSemaphore.signal()
+				}
+				sleep(1)
+			} while true
+		} catch {
+			handleError(error, "while monitoring input.txt")
+		}
+	}
+	
+	
+	DispatchQueue.global().async(execute: inputFileMonitor)
+	
+	
 	repeat {
 		//wait for a background task
 		backgroundSemaphore.wait()
@@ -319,8 +342,8 @@ func main() throws {
 					from: firstComponent.characters.index(after: firstComponent.characters.startIndex)
 				)
 				guard let roomID = Int(roomIDStr) else {
-						print("Invalid room ID.")
-						break
+					print("Invalid room ID.")
+					break
 				}
 				
 				guard let roomIndex = rooms.index(where: { roomID == $0.roomID }) else {
