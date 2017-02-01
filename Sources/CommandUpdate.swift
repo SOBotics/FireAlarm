@@ -14,6 +14,10 @@ class CommandUpdate: Command {
 		return ["update force", "update"]
 	}
 	
+	override class func privileges() -> ChatUser.Privileges {
+		return .owner
+	}
+	
 	override func run() throws {
 		if !update(listener, message.room, force: (usageIndex == 0)) {
 			reply("No new update available.")
