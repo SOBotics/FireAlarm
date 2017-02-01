@@ -189,7 +189,7 @@ func main() throws {
 			ChatRoom(client: client, roomID: 111347), //SOBotics
 		]
 		
-		development = true
+		development = false
 	}
 	try rooms.forEach {try $0.loadUserDB()}
 	
