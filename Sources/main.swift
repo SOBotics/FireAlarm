@@ -307,7 +307,11 @@ func main() throws {
 			let file = "input.txt"
 			repeat {
 				if manager.fileExists(atPath: file) {
-					let input = try String(contentsOfFile: file)
+					let input = String(
+						data: try Data(contentsOf: saveURL.appendingPathComponent(file)),
+						encoding: .utf8
+						)!
+					
 					try manager.removeItem(atPath: file)
 					
 					backgroundTasks.append(.handleInput(input: input.trimmingCharacters(in: .whitespacesAndNewlines)))
