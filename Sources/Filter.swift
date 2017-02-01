@@ -365,8 +365,8 @@ class Filter {
 					"[\(post.title ?? "<no title>")](//youtube.com/watch?v=dQw4w9WgXcQ)"
 				)
 			}
-			return .notBad
 		}
+		return .notBad
 	}
 	
 	func tags(for post: Post) -> [String] {
