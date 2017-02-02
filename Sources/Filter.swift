@@ -50,6 +50,9 @@ class Filter {
 	var queue = DispatchQueue(label: "Filter", attributes: [.concurrent])
 	
 	
+	private var lastEventDate: Date?
+	
+	
 	enum FilterLoadingError: Error {
 		case UsernamesNotArrayOfStrings
 		case ReportsNotArrayOfDictionaries
@@ -180,6 +183,18 @@ class Filter {
 	func webSocketOpen() {
 		print("Listening to active questions!")
 		ws.write("155-questions-active")
+		
+		queue.async {
+			while true {
+				sleep(600)
+				if (Date().timeIntervalSinceReferenceDate -
+					(self.lastEventDate?.timeIntervalSinceReferenceDate ?? 0)) > 600 {
+					
+					self.ws?.disconnect()
+				}
+				return
+			}
+		}
 	}
 	
 	func webSocketClose(_ code: Int, reason: String, wasClean: Bool) {
