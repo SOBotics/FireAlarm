@@ -565,7 +565,6 @@ class Filter {
 					fatalError(
 						"Realtime questions websocket died; failed to reconnect!  Active posts will not be reported until a reboot.  (cc @NobodyNada)"
 					)
-					return
 				}
 				wsRetries += 1
 				try start()
