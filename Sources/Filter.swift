@@ -182,6 +182,7 @@ class Filter {
 	
 	func webSocketOpen() {
 		print("Listening to active questions!")
+		wsRetries = 0
 		ws.write("155-questions-active")
 		
 		queue.async {
@@ -569,7 +570,6 @@ class Filter {
 				wsRetries += 1
 				try start()
 				done = true
-				wsRetries = 0
 			} catch {
 				done = false
 				sleep(5)
