@@ -561,7 +561,7 @@ class Filter {
 		repeat {
 			do {
 				if wsRetries >= wsMaxRetries {
-					rooms.first!.postMessage(
+					fatalError(
 						"Realtime questions websocket died; failed to reconnect!  Active posts will not be reported until a reboot.  (cc @NobodyNada)"
 					)
 					return
@@ -569,8 +569,10 @@ class Filter {
 				wsRetries += 1
 				try start()
 				done = true
+				wsRetries = 0
 			} catch {
 				done = false
+				sleep(5)
 			}
 		} while !done
 	}
