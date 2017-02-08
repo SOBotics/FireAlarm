@@ -14,10 +14,10 @@ import SwiftStack
 let commands: [Command.Type] = [
 	CommandSay.self,
 	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self,
+	CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
 	CommandCheckPost.self, CommandQuota.self,
 	CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
 	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self,
-	CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
 ]
 
 //var apiClient = APIClient(proxyAddress: "127.0.0.1", proxyPort: 8080)
