@@ -187,7 +187,7 @@ func main() throws {
 	else {
 		rooms = [
 			ChatRoom(client: client, roomID: 111347), //SOBotics
-			ChatRoom(client: client, roomID: 68414),  //SOCVR Testing Facility
+			ChatRoom(client: client, roomID: 41570),  //SO Close Vote Reviewers
 		]
 		
 		development = false
