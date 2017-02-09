@@ -15,7 +15,7 @@ class CommandBlacklistUsername: Command {
 	}
 	
 	override class func privileges() -> ChatUser.Privileges {
-		return [.blacklist]
+		return .filter
 	}
 	
 	

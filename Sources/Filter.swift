@@ -216,7 +216,7 @@ class Filter {
 		case noSite(json: String)
 	}
 	
-	func runBayesianFilter(_ post: Post) -> (Bool, Int) {
+	func runBayesianFilter(_ post: Post) -> Int {
 		var trueProbability = Double(0.263)
 		var falseProbability = Double(1 - trueProbability)
 		var postWords = [String]()
@@ -224,7 +224,7 @@ class Filter {
 		
 		guard let body = post.body else {
 			print("No body for \(post.id.map { String($0) } ?? "<no ID>")")
-			return (false, 0)
+			return 10000
 		}
 		
 		var currentWord: String = ""
@@ -266,7 +266,7 @@ class Filter {
 		
 		let difference = -log10(falseProbability - trueProbability)
 		
-		return (difference < 45, Int(difference.isNormal ? difference : 0))
+		return Int(difference.isNormal ? difference : 10000)
 	}
 	
 	func runUsernameFilter(_ post: Post) -> Bool {
@@ -347,12 +347,13 @@ class Filter {
 	
 	func checkPost(_ post: Post) -> ReportReason? {
 		let bayesianResults = runBayesianFilter(post)
+		
 		if runLinkFilter(post) {
 			return .misleadingLink
 		} else if runUsernameFilter(post) {
 			return .blacklistedUsername
-		} else if bayesianResults.0 {
-			return .bayesianFilter(difference: bayesianResults.1)
+		} else if rooms.contains(where: {room in return bayesianResults < room.threshold}) {
+			return .bayesianFilter(difference: bayesianResults)
 		} else {
 			return nil
 		}
@@ -434,10 +435,12 @@ class Filter {
 		reportedPosts.append((id: id, when: Date(), difference: difference))
 		
 		for room in rooms {
-			let message = "[ [\(botName)](\(githubLink)) ] " +
-				"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(post.title ?? "<no title>")](//stackoverflow.com/q/\(id)) " +
-				room.notificationString(tags: tags(for: post), reason: reason)
-			room.postMessage(message)
+			if difference < room.threshold {
+				let message = "[ [\(botName)](\(githubLink)) ] " +
+					"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(post.title ?? "<no title>")](//stackoverflow.com/q/\(id)) " +
+					room.notificationString(tags: tags(for: post), reason: reason)
+				room.postMessage(message)
+			}
 		}
 		
 		return .reported(reason: reason)
