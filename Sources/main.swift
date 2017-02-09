@@ -14,6 +14,7 @@ import SwiftStack
 let commands: [Command.Type] = [
 	CommandSay.self,
 	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self,
+	CommandCheckThreshold.self, CommandSetThreshold.self,
 	CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
 	CommandCheckPost.self, CommandQuota.self,
 	CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
@@ -93,13 +94,21 @@ extension ChatRoom {
 		
 		return users.map { "@" + $0.name.replacingOccurrences(of: " ", with: "") }.joined(separator: " ")
 	}
+	
+	var threshold: Int {
+		get {
+			return (info["threshold"] as? Int) ?? 45
+		} set {
+			info["threshold"] = newValue
+		}
+	}
 }
 
 extension ChatUser.Privileges {
-	static let blacklist = ChatUser.Privileges(rawValue: 1 << 1)
+	static let filter = ChatUser.Privileges(rawValue: 1 << 1)
 }
 
-ChatUser.Privileges.add(name: "Blacklist", for: .blacklist)
+ChatUser.Privileges.add(name: "Filter", for: .filter)
 
 
 private enum BackgroundTask {
@@ -208,7 +217,7 @@ func main() throws {
 	try rooms.forEach { try $0.join() }
 	
 	//Post the startup message
-	let startupMessage: String
+	let startupMessage: String?
 	
 	currentVersion = getCurrentVersion()
 	if FileManager.default.fileExists(atPath: "update-failure") {
@@ -234,10 +243,13 @@ func main() throws {
 		try! FileManager.default.removeItem(atPath: "version-new.txt")
 	}
 	else {
-		startupMessage = "[\(botName)](\(githubLink)) started."
+		startupMessage = nil
+		rooms.first?.postMessage("[\(botName)](\(githubLink)) started.")
 	}
 	
-	rooms.forEach { $0.postMessage(startupMessage) }
+	if let message = startupMessage {
+		rooms.forEach { $0.postMessage(message) }
+	}
 	
 	shortVersion = getShortVersion(currentVersion)
 	versionLink = getVersionLink(currentVersion)
