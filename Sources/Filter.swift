@@ -377,7 +377,7 @@ class Filter {
 		}
 		else if let q = post as? Question {
 			if (post.id ?? 1) % 10000 == 0 && q.last_edit_date == nil {
-				rooms.first.postMessage("[ [\(botName)](\(githubLink)) ] " +
+				rooms.first!.postMessage("[ [\(botName)](\(githubLink)) ] " +
 					"[tag:\(tags(for: post).first ?? "tagless")] Potentially bad question: " +
 					"[\(post.title ?? "<no title>")](//youtube.com/watch?v=dQw4w9WgXcQ)"
 					)
