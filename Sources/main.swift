@@ -21,6 +21,18 @@ let commands: [Command.Type] = [
 	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self,
 ]
 
+
+
+var startTime = Date()
+
+var botName = "FireAlarm-Swift"
+var githubLink = "//github.com/SOBotics/FireAlarm/tree/swift"
+var stackAppsLink = "//stackapps.com/q/7183"
+
+var currentVersion = "<unknown version>"
+var shortVersion = "<unknown version>"
+var versionLink = githubLink
+
 //var apiClient = APIClient(proxyAddress: "127.0.0.1", proxyPort: 8080)
 var apiClient = APIClient()
 
@@ -244,7 +256,7 @@ func main() throws {
 	}
 	else {
 		startupMessage = nil
-		rooms.first?.postMessage("[\(botName)](\(githubLink)) started.")
+		rooms.first?.postMessage("[\(botName)](\(stackAppsLink)) started.")
 	}
 	
 	if let message = startupMessage {
