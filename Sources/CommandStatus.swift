@@ -10,10 +10,6 @@ import Foundation
 import Dispatch
 import SwiftChatSE
 
-#if os(Linux)
-	typealias Process = Task
-#endif
-
 open class CommandStatus: Command {
 	override open class func usage() -> [String] {
 		return ["alive", "status", "version"]

@@ -9,10 +9,6 @@
 import Foundation
 import SwiftChatSE
 
-#if os(Linux)
-	typealias Process = Task
-#endif
-
 func launchProcess(path: String, arguments: [String]) -> Process {
 	#if os(Linux)
 		return Process.launchedTaskWithLaunchPath(path, arguments: arguments)
