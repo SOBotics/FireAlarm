@@ -377,7 +377,7 @@ class Filter {
 		}
 		else if let q = post as? Question {
 			if (post.id ?? 1) % 10000 == 0 && q.last_edit_date == nil {
-				rooms.first!.postMessage("[ [\(botName)](\(githubLink)) ] " +
+				rooms.first!.postMessage("[ [\(botName)](\(stackAppsLink)) ] " +
 					"[tag:\(tags(for: post).first ?? "tagless")] Potentially bad question: " +
 					"[\(post.title ?? "<no title>")](//youtube.com/watch?v=dQw4w9WgXcQ)"
 					)
@@ -436,7 +436,7 @@ class Filter {
 		
 		for room in rooms {
 			if difference < room.threshold {
-				let message = "[ [\(botName)](\(githubLink)) ] " +
+				let message = "[ [\(botName)](\(stackAppsLink)) ] " +
 					"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(post.title ?? "<no title>")](//stackoverflow.com/q/\(id)) " +
 					room.notificationString(tags: tags(for: post), reason: reason)
 				room.postMessage(message)
