@@ -23,6 +23,12 @@ let commands: [Command.Type] = [
 
 
 
+#if os(Linux)
+	typealias Process = Task
+#endif
+
+
+
 var startTime = Date()
 
 var botName = "FireAlarm-Swift"
