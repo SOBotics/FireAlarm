@@ -214,6 +214,7 @@ func main() throws {
 	}
 	else {
 		rooms = [
+			ChatRoom(client: client, roomID: 123602), //FireAlarm Development
 			ChatRoom(client: client, roomID: 111347), //SOBotics
 			ChatRoom(client: client, roomID: 41570),  //SO Close Vote Reviewers
 		]
