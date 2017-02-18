@@ -11,7 +11,7 @@ import SwiftChatSE
 
 class CommandHelp: Command {
     override class func usage() -> [String] {
-        return ["help"]
+        return ["help", "command", "commands"]
     }
     
     override func run() throws {
