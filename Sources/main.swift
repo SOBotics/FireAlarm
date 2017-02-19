@@ -18,7 +18,7 @@ let commands: [Command.Type] = [
 	CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
 	CommandCheckPost.self, CommandQuota.self,
 	CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
-	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self,
+	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self, CommandLeaveRoom.self,
 ]
 
 
