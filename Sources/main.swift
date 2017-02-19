@@ -306,9 +306,9 @@ func main() throws {
 		while true {
 			//wait one minute
 			sleep(60)
-			if !updated && !development {
+			/*if !updated && !development {
 				updated = update(listener, rooms)
-			}
+			}*/
 			
 			save()
 		}
