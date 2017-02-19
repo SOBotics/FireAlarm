@@ -437,8 +437,8 @@ class Filter {
 		for room in rooms {
 			if difference < room.threshold {
 				let title = post.title
-				title = title.replacingOccurrences(of: "[", with: "\[")
-				title = title.replacingOccurrences(of: "]", with: "\]")
+				title = title.replacingOccurrences(of: "[", with: "\\[")
+				title = title.replacingOccurrences(of: "]", with: "\\]")
 				let message = "[ [\(botName)](\(stackAppsLink)) ] " +
 					"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(post.title ?? "<no title>")](//stackoverflow.com/q/\(id)) " +
 					room.notificationString(tags: tags(for: post), reason: reason)
