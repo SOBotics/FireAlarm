@@ -263,7 +263,9 @@ func main() throws {
 	}
 	else {
 		startupMessage = nil
-		rooms.first?.postMessage("[\(botName)](\(stackAppsLink)) started.")
+		let newShort = getShortVersion(new)
+		let newLink = getVersionLink(new)
+		rooms.first?.postMessage("[\(botName)](\(stackAppsLink)) started at rev [`\(newShort)`](\(newLink)).")
 	}
 	
 	if let message = startupMessage {
