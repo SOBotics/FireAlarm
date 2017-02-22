@@ -12,7 +12,7 @@ import SwiftStack
 
 class CommandQuota: Command {
 	override class func usage() -> [String] {
-		return ["quota", "api quota", "api-quota"]
+		return ["quota", "api quota", "api-quota", "apiquota"]
 	}
 	
 	override func run() throws {
