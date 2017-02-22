@@ -265,7 +265,7 @@ func main() throws {
 		startupMessage = nil
 		let short = getShortVersion(currentVersion)
 		let link = getVersionLink(currentVersion)
-		rooms.first?.postMessage("[\(botName)](\(stackAppsLink)) started at rev [`\(short)`](\(link)).")
+		rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] started at rev [`\(short)`](\(link)) with api quota \(apiClient.quota.map { String($0) } ?? "unknown"). .")
 	}
 	
 	if let message = startupMessage {
