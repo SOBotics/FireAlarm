@@ -255,8 +255,7 @@ func main() throws {
 		
 		let message = components.count > 1 ? (" (" + components[1..<components.count].joined(separator: " ") + ")") : ""
 		
-		startupMessage = "Updated from [`\(oldShort)`](\(oldLink)) to [`\(newShort)`](\(newLink))\(message)."
-		
+		startupMessage = "Updated from [`\(oldShort)`](\(oldLink)) to [`\(newShort)`](\(newLink))\(message)."		
 		try! new.write(toFile: "version.txt", atomically: true, encoding: .utf8)
 		currentVersion = new
 		try! FileManager.default.removeItem(atPath: "version-new.txt")
@@ -265,7 +264,15 @@ func main() throws {
 		startupMessage = nil
 		let short = getShortVersion(currentVersion)
 		let link = getVersionLink(currentVersion)
-		rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] started at rev [`\(short)`](\(link)) with api quota \(apiClient.quota.map { String($0) } ?? "unknown"). .")
+		
+		do {
+			let _ = try apiClient.fetchSites()
+		}
+		catch {
+			handlerError (error, "fetching sites")
+		}
+		
+		rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] started at rev [`\(short)`](\(link)) with api quota \(apiClient.quota.map { String($0) } ?? "unknown") .")
 	}
 	
 	if let message = startupMessage {
