@@ -11,7 +11,7 @@ import SwiftChatSE
 
 class CommandSetThreshold: Command {
 	override public class func usage() -> [String] {
-		return ["set threshold *", "change threshold *", "change threshold to *"]
+		return ["set threshold *", "change threshold *", "change threshold to *", "set threshold to *"]
 	}
 	
 	override public class func privileges() -> ChatUser.Privileges {
