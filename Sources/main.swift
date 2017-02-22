@@ -265,14 +265,8 @@ func main() throws {
 		let short = getShortVersion(currentVersion)
 		let link = getVersionLink(currentVersion)
 		
-		do {
-			let _ = try apiClient.fetchSites()
-		}
-		catch {
-			handlerError (error, "fetching sites")
-		}
-		
-		rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] started at rev [`\(short)`](\(link)) with api quota \(apiClient.quota.map { String($0) } ?? "unknown") .")
+		rooms.first?.postMessage
+		("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at rev [`\(short)`](\(link)) with api quota \(apiClient.quota.map { String($0) } ?? "<unknown>") .")
 	}
 	
 	if let message = startupMessage {
