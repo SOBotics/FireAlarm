@@ -11,7 +11,7 @@ import SwiftChatSE
 
 class CommandBlacklistUsername: Command {
 	override class func usage() -> [String] {
-		return ["blu ...", "blacklist user ...", "blacklist username ..."]
+		return ["blu ...", "blacklist user ...", "blacklist username ...", "addblu ..."]
 	}
 	
 	override class func privileges() -> ChatUser.Privileges {
