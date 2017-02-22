@@ -11,7 +11,7 @@ import SwiftChatSE
 
 class CommandUpdate: Command {
 	override class func usage() -> [String] {
-		return ["update force", "update"]
+		return ["update force", "update", "pull"]
 	}
 	
 	override class func privileges() -> ChatUser.Privileges {
