@@ -11,7 +11,7 @@ import SwiftChatSE
 
 class CommandLeaveRoom: Command {
 	override class func usage() -> [String] {
-		return ["leave room", "leave"]
+		return ["leave room", "leave", "go out"]
 	}
 	
 	override class func privileges() -> ChatUser.Privileges {
