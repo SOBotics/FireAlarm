@@ -266,7 +266,7 @@ func main() throws {
 		let link = getVersionLink(currentVersion)
 		
 		rooms.first?.postMessage
-		("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at rev [`\(short)`](\(link)) with api quota \(apiClient.quota.map { String($0) } ?? "<unknown>") .")
+		("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at revision [`\(short)`](\(link)).")
 	}
 	
 	if let message = startupMessage {
