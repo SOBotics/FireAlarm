@@ -265,8 +265,7 @@ func main() throws {
 		let short = getShortVersion(currentVersion)
 		let link = getVersionLink(currentVersion)
 		
-		rooms.first?.postMessage
-		("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at revision [`\(short)`](\(link)).")
+		rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at revision [`\(short)`](\(link)).")
 	}
 	
 	if let message = startupMessage {
