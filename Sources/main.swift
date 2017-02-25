@@ -310,8 +310,7 @@ func main() throws {
 	
 	func autosaveAndUpdate() {
 		var updated = false
-		while true {
-			var updated = false
+		while !updated {
 			//wait one minute
 			sleep(60)
 			if !updated && !development {
