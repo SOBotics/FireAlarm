@@ -282,6 +282,7 @@ func main() throws {
 	filter = Filter(rooms)
 	try filter.start()
 	
+	errorsInLast30Seconds = 0
 	afterTooManyErrors = {
 		print("Too many errors; aborting...")
 		abort()
@@ -312,9 +313,9 @@ func main() throws {
 		while true {
 			//wait one minute
 			sleep(60)
-			/*if !updated && !development {
-				updated = update(listener, rooms)
-			}*/
+			if !updated && !development {
+				updated = update(listener, rooms, auto: true)
+			}
 			
 			save()
 		}
