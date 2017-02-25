@@ -83,7 +83,7 @@ func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom]) {
 	listener.stop(.update)
 }
 
-func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false) -> Bool {
+func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, auto: Bool = false) -> Bool {
 	if force {
 		prepareUpdate(listener, rooms)
 		return true
