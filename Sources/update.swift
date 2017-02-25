@@ -26,8 +26,7 @@ func installUpdate() -> Bool {
 			let compile = "./build.sh"
 			let move = "mv ./.build/debug/FireAlarm .."
 		#endif
-		let updateScript = "rm -rf update;pushd .;" +
-			"(git clone -b swift \"git://github.com/SOBotics/FireAlarm.git\" update && " +
+		let updateScript = "pushd .;" +
 			"cd update && " +
 			compile + "&& " +
 			move + " && " +
@@ -56,6 +55,30 @@ func installUpdate() -> Bool {
 	return false
 }
 
+private enum DownloadFailure: Error {
+	case noAutoupdate
+	case downloadFailed
+}
+
+func downloadUpdate(isAuto: Bool = false) throws {
+	let script = "rm -rf update;" +
+		"(git clone -b swift \"git://github.com/SOBotics/FireAlarm.git\" update && " +
+		"cd update && " +
+	"git log --format='oneline' -n 1 > ../version-downloaded.txt) || exit 1 "
+	
+	let process = launchProcess(path: "/bin/bash", arguments: ["-c", script])
+	process.waitUntilExit()
+	
+	if process.terminationStatus != 0 {
+		throw DownloadFailure.downloadFailed
+	} else {
+		let downloaded = try loadFile("version-downloaded.txt")
+		if isAuto && !downloaded.contains("--autoupdate") {
+			throw DownloadFailure.noAutoupdate
+		}
+	}
+}
+
 func getCurrentVersion() -> String {
 	return (try? loadFile("version.txt").replacingOccurrences(of: "\n", with: "")) ?? "<unknown version>"
 }
@@ -78,14 +101,22 @@ public func getVersionLink(_ version: String) -> String {
 }
 
 
-func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom]) {
+func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom], isAuto: Bool = false) {
+	do {
+		try downloadUpdate(isAuto: isAuto)
+	} catch DownloadFailure.noAutoupdate {
+		return
+	} catch {
+		handleError(error, "while downloading an update")
+	}
+	
 	rooms.forEach {$0.postMessage("Installing update...")}
 	listener.stop(.update)
 }
 
 func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, auto: Bool = false) -> Bool {
 	if force {
-		prepareUpdate(listener, rooms)
+		prepareUpdate(listener, rooms, isAuto: auto)
 		return true
 	}
 	
@@ -105,7 +136,7 @@ func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, 
 		let availableVersion = components.first ?? ""
 		
 		if currentVersion != availableVersion {
-			prepareUpdate(listener, rooms)
+			prepareUpdate(listener, rooms, isAuto: auto)
 			return true
 		}
 	}
