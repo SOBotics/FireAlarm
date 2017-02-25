@@ -27,7 +27,7 @@ func installUpdate() -> Bool {
 			let move = "mv ./.build/debug/FireAlarm .."
 		#endif
 		let updateScript = "pushd .;" +
-			"cd update && " +
+			"(cd update && " +
 			compile + "&& " +
 			move + " && " +
 			"git log --format='oneline' -n 1 > ../version-new.txt && " +
