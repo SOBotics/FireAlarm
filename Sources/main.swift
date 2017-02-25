@@ -148,6 +148,7 @@ var filter: Filter!
 func main() throws {
 	print("FireAlarm starting...")
 	startTime = Date()
+	afterTooManyErrors = {}
 	
 	//Save the working directory & change to the chatbot directory.
 	let originalWorkingDirectory = FileManager.default.currentDirectoryPath
@@ -281,7 +282,10 @@ func main() throws {
 	filter = Filter(rooms)
 	try filter.start()
 	
-	
+	afterTooManyErrors = {
+		print("Too many errors; aborting...")
+		abort()
+	}
 	
 	
 	//Run background tasks
