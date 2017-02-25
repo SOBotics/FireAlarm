@@ -202,8 +202,16 @@ func main() throws {
 			exit(EXIT_FAILURE)
 		}
 	}
-	
-	
+    
+    //Get the location
+    var rawLocation = ""
+    var location = ""
+    do {
+        rawLocation = try loadFile ("location.txt")
+        location = String(rawLocation.characters.filter { !"\n".characters.contains($0) })
+    } catch {
+        handleError(error, "while loading location")
+    }
 	
 	//Join the chat room
 	let rooms: [ChatRoom]
@@ -266,7 +274,7 @@ func main() throws {
 		let short = getShortVersion(currentVersion)
 		let link = getVersionLink(currentVersion)
 		
-		rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at revision [`\(short)`](\(link)).")
+		rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at revision [`\(short)`](\(link)) instance owner \(location).")
 	}
 	
 	if let message = startupMessage {
