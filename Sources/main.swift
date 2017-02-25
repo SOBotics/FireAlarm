@@ -19,6 +19,7 @@ let commands: [Command.Type] = [
 	CommandCheckPost.self, CommandQuota.self,
 	CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
 	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self, CommandLeaveRoom.self,
+	CommandLocation.self,
 ]
 
 
@@ -26,8 +27,6 @@ let commands: [Command.Type] = [
 #if os(Linux)
 	typealias Process = Task
 #endif
-
-
 
 var startTime = Date()
 
@@ -202,8 +201,18 @@ func main() throws {
 			exit(EXIT_FAILURE)
 		}
 	}
-	
-	
+    
+    //Get the location
+    var rawLocation = ""
+    var location = "<unknown>"
+    do {
+        rawLocation = try loadFile ("location.txt")
+        location = String(rawLocation.characters.filter { !"\n".characters.contains($0) })
+    } catch {
+        //handleError(error, "while loading location")
+        print ("Setting the location to unknown")
+        location = "<unknown>"
+    }
 	
 	//Join the chat room
 	let rooms: [ChatRoom]
@@ -266,7 +275,7 @@ func main() throws {
 		let short = getShortVersion(currentVersion)
 		let link = getVersionLink(currentVersion)
 		
-		rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at revision [`\(short)`](\(link)).")
+		rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at revision [`\(short)`](\(link)) (running on \(location))")
 	}
 	
 	if let message = startupMessage {
