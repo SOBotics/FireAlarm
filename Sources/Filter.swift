@@ -363,6 +363,7 @@ class Filter {
 		case bayesianFilter(difference: Int)
 		case blacklistedUsername
 		case misleadingLink
+        case manuallyReported
 	}
 	
 	enum ReportResult {
@@ -430,6 +431,8 @@ class Filter {
 			header = "Blacklisted username:"
 		case .misleadingLink:
 			header = "Misleading link:"
+        case .manuallyReported:
+            header = "Manually reported question:"
 		}
 		
 		reportedPosts.append((id: id, when: Date(), difference: difference))
