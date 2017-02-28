@@ -50,8 +50,20 @@ class CommandReport: Command {
         
         if usageIndex == 0
         {
-            let messagePost = "[ [\(botName)](\(stackAppsLink)) ] " +
+            /*let messagePost = "[ [\(botName)](\(stackAppsLink)) ] " +
             "[tag:\(tags(for: question).first ?? "<unknown tag>")] Manually reported post [\(question.title ?? "<no title>")](//stackoverflow.com/q/\(questionID))"
+            
+            let newMessage = messagePost.replacingOccurrences(of: "[", with: "\\[")
+            let messageToBePosted = newMessage.replacingOccurrences(of: "]", with: "\\]")*/
+            
+            var newTitle = "\(question.title ?? "<no title>")"
+            
+            newTitle = newTitle.replacingOccurrences(of: "[", with: "\\[")
+            newTitle = newTitle.replacingOccurrences(of: "]", with: "\\]")
+            
+            let messagePost = "[ [\(botName)](\(stackAppsLink)) ] " +
+            "[tag:\(tags(for: question).first ?? "<unknown tag>")] Manually reported post [\(newTitle)](//stackoverflow.com/q/\(questionID))"
+            
             message.room.postMessage(messagePost)
         }
     }
