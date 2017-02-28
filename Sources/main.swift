@@ -19,7 +19,7 @@ let commands: [Command.Type] = [
 	CommandCheckPost.self, CommandQuota.self,
 	CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
 	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self, CommandLeaveRoom.self,
-	CommandLocation.self,
+	CommandLocation.self, CommandReport.self,
 ]
 
 
@@ -100,8 +100,13 @@ extension ChatRoom {
 						
 						shouldNotify = true
 					}
-				}
-				
+                
+                case .manuallyReported:
+                    if shouldNotify == true {
+                        shouldNotify = true
+                    }
+                    
+                }
 			}
 			
 			if shouldNotify {
@@ -321,11 +326,10 @@ func main() throws {
 		var updated = false
 		while !updated {
 			//wait one minute
-			sleep(60)
+			/*sleep(60)
 			if !updated && !development {
 				updated = update(listener, rooms, auto: true)
-			}
-			
+			}*/
 			save()
 		}
 	}
