@@ -101,23 +101,24 @@ public func getVersionLink(_ version: String) -> String {
 }
 
 
-func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom], isAuto: Bool = false) {
+func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom], isAuto: Bool = false) -> Bool {
 	do {
 		try downloadUpdate(isAuto: isAuto)
 	} catch DownloadFailure.noAutoupdate {
-		return
+		return false
 	} catch {
 		handleError(error, "while downloading an update")
+		return false
 	}
 	
 	rooms.forEach {$0.postMessage("Installing update...")}
 	listener.stop(.update)
+	return true
 }
 
 func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, auto: Bool = false) -> Bool {
 	if force {
-		prepareUpdate(listener, rooms, isAuto: auto)
-		return true
+		return prepareUpdate(listener, rooms, isAuto: auto)
 	}
 	
 	
@@ -136,8 +137,7 @@ func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, 
 		let availableVersion = components.first ?? ""
 		
 		if currentVersion != availableVersion {
-			prepareUpdate(listener, rooms, isAuto: auto)
-			return true
+			return prepareUpdate(listener, rooms, isAuto: auto)
 		}
 	}
 	catch {
