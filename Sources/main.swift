@@ -102,10 +102,7 @@ extension ChatRoom {
 					}
                 
                 case .manuallyReported:
-                    if shouldNotify == true {
-                        shouldNotify = true
-                    }
-                    
+					break
                 }
 			}
 			
@@ -252,11 +249,18 @@ func main() throws {
 	
 	//Post the startup message
 	let startupMessage: String?
+	let startupMessageCompletion: ((Int) -> Void)?
 	
 	currentVersion = getCurrentVersion()
 	if FileManager.default.fileExists(atPath: "update-failure") {
 		startupMessage = "Update failed!"
-		try! FileManager.default.removeItem(atPath: "update-failure")
+		startupMessageCompletion = {_ in
+			do {
+				try FileManager.default.removeItem(atPath: "update-failure")
+			} catch {
+				handleError(error, "while clearing the update status")
+			}
+		}
 	}
 	else if let new = try? loadFile("version-new.txt").replacingOccurrences(of: "\n", with: "") {
 		let components = new.components(separatedBy: " ")
@@ -273,10 +277,17 @@ func main() throws {
 		startupMessage = "Updated from [`\(oldShort)`](\(oldLink)) to [`\(newShort)`](\(newLink))\(message)."		
 		try! new.write(toFile: "version.txt", atomically: true, encoding: .utf8)
 		currentVersion = new
-		try! FileManager.default.removeItem(atPath: "version-new.txt")
+		startupMessageCompletion = {_ in
+			do {
+			try FileManager.default.removeItem(atPath: "version-new.txt")
+			} catch {
+				handleError(error, "while clearing the update status")
+			}
+		}
 	}
 	else {
 		startupMessage = nil
+		startupMessageCompletion = nil
 		let short = getShortVersion(currentVersion)
 		let link = getVersionLink(currentVersion)
 		
@@ -284,7 +295,7 @@ func main() throws {
 	}
 	
 	if let message = startupMessage {
-		rooms.forEach { $0.postMessage(message) }
+		rooms.forEach { $0.postMessage(message, completion: startupMessageCompletion) }
 	}
 	
 	shortVersion = getShortVersion(currentVersion)
@@ -326,10 +337,10 @@ func main() throws {
 		var updated = false
 		while !updated {
 			//wait one minute
-			/*sleep(60)
+			sleep(60)
 			if !updated && !development {
 				updated = update(listener, rooms, auto: true)
-			}*/
+			}
 			save()
 		}
 	}
