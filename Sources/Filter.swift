@@ -363,6 +363,7 @@ class Filter {
 		case bayesianFilter(difference: Int)
 		case blacklistedUsername
 		case misleadingLink
+        case manuallyReported
 	}
 	
 	enum ReportResult {
@@ -430,19 +431,25 @@ class Filter {
 			header = "Blacklisted username:"
 		case .misleadingLink:
 			header = "Misleading link:"
+        case .manuallyReported:
+            header = "Manually reported question:"
 		}
 		
 		reportedPosts.append((id: id, when: Date(), difference: difference))
 		
 		for room in rooms {
 			if difference < room.threshold {
-				/*let title = post.title
-				title = title.replacingOccurrences(of: "[", with: "\\[")
-				title = title.replacingOccurrences(of: "]", with: "\\]")*/
+                var newTitle = "\(post.title ?? "<no title>")"
+                
+                newTitle = newTitle.replacingOccurrences(of: "[", with: "\\[")
+                newTitle = newTitle.replacingOccurrences(of: "]", with: "\\]")
+                
 				let message = "[ [\(botName)](\(stackAppsLink)) ] " +
-					"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(post.title ?? "<no title>")](//stackoverflow.com/q/\(id)) (filter score: \(difference))" +
+					"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(newTitle)](//stackoverflow.com/q/\(id)) (filter score: \(difference))" +
 					room.notificationString(tags: tags(for: post), reason: reason)
+                
 				room.postMessage(message)
+                
 			}
 		}
 		
