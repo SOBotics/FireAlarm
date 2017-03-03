@@ -483,7 +483,11 @@ func halt(reboot: Bool = false, update: Bool = false) {
 
 
 
-
-try! main()
+do {
+	try main()
+} catch {
+	handleError(error, "while starting up")
+	abort()
+}
 
 
