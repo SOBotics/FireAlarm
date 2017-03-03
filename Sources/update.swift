@@ -118,7 +118,7 @@ func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom], isAuto: Bool =
 	}
 	
 	isUpdating = true
-	rooms.forEach {$0.postMessage("Installing update...")}
+	rooms.forEach {$0.postMessage("Installing update..."); sleep(1)}
 	listener.stop(.update)
 	return true
 }
