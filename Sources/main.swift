@@ -295,7 +295,7 @@ func main() throws {
 	}
 	
 	if let message = startupMessage {
-		rooms.forEach { $0.postMessage(message, completion: startupMessageCompletion) }
+		rooms.forEach { $0.postMessage(message, completion: startupMessageCompletion); sleep(1) }
 	}
 	
 	shortVersion = getShortVersion(currentVersion)
