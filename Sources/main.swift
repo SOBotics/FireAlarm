@@ -279,7 +279,9 @@ func main() throws {
 		currentVersion = new
 		startupMessageCompletion = {_ in
 			do {
-			try FileManager.default.removeItem(atPath: "version-new.txt")
+				if FileManager.default.fileExists(atPath: "version-new.txt") {
+					try FileManager.default.removeItem(atPath: "version-new.txt")
+				}
 			} catch {
 				handleError(error, "while clearing the update status")
 			}
