@@ -134,7 +134,6 @@ func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, 
 	
 	
 	do {
-		
 		try versionScript.write(toFile: "get_version.sh", atomically: true, encoding: .utf8)
 		let process = launchProcess(path: "/bin/bash", arguments: ["get_version.sh"])
 		process.waitUntilExit()
