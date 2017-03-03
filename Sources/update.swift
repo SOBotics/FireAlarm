@@ -17,6 +17,8 @@ func launchProcess(path: String, arguments: [String]) -> Process {
 	#endif
 }
 
+var isUpdating = false
+
 func installUpdate() -> Bool {
 	do {
 		#if os(Linux)
@@ -102,6 +104,10 @@ public func getVersionLink(_ version: String) -> String {
 
 
 func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom], isAuto: Bool = false) -> Bool {
+	if isUpdating {
+		return true
+	}
+	
 	do {
 		try downloadUpdate(isAuto: isAuto)
 	} catch DownloadFailure.noAutoupdate {
@@ -111,6 +117,7 @@ func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom], isAuto: Bool =
 		return false
 	}
 	
+	isUpdating = true
 	rooms.forEach {$0.postMessage("Installing update...")}
 	listener.stop(.update)
 	return true
