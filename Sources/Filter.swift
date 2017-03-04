@@ -86,14 +86,14 @@ class Filter {
 			blacklistedUsernames = usernames
 			
 		} catch {
-			handleError(error, "while loading blacklisted usernames.")
+			handleError(error, "while loading blacklisted usernames")
 			print("Loading an empty username database.")
 			if FileManager.default.fileExists(atPath: usernameURL.path) {
 				print("Backing up blacklisted_users.json.")
 				do {
 					try FileManager.default.moveItem(at: usernameURL, to: saveDirURL.appendingPathComponent("blacklisted_users.json.bak"))
 				} catch {
-					handleError(error, "while backing up the blacklisted usernames.")
+					handleError(error, "while backing up the blacklisted usernames")
 				}
 			}
 		}
@@ -114,14 +114,14 @@ class Filter {
 			}
 			
 		} catch {
-			handleError(error, "while loading reports.")
+			handleError(error, "while loading reports")
 			print("Loading an empty report list.")
 			if FileManager.default.fileExists(atPath: reportsURL.path) {
 				print("Backing up reports.json.")
 				do {
 					try FileManager.default.moveItem(at: usernameURL, to: saveDirURL.appendingPathComponent("reports.json.bak"))
 				} catch {
-					handleError(error, "while backing up the blacklisted usernames.")
+					handleError(error, "while backing up the blacklisted usernames")
 				}
 			}
 		}
@@ -564,7 +564,7 @@ class Filter {
 						try self.checkAndReportPost(post)
 					}
 				} catch {
-					handleError(error, "while checking active posts.")
+					handleError(error, "while checking active posts")
 				}
 			}
 		}
