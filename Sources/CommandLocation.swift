@@ -16,15 +16,8 @@ class CommandLocation: Command {
     
     override func run() throws {
         //Get the location
-        do {
-            let rawLocation = try loadFile ("location.txt")
-			let location = String(rawLocation.characters.filter { !"\n".characters.contains($0) })
-			reply ("I'm running on `\(location)`.")
-        } catch {
-            //handleError(error, "while loading location")
-			reply("I don't know my location.")
-        }
-		
+        let message = "I'm running on \(location)"
+        reply (message)
     }
 }
 

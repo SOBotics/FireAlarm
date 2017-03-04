@@ -38,6 +38,10 @@ var currentVersion = "<unknown version>"
 var shortVersion = "<unknown version>"
 var versionLink = githubLink
 
+var location = "<unknown location>"
+var user = "<unknown user>"
+var device = "<unknown device>"
+
 //var apiClient = APIClient(proxyAddress: "127.0.0.1", proxyPort: 8080)
 var apiClient = APIClient()
 
@@ -209,14 +213,21 @@ func main() throws {
     
     //Get the location
     var rawLocation = ""
-    var location = "<unknown>"
     do {
         rawLocation = try loadFile ("location.txt")
-        location = String(rawLocation.characters.filter { !"\n".characters.contains($0) })
+        let components = rawLocation.components(separatedBy: CharacterSet.whitespaces)
+        
+        user = components [0]
+        device = components [1]
+        
+        location = "\(user)/\(device)"
+        
+        location = String(location.characters.filter { !"\n".characters.contains($0) })
+        user = String(user.characters.filter { !"\n".characters.contains($0) })
+        device = String(device.characters.filter { !"\n".characters.contains($0) })
+        ping = " (cc @\(user))"
     } catch {
-        //handleError(error, "while loading location")
-        print ("Setting the location to unknown")
-        location = "<unknown>"
+        print ("Location could not be loaded!")
     }
 	
 	//Join the chat room
