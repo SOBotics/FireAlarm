@@ -62,6 +62,9 @@ private enum DownloadFailure: Error {
 	case downloadFailed
 }
 
+var downloadedVersion: String = "<unknown>"
+var availableVersion: String = "<unknown>"
+
 func downloadUpdate(isAuto: Bool = false) throws {
 	let script = "rm -rf update;" +
 		"(git clone -b swift \"git://github.com/SOBotics/FireAlarm.git\" update && " +
@@ -74,6 +77,8 @@ func downloadUpdate(isAuto: Bool = false) throws {
 	if process.terminationStatus != 0 {
 		throw DownloadFailure.downloadFailed
 	} else {
+        downloadedVersion = availableVersion
+
 		let downloaded = try loadFile("version-downloaded.txt")
 		if isAuto && !downloaded.contains("--autoupdate") {
 			throw DownloadFailure.noAutoupdate
@@ -140,9 +145,10 @@ func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, 
 		
 		let versionContents = try loadFile("available_version.txt").replacingOccurrences(of: "\n", with: " ")
 		let components = versionContents.components(separatedBy: " ")
-		let availableVersion = components.first ?? ""
+        availableVersion = components.first ?? ""
 		
-		if currentVersion != availableVersion {
+		if currentVersion != availableVersion &&
+            !(auto && downloadedVersion == availableVersion && downloadedVersion != "<unknown>") {
 			return prepareUpdate(listener, rooms, isAuto: auto)
 		}
 	}
