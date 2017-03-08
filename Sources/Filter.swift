@@ -35,6 +35,8 @@ extension Post {
 	}
 }
 
+var reportedPosts = [(id: Int, when: Date, difference: Int)]()
+
 class Filter {
 	let client: Client
 	let rooms: [ChatRoom]
@@ -42,8 +44,6 @@ class Filter {
 	let initialProbability: Double
 	let words: [String:Word]
 	var blacklistedUsernames: [String]
-	
-	var reportedPosts = [(id: Int, when: Date, difference: Int)]()
 	
 	var postsToCheck = [Int]()
 	
@@ -576,7 +576,7 @@ class Filter {
 			do {
 				if wsRetries >= wsMaxRetries {
 					fatalError(
-						"Realtime questions websocket died; failed to reconnect!  Active posts will not be reported until a reboot.  (cc @NobodyNada)"
+						"Realtime questions websocket died; failed to reconnect!  Active posts will not be reported until a reboot. \(ping)"
 					)
 				}
 				wsRetries += 1
