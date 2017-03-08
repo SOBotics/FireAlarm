@@ -214,8 +214,8 @@ func main() throws {
         rawLocation = try loadFile ("location.txt")
         let components = rawLocation.components(separatedBy: CharacterSet.whitespaces)
         
-        user = components [0]
-        device = components [1]
+        user = components.first ?? ""
+        device = components.dropFirst().joined(separator: " ")
         
         location = "\(user)/\(device)"
         
