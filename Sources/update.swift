@@ -128,6 +128,7 @@ func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom], isAuto: Bool =
 	return true
 }
 
+
 func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, auto: Bool = false) -> Bool {
 	if force {
 		return prepareUpdate(listener, rooms, isAuto: auto)
@@ -135,7 +136,7 @@ func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, 
 	
 	
 	let versionScript = "git ls-remote git://github.com/SOBotics/FireAlarm swift | cut -d '\t' -f1 > available_version.txt"
-	
+
 	
 	do {
 		try versionScript.write(toFile: "get_version.sh", atomically: true, encoding: .utf8)
