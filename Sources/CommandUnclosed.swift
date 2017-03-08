@@ -73,7 +73,7 @@ class CommandUnclosed: Command {
                 //post is not closed
                 //message.room.postMessage("\(post.link)")
                 
-                messageClosed = messageClosed + "\n [tag: \(post.tags!.first)] \(post.link!)"
+                messageClosed = messageClosed + "\n [tag:\(post.tags!.first ?? "tagless")] \(post.link!)"
             }
         }
         
