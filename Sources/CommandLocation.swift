@@ -3,11 +3,12 @@
 //  FireAlarm
 //
 //  Created by Ashish Ahuja on 25/02/17.
-//  Copyright © 2017 Ashish Ahuja. All right reserved
+//  Copyright © 2017 Ashish Ahuja. All rights reserved
 //
 
 import Foundation
 import SwiftChatSE
+import SwiftStack
 
 class CommandLocation: Command {
     override class func usage() -> [String] {
