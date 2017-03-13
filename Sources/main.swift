@@ -451,6 +451,7 @@ func main() throws {
 	func pingRedunda() {
 		guard redundaKey != nil else { return }
 		repeat {
+			sleep(30)
 			do {
 				let response = try sendStatusPing(client: client)
 				
@@ -462,7 +463,6 @@ func main() throws {
 			} catch {
 				handleError(error, "while sending a status ping to Redunda")
 			}
-			sleep(30)
 		} while true
 	}
 	
