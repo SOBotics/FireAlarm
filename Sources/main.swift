@@ -267,6 +267,7 @@ func main() throws {
         user = String(user.characters.filter { !"\n".characters.contains($0) })
         device = String(device.characters.filter { !"\n".characters.contains($0) })
         ping = " (cc @\(user))"
+		userLocation = location
     } catch {
         print ("Location could not be loaded!")
     }
