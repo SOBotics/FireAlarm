@@ -65,7 +65,6 @@ class CommandUnclosed: Command {
         }
         
         var messageClosed = ""
-        
         //Now fetch the posts from the API
         for post in try apiClient.fetchQuestions(postsToCheck).items ?? [] {
             if (post.closed_reason == nil)
@@ -73,7 +72,7 @@ class CommandUnclosed: Command {
                 //post is not closed
                 //message.room.postMessage("\(post.link)")
                 
-                messageClosed = messageClosed + "\n [tag:\(post.tags!.first ?? "tagless")] \(post.link!)"
+                messageClosed = messageClosed + "\n \(post.link!)"
             }
         }
         
