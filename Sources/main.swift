@@ -461,7 +461,7 @@ func main() throws {
 				let response = try sendStatusPing(client: client)
 				
 				if response.shouldStandby {
-					rooms.first!.postMessage("[ [\(botName)](\(githubLink)) ] switching to standby mode on \(location).")
+					rooms.first!.postMessage("[ [\(botName)](\(githubLink)) ] Switching to standby mode on \(location).")
 					backgroundTasks.append(.shutDown(reboot: true, update: false))
 					backgroundSemaphore.signal()
 				}
