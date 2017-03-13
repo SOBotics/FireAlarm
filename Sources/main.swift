@@ -202,6 +202,7 @@ func main() throws {
 		var isFirst = true
 		repeat {
 			do {
+				print("Pinging Redunda.")
 				let response = try sendStatusPing(client: client)
 				if response.shouldStandby {
 					shouldStandby = true
@@ -210,6 +211,8 @@ func main() throws {
 					}
 					isFirst = false
 					sleep(30)
+				} else {
+					shouldStandby = false
 				}
 			} catch {
 				handleError(error, "while sending a status ping to Redunda")
