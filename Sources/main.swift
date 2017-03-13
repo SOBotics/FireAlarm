@@ -195,7 +195,7 @@ func main() throws {
 	let client = Client(host: .StackOverflow)
 
 	
-	redundaKey = try? String(contentsOfFile: "redunda_key.txt").trimmingCharacters(in: .whitespacesAndNewlines)
+	redundaKey = try? loadFile("redunda_key.txt").trimmingCharacters(in: .whitespacesAndNewlines)
 	if redundaKey != nil {
 		//standby until Redunda tells us not to
 		var shouldStandby = false
@@ -461,9 +461,11 @@ func main() throws {
 			} catch {
 				handleError(error, "while sending a status ping to Redunda")
 			}
+			sleep(30)
 		} while true
 	}
 	
+	DispatchQueue.global().async(execute: pingRedunda)
 	
 	
 	repeat {
