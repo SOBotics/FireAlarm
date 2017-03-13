@@ -264,6 +264,7 @@ func main() throws {
         location = "\(user)/\(device)"
         
         location = String(location.characters.filter { !"\n".characters.contains($0) })
+        userLocation = location
         user = String(user.characters.filter { !"\n".characters.contains($0) })
         device = String(device.characters.filter { !"\n".characters.contains($0) })
         ping = " (cc @\(user))"
