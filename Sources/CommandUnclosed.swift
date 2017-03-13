@@ -72,7 +72,7 @@ class CommandUnclosed: Command {
                 //post is not closed
                 //message.room.postMessage("\(post.link)")
                 
-                messageClosed = messageClosed + "\n \(post.link!)"
+                messageClosed = messageClosed + "\n \(post.link)"
             }
         }
         
