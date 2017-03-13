@@ -204,6 +204,7 @@ func main() throws {
 			do {
 				let response = try sendStatusPing(client: client)
 				if response.shouldStandby {
+					shouldStandby = true
 					isFirst = false
 					print("FireAlarm started in standby mode.")
 					sleep(30)
