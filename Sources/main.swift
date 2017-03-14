@@ -360,7 +360,8 @@ func main() throws {
 	}
 	
 	if let message = startupMessage {
-		rooms.forEach { $0.postMessage(message, completion: startupMessageCompletion); sleep(1) }
+		rooms.dropLast().forEach { $0.postMessage(message); sleep(1) }
+		rooms.last!.postMessage(message, completion: startupMessageCompletion);
 	}
 	
 	shortVersion = getShortVersion(currentVersion)
@@ -459,7 +460,7 @@ func main() throws {
 		repeat {
 			sleep(30)
 			do {
-				let response: ReundaResponse
+				let response: RedundaResponse
 				if getShortVersion(currentVersion) == "<unknown>" {
 					response = try sendStatusPing(client: client)
 				} else {
