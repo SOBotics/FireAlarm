@@ -191,7 +191,7 @@ func main() throws {
 	let _ = FileManager.default.changeCurrentDirectoryPath(saveDirURL.path)
 	
 	apiClient.key = "HNA2dbrFtyTZxeHN6rThNg(("
-	apiClient.defaultFilter = "withbody"
+	apiClient.defaultFilter = "!-*f(6rOFHc24"
 
 	let client = Client(host: .StackOverflow)
 
