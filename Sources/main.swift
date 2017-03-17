@@ -454,7 +454,6 @@ func main() throws {
 	
 	DispatchQueue.global().async(execute: inputFileMonitor)
 	
-	
 	func pingRedunda() {
 		guard redundaKey != nil else { return }
 		repeat {
