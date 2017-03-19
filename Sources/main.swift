@@ -404,9 +404,9 @@ func main() throws {
 		while !updated {
 			//wait one minute
 			sleep(60)
-			/*if !updated && !development {
+			if !updated && !development {
 				updated = update(listener, rooms, auto: true)
-			}*/
+			}
 			save()
 		}
 	}
