@@ -81,7 +81,7 @@ class CommandUnclosed: Command {
             }
             
             var i = 0
-            while postsToCheck.count < totalToCheck {
+            while (postsToCheck.count < totalToCheck && i < recentlyReportedPosts.count) {
                 if (recentlyReportedPosts [i].difference < threshold) {
                     postsToCheck.append(recentlyReportedPosts[i].id)
                 }
