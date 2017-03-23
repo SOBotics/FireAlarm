@@ -144,33 +144,12 @@ private let backgroundSemaphore = DispatchSemaphore(value: 0)
 
 let saveDirURL = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".firealarm", isDirectory: true)
 
-var redundaKey: String?
-
 
 fileprivate var listener: ChatListener!
 
 var filter: Filter!
 
-enum RedundaError: Error {
-	case invalidJSON(json: Any)
-}
-struct RedundaResponse {
-	let shouldStandby: Bool
-}
-
-func sendStatusPing(client: Client, version: String? = nil) throws -> RedundaResponse {
-	let data = version == nil ? ["key":redundaKey!] : ["key":redundaKey!, "version":version!]
-	let response = try client.parseJSON(try client.post("https://redunda.sobotics.org/status.json", data))
-	guard let json = response as? [String:Any] else {
-		throw RedundaError.invalidJSON(json: response)
-	}
-	
-	guard let shouldStandby = json["should_standby"] as? Bool else {
-		throw RedundaError.invalidJSON(json: response)
-	}
-	
-	return RedundaResponse(shouldStandby: shouldStandby)
-}
+var redunda: Redunda?
 
 func main() throws {
 	print("FireAlarm starting...")
@@ -196,15 +175,26 @@ func main() throws {
 	let client = Client(host: .StackOverflow)
 
 	
-	redundaKey = try? loadFile("redunda_key.txt").trimmingCharacters(in: .whitespacesAndNewlines)
-	if redundaKey != nil {
+	if let redundaKey = try? loadFile("redunda_key.txt").trimmingCharacters(in: .whitespacesAndNewlines) {
 		//standby until Redunda tells us not to
+		redunda = Redunda(key: redundaKey, client: client, filesToSync: [
+			"^filter\\.json$", "^reports\\.json$", "^room_\\d+_[a-z\\.]+\\.json$"
+		])
+		
+		do {
+			try redunda!.downloadFiles()
+		} catch {
+			print("Could not download files!")
+		}
+		
+		return
+		
 		var shouldStandby = false
 		var isFirst = true
 		repeat {
 			do {
-				let response = try sendStatusPing(client: client)
-				if response.shouldStandby {
+				try redunda!.sendStatusPing()
+				if redunda!.shouldStandby {
 					shouldStandby = true
 					if isFirst {
 						print("FireAlarm started in standby mode.")
@@ -456,18 +446,17 @@ func main() throws {
 	
 	
 	func pingRedunda() {
-		guard redundaKey != nil else { return }
+		guard let r = redunda else { return }
 		repeat {
 			sleep(30)
 			do {
-				let response: RedundaResponse
 				if getShortVersion(currentVersion) == "<unknown>" {
-					response = try sendStatusPing(client: client)
+					 try r.sendStatusPing()
 				} else {
-					response = try sendStatusPing(client: client, version: getShortVersion(currentVersion))
+					 try r.sendStatusPing(version: getShortVersion(currentVersion))
 				}
 				
-				if response.shouldStandby {
+				if r.shouldStandby {
 					rooms.first!.postMessage("[ [\(botName)](\(githubLink)) ] Switching to standby mode on \(location).")
 					backgroundTasks.append(.shutDown(reboot: true, update: false))
 					backgroundSemaphore.signal()
