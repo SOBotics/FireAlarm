@@ -13,6 +13,7 @@ class Redunda {
 	enum RedundaError: Error {
 		case invalidJSON(json: Any)
 		case downloadFailed(status: Int)
+		case uploadFailed(status: Int)
 	}
 	
 	let key: String
@@ -37,9 +38,18 @@ class Redunda {
 	func uploadFile(named name: String) throws {
 		print("Uploading \(name).")
 		
-		let data = try Data(contentsOf: URL(fileURLWithPath: path))
+		let data = try Data(contentsOf:
+			URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent(name)
+		)
 		
-		let (_, response) = try client.post("https://redunda.sobotics.org/bots/data/\(name)?key=\(key)", data)
+		let (_, response) = try client.post(
+			"https://redunda.sobotics.org/bots/data/\(name)?key=\(key)",
+			data: data, contentType: "application/octet-stream"
+		)
+		
+		guard response.statusCode < 400 else {
+			throw RedundaError.uploadFailed(status: response.statusCode)
+		}
 	}
 	
 	
@@ -73,7 +83,7 @@ class Redunda {
 	
 	///Downloads modified files from Redunda.
 	///- Warning:
-	///Do not post errors to chat; they contain the instance key!
+	///Do not post non-`RedundaError`s to chat; they contain the instance key!
 	func downloadFiles() throws {
 		let response = try client.parseJSON(client.get("https://redunda.sobotics.org/bots/data.json?key=\(key)"))
 		
@@ -99,7 +109,7 @@ class Redunda {
 	
 	///Downloads modified files from Redunda.
 	///- Warning:
-	///Do not post errors to chat; they contain the instance key!
+	///Do not post non-`RedundaError`s to chat; they contain the instance key!
 	func uploadFiles() throws {
 		let response = try client.parseJSON(client.get("https://redunda.sobotics.org/bots/data.json?key=\(key)"))
 		
