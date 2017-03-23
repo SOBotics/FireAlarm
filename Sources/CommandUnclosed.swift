@@ -6,6 +6,9 @@
 //  Copyright © 2017 Ashish Ahuja. All right reserved
 //
 
+//TODO:
+// 1. Instead of printing the reports in chat send them to Sam's server
+
 import Foundation
 import SwiftStack
 import SwiftChatSE
@@ -32,6 +35,8 @@ class CommandUnclosed: Command {
         var totalToCheck: Int!
         let maxThreshold = 100
         var threshold: Int! = maxThreshold
+        var maxCV: Int! = 4
+        var minCV: Int! = 0
         
         if let total = Int(arguments[0]) {
             if (total > 40)
@@ -59,6 +64,20 @@ class CommandUnclosed: Command {
                         threshold = maxThreshold
                     }
                 }
+                
+                if (arguments [i].range(of: "cv=") != nil)
+                {
+                    maxCV = Int (arguments[i].replacingOccurrences(of: "cv=", with: ""))
+                    minCV = maxCV
+                } else if (arguments [i].range(of: "cv<") != nil) {
+                    maxCV = Int(arguments[i].replacingOccurrences(of: "cv<", with: "")) ?? 5 - 1
+                } else if (arguments [i].range(of: "cv>") != nil){
+                    minCV = Int(arguments[i].replacingOccurrences(of: "cv>", with: "")) ?? -1 + 1
+                } else if (arguments [i].range(of: "cv<=") != nil) {
+                    maxCV = Int(arguments[i].replacingOccurrences(of: "cv<=", with: ""))
+                } else if (arguments[i].range(of: "cv>=") != nil) {
+                    minCV = Int(arguments [i].replacingOccurrences(of: "cv>=", with: ""))
+                }
             }
         }
         
@@ -81,11 +100,8 @@ class CommandUnclosed: Command {
             }
             
             var i = 0
-            while (postsToCheck.count < totalToCheck && i < recentlyReportedPosts.count) {
-                if (recentlyReportedPosts [i].difference < threshold) {
-                    postsToCheck.append(recentlyReportedPosts[i].id)
-                }
-                
+            while postsToCheck.count < recentlyReportedPosts.count {
+                postsToCheck.append(recentlyReportedPosts [i].id)
                 i = i + 1
             }
         }
@@ -94,11 +110,13 @@ class CommandUnclosed: Command {
         }
         
         var messageClosed = ""
+        var totalPosts = 0
         //Now fetch the posts from the API
         for post in try apiClient.fetchQuestions(postsToCheck).items ?? [] {
-            if (post.closed_reason == nil)
+            if (totalPosts < totalToCheck && (post.closed_reason == nil && post.close_vote_count ?? 0 >= minCV && post.close_vote_count ?? 0 <= maxCV))
             {
 				messageClosed = messageClosed + "\nCV:\(post.close_vote_count ?? 0)   \(post.link?.absoluteString ?? "https://example.com")"
+                totalPosts = totalPosts + 1
             }
         }
         
