@@ -187,8 +187,6 @@ func main() throws {
 			print("Could not download files!")
 		}
 		
-		return
-		
 		var shouldStandby = false
 		var isFirst = true
 		repeat {
@@ -386,6 +384,12 @@ func main() throws {
 			try filter.saveReports()
 		} catch {
 			handleError(error, "while saving reports")
+		}
+		
+		do {
+			try redunda?.uploadFiles()
+		} catch {
+			print("Could not upload files!")
 		}
 	}
 	
