@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftChatSE
+import Dispatch
 
 class Redunda {
 	enum RedundaError: Error {
