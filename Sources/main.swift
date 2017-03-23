@@ -350,7 +350,7 @@ func main() throws {
 	if let message = startupMessage {
 		//rooms.dropLast().forEach { $0.postMessage(message); sleep(1) }
 		//rooms.last!.postMessage(message, completion: startupMessageCompletion);
-        rooms.first?.postMessage(message)
+		rooms.first?.postMessage(message, completion: startupMessageCompletion)
 	}
 	
 	shortVersion = getShortVersion(currentVersion)
