@@ -170,7 +170,7 @@ func main() throws {
 	let _ = FileManager.default.changeCurrentDirectoryPath(saveDirURL.path)
 	
 	apiClient.key = "HNA2dbrFtyTZxeHN6rThNg(("
-	apiClient.defaultFilter = "withbody"
+	apiClient.defaultFilter = "!-*f(6rOFHc24"
 
 	let client = Client(host: .StackOverflow)
 
@@ -348,8 +348,9 @@ func main() throws {
 	}
 	
 	if let message = startupMessage {
-		rooms.dropLast().forEach { $0.postMessage(message); sleep(1) }
-		rooms.last!.postMessage(message, completion: startupMessageCompletion);
+		//rooms.dropLast().forEach { $0.postMessage(message); sleep(1) }
+		//rooms.last!.postMessage(message, completion: startupMessageCompletion);
+        rooms.first?.postMessage(message)
 	}
 	
 	shortVersion = getShortVersion(currentVersion)
@@ -447,7 +448,6 @@ func main() throws {
 	}
 	
 	DispatchQueue.global().async(execute: inputFileMonitor)
-	
 	
 	func pingRedunda() {
 		guard let r = redunda else { return }
