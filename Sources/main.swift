@@ -400,7 +400,7 @@ func main() throws {
 			//wait one minute
 			sleep(60)
 			if !updated && !development {
-				updated = update(listener, rooms, auto: true)
+				updated = update(listener, [rooms.first!], auto: true)
 			}
 			save()
 		}
