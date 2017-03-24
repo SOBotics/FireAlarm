@@ -181,12 +181,6 @@ func main() throws {
 			"^filter\\.json$", "^reports\\.json$", "^room_\\d+_[a-z\\.]+\\.json$"
 		])
 		
-		do {
-			try redunda!.downloadFiles()
-		} catch {
-			print("Could not download files!")
-		}
-		
 		var shouldStandby = false
 		var isFirst = true
 		repeat {
@@ -208,6 +202,12 @@ func main() throws {
 		} while shouldStandby
 		if !isFirst {
 			print("FireAlarm activating...")
+		}
+		
+		do {
+			try redunda!.downloadFiles()
+		} catch {
+			print("Could not download files!")
 		}
 	}
 	
