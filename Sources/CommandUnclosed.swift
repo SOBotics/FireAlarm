@@ -82,6 +82,7 @@ class CommandUnclosed: Command {
         }
         
         var postsToCheck = [Int]()
+        var postDifferences = [Int]()
         
         if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -10), to: Date()) {
             let recentlyReportedPosts = reportedPosts.filter {
@@ -102,6 +103,7 @@ class CommandUnclosed: Command {
             var i = 0
             while postsToCheck.count < recentlyReportedPosts.count {
                 postsToCheck.append(recentlyReportedPosts [i].id)
+                postDifferences.append(recentlyReportedPosts [i].difference)
                 i = i + 1
             }
         }
@@ -111,13 +113,16 @@ class CommandUnclosed: Command {
         
         var messageClosed = ""
         var totalPosts = 0
+        var i = 0
+        
         //Now fetch the posts from the API
         for post in try apiClient.fetchQuestions(postsToCheck).items ?? [] {
-            if (totalPosts < totalToCheck && (post.closed_reason == nil && post.close_vote_count ?? 0 >= minCV && post.close_vote_count ?? 0 <= maxCV))
+            if (totalPosts < totalToCheck && (postDifferences [i] < threshold && post.closed_reason == nil && post.close_vote_count ?? 0 >= minCV && post.close_vote_count ?? 0 <= maxCV))
             {
 				messageClosed = messageClosed + "\nCV:\(post.close_vote_count ?? 0)   \(post.link?.absoluteString ?? "https://example.com")"
                 totalPosts = totalPosts + 1
             }
+            i = i + 1
         }
         
         message.room.postMessage (messageClosed)
