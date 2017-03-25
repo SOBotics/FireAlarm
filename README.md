@@ -3,11 +3,11 @@ A Stack Exchange chatbot to catch questions that need closing. Uses [SwiftChatSE
 
 ![Example Chat Post](https://i.stack.imgur.com/Mfmpz.png)
 
-#License
+# License
 
 Licensed under MIT (https://github.com/SOBotics/FireAlarm/blob/swift/LICENSE.md or https://opensource.org/licenses/MIT)
 
-#Authors
+# Authors
 
  - Ashish Ahuja ([StackOverflow](http://stackoverflow.com/users/4688119/ashish-ahuja), [Github](https://github.com/Fortunate-MAN))
  
