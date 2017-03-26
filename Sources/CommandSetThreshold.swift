@@ -11,7 +11,7 @@ import SwiftChatSE
 
 class CommandSetThreshold: Command {
 	override public class func usage() -> [String] {
-		return ["set threshold *", "change threshold *", "change threshold to *", "set threshold to *"]
+        return ["set threshold to *", "change threshold to *", "set threshold *", "change threshold *"]
 	}
 	
 	override public class func privileges() -> ChatUser.Privileges {
@@ -19,11 +19,11 @@ class CommandSetThreshold: Command {
 	}
 	
 	override func run() throws {
-		guard let newThreshold = (arguments.first.map({Int($0)}) ?? nil) else {
+		guard let newThreshold = Int (arguments[0]) else {
 			message.reply("Please specify a valid threshold.")
 			return
 		}
-		
+        
 		message.room.threshold = newThreshold
 		
 		message.reply("The threshold for this room has been set to \(newThreshold) (*higher* thresholds report more posts).")
