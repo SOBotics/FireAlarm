@@ -3,7 +3,7 @@
 //  FireAlarm
 //
 //  Created by NobodyNada on 2/9/17.
-//
+//  
 //
 
 import Foundation
@@ -19,7 +19,7 @@ class CommandSetThreshold: Command {
 	}
 	
 	override func run() throws {
-		guard let newThreshold = Int (arguments[0]) else {
+		guard let newThreshold = (arguments.first.map({Int($0)}) ?? nil) else {
 			message.reply("Please specify a valid threshold.")
 			return
 		}

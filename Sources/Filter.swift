@@ -216,7 +216,7 @@ class Filter {
 		case noSite(json: String)
 	}
 	
-	func runBayesianFilter(_ post: Post) -> Int {
+	func runBayesianFilter(_ post: Question) -> Int {
 		var trueProbability = Double(0.263)
 		var falseProbability = Double(1 - trueProbability)
 		var postWords = [String]()
@@ -269,7 +269,7 @@ class Filter {
 		return Int(difference.isNormal ? difference : 10000)
 	}
 	
-	func runUsernameFilter(_ post: Post) -> Bool {
+	func runUsernameFilter(_ post: Question) -> Bool {
 		guard let name = post.owner?.display_name else {
 			print("No username for \(post.id.map { String($0) } ?? "<no ID>")!")
 			return false
@@ -284,7 +284,7 @@ class Filter {
 		return false
 	}
 	
-	func runLinkFilter(_ post: Post) -> Bool {
+	func runLinkFilter(_ post: Question) -> Bool {
 		do {
 			let regex = try NSRegularExpression(pattern:
 				"<a href=\"([^\"]*)\" rel=\"nofollow(?: noreferrer)?\">\\s*([^<\\s]*)(?=\\s*</a>)", options: []
@@ -345,7 +345,7 @@ class Filter {
 		}
 	}
 	
-	func checkPost(_ post: Post) -> ReportReason? {
+	func checkPost(_ post: Question) -> ReportReason? {
 		let bayesianResults = runBayesianFilter(post)
 		
 		if runLinkFilter(post) {
@@ -372,12 +372,17 @@ class Filter {
 		case reported(reason: ReportReason)
 	}
 	
-	@discardableResult func checkAndReportPost(_ post: Post) throws -> ReportResult {
+	@discardableResult func checkAndReportPost(_ post: Question) throws -> ReportResult {
 		if let reason = checkPost(post) {
-			return report(post: post, reason: reason)
+            if (post.closed_reason == nil) {
+                return report(post: post, reason: reason)
+            } else {
+                print ("Not reporting \(post.id) as it is closed.")
+                return .notBad
+            }
 		}
-		else if let q = post as? Question {
-			if (post.id ?? 1) % 10000 == 0 && q.last_edit_date == nil {
+		else {
+			if (post.id ?? 1) % 10000 == 0 && post.last_edit_date == nil {
 				rooms.first!.postMessage("[ [\(botName)](\(stackAppsLink)) ] " +
 					"[tag:\(tags(for: post).first ?? "tagless")] Potentially bad question: " +
 					"[\(post.title ?? "<no title>")](//youtube.com/watch?v=dQw4w9WgXcQ)"
@@ -387,18 +392,12 @@ class Filter {
 		return .notBad
 	}
 	
-	func tags(for post: Post) -> [String] {
-		if let q = post as? Question {
-			return q.tags ?? []
-		} else if let a = post as? Answer {
-			return a.tags ?? []
-		} else {
-			return []
-		}
+	func tags(for post: Question) -> [String] {
+		return post.tags ?? []
 	}
 	
 	///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
-	func report(post: Post, reason: ReportReason) -> ReportResult {
+	func report(post: Question, reason: ReportReason) -> ReportResult {
 		guard let id = post.id else {
 			print("No post ID!")
 			return .notBad
@@ -424,15 +423,15 @@ class Filter {
 		let header: String
 		var difference: Int = 0
 		switch reason {
-		case .bayesianFilter(let d):
-			difference = d
-			header = "Potentially bad question:"
-		case .blacklistedUsername:
-			header = "Blacklisted username:"
-		case .misleadingLink:
-			header = "Misleading link:"
-        case .manuallyReported:
-            header = "Manually reported question:"
+            case .bayesianFilter(let d):
+                difference = d
+                header = "Potentially bad question:"
+            case .blacklistedUsername:
+                header = "Blacklisted username:"
+            case .misleadingLink:
+                header = "Misleading link:"
+            case .manuallyReported:
+                header = "Manually reported question:"
 		}
 		
 		reportedPosts.append((id: id, when: Date(), difference: difference))
