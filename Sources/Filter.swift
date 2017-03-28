@@ -377,7 +377,7 @@ class Filter {
             if (post.closed_reason == nil) {
                 return report(post: post, reason: reason)
             } else {
-                print ("Not reporting \(post.id) as it is closed.")
+                print ("Not reporting \(post.id ?? 0) as it is closed.")
                 return .notBad
             }
 		}
