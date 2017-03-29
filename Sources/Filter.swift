@@ -368,7 +368,8 @@ class Filter {
 	
 	enum ReportResult {
 		case notBad	//the post was not bad
-		case alreadyReported
+        case alreadyClosed //the post is already closed
+		case alreadyReported //the post was recently reported
 		case reported(reason: ReportReason)
 	}
 	
@@ -378,7 +379,7 @@ class Filter {
                 return report(post: post, reason: reason)
             } else {
                 print ("Not reporting \(post.id ?? 0) as it is closed.")
-                return .notBad
+                return .alreadyClosed
             }
 		}
 		else {
