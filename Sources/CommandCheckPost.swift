@@ -40,12 +40,14 @@ class CommandCheckPost: Command {
 		}
 		let result = try filter.checkAndReportPost(question)
 		switch result {
-		case .notBad:
-			reply("That post was not caught by the filter.")
-		case .alreadyReported:
-			reply("That post was already reported.")
-		case .reported:
-			break
+            case .alreadyClosed:
+                reply ("That post was caught by the filter but is already closed.")
+            case .notBad:
+                reply("That post was not caught by the filter.")
+            case .alreadyReported:
+                reply("That post was already reported.")
+            case .reported:
+                break
 		}
 	}
 }
