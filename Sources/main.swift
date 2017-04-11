@@ -19,7 +19,7 @@ let commands: [Command.Type] = [
 	CommandCheckPost.self, CommandQuota.self,
 	CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
 	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self, CommandLeaveRoom.self,
-	CommandLocation.self, CommandReport.self, CommandUnclosed.self, CommandTestBayesian.self,
+	CommandLocation.self, CommandReport.self, CommandUnclosed.self, CommandTestBayesian.self, CommandPingOnError.self,
 ]
 
 
@@ -265,6 +265,7 @@ func main() throws {
 		userLocation = location
     } catch {
         print ("Location could not be loaded!")
+        ping = " (cc @AshishAhuja @NobodyNada)"
     }
 	
 	//Join the chat room
