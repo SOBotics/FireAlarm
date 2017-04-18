@@ -123,8 +123,6 @@ func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
 
 func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 	BackgroundTaskManager.shared.tasks = [
-		
-		
 		//Save
 		BackgroundTask(interval: 60) {task in
 			save(rooms: rooms)
