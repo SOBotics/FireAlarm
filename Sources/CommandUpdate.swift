@@ -10,17 +10,41 @@ import Foundation
 import SwiftChatSE
 
 class CommandUpdate: Command {
+    fileprivate let FORCE_INDEX = 2
 	override class func usage() -> [String] {
-		return ["update force", "update", "pull"]
+		return ["update force ...", "pull force ...", "update ...", "pull ..."]
 	}
 	
 	override class func privileges() -> ChatUser.Privileges {
 		return .owner
 	}
 	
-	override func run() throws {
-		if !update(listener, [message.room], force: (usageIndex == 0), auto: false) {
-			reply("No new update available.")
-		}
+    override func run() throws {
+        let argLocation: String
+        
+        if (arguments.count == 0)
+        {
+            if (!update (listener, [message.room], force: (usageIndex < FORCE_INDEX), auto: false))
+            {
+                reply ("No new update available.")
+            }
+            return
+        } else {
+            argLocation = arguments.joined(separator: " ").lowercased()
+        }
+        
+        if (userLocation == "<unknown>") {
+            reply("The current instance's location is unknown.")
+            return
+        }
+        
+        if (userLocation.lowercased() == argLocation)
+        {
+            if (!update (listener, [message.room], force: (usageIndex < FORCE_INDEX), auto: false))
+            {
+                reply ("No new update available.")
+            }
+            return
+        }
 	}
 }
