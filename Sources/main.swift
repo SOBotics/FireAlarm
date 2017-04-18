@@ -8,9 +8,12 @@
 
 import Foundation
 import SwiftChatSE
+import Dispatch
+
 #if os(Linux)
 	import Glibc
 #endif
+
 
 do {
 	try main()
