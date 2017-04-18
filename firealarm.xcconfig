@@ -1,0 +1,4 @@
+OTHER_SWIFT_FLAGS = "-lwebsockets -I/usr/local/opt/openssl/include -I/usr/local/include -L/usr/local/lib -DXcode";
+OTHER_LDFLAGS = -lwebsockets;
+HEADER_SEARCH_PATHS = /usr/local/opt/openssl/include;
+LIBRARY_SEARCH_PATHS = /usr/local/lib;

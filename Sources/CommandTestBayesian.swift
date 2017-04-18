@@ -16,10 +16,10 @@ class CommandTestBayesian: Command {
     }
     
     override func run () throws {
-        guard let body = arguments.map({"\($0)"}).joined(separator: " ") ?? nil else {
+        /*guard let body = arguments.map({"\($0)"}).joined(separator: " ") ?? nil else {
             message.reply ("Please enter a valid body")
             return
-        }
+        }*/
         
         //Under development ...
     }
