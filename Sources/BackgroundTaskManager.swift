@@ -45,8 +45,9 @@ final class BackgroundTask: Hashable {
 				if self.isCancelled { return }
 				
 				self.run?(self)
+				self.isScheduled = false
 				
-				if self.isCancelled { self.isScheduled = false; return }
+				if self.isCancelled { return }
 				self.schedule(manager: manager)
 			}
 			
