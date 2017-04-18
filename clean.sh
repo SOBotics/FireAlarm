@@ -1,2 +1,2 @@
-swift build --clean
+swift package clean
 rm -rf Packages
