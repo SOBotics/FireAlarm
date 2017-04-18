@@ -182,7 +182,7 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 				if r.shouldStandby {
 					rooms.first!.postMessage("[ [\(botName)](\(githubLink)) ] Switching to standby mode on \(location).")
 					
-					//TODO: Switch to standby mode
+					shutDown(reason: .reboot, rooms: rooms)
 				}
 			} catch {
 				handleError(error, "while sending a status ping to Redunda")
