@@ -30,6 +30,7 @@ func save(rooms: [ChatRoom]) {
 		try redunda?.uploadFiles()
 	} catch {
 		print("Could not upload files!")
+		print(error)
 	}
 }
 
