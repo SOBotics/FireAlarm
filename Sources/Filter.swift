@@ -136,15 +136,10 @@ class Filter {
 	fileprivate var wsRetries = 0
 	fileprivate let wsMaxRetries = 10
 	
-	private var _running = false
-	
-	
-	var running: Bool {
-		return _running
-	}
+	private(set) var running = false
 	
 	func start() throws {
-		_running = true
+		running = true
 		
 		//let request = URLRequest(url: URL(string: "ws://qa.sockets.stackexchange.com/")!)
 		//ws = WebSocket(request: request)
@@ -176,7 +171,7 @@ class Filter {
 	}
 	
 	func stop() {
-		_running = false
+		running = false
 		ws?.disconnect()
 	}
 	
