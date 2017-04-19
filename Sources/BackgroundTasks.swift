@@ -88,7 +88,7 @@ func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
 			sleep(1)
 		}
 	}
-	while !(filter.ws.state == .disconnected || filter.ws.state == .error) {
+	while filter != nil && !(filter.ws.state == .disconnected || filter.ws.state == .error) {
 		sleep(1)
 	}
 	
