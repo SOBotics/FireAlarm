@@ -23,5 +23,6 @@ do {
 }
 
 while true {
+	//dispatchMain seems to be broken, so use this instead
 	pause()
 }
