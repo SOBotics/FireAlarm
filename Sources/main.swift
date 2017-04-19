@@ -22,4 +22,6 @@ do {
 	abort()
 }
 
-dispatchMain()
+while true {
+	pause()
+}
