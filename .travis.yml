@@ -19,9 +19,10 @@ install:
       sudo tar -xf "$SWIFT_BUILD.tar.gz" || exit 3;
     fi;
     echo "Installing libwebsockets...";
-    git clone https://github.com/warmcat/libwebsockets" || exit 4;
+    git clone "https://github.com/warmcat/libwebsockets" || exit 4;
     pushd libwebsockets || exit 5;
     (cmake . && make && sudo make install) || exit 6;
+    popd
 
 script:
   - ./build.sh
