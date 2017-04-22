@@ -18,8 +18,6 @@ install:
       echo "Installing Swift...";
       curl "$SWIFT_URL" | tar -xf - || exit 2;
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      (brew update && brew install openssl); exit 2;
-      export OPENSSL_ROOT_DIR=$(brew --prefix openssl);
     fi;
 
     echo "Installing libwebsockets...";
