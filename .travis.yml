@@ -17,7 +17,6 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       echo "Installing Swift...";
       curl "$SWIFT_URL" | tar -xf - || exit 2;
-    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     fi;
 
     echo "Installing libwebsockets...";
