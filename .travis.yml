@@ -1,7 +1,4 @@
 language: generic
-os:
-  - linux
-  - osx
 
 matrix:
   include:
@@ -17,14 +14,14 @@ matrix:
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      echo "Installing Swift..."
-      curl "$SWIFT_URL" || exit 1
-      sudo tar -xf "$SWIFT_BUILD.tar.gz" || exit 2
-    fi
-    echo "Installing libwebsockets..."
-    git clone https://github.com/warmcat/libwebsockets" || exit 3
-    pushd libwebsockets || exit 4
-    (cmake . && make && sudo make install) || exit 5
+      echo "Installing Swift...";
+      curl "$SWIFT_URL" || exit 2;
+      sudo tar -xf "$SWIFT_BUILD.tar.gz" || exit 3;
+    fi;
+    echo "Installing libwebsockets...";
+    git clone https://github.com/warmcat/libwebsockets" || exit 4;
+    pushd libwebsockets || exit 5;
+    (cmake . && make && sudo make install) || exit 6;
 
 script:
   - ./build.sh
