@@ -12,11 +12,13 @@ matrix:
           PATH="$SWIFT_BUILD/usr/bin:$PATH"
     - os: osx
       osx_image: xcode8.3
+      env:
+        - OPENSSL_ROOT_DIR=$(brew --prefix openssl)
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       echo "Installing Swift...";
-      curl "$SWIFT_URL" | tar -xf - || exit 2;
+      curl "$SWIFT_URL" | tar -xzf - || exit 2;
     fi;
 
     echo "Installing libwebsockets...";
