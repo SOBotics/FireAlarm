@@ -13,7 +13,7 @@ matrix:
           SWIFT_BUILD=$SWIFT_VERSION-RELEASE-ubuntu14.04
           SWIFT_URL=https://swift.org/builds/$SWIFT_VERSION-release/ubuntu1404/$SWIFT_VERSION-RELASE/$SWIFT_BUILD.tar.gz
     - os: osx
-      osx_image=xcode8.3
+      osx_image: xcode8.3
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
