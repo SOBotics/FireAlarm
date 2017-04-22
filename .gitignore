@@ -1,0 +1,6 @@
+*.log
+FireAlarm.xcodeproj
+FireAlarm.xcworkspace
+.DS_Store
+Package.pins
+.build
