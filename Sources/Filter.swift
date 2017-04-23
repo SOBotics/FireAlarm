@@ -38,13 +38,12 @@ extension Post {
 }
 
 var reportedPosts = [(id: Int, when: Date, difference: Int)]()
+var filterNaiveBayes: FilterNaiveBayes!
 
 class Filter {
 	let client: Client
 	let rooms: [ChatRoom]
 	
-	let initialProbability: Double
-	let words: [String:Word]
 	var blacklistedUsernames: [String]
 	
 	var postsToCheck = [Int]()
@@ -68,15 +67,7 @@ class Filter {
 		print("Loading filter...")
 		blacklistedUsernames = []
 		
-		let data = try! Data(contentsOf: saveDirURL.appendingPathComponent("filter.json"))
-		let db = try! JSONSerialization.jsonObject(with: data, options: []) as! [String:Any]
-		initialProbability = db["initialProbability"] as! Double
-		var words = [String:Word]()
-		for (word, probabilites) in db["wordProbabilities"] as! [String:[Double]] {
-			words[word] = Word(word, probabilites.first!, probabilites.last!)
-		}
-		
-		self.words = words
+		filterNaiveBayes = FilterNaiveBayes ()
 		
 		let usernameURL = saveDirURL.appendingPathComponent("blacklisted_users.json")
 		
@@ -213,59 +204,6 @@ class Filter {
 		case noSite(json: String)
 	}
 	
-	func runBayesianFilter(_ post: Question) -> Int {
-		var trueProbability = Double(0.263)
-		var falseProbability = Double(1 - trueProbability)
-		var postWords = [String]()
-		var checkedWords = [String]()
-		
-		guard let body = post.body else {
-			print("No body for \(post.id.map { String($0) } ?? "<no ID>")")
-			return 10000
-		}
-		
-		var currentWord: String = ""
-		let set = CharacterSet.alphanumerics.inverted
-		for character in body.lowercased().characters {
-			if !set.contains(String(character).unicodeScalars.first!) {
-				currentWord.append(character)
-			}
-			else if !currentWord.isEmpty {
-				postWords.append(currentWord)
-				currentWord = ""
-			}
-		}
-		
-		if !currentWord.isEmpty {
-			postWords.append(currentWord)
-		}
-		
-		for postWord in postWords {
-			if postWord.isEmpty {
-				continue
-			}
-			guard let word = words[postWord] else {
-				continue
-			}
-			checkedWords.append(postWord)
-			
-			let pTrue = word.trueProbability
-			let pFalse = word.falseProbability
-			
-			
-			let newTrue = trueProbability * Double(pTrue)
-			let newFalse = falseProbability * Double(pFalse)
-			if newTrue != 0.0 && newFalse != 0.0 {
-				trueProbability = newTrue
-				falseProbability = newFalse
-			}
-		}
-		
-		let difference = -log10(falseProbability - trueProbability)
-		
-		return Int(difference.isNormal ? difference : 10000)
-	}
-	
 	func runUsernameFilter(_ post: Question) -> Bool {
 		guard let name = post.owner?.display_name else {
 			print("No username for \(post.id.map { String($0) } ?? "<no ID>")!")
@@ -343,7 +281,7 @@ class Filter {
 	}
 	
 	func checkPost(_ post: Question) -> ReportReason? {
-		let bayesianResults = runBayesianFilter(post)
+		let bayesianResults = filterNaiveBayes.runBayesianFilter(post)
 		
 		if runLinkFilter(post) {
 			return .misleadingLink
