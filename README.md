@@ -1,4 +1,7 @@
 # FireAlarm
+
+[![Build Status](https://travis-ci.org/SOBotics/FireAlarm.svg?branch=master)](https://travis-ci.org/SOBotics/FireAlarm)
+
 A Stack Exchange chatbot to catch questions that need closing. Uses [SwiftChatSE](https://github.com/SOBotics/SwiftChatSE) and [SwiftStack](https://github.com/SOBotics/SwiftStack).
 
 ![Example Chat Post](https://i.stack.imgur.com/Mfmpz.png)
