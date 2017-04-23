@@ -11,20 +11,6 @@ import SwiftChatSE
 import SwiftStack
 import Dispatch
 
-
-
-class Word {
-	let text: String
-	let trueProbability: Double
-	let falseProbability: Double
-	
-	init(_ text: String, _ pTrue: Double, _ pFalse: Double) {
-		self.text = text
-		trueProbability = pTrue
-		falseProbability = pFalse
-	}
-}
-
 extension Post {
 	var id: Int? {
 		if let q = self as? Question, let id = q.question_id {
