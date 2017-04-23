@@ -19,6 +19,8 @@ func launchProcess(path: String, arguments: [String]) -> Process {
 
 var isUpdating = false
 
+let branch = "rpi"
+
 func installUpdate() -> Bool {
 	do {
 		#if os(Linux)
@@ -67,7 +69,7 @@ var availableVersion: String = "<unknown>"
 
 func downloadUpdate(isAuto: Bool = false) throws {
 	let script = "rm -rf update;" +
-		"(git clone -b swift \"git://github.com/SOBotics/FireAlarm.git\" update && " +
+		"(git clone -b \(branch) \"git://github.com/SOBotics/FireAlarm.git\" update && " +
 		"cd update && " +
 	"git log --format='oneline' -n 1 > ../version-downloaded.txt) || exit 1 "
 	
@@ -135,7 +137,7 @@ func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, 
 	}
 	
 	
-	let versionScript = "git ls-remote git://github.com/SOBotics/FireAlarm swift | cut -d '\t' -f1 > available_version.txt"
+	let versionScript = "git ls-remote git://github.com/SOBotics/FireAlarm \(branch) | cut -d '\t' -f1 > available_version.txt"
 
 	
 	do {
