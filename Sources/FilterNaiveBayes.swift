@@ -1,7 +1,7 @@
 //  FilterNaiveBayes.swift
 //  FireAlarm
 //
-//  Created by AshishAhuja.
+//  Created by AshishAhuja on 23/04/17.
 //  Copyright © 2017 Ashish Ahuja (Fortunate-MAN). All rights reserved.
 //
 
@@ -9,6 +9,18 @@ import Foundation
 import SwiftChatSE
 import Dispatch
 import SwiftStack
+
+class Word {
+    let text: String
+    let trueProbability: Double
+    let falseProbability: Double
+    
+    init(_ text: String, _ pTrue: Double, _ pFalse: Double) {
+        self.text = text
+        trueProbability = pTrue
+        falseProbability = pFalse
+    }
+}
 
 class FilterNaiveBayes {
     let words: [String:Word]
