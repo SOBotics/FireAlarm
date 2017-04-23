@@ -19,7 +19,7 @@ func launchProcess(path: String, arguments: [String]) -> Process {
 
 var isUpdating = false
 
-let branch = "rpi"
+fileprivate let branch = "rpi"
 
 func installUpdate() -> Bool {
 	do {
