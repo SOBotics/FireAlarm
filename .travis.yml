@@ -1,5 +1,6 @@
 branches:
-  except: - rpi
+  except: 
+    - rpi
 
 language: generic
 sudo: required
