@@ -2,7 +2,7 @@
 
 #download libraries
 [[ -d SwiftChatSE ]] && rm -rf SwiftChatSE
-git clone git://github.com/NobodyNada/SwiftChatSE || exit 1
+git clone git://github.com/NobodyNada/SwiftChatSE -b rpi || exit 1
 
 [[ -d SwiftStack ]] && rm -rf SwiftStack
 git clone git://github.com/NobodyNada/SwiftStack || exit 1
