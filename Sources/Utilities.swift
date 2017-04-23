@@ -10,10 +10,6 @@ import Foundation
 import SwiftStack
 import SwiftChatSE
 
-#if os(Linux)
-	typealias Process = Task
-#endif
-
 let saveDirURL = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".firealarm", isDirectory: true)
 
 var startTime = Date()

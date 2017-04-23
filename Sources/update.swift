@@ -10,16 +10,12 @@ import Foundation
 import SwiftChatSE
 
 func launchProcess(path: String, arguments: [String]) -> Process {
-	#if os(Linux)
-		return Process.launchedTaskWithLaunchPath(path, arguments: arguments)
-	#else
-		return Process.launchedProcess(launchPath: path, arguments: arguments)
-	#endif
+	return Process.launchedProcess(launchPath: path, arguments: arguments)
 }
 
 var isUpdating = false
 
-fileprivate let branch = "rpi"
+fileprivate let branch = "swift"
 
 func installUpdate() -> Bool {
 	do {
@@ -79,8 +75,8 @@ func downloadUpdate(isAuto: Bool = false) throws {
 	if process.terminationStatus != 0 {
 		throw DownloadFailure.downloadFailed
 	} else {
-        downloadedVersion = availableVersion
-
+		downloadedVersion = availableVersion
+		
 		let downloaded = try loadFile("version-downloaded.txt")
 		if isAuto && !downloaded.contains("--autoupdate") {
 			throw DownloadFailure.noAutoupdate
@@ -138,7 +134,7 @@ func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, 
 	
 	
 	let versionScript = "git ls-remote git://github.com/SOBotics/FireAlarm \(branch) | cut -d '\t' -f1 > available_version.txt"
-
+	
 	
 	do {
 		try versionScript.write(toFile: "get_version.sh", atomically: true, encoding: .utf8)
@@ -147,10 +143,10 @@ func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, 
 		
 		let versionContents = try loadFile("available_version.txt").replacingOccurrences(of: "\n", with: " ")
 		let components = versionContents.components(separatedBy: " ")
-        availableVersion = components.first ?? ""
+		availableVersion = components.first ?? ""
 		
 		if currentVersion != availableVersion &&
-            !(auto && downloadedVersion == availableVersion && downloadedVersion != "<unknown>") {
+			!(auto && downloadedVersion == availableVersion && downloadedVersion != "<unknown>") {
 			return prepareUpdate(listener, rooms, isAuto: auto)
 		}
 	}
