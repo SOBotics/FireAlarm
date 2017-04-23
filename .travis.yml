@@ -1,3 +1,6 @@
+branches:
+  except: - rpi
+
 language: generic
 sudo: required
 
