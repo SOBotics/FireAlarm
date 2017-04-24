@@ -24,24 +24,24 @@ extension Post {
 }
 
 var reportedPosts = [(id: Int, when: Date, difference: Int)]()
-var filterNaiveBayes: FilterNaiveBayes!
 
 class Filter {
 	let client: Client
 	let rooms: [ChatRoom]
 	
-	var blacklistedUsernames: [String]
-	
 	var postsToCheck = [Int]()
 	
 	var queue = DispatchQueue(label: "Filter", attributes: [.concurrent])
+    
+    var filterNaiveBayes: FilterNaiveBayes!
+    var filterMisleadingLinks: FilterMisleadingLinks!
+    var filterBlacklistedUsernames: FilterBlacklistedUsernames!
 	
 	
 	private var lastEventDate: Date?
 	
 	
 	enum FilterLoadingError: Error {
-		case UsernamesNotArrayOfStrings
 		case ReportsNotArrayOfDictionaries
 		case InvalidReport(report: [String:Any])
 	}
@@ -51,33 +51,13 @@ class Filter {
 		self.rooms = rooms
 		
 		print("Loading filter...")
-		blacklistedUsernames = []
 		
 		filterNaiveBayes = FilterNaiveBayes ()
-		
-		let usernameURL = saveDirURL.appendingPathComponent("blacklisted_users.json")
-		
-		do {
-			let usernameData = try Data(contentsOf: usernameURL)
-			guard let usernames = try JSONSerialization.jsonObject(with: usernameData, options: []) as? [String] else {
-				throw FilterLoadingError.UsernamesNotArrayOfStrings
-			}
-			blacklistedUsernames = usernames
-			
-		} catch {
-			handleError(error, "while loading blacklisted usernames")
-			print("Loading an empty username database.")
-			if FileManager.default.fileExists(atPath: usernameURL.path) {
-				print("Backing up blacklisted_users.json.")
-				do {
-					try FileManager.default.moveItem(at: usernameURL, to: saveDirURL.appendingPathComponent("blacklisted_users.json.bak"))
-				} catch {
-					handleError(error, "while backing up the blacklisted usernames")
-				}
-			}
-		}
+        filterMisleadingLinks = FilterMisleadingLinks()
+        filterBlacklistedUsernames = FilterBlacklistedUsernames()
 		
 		let reportsURL = saveDirURL.appendingPathComponent("reports.json")
+        let usernameURL = saveDirURL.appendingPathComponent("blacklisted_users.json")
 		do {
 			let reportData = try Data(contentsOf: reportsURL)
 			guard let reports = try JSONSerialization.jsonObject(with: reportData, options: []) as? [[String:Any]] else {
@@ -190,88 +170,12 @@ class Filter {
 		case noSite(json: String)
 	}
 	
-	func runUsernameFilter(_ post: Question) -> Bool {
-		guard let name = post.owner?.display_name else {
-			print("No username for \(post.id.map { String($0) } ?? "<no ID>")!")
-			return false
-		}
-		for regex in blacklistedUsernames {
-			if name.range(of: regex, options: [.regularExpression, .caseInsensitive]) != nil {
-				return true
-			}
-		}
-		
-		
-		return false
-	}
-	
-	func runLinkFilter(_ post: Question) -> Bool {
-		do {
-			let regex = try NSRegularExpression(pattern:
-				"<a href=\"([^\"]*)\" rel=\"nofollow(?: noreferrer)?\">\\s*([^<\\s]*)(?=\\s*</a>)", options: []
-			)
-			
-			guard let body = post.body else {
-				print("No body for \(post.id.map { String($0) } ?? "<no ID>")!")
-				return false
-			}
-			
-			#if os(Linux)
-				let nsString = body._bridgeToObjectiveC()
-			#else
-				let nsString = body as NSString
-			#endif
-			for match in regex.matches(in: body, options: [], range: NSMakeRange(0, nsString.length)) {
-				
-				
-				#if os(Linux)
-					let linkString = nsString.substring(with: match.range(at: 1))
-					let textString = nsString.substring(with: match.range(at: 2))
-				#else
-					
-					let linkString = nsString.substring(with: match.rangeAt(1)) as String
-					let textString = nsString.substring(with: match.rangeAt(2)) as String
-				#endif
-				guard
-					let link = URL(string: linkString),
-					let text = URL(string: textString),
-					let linkHost = link.host?.lowercased(),
-					let textHost = text.host?.lowercased() else {
-						continue
-				}
-				
-				
-				if (!textHost.isEmpty &&
-					textHost != linkHost &&
-					!linkHost.contains("rads.stackoverflow.com") &&
-					"www." + textHost != linkHost &&
-					"www." + linkHost != textHost &&
-					linkHost.contains(".") &&
-					textHost.contains(".") &&
-					!linkHost.trimmingCharacters(in: .whitespaces).contains(" ") &&
-					!textHost.trimmingCharacters(in: .whitespaces).contains(" ") &&
-					!linkHost.contains("//http") &&
-					!textHost.contains("//http")) {
-					
-					return true
-				}
-				
-				
-			}
-			return false
-			
-		} catch {
-			handleError(error, "while checking for misleading links")
-			return false
-		}
-	}
-	
 	func checkPost(_ post: Question) -> ReportReason? {
 		let bayesianResults = filterNaiveBayes.runBayesianFilter(post)
 		
-		if runLinkFilter(post) {
+		if filterMisleadingLinks.runLinkFilter(post) {
 			return .misleadingLink
-		} else if runUsernameFilter(post) {
+		} else if filterBlacklistedUsernames.runUsernameFilter(post) {
 			return .blacklistedUsername
 		} else if rooms.contains(where: {room in return bayesianResults < room.threshold}) {
 			return .bayesianFilter(difference: bayesianResults)
@@ -378,7 +282,7 @@ class Filter {
 	}
 	
 	func saveUsernameBlacklist() throws {
-		let data = try JSONSerialization.data(withJSONObject: blacklistedUsernames, options: .prettyPrinted)
+		let data = try JSONSerialization.data(withJSONObject: filterBlacklistedUsernames.blacklistedUsernames, options: .prettyPrinted)
 		try data.write(to: saveDirURL.appendingPathComponent("blacklisted_users.json"))
 	}
 	
