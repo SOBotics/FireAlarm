@@ -89,7 +89,6 @@ class Filter {
 		print("Filter loaded.")
 	}
 	
-	
 	var ws: WebSocket!
 	
 	fileprivate var wsRetries = 0
