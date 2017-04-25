@@ -60,4 +60,9 @@ class FilterBlacklistedUsernames {
         
         return false
     }
+    
+    func saveUsernameBlacklist() throws {
+        let data = try JSONSerialization.data(withJSONObject:blacklistedUsernames, options: .prettyPrinted)
+        try data.write(to: saveDirURL.appendingPathComponent("blacklisted_users.json"))
+    }
 }
