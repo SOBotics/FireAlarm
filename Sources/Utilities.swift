@@ -57,7 +57,7 @@ extension ChatUser {
 extension ChatRoom {
 	
 	
-	func notificationString(tags: [String], reason: Filter.ReportReason) -> String {
+	func notificationString(tags: [String], reason: PostClassifier.ReportReason) -> String {
 		var users = [ChatUser]()
 		for user in userDB {
 			var shouldNotify = false

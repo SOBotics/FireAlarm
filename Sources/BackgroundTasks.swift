@@ -16,12 +16,12 @@ func save(rooms: [ChatRoom]) {
 		handleError(error, "while saving the user database")
 	}
 	do {
-		try filter.saveUsernameBlacklist()
+		try filter.filterBlacklistedUsernames.saveUsernameBlacklist()
 	} catch {
 		handleError(error, "while saving the username blacklist")
 	}
 	do {
-		try filter.saveReports()
+		try filter.reports.saveReports()
 	} catch {
 		handleError(error, "while saving reports")
 	}
@@ -80,7 +80,7 @@ func handleInput(input: String, rooms: [ChatRoom], listener: ChatListener) {
 func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
 	var shouldReboot = reason == .reboot
 	
-	filter.stop()
+	filter.postFetcher.stop()
 	
 	//Wait for pending messages to be posted.
 	for room in rooms {
@@ -88,7 +88,7 @@ func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
 			sleep(1)
 		}
 	}
-	while filter != nil && !(filter.ws.state == .disconnected || filter.ws.state == .error) {
+	while filter != nil && !(filter.postFetcher.ws.state == .disconnected || filter.postFetcher.ws.state == .error) {
 		sleep(1)
 	}
 	

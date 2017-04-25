@@ -254,7 +254,7 @@ func main() throws {
 	
 	//Load the filter
 	filter = Filter(rooms)
-	try filter.start()
+	try filter.postFetcher.start()
 	
 	errorsInLast30Seconds = 0
 	afterTooManyErrors = {
