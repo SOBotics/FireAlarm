@@ -139,23 +139,21 @@ func main() throws {
 	
 	
     //Get the location
-    var rawLocation = ""
-    do {
-        rawLocation = try loadFile ("location.txt")
-        let components = rawLocation.components(separatedBy: CharacterSet.whitespaces)
+	if let rawLocation = redunda?.locationName {
+        let components = rawLocation.components(separatedBy: "/")
         
         user = components.first ?? ""
         device = components.dropFirst().joined(separator: " ")
         
         location = "\(user)/\(device)"
         
-        location = String(location.characters.filter { !"\n".characters.contains($0) })
+        location = String(String.UnicodeScalarView(location.unicodeScalars.filter { !CharacterSet.newlines.contains($0) }))
         userLocation = location
-        user = String(user.characters.filter { !"\n".characters.contains($0) })
-        device = String(device.characters.filter { !"\n".characters.contains($0) })
+        user = String(String.UnicodeScalarView(user.unicodeScalars.filter { !CharacterSet.newlines.contains($0) }))
+        device = String(String.UnicodeScalarView(device.unicodeScalars.filter { !CharacterSet.newlines.contains($0) }))
         ping = " (cc @\(user))"
 		userLocation = location
-    } catch {
+    } else {
         print ("Location could not be loaded!")
     }
 	
