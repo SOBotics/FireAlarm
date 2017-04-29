@@ -29,6 +29,7 @@ var device = "<unknown device>"
 var originalWorkingDirectory: String!
 
 var development = false
+var noUpdate = false
 
 extension ChatUser {
 	var notified: Bool {

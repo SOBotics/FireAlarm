@@ -39,6 +39,8 @@ func main() throws {
 	afterTooManyErrors = {}
 	addPrivileges()
 	
+	noUpdate = ProcessInfo.processInfo.arguments.contains("--noupdate")
+	
 	
 	//Save the working directory & change to the chatbot directory.
 	originalWorkingDirectory = FileManager.default.currentDirectoryPath

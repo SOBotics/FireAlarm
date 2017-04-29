@@ -128,6 +128,10 @@ func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom], isAuto: Bool =
 
 
 func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, auto: Bool = false) -> Bool {
+	if noUpdate {
+		return false
+	}
+	
 	if force {
 		return prepareUpdate(listener, rooms, isAuto: auto)
 	}
