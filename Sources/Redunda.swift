@@ -144,6 +144,7 @@ class Redunda {
 	}
 	
 	var shouldStandby: Bool = false
+	var locationName: String?
 	
 	func sendStatusPing(version: String? = nil) throws {
 		let data = version == nil ? ["key":key] : ["key":key, "version":version!]
@@ -157,5 +158,6 @@ class Redunda {
 		}
 		
 		shouldStandby = standby
+		locationName = json["location"] as? String
 	}
 }
