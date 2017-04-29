@@ -20,6 +20,11 @@ class CommandUpdate: Command {
 	}
 	
     override func run() throws {
+		if noUpdate {
+			reply("Updates are disabled.")
+			return
+		}
+		
         let argLocation: String
         
         if (arguments.count == 0)

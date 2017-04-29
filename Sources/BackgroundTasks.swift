@@ -132,7 +132,7 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 		
 		//Update
 		BackgroundTask(interval: 60) {task in
-			if development || update(listener, [rooms.first!], auto: true) {
+			if development || noUpdate || update(listener, [rooms.first!], auto: true) {
 				task.cancel()
 			}
 		},
