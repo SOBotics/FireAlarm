@@ -24,25 +24,5 @@ extension Post {
 }
 
 class Filter {
-	let client: Client
-    
-    var postFetcher: PostFetcher!
-    var reports: Reports!
-    
-    var filterBlacklistedUsernames: FilterBlacklistedUsernames!
 	
-	private var lastEventDate: Date?
-	
-	init(_ rooms: [ChatRoom]) {
-		client = rooms.first!.client
-		
-		print("Loading filter...")
-        
-        postFetcher = PostFetcher(rooms)
-        reports = Reports()
-        
-        filterBlacklistedUsernames = postFetcher.postClassifier.filterBlacklistedUsernames
-        
-		print("Filter loaded.")
-	}
 }

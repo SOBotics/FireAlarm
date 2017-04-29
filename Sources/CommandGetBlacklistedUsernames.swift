@@ -15,11 +15,11 @@ class CommandGetBlacklistedUsernames: Command {
 	}
 	
 	override func run() throws {
-		if filter.filterBlacklistedUsernames.blacklistedUsernames.count == 0 {
+		if classifier.filterBlacklistedUsernames.blacklistedUsernames.count == 0 {
 			reply("No usernames are blacklisted.")
 			return
 		}
 		reply("Blacklisted usernames:")
-		post("    " + filter.filterBlacklistedUsernames.blacklistedUsernames.joined(separator: "\n    "))
+		post("    " + classifier.filterBlacklistedUsernames.blacklistedUsernames.joined(separator: "\n    "))
 	}
 }
