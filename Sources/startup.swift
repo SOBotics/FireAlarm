@@ -26,7 +26,7 @@ let commands: [Command.Type] = [
 
 fileprivate var listener: ChatListener!
 
-var filter: Filter!
+var classifier: PostClassifier!
 
 var redunda: Redunda?
 
@@ -253,8 +253,8 @@ func main() throws {
 	
 	
 	//Load the filter
-	filter = Filter(rooms)
-	try filter.postFetcher.start()
+	classifier = PostClassifier(rooms)
+	try classifier.postFetcher.start()
 	
 	errorsInLast30Seconds = 0
 	afterTooManyErrors = {

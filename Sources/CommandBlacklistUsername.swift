@@ -25,7 +25,7 @@ class CommandBlacklistUsername: Command {
 			return
 		}
 		let regex = arguments.joined(separator: " ")
-		filter.filterBlacklistedUsernames.blacklistedUsernames.append(regex)
+		classifier.filterBlacklistedUsernames.blacklistedUsernames.append(regex)
 		reply("Blacklisted regular expression `\(regex)`.")
 	}
 }
