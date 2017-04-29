@@ -38,7 +38,7 @@ class CommandCheckPost: Command {
 			reply("Could not fetch the question!")
 			return
 		}
-		let result = try classifier.postFetcher.postClassifier.checkAndReportPost(question)
+		let result = try classifier.checkAndReportPost(question)
 		switch result {
             case .alreadyClosed:
                 reply ("That post was caught by the filter but is already closed.")

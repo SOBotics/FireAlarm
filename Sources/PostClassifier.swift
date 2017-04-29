@@ -12,7 +12,7 @@ import SwiftStack
 import Dispatch
 
 class PostClassifier {
-	let postFetcher: PostFetcher
+	var postFetcher: PostFetcher!
 	let reporter: Reporter
     
     var filterNaiveBayes: FilterNaiveBayes!
@@ -32,12 +32,14 @@ class PostClassifier {
         print ("Post Classifier loading...")
         
         self.rooms = rooms
-		postFetcher = PostFetcher(rooms)
 		reporter = Reporter(rooms)
         
         filterNaiveBayes = FilterNaiveBayes()
         filterMisleadingLinks = FilterMisleadingLinks()
         filterBlacklistedUsernames = FilterBlacklistedUsernames()
+		
+		
+		postFetcher = PostFetcher(rooms: rooms, classifier: self)
     }
     
     func checkPost(_ post: Question) -> PostClassifier.ReportReason? {
