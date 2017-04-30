@@ -22,8 +22,6 @@ let commands: [Command.Type] = [
 	CommandLocation.self, CommandReport.self, CommandUnclosed.self, CommandTestBayesian.self,
 ]
 
-
-
 fileprivate var listener: ChatListener!
 
 var reporter: Reporter!
