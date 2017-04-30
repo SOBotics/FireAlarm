@@ -14,21 +14,23 @@ import Dispatch
 var reportedPosts = [(id: Int, when: Date, difference: Int)]()
 
 class Reporter {
+	var postFetcher: PostFetcher!
 	let rooms: [ChatRoom]
 	
-	enum ReportResult {
-		case notBad	//the post was not bad
-		case alreadyClosed //the post is already closed
-		case alreadyReported //the post was recently reported
-		case reported(reason: PostClassifier.ReportReason)
-	}
+	var filters = [Filter]()
 	
-	enum ReportsLoadingError: Error {
-		case ReportsNotArrayOfDictionaries
-		case InvalidReport(report: [String:Any])
+	func filter<T: Filter>(ofType type: T.Type) -> T? {
+		for filter in filters {
+			if let f = filter as? T {
+				return f
+			}
+		}
+		return nil
 	}
 	
 	init(_ rooms: [ChatRoom]) {
+		print ("Reporter loading...")
+		
 		self.rooms = rooms
 		
 		let reportsURL = saveDirURL.appendingPathComponent("reports.json")
@@ -59,6 +61,36 @@ class Reporter {
 				}
 			}
 		}
+		
+		filters = [
+			FilterNaiveBayes(),
+			FilterMisleadingLinks(),
+			FilterBlacklistedUsernames()
+		]
+		
+		postFetcher = PostFetcher(rooms: rooms, reporter: self)
+	}
+	
+	func checkPost(_ post: Question) -> [FilterResult] {
+		return filters.flatMap { $0.check(post) }
+	}
+	
+	@discardableResult func checkAndReportPost(_ post: Question) throws -> Reporter.ReportResult {
+		let results = checkPost(post)
+		
+		return report(post: post, reasons: results)
+	}
+	
+	enum ReportResult {
+		case notBad	//the post was not bad
+		case alreadyClosed //the post is already closed
+		case alreadyReported //the post was recently reported
+		case reported(reasons: [FilterResult])
+	}
+	
+	enum ReportsLoadingError: Error {
+		case ReportsNotArrayOfDictionaries
+		case InvalidReport(report: [String:Any])
 	}
 	
 	func saveReports() throws {
@@ -74,12 +106,16 @@ class Reporter {
 	
 	
 	///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
-	func report(post: Question, reason: PostClassifier.ReportReason) -> ReportResult {
+	func report(post: Question, reasons: [FilterResult]) -> ReportResult {
 		guard let id = post.id else {
 			print("No post ID!")
 			return .notBad
 		}
 		
+		if (post.closed_reason != nil) {
+			print ("Not reporting \(post.id ?? 0) as it is closed.")
+			return .alreadyClosed
+		}
 		
 		if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
 			let recentlyReportedPosts = reportedPosts.filter {
@@ -95,41 +131,43 @@ class Reporter {
 		}
 		
 		
-		print("Reporting question \(id).")
+		var reported = false
 		
-		let header: String
-		var difference: Int = 0
-		switch reason {
-		case .bayesianFilter(let d):
-			difference = d
-			header = "Potentially bad question:"
-		case .blacklistedUsername:
-			header = "Blacklisted username:"
-		case .misleadingLink:
-			header = "Misleading link:"
-		case .manuallyReported:
-			header = "Manually reported question:"
-		}
-		
-		reportedPosts.append((id: id, when: Date(), difference: difference))
+		var bayesianDifference: Int?
 		
 		for room in rooms {
-			if difference < room.threshold {
-				let title = "\(post.title ?? "<no title>")"
-					.replacingOccurrences(of: "[", with: "\\[")
-					.replacingOccurrences(of: "]", with: "\\]")
-				
-				let tags = post.tags ?? []
-				
-				let message = "[ [\(botName)](\(stackAppsLink)) ] " +
-					"[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//stackoverflow.com/q/\(id)) (filter score: \(difference))" +
-					room.notificationString(tags: tags, reason: reason)
-				
-				room.postMessage(message)
-				
+			//Filter out Bayesian scores which are less than this room's threshold.
+			let reasons = reasons.filter {
+				if case .bayesianFilter(let difference) = $0.type {
+					bayesianDifference = difference
+					return difference < room.threshold
+				}
+				return true
 			}
+			if reasons.isEmpty { continue }
+			reported = true
+			
+			let title = "\(post.title ?? "<no title>")"
+				.replacingOccurrences(of: "[", with: "\\[")
+				.replacingOccurrences(of: "]", with: "\\]")
+			
+			let tags = post.tags ?? []
+			
+			let header = reasons.map { $0.header }.joined(separator: ", ")
+			
+			let message = "[ [\(botName)](\(stackAppsLink)) ] " +
+				"[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//stackoverflow.com/q/\(id))" +
+				room.notificationString(tags: tags, reasons: reasons)
+			
+			room.postMessage(message)
+			
 		}
 		
-		return .reported(reason: reason)
+		if reported {
+			reportedPosts.append((id: id, when: Date(), difference: bayesianDifference ?? 0))
+			return .reported(reasons: reasons)
+		} else {
+			return .notBad
+		}
 	}
 }

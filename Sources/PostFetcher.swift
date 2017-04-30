@@ -21,20 +21,20 @@ class PostFetcher {
     fileprivate let wsMaxRetries: Int
     
     let rooms: [ChatRoom]
-    weak var classifier: PostClassifier!
+    weak var reporter: Reporter!
     
     private(set) var running: Bool
     
     private var lastEventDate: Date?
     
-	init (rooms: [ChatRoom], classifier: PostClassifier) {
+	init (rooms: [ChatRoom], reporter: Reporter) {
         wsRetries = 0
         wsMaxRetries = 10
         running = false
         
         self.rooms = rooms
         
-        self.classifier = classifier
+        self.reporter = reporter
     }
     
     enum QuestionProcessingError: Error {
@@ -72,7 +72,7 @@ class PostFetcher {
                             continue
                         }
                         
-                        try self.classifier.checkAndReportPost(post)
+                        try self.reporter.checkAndReportPost(post)
                     }
                 } catch {
                     handleError(error, "while checking active posts")

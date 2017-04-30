@@ -27,18 +27,18 @@ class CommandCheckPost: Command {
 			return
 		}
 		
-		if classifier == nil {
+		if reporter == nil {
 			reply("Waiting for the filter to load...")
 			repeat {
 				sleep(1)
-			} while classifier == nil
+			} while reporter == nil
 		}
 		
 		guard let question = try apiClient.fetchQuestion(questionID).items?.first else {
 			reply("Could not fetch the question!")
 			return
 		}
-		let result = try classifier.checkAndReportPost(question)
+		let result = try reporter.checkAndReportPost(question)
 		switch result {
             case .alreadyClosed:
                 reply ("That post was caught by the filter but is already closed.")

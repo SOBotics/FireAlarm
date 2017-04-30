@@ -56,43 +56,32 @@ extension ChatUser {
 }
 
 extension ChatRoom {
-	
-	
-	func notificationString(tags: [String], reason: PostClassifier.ReportReason) -> String {
+	func notificationString(tags: [String], reasons: [FilterResult]) -> String {
 		var users = [ChatUser]()
 		for user in userDB {
 			var shouldNotify = false
 			
 			if user.notified {
-				switch reason {
-				case .bayesianFilter:
-					if !user.notificationTags.isEmpty {
-						for tag in tags {
-							if user.notificationTags.contains(tag) {
-								shouldNotify = true
-							}
+				if !user.notificationTags.isEmpty {
+					for tag in tags {
+						if user.notificationTags.contains(tag) {
+							shouldNotify = true
 						}
 					}
-					else {
+				}
+				else {
+					shouldNotify = true
+				}
+				
+				for reason in reasons {
+					guard case .customFilter(let filter) = reason.type else { continue }
+					
+					if filter is FilterBlacklistedUsernames && user.notificationReasons.contains("username") {
 						shouldNotify = true
 					}
-					
-				case .blacklistedUsername:
-					if (user.notificationReasons.isEmpty && user.notificationTags.isEmpty)
-						|| user.notificationReasons.contains("username") {
-						
+					if filter is FilterMisleadingLinks && user.notificationReasons.contains("misleadingLink") {
 						shouldNotify = true
 					}
-					
-				case .misleadingLink:
-					if (user.notificationReasons.isEmpty && user.notificationTags.isEmpty)
-						|| user.notificationReasons.contains("misleadingLink") {
-						
-						shouldNotify = true
-					}
-					
-				case .manuallyReported:
-					break
 				}
 			}
 			

@@ -11,7 +11,7 @@ import SwiftChatSE
 import Dispatch
 import SwiftStack
 
-class FilterBlacklistedUsernames {
+class FilterBlacklistedUsernames: Filter {
     var blacklistedUsernames: [String]
     
     enum FilterUsersLoadingError: Error {
@@ -46,22 +46,26 @@ class FilterBlacklistedUsernames {
         }
     }
     
-    func runUsernameFilter(_ post: Question) -> Bool {
+    func check(_ post: Question) -> FilterResult? {
         guard let name = post.owner?.display_name else {
             print("No username for \(post.id.map { String($0) } ?? "<no ID>")!")
-            return false
+            return nil
         }
         for regex in blacklistedUsernames {
             if name.range(of: regex, options: [.regularExpression, .caseInsensitive]) != nil {
-                return true
+				return FilterResult(
+					type: .customFilter(filter: self),
+					header: "Blacklisted username",
+					details: "Username matched regex `\(regex)`"
+				)
             }
         }
         
         
-        return false
+        return nil
     }
     
-    func saveUsernameBlacklist() throws {
+    func save() throws {
         let data = try JSONSerialization.data(withJSONObject:blacklistedUsernames, options: .prettyPrinted)
         try data.write(to: saveDirURL.appendingPathComponent("blacklisted_users.json"))
     }
