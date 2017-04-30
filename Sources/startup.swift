@@ -136,8 +136,6 @@ func main() throws {
 		}
 	}
 	
-	
-	
     //Get the location
 	if let rawLocation = redunda?.locationName {
         let components = rawLocation.components(separatedBy: "/")
@@ -153,6 +151,26 @@ func main() throws {
         device = String(String.UnicodeScalarView(device.unicodeScalars.filter { !CharacterSet.newlines.contains($0) }))
         ping = " (cc @\(user))"
 		userLocation = location
+    } else if FileManager.default.fileExists (atPath: "location.txt") {
+        do {
+            let rawLocation = try loadFile ("location.txt")
+            
+            let components = rawLocation.components(separatedBy: "/")
+            
+            user = components.first ?? ""
+            device = components.dropFirst().joined(separator: " ")
+            
+            location = "\(user)/\(device)"
+            
+            location = String(location.characters.filter { !"\n".characters.contains($0) })
+            userLocation = location
+            user = String(user.characters.filter { !"\n".characters.contains($0) })
+            device = String(device.characters.filter { !"\n".characters.contains($0) })
+            ping = " (cc @\(user))"
+            userLocation = location
+        } catch {
+            print ("Location could not be loaded!")
+        }
     } else {
         print ("Location could not be loaded!")
     }
