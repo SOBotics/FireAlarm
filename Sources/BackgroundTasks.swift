@@ -15,13 +15,17 @@ func save(rooms: [ChatRoom]) {
 	} catch {
 		handleError(error, "while saving the user database")
 	}
-	do {
-		try classifier.filterBlacklistedUsernames.saveUsernameBlacklist()
-	} catch {
-		handleError(error, "while saving the username blacklist")
+	
+	for filter in reporter.filters {
+		do {
+			try filter.save()
+		} catch {
+			handleError(error, "while saving a filter")
+		}
 	}
+	
 	do {
-		try classifier.reporter.saveReports()
+		try reporter.saveReports()
 	} catch {
 		handleError(error, "while saving reports")
 	}
@@ -80,7 +84,7 @@ func handleInput(input: String, rooms: [ChatRoom], listener: ChatListener) {
 func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
 	var shouldReboot = reason == .reboot
 	
-	classifier.postFetcher.stop()
+	reporter.postFetcher.stop()
 	
 	//Wait for pending messages to be posted.
 	for room in rooms {
@@ -88,7 +92,7 @@ func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
 			sleep(1)
 		}
 	}
-	while classifier != nil && !(classifier.postFetcher.ws.state == .disconnected || classifier.postFetcher.ws.state == .error) {
+	while reporter != nil && !(reporter.postFetcher.ws.state == .disconnected || reporter.postFetcher.ws.state == .error) {
 		sleep(1)
 	}
 	

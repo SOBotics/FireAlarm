@@ -22,7 +22,7 @@ class Word {
     }
 }
 
-class FilterNaiveBayes {
+class FilterNaiveBayes: Filter {
     let words: [String:Word]
     let initialProbability: Double
     
@@ -39,7 +39,7 @@ class FilterNaiveBayes {
         self.words = words
     }
     
-    func runBayesianFilter(_ post: Question) -> Int {
+    func check(_ post: Question) -> FilterResult? {
         var trueProbability = Double(0.263)
         var falseProbability = Double(1 - trueProbability)
         var postWords = [String]()
@@ -47,7 +47,7 @@ class FilterNaiveBayes {
         
         guard let body = post.body else {
             print("No body for \(post.id.map { String($0) } ?? "<no ID>")")
-            return 10000
+            return nil
         }
         
         var currentWord: String = ""
@@ -89,6 +89,18 @@ class FilterNaiveBayes {
         
         let difference = -log10(falseProbability - trueProbability)
         
-        return Int(difference.isNormal ? difference : 10000)
+		if difference.isNormal {
+			return FilterResult(
+				type: .bayesianFilter(difference: Int(difference)),
+				header: "Potentially bad question",
+				details: "Naive Bayes score \(Int(difference))"
+			)
+		}
+		
+		return nil
     }
+	
+	func save() throws {
+		
+	}
 }

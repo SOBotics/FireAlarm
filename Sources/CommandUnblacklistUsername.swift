@@ -25,8 +25,10 @@ class CommandUnblacklistUsername: Command {
 		}
 		
 		let username = arguments.joined(separator: " ")
-		if let index = classifier.filterBlacklistedUsernames.blacklistedUsernames.index(of: username) {
-			classifier.filterBlacklistedUsernames.blacklistedUsernames.remove(at: index)
+		let filter = reporter.filter(ofType: FilterBlacklistedUsernames.self)
+		
+		if let index = filter?.blacklistedUsernames.index(of: username) {
+			filter?.blacklistedUsernames.remove(at: index)
 			reply("\(username) was removed from the username blacklist.")
 		} else {
 			reply("\(username) was not blacklisted.")

@@ -23,6 +23,25 @@ extension Post {
 	}
 }
 
-class Filter {
+
+struct FilterResult {
+	enum ResultType {
+		case bayesianFilter(difference: Int)
+		case customFilter(filter: Filter)
+	}
 	
+	let type: ResultType
+	let header: String
+	let details: String?
+	
+	init(type: ResultType, header: String, details: String? = nil) {
+		self.type = type
+		self.header = header
+		self.details = details
+	}
+}
+
+protocol Filter: class {
+	func check(_ post: Question) -> FilterResult?
+	func save() throws
 }

@@ -11,10 +11,10 @@ import SwiftChatSE
 import SwiftStack
 import Dispatch
 
-class FilterMisleadingLinks {
+class FilterMisleadingLinks: Filter {
     init () {}
     
-    func runLinkFilter(_ post: Question) -> Bool {
+    func check(_ post: Question) -> FilterResult? {
         do {
             let regex = try NSRegularExpression(pattern:
                 "<a href=\"([^\"]*)\" rel=\"nofollow(?: noreferrer)?\">\\s*([^<\\s]*)(?=\\s*</a>)", options: []
@@ -22,7 +22,7 @@ class FilterMisleadingLinks {
             
             guard let body = post.body else {
                 print("No body for \(post.id.map { String($0) } ?? "<no ID>")!")
-                return false
+                return nil
             }
             
             #if os(Linux)
@@ -62,16 +62,24 @@ class FilterMisleadingLinks {
                     !linkHost.contains("//http") &&
                     !textHost.contains("//http")) {
                     
-                    return true
+					return FilterResult(
+						type: .customFilter(filter: self),
+						header: "Misleading link",
+						details: "Link appears to go to `\(textHost)` but actually goes to `\(linkHost)`"
+					)
                 }
                 
                 
             }
-            return false
+            return nil
             
         } catch {
             handleError(error, "while checking for misleading links")
-            return false
+            return nil
         }
-    }
+	}
+	
+	func save() throws {
+		
+	}
 }
