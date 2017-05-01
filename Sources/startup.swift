@@ -146,6 +146,7 @@ func main() throws {
         location = String(String.UnicodeScalarView(location.unicodeScalars.filter { !CharacterSet.newlines.contains($0) }))
         userLocation = location
         user = String(String.UnicodeScalarView(user.unicodeScalars.filter { !CharacterSet.newlines.contains($0) }))
+        user = user.replacingOccurrences(of: " ", with: "")
         device = String(String.UnicodeScalarView(device.unicodeScalars.filter { !CharacterSet.newlines.contains($0) }))
         ping = " (cc @\(user))"
 		userLocation = location
