@@ -156,7 +156,7 @@ class Reporter {
 			let header = reasons.map { $0.header }.joined(separator: ", ")
 			
 			let message = "[ [\(botName)](\(stackAppsLink)) ] " +
-				"[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//stackoverflow.com/q/\(id))" +
+				"[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//stackoverflow.com/q/\(id)) " +
 				room.notificationString(tags: tags, reasons: reasons)
 			
 			room.postMessage(message)
