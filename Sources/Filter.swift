@@ -442,7 +442,7 @@ class Filter {
                 newTitle = newTitle.replacingOccurrences(of: "]", with: "\\]")
                 
 				let message = "[ [\(botName)](\(stackAppsLink)) ] " +
-					"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(newTitle)](//stackoverflow.com/q/\(id)) (filter score: \(difference))" +
+					"[tag:\(tags(for: post).first ?? "tagless")] \(header) [\(newTitle)](//stackoverflow.com/q/\(id)) (filter score: \(difference)) " +
 					room.notificationString(tags: tags(for: post), reason: reason)
                 
 				room.postMessage(message)
