@@ -23,11 +23,11 @@ extension Post {
 	}
 }
 
-
 struct FilterResult {
 	enum ResultType {
 		case bayesianFilter(difference: Int)
 		case customFilter(filter: Filter)
+        case manuallyReported
 	}
 	
 	let type: ResultType
