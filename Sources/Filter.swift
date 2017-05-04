@@ -23,7 +23,6 @@ extension Post {
 	}
 }
 
-
 struct FilterResult {
 	enum ResultType {
 		case bayesianFilter(difference: Int)
