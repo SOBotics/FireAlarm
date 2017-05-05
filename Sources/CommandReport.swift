@@ -47,7 +47,7 @@ class CommandReport: Command {
         
         var filterResult = reporter.checkPost(question)
         
-        filterResult [0] = FilterResult (type: .manuallyReported, header: "Manually reported question", details: "Question manually reported.")
+        filterResult.append(FilterResult (type: .manuallyReported, header: "Manually reported question", details: "Question manually reported by \(message.user): https://chat.\(message.room.client.host.rawValue)/transcript/message.id#message.id"))
         
         reporter.report(post: question, reasons: filterResult)
     }
