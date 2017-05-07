@@ -59,7 +59,7 @@ func main() throws {
 	apiClient.key = "HNA2dbrFtyTZxeHN6rThNg(("
 	apiClient.defaultFilter = "!-*f(6rOFHc24"
 
-	let client = Client(host: .StackOverflow)
+	let client = Client()
 
 	
 	
@@ -180,14 +180,14 @@ func main() throws {
 	//Join the chat room
 	let rooms: [ChatRoom]
 	if let devString = env["DEVELOPMENT"], let devRoom = Int(devString) {
-		rooms = [ChatRoom(client: client, roomID: devRoom)]
+		rooms = [ChatRoom(client: client, host: .stackOverflow, roomID: devRoom)]
 		development = true
 	}
 	else {
 		rooms = [
-			ChatRoom(client: client, roomID: 123602), //FireAlarm Development
-			ChatRoom(client: client, roomID: 111347), //SOBotics
-			ChatRoom(client: client, roomID: 41570),  //SO Close Vote Reviewers
+			ChatRoom(client: client, host: .stackOverflow, roomID: 123602), //FireAlarm Development
+			ChatRoom(client: client, host: .stackOverflow, roomID: 111347), //SOBotics
+			ChatRoom(client: client, host: .stackOverflow, roomID: 41570),  //SO Close Vote Reviewers
 		]
 		
 		development = false
