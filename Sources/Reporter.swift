@@ -103,8 +103,6 @@ class Reporter {
 		try data.write(to: saveDirURL.appendingPathComponent("reports.json"))
 	}
 	
-	
-	
 	///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
 	func report(post: Question, reasons: [FilterResult]) -> ReportResult {
 		guard let id = post.id else {
