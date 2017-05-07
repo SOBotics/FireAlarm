@@ -20,6 +20,7 @@ let commands: [Command.Type] = [
 	CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
 	CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self, CommandLeaveRoom.self,
 	CommandLocation.self, CommandReport.self, CommandUnclosed.self, CommandTestBayesian.self,
+	CommandWhy.self,
 ]
 
 fileprivate var listener: ChatListener!
@@ -217,8 +218,6 @@ func main() throws {
 	errorRoom = rooms.first!
 	
 	
-	
-	
 	listener = ChatListener(commands: commands)
 	listener.onShutdown { shutDown(reason: $0, rooms: rooms) }
 	rooms.forEach {room in room.onMessage { listener.processMessage(room, message: $0, isEdit: $1) } }
@@ -282,9 +281,6 @@ func main() throws {
 	
 	shortVersion = getShortVersion(currentVersion)
 	versionLink = getVersionLink(currentVersion)
-	
-	
-	
 	
 	//Load the filter
 	reporter = Reporter(rooms)
