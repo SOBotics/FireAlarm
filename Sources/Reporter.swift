@@ -179,13 +179,13 @@ class Reporter {
             room.postMessage(message, completion: {
                 messageID in
                 idMessage = messageID
-                print ("\(messageID)   ||  \(idMessage)")
             })
+            
+            while (room.messageQueue.count != 0) { sleep (1) }
 		}
 		
 		if reported {
             reportedPosts.append((id: id, when: Date(), difference: bayesianDifference ?? 0, messageID: idMessage, details: postDetails))
-            print (" ID MESSAGE:\(idMessage)")
 			return .reported(reasons: reasons)
 		} else {
 			return .notBad
