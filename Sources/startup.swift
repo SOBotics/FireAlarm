@@ -226,7 +226,7 @@ func main() throws {
 	
 	//Post the startup message
 	let startupMessage: String?
-	let startupMessageCompletion: ((Int) -> Void)?
+	let startupMessageCompletion: ((Int?) -> Void)?
 	
 	currentVersion = getCurrentVersion()
 	if FileManager.default.fileExists(atPath: "update-failure") {
