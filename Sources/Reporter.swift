@@ -111,25 +111,36 @@ class Reporter {
 			print("No post ID!")
 			return .notBad
 		}
+        
+        var manuallyReported = false
+        
+        let _ = reasons.filter {
+            if case .manuallyReported = $0.type {
+                manuallyReported = true
+                return true
+            }
+            return false
+        }
 		
-		if (post.closed_reason != nil) {
-			print ("Not reporting \(post.id ?? 0) as it is closed.")
-			return .alreadyClosed
-		}
-		
-		if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
-			let recentlyReportedPosts = reportedPosts.filter {
-				$0.when > minDate
-			}
-			if recentlyReportedPosts.contains(where: { $0.id == id }) {
-				print("Not reporting \(id) because it was recently reported.")
-				return .alreadyReported
-			}
-		}
-		else {
-			rooms.forEach {$0.postMessage("Failed to calculate minimum report date!")}
-		}
-		
+        if manuallyReported == false {
+            if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
+                let recentlyReportedPosts = reportedPosts.filter {
+                    $0.when > minDate
+                }
+                if recentlyReportedPosts.contains(where: { $0.id == id }) {
+                    print("Not reporting \(id) because it was recently reported.")
+                    return .alreadyReported
+                }
+            }
+            else {
+                rooms.forEach {$0.postMessage("Failed to calculate minimum report date!")}
+            }
+            
+            if (post.closed_reason != nil) {
+                print ("Not reporting \(post.id ?? 0) as it is closed.")
+                return .alreadyClosed
+            }
+        }
 		
 		var reported = false
 		
