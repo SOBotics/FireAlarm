@@ -179,7 +179,23 @@ func main() throws {
 	//Join the chat room
 	let rooms: [ChatRoom]
 	if let devString = env["DEVELOPMENT"], let devRoom = Int(devString) {
-		rooms = [ChatRoom(client: client, host: .stackOverflow, roomID: devRoom)]
+		let devServer: ChatRoom.Host
+		if let devServerString = env["DEVELOPMENT_HOST"] {
+			switch devServerString.lowercased() {
+			case "chat.so":
+				devServer = .stackOverflow
+			case "chat.se":
+				devServer = .stackExchange
+			case "chat.mse":
+				devServer = .metaStackExchange
+			default:
+				fatalError("DEVELOPMENT_HOST contains an invalid value; accepted values are chat.SO, chat.SE, and chat.mSE (case-insensitive)")
+			}
+		} else {
+			devServer = .stackOverflow
+		}
+		
+		rooms = [ChatRoom(client: client, host: devServer, roomID: devRoom)]
 		development = true
 	}
 	else {
@@ -187,6 +203,7 @@ func main() throws {
 			ChatRoom(client: client, host: .stackOverflow, roomID: 123602), //FireAlarm Development
 			ChatRoom(client: client, host: .stackOverflow, roomID: 111347), //SOBotics
 			ChatRoom(client: client, host: .stackOverflow, roomID: 41570),  //SO Close Vote Reviewers
+			ChatRoom(client: client, host: .stackExchange, roomID: 54445),	//SEBotics
 		]
 		
 		development = false
