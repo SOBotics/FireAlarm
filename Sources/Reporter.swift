@@ -11,7 +11,77 @@ import SwiftStack
 import SwiftChatSE
 import Dispatch
 
-var reportedPosts = [(id: Int, when: Date, difference: Int, messageID: Int, details: String)]()
+struct Report {
+	let id: Int
+	let when: Date
+	let difference: Int?
+	
+	let messages: [(host: ChatRoom.Host, roomID: Int, messageID: Int)]
+	let details: String?
+	
+	
+	init(
+		id: Int,
+		when: Date,
+		difference: Int?,
+		messages: [(host: ChatRoom.Host, roomID: Int, messageID: Int)] = [],
+		details: String? = nil
+		) {
+		
+		self.id = id
+		self.when = when
+		self.difference = difference
+		self.messages = messages
+		self.details = details
+	}
+	
+	init?(json: [String:Any]) {
+		guard let id = json["id"] as? Int, let when = json["t"] as? Int else {
+			return nil
+		}
+		
+		let messages = (json["m"] as? [[String:Any]])?.flatMap { messageJSON in
+			guard let host = (messageJSON["h"] as? Int).map ({ChatRoom.Host(rawValue: $0)}) ?? nil,
+				let room = messageJSON["r"] as? Int,
+				let message = messageJSON["m"] as? Int else {
+					return nil
+			}
+			
+			return (host: host, roomID: room, messageID: message)
+		} as [(host: ChatRoom.Host, roomID: Int, messageID: Int)]? ?? []
+		let why = json["w"] as? String
+		
+		self.init(
+			id: id,
+			when: Date(timeIntervalSince1970: TimeInterval(when)),
+			difference: (json["d"] as? Int),
+			messages: messages,
+			details: why
+		)
+	}
+	
+	var json: [String:Any] {
+		var result = [String:Any]()
+		result["id"] = id
+		result["t"] = Int(when.timeIntervalSince1970)
+		if let d = difference {
+			result["d"] = d
+		}
+		
+		if let w = details {
+			result["w"] = w
+		}
+		
+		
+		result["m"] = messages.map {
+			["h":$0.host.rawValue, "r":$0.roomID, "m":$0.messageID]
+		}
+		
+		return result
+	}
+}
+
+var reportedPosts = [Report]()
 
 class Reporter {
 	var postFetcher: PostFetcher!
@@ -42,11 +112,10 @@ class Reporter {
 			}
 			
 			reportedPosts = try reports.map {
-				guard let id = $0["id"] as? Int, let when = $0["t"] as? Int else {
+				guard let report = Report(json: $0) else {
 					throw ReportsLoadingError.InvalidReport(report: $0)
 				}
-				let difference = ($0["d"] as? Int) ?? 0
-                return (id: id, when: Date(timeIntervalSince1970: TimeInterval(when)), difference: difference, messageID: -1, details: "Details for this post are lost.")
+				return report
 			}
 			
 		} catch {
@@ -95,9 +164,7 @@ class Reporter {
 	
 	func saveReports() throws {
 		let data = try JSONSerialization.data(
-			withJSONObject: reportedPosts.map {
-				["id":$0.id,"t":Int($0.when.timeIntervalSince1970),"d":$0.difference]
-			}
+			withJSONObject: reportedPosts.map { $0.json }
 		)
 		
 		try data.write(to: saveDirURL.appendingPathComponent("reports.json"))
@@ -109,44 +176,50 @@ class Reporter {
 			print("No post ID!")
 			return .notBad
 		}
-        
-        var manuallyReported = false
-        
-        let _ = reasons.filter {
-            if case .manuallyReported = $0.type {
-                manuallyReported = true
-                return true
-            }
-            return false
-        }
 		
-        if manuallyReported == false {
-            if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
-                let recentlyReportedPosts = reportedPosts.filter {
-                    $0.when > minDate
-                }
-                if recentlyReportedPosts.contains(where: { $0.id == id }) {
-                    print("Not reporting \(id) because it was recently reported.")
-                    return .alreadyReported
-                }
-            }
-            else {
-                rooms.forEach {$0.postMessage("Failed to calculate minimum report date!")}
-            }
-            
-            if (post.closed_reason != nil) {
-                print ("Not reporting \(post.id ?? 0) as it is closed.")
-                return .alreadyClosed
-            }
-        }
+		if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
+			let recentlyReportedPosts = reportedPosts.filter {
+				$0.when > minDate
+			}
+			if recentlyReportedPosts.contains(where: { $0.id == id }) {
+				print("Not reporting \(id) because it was recently reported.")
+				return .alreadyReported
+			}
+		}
+		else {
+			rooms.forEach {$0.postMessage("Failed to calculate minimum report date!")}
+		}
+		
+		if (post.closed_reason != nil) {
+			print ("Not reporting \(post.id ?? 0) as it is closed.")
+			return .alreadyClosed
+		}
 		
 		var reported = false
 		
 		var bayesianDifference: Int?
-        
-        var idMessage = -1
-        
-        var postDetails = "Details unknown."
+		
+		var postDetails = "Details unknown."
+		
+		
+		
+		let title = "\(post.title ?? "<no title>")"
+			.replacingOccurrences(of: "[", with: "\\[")
+			.replacingOccurrences(of: "]", with: "\\]")
+		
+		let tags = post.tags ?? []
+		
+		let header = reasons.map { $0.header }.joined(separator: ", ")
+		
+		postDetails = reasons.map {$0.details ?? "Details unknown."}.joined (separator: ", ")
+		
+		
+		
+		var messages: [(host: ChatRoom.Host, roomID: Int, messageID: Int)] = []
+		
+		
+		
+		let sema = DispatchSemaphore(value: 0)
 		
 		for room in rooms {
 			//Filter out Bayesian scores which are less than this room's threshold.
@@ -157,33 +230,38 @@ class Reporter {
 				}
 				return true
 			}
-			if reasons.isEmpty { continue }
+			if reasons.isEmpty {
+				sema.signal()
+				continue
+			}
+			
 			reported = true
 			
-			let title = "\(post.title ?? "<no title>")"
-				.replacingOccurrences(of: "[", with: "\\[")
-				.replacingOccurrences(of: "]", with: "\\]")
-			
-			let tags = post.tags ?? []
-			
-			let header = reasons.map { $0.header }.joined(separator: ", ")
-            
-            postDetails = reasons.map {$0.details ?? "Details unknown."}.joined (separator: ", ")
 			
 			let message = "[ [\(botName)](\(stackAppsLink)) ] " +
 				"[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//stackoverflow.com/q/\(id)) " +
 				room.notificationString(tags: tags, reasons: reasons)
 			
-            room.postMessage(message, completion: {
-                messageID in
-                idMessage = messageID
-            })
-            
-            while (room.messageQueue.count != 0) { sleep (1) }
+			room.postMessage(message, completion: {message in
+				if let message = message {
+					messages.append((host: room.host, roomID: room.roomID, messageID: message))
+				}
+				sema.signal()
+			})
 		}
+		rooms.forEach { _ in sema.wait() }
+		
 		
 		if reported {
-            reportedPosts.append((id: id, when: Date(), difference: bayesianDifference ?? 0, messageID: idMessage, details: postDetails))
+			reportedPosts.append(Report(
+				id: id,
+				when: Date(),
+				difference: bayesianDifference,
+				messages: messages,
+				details: postDetails
+				)
+			)
+			
 			return .reported(reasons: reasons)
 		} else {
 			return .notBad

@@ -10,22 +10,44 @@ import Foundation
 import SwiftChatSE
 
 class CommandWhy: Command {
-    override class func usage() -> [String] {
-        return ["why"]
-    }
-    
-    override func run() throws {
-        var index = reportedPosts.count - 1
-        print ("\(index)")
-        
-        while (index >= 0) {
-            if reportedPosts[index].messageID == message.replyID {
-                message.reply(reportedPosts [index].details)
-                return
-            }
-            index -= 1
-        }
-        
-        message.reply ("Not a report (or did the bot reboot after the report?) \(index)")
-    }
+	override class func usage() -> [String] {
+		return ["why"]
+	}
+	
+	override func run() throws {
+		let matchingReport: Report
+		
+		if let replyID = message.replyID {
+			
+			//This is a reply.
+			//Get the last report whose message matches this one.
+			if let report = reportedPosts
+				.reversed()
+				.first(where: { report in
+					report.messages.contains { $0.messageID == replyID && $0.host == message.room.host}
+				}) {
+				
+				matchingReport = report
+			} else {
+				reply("That message is not in the report list.")
+				return
+			}
+		} else {
+			//This is not a reply.
+			//Get the last report in this room.
+			if let report = reportedPosts
+				.reversed()
+				.first(where: { report in
+					report.messages.contains { $0.roomID == message.room.roomID }
+				}) {
+				
+				matchingReport = report
+			} else {
+				reply("No reports have been posted in this room.")
+				return
+			}
+		}
+		
+		reply(matchingReport.details ?? "Details for this report are not available.")
+	}
 }
