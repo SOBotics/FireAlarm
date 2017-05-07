@@ -11,7 +11,7 @@ import SwiftStack
 import SwiftChatSE
 import Dispatch
 
-var reportedPosts = [(id: Int, when: Date, difference: Int)]()
+var reportedPosts = [(id: Int, when: Date, difference: Int, messageID: Int, details: String)]()
 
 class Reporter {
 	var postFetcher: PostFetcher!
@@ -46,7 +46,7 @@ class Reporter {
 					throw ReportsLoadingError.InvalidReport(report: $0)
 				}
 				let difference = ($0["d"] as? Int) ?? 0
-				return (id: id, when: Date(timeIntervalSince1970: TimeInterval(when)), difference: difference)
+                return (id: id, when: Date(timeIntervalSince1970: TimeInterval(when)), difference: difference, messageID: -1, details: "Details for this post are lost.")
 			}
 			
 		} catch {
@@ -145,6 +145,10 @@ class Reporter {
 		var reported = false
 		
 		var bayesianDifference: Int?
+        
+        var idMessage = -1
+        
+        var postDetails = "Details unknown."
 		
 		for room in rooms {
 			//Filter out Bayesian scores which are less than this room's threshold.
@@ -165,17 +169,23 @@ class Reporter {
 			let tags = post.tags ?? []
 			
 			let header = reasons.map { $0.header }.joined(separator: ", ")
+            
+            postDetails = reasons.map {$0.details ?? "Details unknown."}.joined (separator: ", ")
 			
 			let message = "[ [\(botName)](\(stackAppsLink)) ] " +
 				"[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//stackoverflow.com/q/\(id)) " +
 				room.notificationString(tags: tags, reasons: reasons)
 			
-			room.postMessage(message)
-			
+            room.postMessage(message, completion: {
+                messageID in
+                idMessage = messageID
+                print ("\(messageID)   ||  \(idMessage)")
+            })
 		}
 		
 		if reported {
-			reportedPosts.append((id: id, when: Date(), difference: bayesianDifference ?? 0))
+            reportedPosts.append((id: id, when: Date(), difference: bayesianDifference ?? 0, messageID: idMessage, details: postDetails))
+            print (" ID MESSAGE:\(idMessage)")
 			return .reported(reasons: reasons)
 		} else {
 			return .notBad

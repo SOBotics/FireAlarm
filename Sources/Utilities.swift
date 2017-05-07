@@ -17,6 +17,7 @@ var startTime = Date()
 var botName = "FireAlarm-Swift"
 var githubLink = "//github.com/SOBotics/FireAlarm/tree/swift"
 var stackAppsLink = "//stackapps.com/q/7183"
+var reportHeader = "[ [FireAlarm-Swift](//stackapps.com/q/7183) ]"
 
 var currentVersion = "<unknown version>"
 var shortVersion = "<unknown version>"
