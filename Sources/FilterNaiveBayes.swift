@@ -100,7 +100,5 @@ class FilterNaiveBayes: Filter {
 		return nil
     }
 	
-	func save() throws {
-		
-	}
+    func save() throws {}
 }
