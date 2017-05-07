@@ -47,8 +47,17 @@ class CommandReport: Command {
         
         var filterResult = reporter.checkPost(question)
         
-        filterResult.append(FilterResult (type: .manuallyReported, header: "Manually reported question", details: "Question manually reported by \(message.user): https://chat.\(message.room.client.host.rawValue)/transcript/message.id#message.id"))
+        filterResult.append(FilterResult (type: .manuallyReported, header: "Manually reported question", details: "Question manually reported by \(message.user): https://\(message.room.host.chatDomain)/transcript/message.id#message.id"))
         
-        reporter.report(post: question, reasons: filterResult)
+		switch reporter.report(post: question, reasons: filterResult) {
+		case .alreadyClosed:
+			reply("That post is already closed.")
+		case .alreadyReported:
+			reply("That post has already been reported.")
+		case .notBad:
+			reply("this should never happen (cc @NobodyNada): `\(#file)`, line \(#line)")
+		case .reported(_):
+			break
+		}
     }
 }
