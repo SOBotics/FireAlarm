@@ -47,7 +47,7 @@ class CommandReport: Command {
         
         var filterResult = reporter.checkPost(question)
         
-        filterResult.append(FilterResult (type: .manuallyReported, header: "Manually reported question", details: "Question manually reported by \(message.user): https://\(message.room.host.chatDomain)/transcript/message.id#message.id"))
+        filterResult.append(FilterResult (type: .manuallyReported, header: "Manually reported question", details: "Question manually reported by \(message.user): https://\(message.room.host.chatDomain)/transcript/message/\(message.id ?? -1)#\(message.id ?? -1)"))
         
 		switch reporter.report(post: question, reasons: filterResult) {
 		case .alreadyClosed:
