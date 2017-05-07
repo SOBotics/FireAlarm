@@ -13,21 +13,11 @@ import Dispatch
 
 class CommandReport: Command {
     override class func usage() -> [String] {
-        return ["report print ...", "report ..."]
+        return ["report ..."]
     }
     
     override class func privileges() -> ChatUser.Privileges {
         return .owner
-    }
-    
-    func tags(for post: Post) -> [String] {
-        if let q = post as? Question {
-            return q.tags ?? []
-        } else if let a = post as? Answer {
-            return a.tags ?? []
-        } else {
-            return []
-        }
     }
     
     override func run() throws {
@@ -43,22 +33,22 @@ class CommandReport: Command {
             return
         }
         
+        if reporter == nil {
+            reply("Waiting for the filter to load...")
+            repeat {
+                sleep(1)
+            } while reporter == nil
+        }
+        
         guard let question = try apiClient.fetchQuestion(questionID).items?.first else {
             reply("Could not fetch the question!")
             return
         }
         
-        if usageIndex == 0
-        {
-            var newTitle = "\(question.title ?? "<no title>")"
-            
-            newTitle = newTitle.replacingOccurrences(of: "[", with: "\\[")
-            newTitle = newTitle.replacingOccurrences(of: "]", with: "\\]")
-            
-            let messagePost = "[ [\(botName)](\(stackAppsLink)) ] " +
-            "[tag:\(tags(for: question).first ?? "<unknown tag>")] Manually reported post [\(newTitle)](//stackoverflow.com/q/\(questionID!))"
-            
-            message.room.postMessage(messagePost)
-        }
+        var filterResult = reporter.checkPost(question)
+        
+        filterResult.append(FilterResult (type: .manuallyReported, header: "Manually reported question", details: "Question manually reported by \(message.user): https://chat.\(message.room.client.host.rawValue)/transcript/message.id#message.id"))
+        
+        reporter.report(post: question, reasons: filterResult)
     }
 }
