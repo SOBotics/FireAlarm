@@ -34,29 +34,9 @@ open class CommandStatus: Command {
 		if minutes != 0 {uptimeStrings.append("\(minutes) minutes")}
 		if seconds != 0 {uptimeStrings.append("\(seconds) seconds")}
 		
-		let pipe = Pipe()
-		let process = Process()
-		process.launchPath = "/usr/bin/env"
-		process.arguments = ["uname", "-srm"]
-		process.standardOutput = pipe
-		process.launch()
-		
-		var machineInfo: String = "<failed to get machine information>"
-		
-		let sema = DispatchSemaphore(value: 0)
-		
-		process.terminationHandler = {process in
-			if let info = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) {
-				machineInfo = info.trimmingCharacters(in: .whitespacesAndNewlines)
-			}
-			sema.signal()
-		}
-		
-		let _ = sema.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(5))
-		
 		
 		let status = "[\(botName)](\(stackAppsLink)) version [\(shortVersion)](\(versionLink)), " +
-		"running for \(uptimeStrings.joined(separator: " ")) on \(machineInfo)"
+		"running for \(uptimeStrings.joined(separator: " ")) on \(location)"
 		
 		reply(status)
 	}
