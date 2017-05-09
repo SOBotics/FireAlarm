@@ -141,6 +141,8 @@ class Reporter {
 	}
 	
 	func checkPost(_ post: Question) -> [FilterResult] {
+        //Debug print
+        print ("Checking post id \(post.id ?? -1).")
 		return filters.flatMap { $0.check(post) }
 	}
 	
@@ -176,6 +178,9 @@ class Reporter {
 			print("No post ID!")
 			return .notBad
 		}
+        
+        //Debug print
+        print ("'report' called on post \(id)")
 		
 		if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
 			let recentlyReportedPosts = reportedPosts.filter {
