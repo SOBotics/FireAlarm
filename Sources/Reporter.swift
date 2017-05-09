@@ -192,7 +192,16 @@ class Reporter {
 				let recentlyReportedPosts = reportedPosts.filter {
 					$0.when > minDate
 				}
-				if recentlyReportedPosts.contains(where: { $0.id == id }) {
+				
+				let isManualReport = reasons.contains {
+					if case .manuallyReported = $0.type {
+						return true
+					} else {
+						return false
+					}
+				}
+				
+				if !isManualReport && recentlyReportedPosts.contains(where: { $0.id == id }) {
 					print("Not reporting \(id) because it was recently reported.")
 					result = .alreadyReported
 					return
