@@ -188,17 +188,17 @@ class Reporter {
 			//Debug print
 			print ("'report' called on post \(id)")
 			
+			let isManualReport = reasons.contains {
+				if case .manuallyReported = $0.type {
+					return true
+				} else {
+					return false
+				}
+			}
+			
 			if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
 				let recentlyReportedPosts = reportedPosts.filter {
 					$0.when > minDate
-				}
-				
-				let isManualReport = reasons.contains {
-					if case .manuallyReported = $0.type {
-						return true
-					} else {
-						return false
-					}
 				}
 				
 				if !isManualReport && recentlyReportedPosts.contains(where: { $0.id == id }) {
@@ -211,7 +211,7 @@ class Reporter {
 				rooms.forEach {$0.postMessage("Failed to calculate minimum report date!")}
 			}
 			
-			if (post.closed_reason != nil) {
+			if !isManualReport && post.closed_reason != nil {
 				print ("Not reporting \(post.id ?? 0) as it is closed.")
 				result = .alreadyClosed
 				return
