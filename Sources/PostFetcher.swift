@@ -159,6 +159,7 @@ class PostFetcher {
     }
     
     func webSocketMessageData(_ data: Data) {
+		lastEventDate = Date()
         let string = String(data: data, encoding: .utf8) ?? "<not UTF-8: \(data.base64EncodedString())>"
         do {
             
