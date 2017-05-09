@@ -19,7 +19,6 @@ struct Report {
 	let messages: [(host: ChatRoom.Host, roomID: Int, messageID: Int)]
 	let details: String?
 	
-	
 	init(
 		id: Int,
 		when: Date,
@@ -48,7 +47,7 @@ struct Report {
 			}
 			
 			return (host: host, roomID: room, messageID: message)
-		} as [(host: ChatRoom.Host, roomID: Int, messageID: Int)]? ?? []
+			} as [(host: ChatRoom.Host, roomID: Int, messageID: Int)]? ?? []
 		let why = json["w"] as? String
 		
 		self.init(
@@ -88,6 +87,9 @@ class Reporter {
 	let rooms: [ChatRoom]
 	
 	var filters = [Filter]()
+	
+	private let queue = DispatchQueue(label: "Reporter queue")
+	
 	
 	func filter<T: Filter>(ofType type: T.Type) -> T? {
 		for filter in filters {
@@ -141,8 +143,8 @@ class Reporter {
 	}
 	
 	func checkPost(_ post: Question) -> [FilterResult] {
-        //Debug print
-        print ("Checking post id \(post.id ?? -1).")
+		//Debug print
+		print ("Checking post id \(post.id ?? -1).")
 		return filters.flatMap { $0.check(post) }
 	}
 	
@@ -174,102 +176,113 @@ class Reporter {
 	
 	///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
 	func report(post: Question, reasons: [FilterResult]) -> ReportResult {
-		guard let id = post.id else {
-			print("No post ID!")
-			return .notBad
-		}
-        
-        //Debug print
-        print ("'report' called on post \(id)")
+		var result: ReportResult = .notBad
 		
-		if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
-			let recentlyReportedPosts = reportedPosts.filter {
-				$0.when > minDate
+		queue.sync {
+			guard let id = post.id else {
+				print("No post ID!")
+				result = .notBad
+				return
 			}
-			if recentlyReportedPosts.contains(where: { $0.id == id }) {
-				print("Not reporting \(id) because it was recently reported.")
-				return .alreadyReported
-			}
-		}
-		else {
-			rooms.forEach {$0.postMessage("Failed to calculate minimum report date!")}
-		}
-		
-		if (post.closed_reason != nil) {
-			print ("Not reporting \(post.id ?? 0) as it is closed.")
-			return .alreadyClosed
-		}
-		
-		var reported = false
-		
-		var bayesianDifference: Int?
-		
-		var postDetails = "Details unknown."
-		
-		
-		
-		let title = "\(post.title ?? "<no title>")"
-			.replacingOccurrences(of: "[", with: "\\[")
-			.replacingOccurrences(of: "]", with: "\\]")
-		
-		let tags = post.tags ?? []
-		
-		let header = reasons.map { $0.header }.joined(separator: ", ")
-		
-		postDetails = reasons.map {$0.details ?? "Details unknown."}.joined (separator: ", ")
-		
-		
-		
-		var messages: [(host: ChatRoom.Host, roomID: Int, messageID: Int)] = []
-		
-		
-		
-		let sema = DispatchSemaphore(value: 0)
-		
-		for room in rooms {
-			//Filter out Bayesian scores which are less than this room's threshold.
-			let reasons = reasons.filter {
-				if case .bayesianFilter(let difference) = $0.type {
-					bayesianDifference = difference
-					return difference < room.threshold
+			
+			//Debug print
+			print ("'report' called on post \(id)")
+			
+			if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
+				let recentlyReportedPosts = reportedPosts.filter {
+					$0.when > minDate
 				}
-				return true
-			}
-			if reasons.isEmpty {
-				sema.signal()
-				continue
-			}
-			
-			reported = true
-			
-			
-			let message = "[ [\(botName)](\(stackAppsLink)) ] " +
-				"[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//stackoverflow.com/q/\(id)) " +
-				room.notificationString(tags: tags, reasons: reasons)
-			
-			room.postMessage(message, completion: {message in
-				if let message = message {
-					messages.append((host: room.host, roomID: room.roomID, messageID: message))
+				if recentlyReportedPosts.contains(where: { $0.id == id }) {
+					print("Not reporting \(id) because it was recently reported.")
+					result = .alreadyReported
+					return
 				}
-				sema.signal()
-			})
-		}
-		rooms.forEach { _ in sema.wait() }
-		
-		
-		if reported {
-			reportedPosts.append(Report(
-				id: id,
-				when: Date(),
-				difference: bayesianDifference,
-				messages: messages,
-				details: postDetails
+			}
+			else {
+				rooms.forEach {$0.postMessage("Failed to calculate minimum report date!")}
+			}
+			
+			if (post.closed_reason != nil) {
+				print ("Not reporting \(post.id ?? 0) as it is closed.")
+				result = .alreadyClosed
+				return
+			}
+			
+			var reported = false
+			
+			var bayesianDifference: Int?
+			
+			var postDetails = "Details unknown."
+			
+			
+			
+			let title = "\(post.title ?? "<no title>")"
+				.replacingOccurrences(of: "[", with: "\\[")
+				.replacingOccurrences(of: "]", with: "\\]")
+			
+			let tags = post.tags ?? []
+			
+			let header = reasons.map { $0.header }.joined(separator: ", ")
+			
+			postDetails = reasons.map {$0.details ?? "Details unknown."}.joined (separator: ", ")
+			
+			
+			
+			var messages: [(host: ChatRoom.Host, roomID: Int, messageID: Int)] = []
+			
+			
+			
+			let sema = DispatchSemaphore(value: 0)
+			
+			for room in rooms {
+				//Filter out Bayesian scores which are less than this room's threshold.
+				let reasons = reasons.filter {
+					if case .bayesianFilter(let difference) = $0.type {
+						bayesianDifference = difference
+						return difference < room.threshold
+					}
+					return true
+				}
+				if reasons.isEmpty {
+					sema.signal()
+					continue
+				}
+				
+				reported = true
+				
+				
+				let message = "[ [\(botName)](\(stackAppsLink)) ] " +
+					"[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//stackoverflow.com/q/\(id)) " +
+					room.notificationString(tags: tags, reasons: reasons)
+				
+				room.postMessage(message, completion: {message in
+					if let message = message {
+						messages.append((host: room.host, roomID: room.roomID, messageID: message))
+					}
+					sema.signal()
+				})
+			}
+			rooms.forEach { _ in sema.wait() }
+			
+			
+			if reported {
+				reportedPosts.append(Report(
+					id: id,
+					when: Date(),
+					difference: bayesianDifference,
+					messages: messages,
+					details: postDetails
+					)
 				)
-			)
-			
-			return .reported(reasons: reasons)
-		} else {
-			return .notBad
+				
+				result = .reported(reasons: reasons)
+				return
+			} else {
+				result = .notBad
+				return
+			}
 		}
+		
+		return result
 	}
 }
