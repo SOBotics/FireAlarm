@@ -224,7 +224,7 @@ class PostFetcher {
                     )
                 }
                 wsRetries += 1
-                try start()
+                try ws.connect()
                 done = true
             } catch {
                 done = false
