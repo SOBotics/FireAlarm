@@ -12,7 +12,7 @@ import SwiftChatSE
 
 open class CommandStatus: Command {
 	override open class func usage() -> [String] {
-		return ["alive", "status", "version", "ver", "rev"]
+		return ["alive", "status", "version", "ver", "rev", "revision", "uptime"]
 	}
 	
 	override open func run() throws {
