@@ -21,7 +21,7 @@ class CommandUpdate: Command {
 	
     override func run() throws {
 		if noUpdate {
-			reply("Updates are disabled.")
+			reply("Updates are disabled for this instance.")
 			return
 		}
 		

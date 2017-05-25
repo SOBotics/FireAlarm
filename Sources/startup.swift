@@ -12,7 +12,7 @@ import SwiftChatSE
 import SwiftStack
 
 let commands: [Command.Type] = [
-	CommandSay.self,
+	CommandSay.self, CommandDeleteMessage.self,
 	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self,
 	CommandCheckThreshold.self, CommandSetThreshold.self,
 	CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
