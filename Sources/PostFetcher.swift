@@ -72,9 +72,6 @@ class PostFetcher {
                             continue
                         }
                         
-                        //Debug print
-                        print ("Checking post \(post.id ?? -1).")
-                        
                         try self.reporter.checkAndReportPost(post)
                     }
                 } catch {

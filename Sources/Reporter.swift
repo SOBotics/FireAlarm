@@ -143,8 +143,6 @@ class Reporter {
 	}
 	
 	func checkPost(_ post: Question) -> [FilterResult] {
-		//Debug print
-		print ("Checking post id \(post.id ?? -1).")
 		return filters.flatMap { $0.check(post) }
 	}
 	
@@ -184,9 +182,6 @@ class Reporter {
 				result = .notBad
 				return
 			}
-			
-			//Debug print
-			print ("'report' called on post \(id)")
 			
 			let isManualReport = reasons.contains {
 				if case .manuallyReported = $0.type {
