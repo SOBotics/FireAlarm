@@ -23,6 +23,7 @@ let commands: [Command.Type] = [
 	CommandWhy.self,
 ]
 
+
 fileprivate var listener: ChatListener!
 
 var reporter: Reporter!
