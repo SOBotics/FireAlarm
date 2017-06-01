@@ -20,27 +20,31 @@ class Word {
         trueProbability = pTrue
         falseProbability = pFalse
     }
+    
+    convenience init(row: Row) {
+        self.init(
+            row.column(named: "word")!,
+            row.column(named: "true")!,
+            row.column(named: "false")!
+        )
+    }
 }
 
 class FilterNaiveBayes: Filter {
-    let words: [String:Word]
-    let initialProbability: Double
-    
-    init () {
+    required init(reporter: Reporter) {
         print ("Loading Naive Bayes filter...")
-        
-        let data = try! Data(contentsOf: saveDirURL.appendingPathComponent("filter.json"))
-        let db = try! JSONSerialization.jsonObject(with: data, options: []) as! [String:Any]
-        initialProbability = db["initialProbability"] as! Double
-        var words = [String:Word]()
-        for (word, probabilites) in db["wordProbabilities"] as! [String:[Double]] {
-            words[word] = Word(word, probabilites.first!, probabilites.last!)
-        }
-        self.words = words
     }
     
-    func check(_ post: Question) -> FilterResult? {
-        var trueProbability = Double(0.263)
+    func check(_ post: Question, site: Int) throws -> FilterResult? {
+        guard let initialProbability = try reporter.staticDB.run(
+            "SELECT initialProbability FROM sites WHERE id = ?", site
+            ).first?.column(at: 0) as Double? else {
+                
+                print("No initialProbability for site \(site)")
+                return nil
+        }
+        
+        var trueProbability = Double(initialProbability)
         var falseProbability = Double(1 - trueProbability)
         var postWords = [String]()
         var checkedWords = [String]()
@@ -70,7 +74,13 @@ class FilterNaiveBayes: Filter {
             if postWord.isEmpty {
                 continue
             }
-            guard let word = words[postWord] else {
+            guard let word = try reporter.staticDB.run(
+                "SELECT * FROM words " +
+                "WHERE site = ? " +
+                "AND word = ?;",
+                site, postWord
+                ).first.map(Word.init) else {
+                    
                 continue
             }
             checkedWords.append(postWord)

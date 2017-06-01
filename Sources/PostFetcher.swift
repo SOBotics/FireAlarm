@@ -12,9 +12,11 @@ import SwiftStack
 import Dispatch
 
 class PostFetcher {
-    var postsToCheck = [Int]()
+    var postsToCheck = [(id: Int, site: Int)]()
     
     var queue = DispatchQueue(label: "Filter", attributes: [.concurrent])
+    
+    var staticDB: DatabaseConnection
     
     var ws: WebSocket!
     fileprivate var wsRetries: Int
@@ -27,7 +29,7 @@ class PostFetcher {
     
     private var lastEventDate: Date?
     
-	init (rooms: [ChatRoom], reporter: Reporter) {
+    init (rooms: [ChatRoom], reporter: Reporter, staticDB: DatabaseConnection) {
         wsRetries = 0
         wsMaxRetries = 10
         running = false
@@ -35,6 +37,8 @@ class PostFetcher {
         self.rooms = rooms
         
         self.reporter = reporter
+        
+        self.staticDB = staticDB
     }
     
     enum QuestionProcessingError: Error {
@@ -45,6 +49,8 @@ class PostFetcher {
         case noDataObject(json: String)
         case noQuestionID(json: String)
         case noSite(json: String)
+        
+        case siteLookupFailed(siteID: Int)
     }
     
     func doCheckPosts() {
@@ -62,17 +68,44 @@ class PostFetcher {
                     }
                     
                     //print("Checking \(posts.count) posts.")
-                    self.postsToCheck = self.postsToCheck.filter {!posts.contains($0)}
-                    for post in try apiClient.fetchQuestions(posts).items ?? [] {
-                        //don't report posts that are more than a day old
-                        let creation = (post.creation_date ?? Date()).timeIntervalSinceReferenceDate
-                        let activity = (post.last_activity_date ?? Date()).timeIntervalSinceReferenceDate
-                        
-                        if creation < (activity - 60 * 60 * 24) {
-                            continue
+                    self.postsToCheck = self.postsToCheck.filter { post in
+                        !posts.contains { $0.id == post.id && $0.site == post.site }
+                    }
+                    
+                    var postsBySite = [Int:[Int]]()
+                    for post in posts {
+                        if postsBySite[post.site] != nil {
+                            postsBySite[post.site]!.append(post.id)
+                        } else {
+                            postsBySite[post.site] = [post.id]
+                        }
+                    }
+                    
+                    for (site, posts) in postsBySite {
+                        guard let apiSiteParameter = try self.staticDB.run(
+                            "SELECT apiSiteParameter FROM sites WHERE id = ?",
+                            site
+                            ).first?.column(at: 0) as String? else {
+                                
+                                throw QuestionProcessingError.siteLookupFailed(siteID: site)
                         }
                         
-                        try self.reporter.checkAndReportPost(post)
+                        for post in try apiClient.fetchQuestions(
+                            posts,
+                            parameters: ["site":apiSiteParameter]
+                            ).items ?? [] {
+                                
+                                //don't report posts that are more than a day old
+                                let creation = (post.creation_date ?? Date()).timeIntervalSinceReferenceDate
+                                let activity = (post.last_activity_date ?? Date()).timeIntervalSinceReferenceDate
+                                
+                                if creation < (activity - 60 * 60 * 24) {
+                                    continue
+                                }
+                                
+                                try self.reporter.checkAndReportPost(post, site: site)
+                        }
+                        
                     }
                 } catch {
                     handleError(error, "while checking active posts")
@@ -80,7 +113,7 @@ class PostFetcher {
             }
         }
     }
-
+    
     func start() throws {
         running = true
         
@@ -156,7 +189,7 @@ class PostFetcher {
     }
     
     func webSocketMessageData(_ data: Data) {
-		lastEventDate = Date()
+        lastEventDate = Date()
         let string = String(data: data, encoding: .utf8) ?? "<not UTF-8: \(data.base64EncodedString())>"
         do {
             
@@ -185,8 +218,11 @@ class PostFetcher {
                     throw QuestionProcessingError.noSite(json: string)
                 }
                 
-                guard site == "stackoverflow" else {
-                    return
+                guard let siteID = try staticDB.run(
+                    "SELECT id FROM sites WHERE apiSiteParameter = ?",
+                    site
+                    ).first?.column(at: 0) as Int? else {
+                        return
                 }
                 
                 guard let id = data["id"] as? Int else {
@@ -194,7 +230,7 @@ class PostFetcher {
                 }
                 
                 
-                postsToCheck.append(id)
+                postsToCheck.append((id: id, site: siteID))
                 //print("Another post has been recieved.  There are now \(postsToCheck.count) posts to check.")
                 
             } catch {
@@ -209,7 +245,7 @@ class PostFetcher {
             handleError(error, "while processing an active question")
         }
     }
-
+    
     
     private func attemptReconnect() {
         var done = false

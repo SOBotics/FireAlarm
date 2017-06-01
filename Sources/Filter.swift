@@ -42,6 +42,7 @@ struct FilterResult {
 }
 
 protocol Filter: class {
-	func check(_ post: Question) -> FilterResult?
+    init(reporter: Reporter)
+    func check(_ post: Question, site: Int) throws -> FilterResult?
 	func save() throws
 }

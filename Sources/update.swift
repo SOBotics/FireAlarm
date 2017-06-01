@@ -24,7 +24,7 @@ func installUpdate() -> Bool {
 			let move = "mv FireAlarm .."
 		#else
 			let compile = "./build.sh"
-			let move = "mv ./.build/debug/FireAlarm .."
+			let move = "mv ./.build/debug/FireAlarm .. && cp filter_static.sqlite .."
 		#endif
 		let updateScript = "pushd .;" +
 			"(cd update && " +

@@ -12,9 +12,9 @@ import SwiftStack
 import Dispatch
 
 class FilterMisleadingLinks: Filter {
-    init () {}
+    required init (reporter: Reporter) {}
     
-    func check(_ post: Question) -> FilterResult? {
+    func check(_ post: Question, site: Int) -> FilterResult? {
         do {
             let regex = try NSRegularExpression(pattern:
                 "<a href=\"([^\"]*)\" rel=\"nofollow(?: noreferrer)?\">\\s*([^<\\s]*)(?=\\s*</a>)", options: []
@@ -79,7 +79,7 @@ class FilterMisleadingLinks: Filter {
         }
 	}
 	
-	func save() throws {
+    func save() throws {
 		
 	}
 }

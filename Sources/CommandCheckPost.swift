@@ -33,12 +33,28 @@ class CommandCheckPost: Command {
 				sleep(1)
 			} while reporter == nil
 		}
+        
+        let apiSiteParameter = "stackoverflow"
+        guard let site = try reporter.staticDB.run(
+            "SELECT * FROM sites WHERE apiSiteParameter = ?",
+            apiSiteParameter
+            ).first?.column(at: 0) as Int? else {
+                
+                reply("Could not fetch the site!")
+                return
+        }
+        
 		
-		guard let question = try apiClient.fetchQuestion(questionID).items?.first else {
-			reply("Could not fetch the question!")
-			return
-		}
-		let result = try reporter.checkAndReportPost(question)
+        guard let question = try apiClient.fetchQuestion(
+            questionID,
+            parameters: ["site":apiSiteParameter]
+            ).items?.first else {
+                
+                reply("Could not fetch the question!")
+                return
+        }
+        
+        let result = try reporter.checkAndReportPost(question, site: site)
 		switch result {
             case .alreadyClosed:
                 reply ("That post was caught by the filter but is already closed.")

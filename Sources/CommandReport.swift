@@ -40,24 +40,42 @@ class CommandReport: Command {
             } while reporter == nil
         }
         
-        guard let question = try apiClient.fetchQuestion(questionID).items?.first else {
-            reply("Could not fetch the question!")
-            return
+        
+        let apiSiteParameter = "stackoverflow"
+        guard let site = try reporter.staticDB.run(
+            "SELECT * FROM sites WHERE apiSiteParameter = ?",
+            apiSiteParameter
+            ).first?.column(at: 0) as Int? else {
+                
+                reply("Could not fetch the site!")
+                return
         }
         
-        var filterResult = reporter.checkPost(question)
+        
+        guard let question = try apiClient.fetchQuestion(
+            questionID,
+            parameters: ["site":apiSiteParameter]
+            ).items?.first else {
+                
+                reply("Could not fetch the question!")
+                return
+        }
+        
+        
+        
+        var filterResult = try reporter.checkPost(question, site: site)
         
         filterResult.append(FilterResult (type: .manuallyReported, header: "Manually reported question", details: "Question manually reported by \(message.user): https://\(message.room.host.chatDomain)/transcript/message/\(message.id ?? -1)#\(message.id ?? -1)"))
         
-		switch reporter.report(post: question, reasons: filterResult) {
-		case .alreadyClosed:
-			reply("That post is already closed.")
-		case .alreadyReported:
-			reply("That post has already been reported.")
-		case .notBad:
-			reply("this should never happen (cc @NobodyNada): `\(#file)`, line \(#line)")
-		case .reported(_):
-			break
-		}
+        switch reporter.report(post: question, reasons: filterResult) {
+        case .alreadyClosed:
+            reply("That post is already closed.")
+        case .alreadyReported:
+            reply("That post has already been reported.")
+        case .notBad:
+            reply("this should never happen (cc @NobodyNada): `\(#file)`, line \(#line)")
+        case .reported(_):
+            break
+        }
     }
 }

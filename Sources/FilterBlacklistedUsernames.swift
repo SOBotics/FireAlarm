@@ -18,7 +18,7 @@ class FilterBlacklistedUsernames: Filter {
         case UsernamesNotArrayOfStrings
     }
     
-    init () {
+    required init(reporter: Reporter) {
         print ("Loading blacklisted usernames...")
         
         blacklistedUsernames = []
@@ -46,7 +46,7 @@ class FilterBlacklistedUsernames: Filter {
         }
     }
     
-    func check(_ post: Question) -> FilterResult? {
+    func check(_ post: Question, site: Int) -> FilterResult? {
         guard let name = post.owner?.display_name else {
             print("No username for \(post.id.map { String($0) } ?? "<no ID>")!")
             return nil

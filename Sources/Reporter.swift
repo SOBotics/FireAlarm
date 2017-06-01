@@ -85,6 +85,8 @@ var reportedPosts = [Report]()
 class Reporter {
 	var postFetcher: PostFetcher!
 	let rooms: [ChatRoom]
+    
+    var staticDB: DatabaseConnection
 	
 	var filters = [Filter]()
 	
@@ -132,22 +134,28 @@ class Reporter {
 				}
 			}
 		}
+        
+        do {
+            staticDB = try DatabaseConnection("filter_static.sqlite")
+        } catch {
+            fatalError("Could not load filter_static.sqlite:\n\(error)")
+        }
 		
 		filters = [
-			FilterNaiveBayes(),
-			FilterMisleadingLinks(),
-			FilterBlacklistedUsernames()
+			FilterNaiveBayes(reporter: self),
+			FilterMisleadingLinks(reporter: self),
+			FilterBlacklistedUsernames(reporter: self)
 		]
 		
-		postFetcher = PostFetcher(rooms: rooms, reporter: self)
+        postFetcher = PostFetcher(rooms: rooms, reporter: self, staticDB: staticDB)
 	}
 	
-	func checkPost(_ post: Question) -> [FilterResult] {
-		return filters.flatMap { $0.check(post) }
+    func checkPost(_ post: Question, site: Int) throws -> [FilterResult] {
+		return try filters.flatMap { try $0.check(post, site: site) }
 	}
 	
-	@discardableResult func checkAndReportPost(_ post: Question) throws -> Reporter.ReportResult {
-		let results = checkPost(post)
+    @discardableResult func checkAndReportPost(_ post: Question, site: Int) throws -> Reporter.ReportResult {
+        let results = try checkPost(post, site: site)
 		
 		return report(post: post, reasons: results)
 	}
