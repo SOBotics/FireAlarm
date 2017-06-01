@@ -22,4 +22,4 @@ popd
 
 #build FireAlarm
 echo "Building FireAlarm..." || exit 1
-swiftc Sources/*.swift -L/usr/local/lib -ISwiftChatSE -ISwiftStack -LSwiftChatSE -LSwiftStack -lSwiftChatSE -lSwiftStack -o FireAlarm || exit 1
+swiftc Sources/*.swift -L/usr/local/lib -ISwiftChatSE -ISwiftStack -LSwiftChatSE -LSwiftStack -lSwiftChatSE -lSwiftStack -lsqlite3 -o FireAlarm || exit 1
