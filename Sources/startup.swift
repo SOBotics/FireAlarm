@@ -12,9 +12,9 @@ import SwiftChatSE
 import SwiftStack
 
 let commands: [Command.Type] = [
+    CommandCheckThreshold.self, CommandSetThreshold.self, CommandCheckSites.self, CommandAddSite.self, CommandRemoveSite.self,
 	CommandSay.self, CommandDeleteMessage.self,
 	CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self,
-	CommandCheckThreshold.self, CommandSetThreshold.self,
 	CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
 	CommandCheckPost.self, CommandQuota.self,
 	CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
@@ -67,7 +67,7 @@ func main() throws {
 	if let redundaKey = try? loadFile("redunda_key.txt").trimmingCharacters(in: .whitespacesAndNewlines) {
 		//standby until Redunda tells us not to
 		redunda = Redunda(key: redundaKey, client: client, filesToSync: [
-			"^filter_static\\.sqlite$", "^reports\\.json$", "^room_\\d+_[a-z\\.]+\\.json$"
+			"^reports\\.json$", "^room_\\d+_[a-z\\.]+\\.json$"
 		])
 		
 		var shouldStandby = false
@@ -205,7 +205,7 @@ func main() throws {
 			ChatRoom(client: client, host: .stackOverflow, roomID: 123602), //FireAlarm Development
 			ChatRoom(client: client, host: .stackOverflow, roomID: 111347), //SOBotics
 			ChatRoom(client: client, host: .stackOverflow, roomID: 41570),  //SO Close Vote Reviewers
-			//ChatRoom(client: client, host: .stackExchange, roomID: 54445),	//SEBotics
+			ChatRoom(client: client, host: .stackExchange, roomID: 54445),	//SEBotics
 		]
 		
 		development = false

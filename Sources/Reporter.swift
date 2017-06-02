@@ -157,7 +157,7 @@ class Reporter {
     @discardableResult func checkAndReportPost(_ post: Question, site: Int) throws -> Reporter.ReportResult {
         let results = try checkPost(post, site: site)
 		
-		return report(post: post, reasons: results)
+        return report(post: post, site: site, reasons: results)
 	}
 	
 	enum ReportResult {
@@ -181,7 +181,7 @@ class Reporter {
 	}
 	
 	///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
-	func report(post: Question, reasons: [FilterResult]) -> ReportResult {
+    func report(post: Question, site: Int, reasons: [FilterResult]) -> ReportResult {
 		var result: ReportResult = .notBad
 		
 		queue.sync {
@@ -251,7 +251,7 @@ class Reporter {
 				let reasons = reasons.filter {
 					if case .bayesianFilter(let difference) = $0.type {
 						bayesianDifference = difference
-						return difference < room.threshold
+						return difference < room.thresholds[site] ?? Int.max
 					}
 					return true
 				}

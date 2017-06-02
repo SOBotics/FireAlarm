@@ -21,16 +21,13 @@ class CommandReport: Command {
     }
     
     override func run() throws {
-        var questionID: Int!
-        if let id = Int(arguments[0]) {
-            questionID = id
-        }
-        else if let url = URL(string: arguments[0]), let id = postIDFromURL(url) {
-            questionID = id
-        }
-        else {
-            reply("Please enter a valid post ID or URL.")
-            return
+        guard
+            let url = URL(string: arguments[0]),
+            let questionID = postIDFromURL(url),
+            let siteDomain = url.host
+            else {
+                reply("Please enter a valid post URL.")
+                return
         }
         
         if reporter == nil {
@@ -40,25 +37,25 @@ class CommandReport: Command {
             } while reporter == nil
         }
         
-        
-        let apiSiteParameter = "stackoverflow"
-        guard let site = try reporter.staticDB.run(
-            "SELECT * FROM sites WHERE apiSiteParameter = ?",
-            apiSiteParameter
-            ).first?.column(at: 0) as Int? else {
-                
-                reply("Could not fetch the site!")
-                return
+        guard
+            let site = try reporter.staticDB.run(
+                "SELECT id FROM sites WHERE domain = ?",
+                siteDomain
+                ).first?.column(at: 0) as Int? else {
+                    
+                    reply("That does not look like a site on which I run.")
+                    return
         }
         
         
-        guard let question = try apiClient.fetchQuestion(
-            questionID,
-            parameters: ["site":apiSiteParameter]
-            ).items?.first else {
-                
-                reply("Could not fetch the question!")
-                return
+        guard
+            let question = try apiClient.fetchQuestion(
+                questionID,
+                parameters: ["site":siteDomain]
+                ).items?.first else {
+                    
+                    reply("Could not fetch the question!")
+                    return
         }
         
         
@@ -67,7 +64,7 @@ class CommandReport: Command {
         
         filterResult.append(FilterResult (type: .manuallyReported, header: "Manually reported question", details: "Question manually reported by \(message.user): https://\(message.room.host.chatDomain)/transcript/message/\(message.id ?? -1)#\(message.id ?? -1)"))
         
-        switch reporter.report(post: question, reasons: filterResult) {
+        switch reporter.report(post: question, site: site, reasons: filterResult) {
         case .alreadyClosed:
             reply("That post is already closed.")
         case .alreadyReported:

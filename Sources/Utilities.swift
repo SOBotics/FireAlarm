@@ -93,14 +93,39 @@ extension ChatRoom {
 		
 		return users.map { "@" + $0.name.replacingOccurrences(of: " ", with: "") }.joined(separator: " ")
 	}
-	
-	var threshold: Int {
-		get {
-			return (info["threshold"] as? Int) ?? 45
-		} set {
-			info["threshold"] = newValue
-		}
-	}
+    
+    
+    private func stringify(thresholds: [Int:Int]) -> [String:Int] {
+        var result = [String:Int]()
+        for (key, value) in thresholds {
+            result[String(key)] = value
+        }
+        return result
+    }
+    
+    private func destringify(thresholds: [String:Int]) -> [Int:Int] {
+        var result = [Int:Int]()
+        for (key, value) in thresholds {
+            if let siteID = Int(key) {
+                result[siteID] = value
+            }
+        }
+        return result
+    }
+    
+    ///A dictionary mapping sites to thresholds.
+    var thresholds: [Int:Int] {
+        get {
+            return (info["thresholds"] as? [String:Int]).map(destringify) ?? (info["threshold"] as? Int).map { [2:$0] } ?? [:]
+        } set {
+            info["thresholds"] = stringify(thresholds: newValue)
+        }
+    }
+    
+    convenience init(client: Client, host: Host, roomID: Int, thresholds: [Int:Int]) {
+        self.init(client: client, host: host, roomID: roomID)
+        self.thresholds = thresholds
+    }
 }
 
 extension ChatUser.Privileges {

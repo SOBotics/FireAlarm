@@ -10,11 +10,30 @@ import Foundation
 import SwiftChatSE
 
 class CommandCheckThreshold: Command {
-	override class func usage() -> [String] {
-		return ["threshold", "check threshold", "get threshold", "current threshold"]
-	}
-	
-	override func run() throws {
-		message.room.postReply("The threshold for this room is \(message.room.threshold) (*higher* thresholds report more posts).", to: message)
-	}
+    override class func usage() -> [String] {
+        return ["threshold", "check threshold", "get threshold", "current threshold",
+                "thresholds","check thresholds","get thresholds","current thresholds"
+        ]
+    }
+    
+    override func run() throws {
+        if message.room.thresholds.isEmpty {
+            reply("This room does not report any posts.")
+        } else if message.room.thresholds.count == 1 {
+            let threshold = message.room.thresholds.first!.value
+            reply(
+                "The threshold for this room is \(threshold) (*higher* thresholds report more posts)."
+            )
+        } else {
+            let siteNames: [String] = try message.room.thresholds.keys.map {
+                try reporter.staticDB.run(
+                    "SELECT domain FROM sites WHERE id = ?", $0
+                    ).first?.column(at: 0) ?? "<unknown site \($0)>"
+            }
+            let siteThresholds = Array(message.room.thresholds.values.map(String.init))
+            
+            reply("The thresholds for this room are: (*higher* thresholds report more posts)")
+            post(makeTable(["Site", "Threshold"], contents: siteNames, siteThresholds))
+        }
+    }
 }
