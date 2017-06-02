@@ -21,7 +21,7 @@ func installUpdate() -> Bool {
 	do {
 		#if os(Linux)
 			let compile = "./build-nopm.sh"	//Swift Package Manager does not work on Raspberry Pi
-			let move = "mv FireAlarm .."
+			let move = "mv FireAlarm .. && gunzip -c filter_static.sqlite.gz > ../filter_static.sqlite"
 		#else
 			let compile = "./build.sh"
 			let move = "mv ./.build/debug/FireAlarm .. && gunzip -c filter_static.sqlite.gz > ../filter_static.sqlite"
