@@ -157,7 +157,7 @@ class Reporter {
     @discardableResult func checkAndReportPost(_ post: Question, site: Int) throws -> Reporter.ReportResult {
         let results = try checkPost(post, site: site)
 		
-        return report(post: post, site: site, reasons: results)
+        return try report(post: post, site: site, reasons: results)
 	}
 	
 	enum ReportResult {
@@ -179,12 +179,16 @@ class Reporter {
 		
 		try data.write(to: saveDirURL.appendingPathComponent("reports.json"))
 	}
+    
+    enum ReportError: Error {
+        case missingSite(id: Int)
+    }
 	
 	///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
-    func report(post: Question, site: Int, reasons: [FilterResult]) -> ReportResult {
+    func report(post: Question, site: Int, reasons: [FilterResult]) throws -> ReportResult {
 		var result: ReportResult = .notBad
 		
-		queue.sync {
+		try queue.sync {
 			guard let id = post.id else {
 				print("No post ID!")
 				result = .notBad
@@ -251,7 +255,7 @@ class Reporter {
 				let reasons = reasons.filter {
 					if case .bayesianFilter(let difference) = $0.type {
 						bayesianDifference = difference
-						return difference < room.thresholds[site] ?? Int.max
+						return difference < room.thresholds[site] ?? Int.min
 					}
 					return true
 				}
@@ -262,9 +266,14 @@ class Reporter {
 				
 				reported = true
 				
-				
+				guard let domain = try staticDB.run("SELECT domain FROM sites WHERE id = ?", site)
+                    .first?.column(at: 0) as String? else {
+                        
+                        throw ReportError.missingSite(id: site)
+                }
+                
 				let message = "[ [\(botName)](\(stackAppsLink)) ] " +
-					"[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//stackoverflow.com/q/\(id)) " +
+					"[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//\(domain)/q/\(id)) " +
 					room.notificationString(tags: tags, reasons: reasons)
 				
 				room.postMessage(message, completion: {message in

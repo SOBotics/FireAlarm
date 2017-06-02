@@ -15,44 +15,42 @@ class CommandCheckPost: Command {
 	}
 	
 	override func run() throws {
-		var questionID: Int!
-		if let id = Int(arguments[0]) {
-			questionID = id
-		}
-		else if let url = URL(string: arguments[0]), let id = postIDFromURL(url) {
-			questionID = id
-		}
-		else {
-			reply("Please enter a valid post ID or URL.")
-			return
-		}
-		
-		if reporter == nil {
-			reply("Waiting for the filter to load...")
-			repeat {
-				sleep(1)
-			} while reporter == nil
-		}
-        
-        let apiSiteParameter = "stackoverflow"
-        guard let site = try reporter.staticDB.run(
-            "SELECT * FROM sites WHERE apiSiteParameter = ?",
-            apiSiteParameter
-            ).first?.column(at: 0) as Int? else {
-                
-                reply("Could not fetch the site!")
+        guard
+            let url = URL(string: arguments[0]),
+            let questionID = postIDFromURL(url),
+            let siteDomain = url.host
+            else {
+                reply("Please enter a valid post URL.")
                 return
         }
         
-		
-        guard let question = try apiClient.fetchQuestion(
-            questionID,
-            parameters: ["site":apiSiteParameter]
-            ).items?.first else {
-                
-                reply("Could not fetch the question!")
-                return
+        if reporter == nil {
+            reply("Waiting for the filter to load...")
+            repeat {
+                sleep(1)
+            } while reporter == nil
         }
+        
+        guard
+            let site = try reporter.staticDB.run(
+                "SELECT id FROM sites WHERE domain = ?",
+                siteDomain
+                ).first?.column(at: 0) as Int? else {
+                    
+                    reply("That does not look like a site on which I run.")
+                    return
+        }
+        
+        guard
+            let question = try apiClient.fetchQuestion(
+                questionID,
+                parameters: ["site":siteDomain]
+                ).items?.first else {
+                    
+                    reply("Could not fetch the question!")
+                    return
+        }
+        
         
         let result = try reporter.checkAndReportPost(question, site: site)
 		switch result {
