@@ -29,6 +29,10 @@ class CommandUpdate: Command {
         
         if (arguments.count == 0)
         {
+            if isUpdating {
+                reply("An update is already in progress.")
+                return
+            }
             if (!update (listener, [message.room], force: (usageIndex < FORCE_INDEX), auto: false))
             {
                 reply ("No new update available.")
@@ -45,6 +49,10 @@ class CommandUpdate: Command {
         
         if (userLocation.lowercased() == argLocation)
         {
+            if isUpdating {
+                reply("An update is currently in progress.")
+                return
+            }
             if (!update (listener, [message.room], force: (usageIndex < FORCE_INDEX), auto: false))
             {
                 reply ("No new update available.")

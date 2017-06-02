@@ -111,6 +111,13 @@ func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom], isAuto: Bool =
 		return true
 	}
 	
+    //If we're performing an auto-update, don't post the message quite yet.  We need to 
+    //download the update and look at the commit log before deciding whether to update or not.
+    if !isAuto {
+        isUpdating = true
+        rooms.forEach { $0.postMessage("Installing update...") }
+    }
+    
 	do {
 		try downloadUpdate(isAuto: isAuto)
 	} catch DownloadFailure.noAutoupdate {
@@ -120,10 +127,18 @@ func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom], isAuto: Bool =
 		return false
 	}
 	
-	isUpdating = true
-	rooms.forEach {$0.postMessage("Installing update..."); sleep(1)}
-	listener.stop(.update)
-	return true
+    if isAuto {
+        isUpdating = true
+        rooms.forEach { $0.postMessage("Installing update...") }
+    }
+	
+    if installUpdate() {
+        rooms.forEach { $0.postMessage("Update complete; rebooting...") }
+        listener.stop(.update)
+    } else {
+        rooms.forEach { $0.postMessage("Update failed!") }
+    }
+    return true
 }
 
 

@@ -230,17 +230,7 @@ func main() throws {
 	let startupMessageCompletion: ((Int?) -> Void)?
 	
 	currentVersion = getCurrentVersion()
-	if FileManager.default.fileExists(atPath: "update-failure") {
-		startupMessage = "Update failed!"
-		startupMessageCompletion = {_ in
-			do {
-				try FileManager.default.removeItem(atPath: "update-failure")
-			} catch {
-				handleError(error, "while clearing the update status")
-			}
-		}
-	}
-	else if let new = try? loadFile("version-new.txt").replacingOccurrences(of: "\n", with: "") {
+    if let new = try? loadFile("version-new.txt").replacingOccurrences(of: "\n", with: "") {
 		let components = new.components(separatedBy: " ")
 		let new = components.first ?? ""
 		let newShort = getShortVersion(new)

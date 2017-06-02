@@ -82,7 +82,7 @@ func handleInput(input: String, rooms: [ChatRoom], listener: ChatListener) {
 
 
 func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
-	var shouldReboot = reason == .reboot
+	let shouldReboot = reason == .reboot || reason == .update
 	
 	reporter.postFetcher.stop()
 	
@@ -98,25 +98,19 @@ func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
 	
 	save(rooms: rooms)
 	
-	if reason == .update {
-		if installUpdate() {
-			execv(saveDirURL.appendingPathComponent("firealarm").path, CommandLine.unsafeArgv)
-		}
-		else {
-			shouldReboot = true
-		}
-	}
-	
 	rooms.forEach { $0.leave() }
 	
 	if shouldReboot {
-		//Change to the old working directory.
-		let _ = FileManager.default.changeCurrentDirectoryPath(originalWorkingDirectory)
 		
 		//Reload the program binary, which will restart the bot.
-		execv(CommandLine.arguments[0], CommandLine.unsafeArgv)
-		//If the exec failed, exit 1 for my script
-		//which automatically reboots on crashes.
+        if reason == .update {
+            execv("FireAlarm", CommandLine.unsafeArgv)
+        } else {
+            //Change to the old working directory.
+            let _ = FileManager.default.changeCurrentDirectoryPath(originalWorkingDirectory)
+            execv(CommandLine.arguments[0], CommandLine.unsafeArgv)
+        }
+		//If the exec failed, exit 1 for my script, which automatically reboots on crashes.
 		exit(1)
 	}
 	
