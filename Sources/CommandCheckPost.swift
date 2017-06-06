@@ -10,11 +10,11 @@ import Foundation
 import SwiftChatSE
 
 class CommandCheckPost: Command {
-	override class func usage() -> [String] {
-		return ["check post *", "check *"]
-	}
-	
-	override func run() throws {
+    override class func usage() -> [String] {
+        return ["check post *", "check *"]
+    }
+    
+    override func run() throws {
         guard
             let url = URL(string: arguments[0]),
             let questionID = postIDFromURL(url),
@@ -53,15 +53,41 @@ class CommandCheckPost: Command {
         
         
         let result = try reporter.checkAndReportPost(question, site: site)
-		switch result {
-            case .alreadyClosed:
-                reply ("That post was caught by the filter but is already closed.")
-            case .notBad:
-                reply("That post was not caught by the filter.")
-            case .alreadyReported:
-                reply("That post was already reported.")
-            case .reported:
-                break
-		}
-	}
+        let score: Int? = result.filterResults.flatMap { reason in
+            if case .bayesianFilter(let score) = reason.type {
+                return score
+            } else {
+                return nil
+            }
+            }.first
+        
+        let otherFilters = result.filterResults.flatMap { reason -> (FilterResult?) in
+            if case .bayesianFilter = reason.type {
+                return nil
+            } else {
+                return reason
+            }
+        }
+        
+        //"" if score is nil, " (score <score>)" otherwise
+        let scoreString = score != nil ? " (score \(score!))" : ""
+        
+        switch result.status {
+        case .alreadyClosed:
+            if otherFilters.isEmpty {
+                reply ("That post is already closed\(scoreString).")
+            } else {
+                reply("That post is already closed, but was caught by " +
+                    formatArray(otherFilters.map { $0.header }, conjunction: "and") +
+                    scoreString
+                )
+            }
+        case .notBad:
+            reply("That post was not caught by the filter\(scoreString).")
+        case .alreadyReported:
+            reply("That post was already reported.")
+        case .reported:
+            break
+        }
+    }
 }
