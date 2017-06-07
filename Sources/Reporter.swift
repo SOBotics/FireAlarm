@@ -207,19 +207,10 @@ class Reporter {
                 }
             }
             
-            if let minDate: Date = Calendar(identifier: .gregorian).date(byAdding: DateComponents(hour: -6), to: Date()) {
-                let recentlyReportedPosts = reportedPosts.filter {
-                    $0.when > minDate
-                }
-                
-                if !isManualReport && recentlyReportedPosts.contains(where: { $0.id == id }) {
-                    print("Not reporting \(id) because it was recently reported.")
-                    status = .alreadyReported
-                    return
-                }
-            }
-            else {
-                rooms.forEach {$0.postMessage("Failed to calculate minimum report date!")}
+            if !isManualReport && reportedPosts.lazy.reversed().contains(where: { $0.id == id }) {
+                print("Not reporting \(id) because it was recently reported.")
+                status = .alreadyReported
+                return
             }
             
             if !isManualReport && post.closed_reason != nil {
