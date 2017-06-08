@@ -9,6 +9,7 @@
 import Foundation
 import SwiftChatSE
 import Dispatch
+import CryptoSwift
 
 class Redunda {
 	enum RedundaError: Error {
@@ -54,37 +55,13 @@ class Redunda {
 	}
 	
 	
-	func hash(of file: String) -> String {
-		let pipe = Pipe()
-		let process = Process()
-		process.launchPath = "/usr/bin/env"
-		process.arguments = ["shasum", "-a", "256", file]
-		process.standardOutput = pipe
-		process.launch()
-		
-		var hash: String?
-		
-		let sema = DispatchSemaphore(value: 0)
-		
-		process.terminationHandler = {process in
-			if let info = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) {
-				hash = info.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: .whitespaces).first
-			}
-			sema.signal()
-		}
-		
-		let _ = sema.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(5))
-		
-		if hash != nil {
-			return hash!
-		} else {
-			return "<failed to get hash>"
-		}
+	func hash(of file: String) throws -> String {
+        return try Data(contentsOf: URL(fileURLWithPath: file)).sha256().toHexString()
 	}
 	
 	///Downloads modified files from Redunda.
 	///- Warning:
-	///Do not post non-`RedundaError`s to chat; they contain the instance key!
+	///Do not post non-`RedundaError`s to chat; they may contain the instance key!
 	func downloadFiles() throws {
 		let response = try client.parseJSON(client.get("https://redunda.sobotics.org/bots/data.json?key=\(key)"))
 		
@@ -99,7 +76,7 @@ class Redunda {
 				throw RedundaError.invalidJSON(json: response)
 			}
 			if manager.fileExists(atPath: filename) {
-				if hash(of: filename) != item["sha256"] as? String {
+				if try hash(of: filename) != item["sha256"] as? String {
 					try downloadFile(named: filename)
 				}
 			} else {
@@ -110,7 +87,7 @@ class Redunda {
 	
 	///Downloads modified files from Redunda.
 	///- Warning:
-	///Do not post non-`RedundaError`s to chat; they contain the instance key!
+	///Do not post non-`RedundaError`s to chat; they may contain the instance key!
 	func uploadFiles() throws {
 		let response = try client.parseJSON(client.get("https://redunda.sobotics.org/bots/data.json?key=\(key)"))
 		
@@ -127,7 +104,7 @@ class Redunda {
 				}
 				
 				if let index = json.index(where: { filename == $0["key"] as? String }) {
-					if hash(of: filename) != json[index]["sha256"] as? String {
+					if try hash(of: filename) != json[index]["sha256"] as? String {
 						try uploadFile(named: filename)
 					}
 				} else {
