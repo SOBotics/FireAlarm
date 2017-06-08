@@ -56,6 +56,17 @@ func main() throws {
 	let _ = FileManager.default.changeCurrentDirectoryPath(saveDirURL.path)
 	
 	
+    do {
+        guard let secretsJSON = (try JSONSerialization.jsonObject(
+            with: Data(contentsOf: saveDirURL.appendingPathComponent("secrets.json"))
+            ) as? [String:String]) else {
+                fatalError("Could not load secrets: secrets.json has an invalid format")
+        }
+        secrets = Secrets(json: secretsJSON)
+    } catch {
+        fatalError("Could not load secrets: \(error)")
+    }
+    
 	
 	apiClient.key = "HNA2dbrFtyTZxeHN6rThNg(("
 	apiClient.defaultFilter = "!-*f(6rOFHc24"
@@ -67,7 +78,7 @@ func main() throws {
 	if let redundaKey = try? loadFile("redunda_key.txt").trimmingCharacters(in: .whitespacesAndNewlines) {
 		//standby until Redunda tells us not to
 		redunda = Redunda(key: redundaKey, client: client, filesToSync: [
-			"^reports\\.json$", "^room_\\d+_[a-z\\.]+\\.json$"
+			"^reports\\.json$", "^room_\\d+_[a-z\\.]+\\.json$", "^secrets.json$"
 		])
 		
 		var shouldStandby = false
@@ -112,16 +123,16 @@ func main() throws {
 		let envEmail = env["ChatBotEmail"]
 		let envPassword = env["ChatBotPass"]
 		
-		if envEmail != nil {
-			email = envEmail!
+		if (envEmail ?? secrets.email) != nil {
+			email = (envEmail ?? secrets.email)!
 		}
 		else {
 			print("Email: ", terminator: "")
 			email = readLine()!
 		}
 		
-		if envPassword != nil {
-			password = envPassword!
+		if (envPassword ?? secrets.password) != nil {
+			password = (envPassword ?? secrets.password)!
 		}
 		else {
 			password = String(validatingUTF8: getpass("Password: "))!

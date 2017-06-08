@@ -171,6 +171,12 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 		//Ping Redunda
 		BackgroundTask(interval: 30) {task in
 			guard let r = redunda else { task.cancel(); return }
+            
+            let webhookHandler: WebhookHandler?
+            if let secret = secrets.githubWebhookSecret {
+                webhookHandler = WebhookHandler(githubSecret: secret)
+            } else { webhookHandler = nil }
+            
 			do {
 				if getShortVersion(currentVersion) == "<unknown>" {
 					try r.sendStatusPing()
@@ -178,6 +184,11 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 					try r.sendStatusPing(version: getShortVersion(currentVersion))
 				}
 				
+                if r.eventCount != 0 {
+                    for event in try r.fetchEvents() {
+                        try webhookHandler?.process(event: event, rooms: [rooms.first!])
+                    }
+                }
 				if r.shouldStandby {
 					rooms.first!.postMessage("[ [\(botName)](\(githubLink)) ] Switching to standby mode on \(location).")
 					

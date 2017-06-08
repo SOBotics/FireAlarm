@@ -12,11 +12,33 @@ import Dispatch
 import CryptoSwift
 
 class Redunda {
-	enum RedundaError: Error {
-		case invalidJSON(json: Any)
-		case downloadFailed(status: Int)
-		case uploadFailed(status: Int)
-	}
+    enum RedundaError: Error {
+        case invalidJSON(json: Any)
+        case downloadFailed(status: Int)
+        case uploadFailed(status: Int)
+    }
+    
+    
+    struct Event {
+        let name: String
+        let headers: [String:String]
+        let content: String
+        
+        func contentAsJSON() throws -> Any {
+            return try JSONSerialization.jsonObject(with: content.data(using: .utf8)!)
+        }
+        
+        init(json: [String:Any]) throws {
+            guard let name = json["name"] as? String,
+                let headers = json["headers"] as? [String:String],
+                let content = json["content"] as? String
+                else { throw RedundaError.invalidJSON(json: json) }
+            
+            self.name = name
+            self.headers = headers
+            self.content = content
+        }
+    }
 	
 	let key: String
 	let client: Client
@@ -122,6 +144,25 @@ class Redunda {
 	
 	var shouldStandby: Bool = false
 	var locationName: String?
+    
+    //The number of unread events.
+    var eventCount: Int = 0
+    
+    func fetchEvents() throws -> [Event] {
+        let json = try client.parseJSON(
+            try client.post(
+                "https://redunda.sobotics.org/events.json",
+                ["key":key]
+            )
+        )
+        
+        guard let events = try (json as? [[String:Any]])?.map(Event.init) else {
+            throw RedundaError.invalidJSON(json: json)
+        }
+        
+        eventCount = 0
+        return events
+    }
 	
 	func sendStatusPing(version: String? = nil) throws {
 		let data = version == nil ? ["key":key] : ["key":key, "version":version!]
@@ -133,8 +174,13 @@ class Redunda {
 		guard let standby = json["should_standby"] as? Bool else {
 			throw RedundaError.invalidJSON(json: response)
 		}
+        
+        guard let eventCount = json["event_count"] as? Int else {
+            throw RedundaError.invalidJSON(json: response)
+        }
 		
 		shouldStandby = standby
 		locationName = json["location"] as? String
+        self.eventCount = eventCount
 	}
 }
