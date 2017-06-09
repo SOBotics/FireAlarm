@@ -33,7 +33,7 @@ class WebhookHandler {
         }
         
         print("Recieved GitHub webhook event.")
-        guard event.headers["X-GitHub-Event"] == "status" else { return }
+        guard event.headers["X-Github-Event"] == "status" else { return }
         
         guard let content = try event.contentAsJSON() as? [String:Any],
             let commitHash = content["sha"] as? String,
@@ -48,9 +48,13 @@ class WebhookHandler {
             //TODO: autoupdate
         }
         
+        if state == "pending" {
+            return
+        }
+        
         let repoLink = "https://github.com/\(repoName)"
         
-        let header = "[ [\(repoName)](repoLink) ]"
+        let header = "[ [\(repoName)](\(repoLink)) ]"
         let link = targetURL != nil ? "[CI](\(targetURL!))" : "CI"
         let status = [
             "pending": "pending",
