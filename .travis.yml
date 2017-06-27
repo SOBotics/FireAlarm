@@ -4,13 +4,12 @@ branches:
 
 language: generic
 sudo: required
+env: SWIFT_VERSION=3.1
 
 matrix:
   include:
     - os: linux
       dist: trusty
-      env:
-        - SWIFT_VERSION=3.1
     - os: osx
       osx_image: xcode8.3
       env:
