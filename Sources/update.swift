@@ -15,7 +15,7 @@ func launchProcess(path: String, arguments: [String]) -> Process {
 
 var isUpdating = false
 
-fileprivate let branch = "swift"
+fileprivate let branch = "master"
 
 func installUpdate() -> Bool {
     do {
