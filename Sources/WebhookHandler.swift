@@ -64,7 +64,7 @@ class WebhookHandler {
             ][state] ?? "status unknown"
         let commitLink = "[\(getShortVersion(commitHash))](\(repoLink)/commit/\(commitHash))"
         
-        let message = [header, link, status, "for", commitLink].joined(separator: " ") + "."
+        let message = [header, link, status, "on", commitLink].joined(separator: " ") + "."
         rooms.forEach { $0.postMessage(message) }
     }
 }
