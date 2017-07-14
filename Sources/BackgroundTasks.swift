@@ -128,14 +128,6 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 		},
 		
 		
-		//Update
-		BackgroundTask(interval: 60) {task in
-			if development || noUpdate || update(listener, [rooms.first!], auto: true) {
-				task.cancel()
-			}
-		},
-		
-		
 		//Watch for input
 		BackgroundTask() { task in
 			repeat {
@@ -175,6 +167,11 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
             let webhookHandler: WebhookHandler?
             if let secret = secrets.githubWebhookSecret {
                 webhookHandler = WebhookHandler(githubSecret: secret)
+                webhookHandler!.onSuccess {repo, commit in
+                    if repo == "SOBotics/FireAlarm" {
+                        _ = update(to: commit, listener: listener, rooms: [rooms.first!])
+                    }
+                }
             } else { webhookHandler = nil }
             
 			do {

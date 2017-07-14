@@ -21,6 +21,13 @@ class WebhookHandler {
         self.githubSecret = githubSecret
     }
     
+    //A closure to be called when CI succeeds.  The closure is passed the repo name and commit SHA.
+    var successHandler: ((String, String) -> ())?
+    
+    func onSuccess(_ handler: ((String, String) -> ())?) {
+        successHandler = handler
+    }
+    
     
     func process(event: Redunda.Event, rooms: [ChatRoom]) throws {
         guard event.name == "ci_status" else { return }
@@ -38,15 +45,11 @@ class WebhookHandler {
         guard let content = try event.contentAsJSON() as? [String:Any],
             let commitHash = content["sha"] as? String,
             let state = content["state"] as? String,
-            let repoName = content["name"] else {
+            let repoName = content["name"] as? String else {
                 throw GithubWebhookError.invalidPayload(payload: event.content)
         }
         
         let targetURL = content["target_url"] as? String
-        
-        if state == "success" {
-            //TODO: autoupdate
-        }
         
         if state == "pending" {
             return
@@ -66,5 +69,9 @@ class WebhookHandler {
         
         let message = [header, link, status, "on", commitLink].joined(separator: " ") + "."
         rooms.forEach { $0.postMessage(message) }
+        
+        if state == "success" {
+            successHandler?(repoName, commitHash)
+        }
     }
 }

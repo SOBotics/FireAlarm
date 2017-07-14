@@ -11,53 +11,39 @@ import SwiftChatSE
 
 class CommandUpdate: Command {
     fileprivate let FORCE_INDEX = 2
-	override class func usage() -> [String] {
-		return ["update force ...", "pull force ...", "update ...", "pull ..."]
-	}
-	
-	override class func privileges() -> ChatUser.Privileges {
-		return .owner
-	}
-	
+    override class func usage() -> [String] {
+        return ["update force ...", "pull force ...", "update ...", "pull ..."]
+    }
+    
+    override class func privileges() -> ChatUser.Privileges {
+        return .owner
+    }
+    
     override func run() throws {
-		if noUpdate {
-			reply("Updates are disabled for this instance.")
-			return
-		}
-		
-        let argLocation: String
-        
-        if (arguments.count == 0)
-        {
-            if isUpdating {
-                reply("An update is already in progress.")
-                return
-            }
-            if (!update (listener, [message.room], force: (usageIndex < FORCE_INDEX), auto: false))
-            {
-                reply ("No new update available.")
-            }
+        if noUpdate {
+            reply("Updates are disabled for this instance.")
             return
+        }
+        
+        let commit: String?
+        if arguments.count > 1 {
+            reply("Usage: update [force] [revision]")
+            return
+        }
+        else if arguments.count == 1 {
+            commit = arguments.first!
         } else {
-            argLocation = arguments.joined(separator: " ").lowercased()
+            commit = nil
         }
         
-        if (userLocation == "<unknown>") {
-            reply("The current instance's location is unknown.")
+        if isUpdating {
+            reply("An update is already in progress.")
             return
         }
-        
-        if (userLocation.lowercased() == argLocation)
+        if (!update (to: commit, listener: listener, rooms: [message.room], force: (usageIndex < FORCE_INDEX)))
         {
-            if isUpdating {
-                reply("An update is currently in progress.")
-                return
-            }
-            if (!update (listener, [message.room], force: (usageIndex < FORCE_INDEX), auto: false))
-            {
-                reply ("No new update available.")
-            }
-            return
+            reply ("No new update available.")
         }
-	}
+        return
+    }
 }

@@ -53,29 +53,24 @@ func installUpdate() -> Bool {
 private enum DownloadFailure: Error {
     case noAutoupdate
     case downloadFailed
+    case incorrectVersion(expected: String, downloaded: String)
 }
 
 var downloadedVersion: String = "<unknown>"
 var availableVersion: String = "<unknown>"
 
-func downloadUpdate(isAuto: Bool = false) throws {
+func downloadUpdate(commit: String? = nil) throws {
     let script = "rm -rf update;" +
         "(git clone -b \(branch) \"git://github.com/SOBotics/FireAlarm.git\" update && " +
-        "cd update && " +
-    "git log --format='oneline' -n 1 > ../version-downloaded.txt) || exit 1 "
+        "cd update" +
+        (commit != nil ? "&& git checkout '\(commit!)'" : "") +
+    ") || exit 1 "
     
     let process = launchProcess(path: "/bin/bash", arguments: ["-c", script])
     process.waitUntilExit()
     
     if process.terminationStatus != 0 {
         throw DownloadFailure.downloadFailed
-    } else {
-        downloadedVersion = availableVersion
-        
-        let downloaded = try loadFile("version-downloaded.txt")
-        if isAuto && !downloaded.contains("--autoupdate") {
-            throw DownloadFailure.noAutoupdate
-        }
     }
 }
 
@@ -101,49 +96,40 @@ public func getVersionLink(_ version: String) -> String {
 }
 
 
-func prepareUpdate(_ listener: ChatListener, _ rooms: [ChatRoom], isAuto: Bool = false) -> Bool {
+func prepareUpdate(to commit: String? = nil, listener: ChatListener, rooms: [ChatRoom]) -> Bool {
     if isUpdating {
         return true
     }
     
-    //If we're performing an auto-update, don't post the message quite yet.  We need to
-    //download the update and look at the commit log before deciding whether to update or not.
-    if !isAuto {
-        isUpdating = true
-        rooms.forEach { $0.postMessage("Installing update...") }
-    }
+    isUpdating = true
+    rooms.forEach { $0.postMessage("Installing update...") }
     
     do {
-        try downloadUpdate(isAuto: isAuto)
-    } catch DownloadFailure.noAutoupdate {
-        return false
+        try downloadUpdate(commit: commit)
     } catch {
         handleError(error, "while downloading an update")
+        isUpdating = false
         return false
-    }
-    
-    if isAuto {
-        isUpdating = true
-        rooms.forEach { $0.postMessage("Installing update...") }
     }
     
     if installUpdate() {
         rooms.forEach { $0.postMessage("Update complete; rebooting...") }
         listener.stop(.update)
     } else {
+        isUpdating = false
         rooms.forEach { $0.postMessage("Update failed!") }
     }
     return true
 }
 
 
-func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, auto: Bool = false) -> Bool {
+func update(to commit: String? = nil, listener: ChatListener, rooms: [ChatRoom], force: Bool = false) -> Bool {
     if noUpdate {
         return false
     }
     
     if force {
-        return prepareUpdate(listener, rooms, isAuto: auto)
+        return prepareUpdate(to: commit, listener: listener, rooms: rooms)
     }
     
     
@@ -160,8 +146,8 @@ func update(_ listener: ChatListener, _ rooms: [ChatRoom], force: Bool = false, 
         availableVersion = components.first ?? ""
         
         if currentVersion != availableVersion &&
-            !(auto && downloadedVersion == availableVersion && downloadedVersion != "<unknown>") {
-            return prepareUpdate(listener, rooms, isAuto: auto)
+            !(downloadedVersion == availableVersion && downloadedVersion != "<unknown>") {
+            return prepareUpdate(to: commit, listener: listener, rooms: rooms)
         }
     }
     catch {
