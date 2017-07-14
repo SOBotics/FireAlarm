@@ -143,7 +143,7 @@ func update(to commit: String? = nil, listener: ChatListener, rooms: [ChatRoom],
         let components = versionContents.components(separatedBy: " ")
         availableVersion = components.first ?? ""
         
-        if (commit != currentVersion || currentVersion != availableVersion) &&
+        if (commit != nil && commit != currentVersion) || (commit == nil && currentVersion != availableVersion),
             !(downloadedVersion == availableVersion && downloadedVersion != "<unknown>") {
             
             return prepareUpdate(to: commit, listener: listener, rooms: rooms)

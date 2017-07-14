@@ -14,6 +14,10 @@ class WebhookHandler {
         case invalidSignature
         case invalidPayload(payload: String)
     }
+    enum UpdateToWebhookError: Error {
+        case invalidToken
+        case invalidPayload
+    }
     
     let githubSecret: String
     
@@ -24,14 +28,25 @@ class WebhookHandler {
     //A closure to be called when CI succeeds.  The closure is passed the repo name, commit branhces, and commit SHA.
     var successHandler: ((String, [String], String) -> ())?
     
-    func onSuccess(_ handler: ((String, [String], String) -> ())?) {
-        successHandler = handler
-    }
+    //A closure to be called when an update_to event is recievd.  The closure is passed the commit SHA.
+    var updateHandler: ((String) -> ())?
+    
+    func onSuccess(_ handler: ((String, [String], String) -> ())?) { successHandler = handler }
+    func onUpdate(_ handler: ((String) -> ())?) { updateHandler = handler }
     
     
     func process(event: Redunda.Event, rooms: [ChatRoom]) throws {
-        guard event.name == "ci_status" else { return }
+        let eventHandlers = [
+            "ci_status":processCIStatus,
+            "update_to":processUpdateTo
+        ]
         
+        try eventHandlers[event.name]?(event, rooms)
+    }
+    
+    
+    
+    private func processCIStatus(event: Redunda.Event, rooms: [ChatRoom]) throws {
         let hmac = try HMAC(key: githubSecret, variant: .sha1)
         let signature = try hmac.authenticate(event.content.data(using: .utf8)!.bytes).toHexString()
         guard "sha1=" + signature == event.headers["X-Hub-Signature"] else {
@@ -76,5 +91,18 @@ class WebhookHandler {
         if state == "success" {
             successHandler?(repoName, branches, commitHash)
         }
+    }
+    
+    private func processUpdateTo(event: Redunda.Event, rooms: [ChatRoom]) throws {
+        guard let json = try event.contentAsJSON() as? [String:Any],
+            let commit = json["commit"] as? String else {
+                throw UpdateToWebhookError.invalidPayload
+        }
+        guard json["token"] as? String == githubSecret else {
+            throw UpdateToWebhookError.invalidToken
+        }
+        
+        updateHandler?(commit)
+        
     }
 }

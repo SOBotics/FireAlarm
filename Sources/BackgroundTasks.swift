@@ -165,12 +165,16 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 			guard let r = redunda else { task.cancel(); return }
             
             let webhookHandler: WebhookHandler?
+            var updateVersion: String?
             if let secret = secrets.githubWebhookSecret {
                 webhookHandler = WebhookHandler(githubSecret: secret)
                 webhookHandler!.onSuccess {repo, branches, commit in
                     if repo == "SOBotics/FireAlarm" && branches.contains(updateBranch) {
-                        _ = update(to: commit, listener: listener, rooms: [rooms.first!])
+                        updateVersion = commit
                     }
+                }
+                webhookHandler!.onUpdate { commit in
+                    updateVersion = commit
                 }
             } else { webhookHandler = nil }
             
@@ -191,6 +195,10 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 					
 					shutDown(reason: .reboot, rooms: rooms)
 				}
+                
+                if let commit = updateVersion {
+                    _ = update(to: commit, listener: listener, rooms: [rooms.first!])
+                }
 			} catch {
 				handleError(error, "while sending a status ping to Redunda")
 			}

@@ -276,6 +276,12 @@ func main() throws {
                 handleError(error, "while clearing the update status")
             }
         }
+        
+        do {
+            try sendUpdateBroadcast(commit: new)
+        } catch {
+            print("Failed to send update broadcast: \(error)")
+        }
     }
     else {
         startupMessage = nil
@@ -315,4 +321,18 @@ func main() throws {
 //	backgroundSemaphore.signal()
 //}
 
-
+func sendUpdateBroadcast(commit: String) throws {
+    //Send the update notification.
+    if let token = secrets.githubWebhookSecret, let r = redunda {
+        let payload = [
+            "token": token,
+            "commit": commit,
+        ]
+        let data = try JSONSerialization.data(withJSONObject: payload)
+        let (_, _) = try r.client.post(
+            "https://redunda.sobotics.org/bots/6/events/update_to?broadcast=true",
+            data: data,
+            contentType: "application/json"
+        )
+    }
+}
