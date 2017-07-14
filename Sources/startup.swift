@@ -75,7 +75,7 @@ func main() throws {
     let client = Client()
     
     #if os(Linux)
-        srand(time(nil))    //This is not cryptographically secure; it's just for train wrecking
+        srand(UInt32(time(nil)))    //This is not cryptographically secure; it's just for train wrecking
     #endif
     
     
