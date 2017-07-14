@@ -77,6 +77,16 @@ class TrainWrecker {
         let threshold = randomNumber(min: minThreshold, max: maxThreshold)
         
         if Float(threshold) < pow(confidence, confidenceWeight) {
+            if room.roomID == 41570 {
+                var calendar = Calendar(identifier: .gregorian)
+                calendar.timeZone = TimeZone(abbreviation: "UTC")!
+                
+                if !calendar.isDateInWeekend(Date()) {
+                    print("Not wrecking train, since it is in SOCVR and it is not a weekend.")
+                    return
+                }
+            }
+            
             print("Wrecking train in \(room.roomID) (confidence \(confidence)); threshold \(threshold).")
             let train = trains[randomNumber(min: 0, max: trains.count - 1)]
             room.postMessage("[#RekdTrain](\(train))")
