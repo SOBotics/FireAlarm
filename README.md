@@ -1,4 +1,4 @@
-# FireAlarm 
+# FireAlarm
 
 [![Build Status](https://travis-ci.org/SOBotics/FireAlarm.svg?branch=master)](https://travis-ci.org/SOBotics/FireAlarm)
 
