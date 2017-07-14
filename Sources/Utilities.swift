@@ -29,6 +29,9 @@ var device = "<unknown device>"
 
 var originalWorkingDirectory: String!
 
+
+let updateBranch = "master"
+
 var development = false
 var noUpdate = false
 

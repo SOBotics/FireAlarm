@@ -21,10 +21,10 @@ class WebhookHandler {
         self.githubSecret = githubSecret
     }
     
-    //A closure to be called when CI succeeds.  The closure is passed the repo name and commit SHA.
-    var successHandler: ((String, String) -> ())?
+    //A closure to be called when CI succeeds.  The closure is passed the repo name, commit branhces, and commit SHA.
+    var successHandler: ((String, [String], String) -> ())?
     
-    func onSuccess(_ handler: ((String, String) -> ())?) {
+    func onSuccess(_ handler: ((String, [String], String) -> ())?) {
         successHandler = handler
     }
     
@@ -45,7 +45,10 @@ class WebhookHandler {
         guard let content = try event.contentAsJSON() as? [String:Any],
             let commitHash = content["sha"] as? String,
             let state = content["state"] as? String,
-            let repoName = content["name"] as? String else {
+            let repoName = content["name"] as? String,
+            let branches = (content["branches"] as? [[String:Any]])?.flatMap({ $0["name"] as? String })
+            
+            else {
                 throw GithubWebhookError.invalidPayload(payload: event.content)
         }
         
@@ -71,7 +74,7 @@ class WebhookHandler {
         rooms.forEach { $0.postMessage(message) }
         
         if state == "success" {
-            successHandler?(repoName, commitHash)
+            successHandler?(repoName, branches, commitHash)
         }
     }
 }

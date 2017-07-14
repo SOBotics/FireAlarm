@@ -167,8 +167,8 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
             let webhookHandler: WebhookHandler?
             if let secret = secrets.githubWebhookSecret {
                 webhookHandler = WebhookHandler(githubSecret: secret)
-                webhookHandler!.onSuccess {repo, commit in
-                    if repo == "SOBotics/FireAlarm" {
+                webhookHandler!.onSuccess {repo, branches, commit in
+                    if repo == "SOBotics/FireAlarm" && branches.contains(updateBranch) {
                         _ = update(to: commit, listener: listener, rooms: [rooms.first!])
                     }
                 }

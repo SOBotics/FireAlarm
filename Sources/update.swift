@@ -15,8 +15,6 @@ func launchProcess(path: String, arguments: [String]) -> Process {
 
 var isUpdating = false
 
-fileprivate let branch = "master"
-
 func installUpdate() -> Bool {
     do {
         let compile = "./build.sh"
@@ -61,7 +59,7 @@ var availableVersion: String = "<unknown>"
 
 func downloadUpdate(commit: String? = nil) throws {
     let script = "rm -rf update;" +
-        "(git clone -b \(branch) \"git://github.com/SOBotics/FireAlarm.git\" update && " +
+        "(git clone --single-branch -b \(updateBranch) \"git://github.com/SOBotics/FireAlarm.git\" update && " +
         "cd update" +
         (commit != nil ? "&& git checkout '\(commit!)'" : "") +
     ") || exit 1 "
@@ -133,7 +131,7 @@ func update(to commit: String? = nil, listener: ChatListener, rooms: [ChatRoom],
     }
     
     
-    let versionScript = "git ls-remote git://github.com/SOBotics/FireAlarm \(branch) | cut -d '\t' -f1 > available_version.txt"
+    let versionScript = "git ls-remote git://github.com/SOBotics/FireAlarm \(updateBranch) | cut -d '\t' -f1 > available_version.txt"
     
     
     do {
@@ -145,8 +143,9 @@ func update(to commit: String? = nil, listener: ChatListener, rooms: [ChatRoom],
         let components = versionContents.components(separatedBy: " ")
         availableVersion = components.first ?? ""
         
-        if currentVersion != availableVersion &&
+        if (commit != currentVersion || currentVersion != availableVersion) &&
             !(downloadedVersion == availableVersion && downloadedVersion != "<unknown>") {
+            
             return prepareUpdate(to: commit, listener: listener, rooms: rooms)
         }
     }
