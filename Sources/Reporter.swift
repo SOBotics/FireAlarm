@@ -144,6 +144,7 @@ class Reporter {
         filters = [
             FilterNaiveBayes(reporter: self),
             FilterMisleadingLinks(reporter: self),
+            FilterBlacklistedKeywords(reporter: self),
             FilterBlacklistedUsernames(reporter: self)
         ]
         

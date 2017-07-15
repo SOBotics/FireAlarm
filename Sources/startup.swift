@@ -18,6 +18,7 @@ let commands: [Command.Type] = [
     CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self,
     CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
     CommandCheckPost.self, CommandQuota.self,
+    CommandBlacklistKeyword.self, CommandGetBlacklistedKeywords.self, CommandUnblacklistKeyword.self,
     CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
     CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self, CommandLeaveRoom.self,
     CommandLocation.self, CommandReport.self, CommandUnclosed.self, CommandTestBayesian.self,

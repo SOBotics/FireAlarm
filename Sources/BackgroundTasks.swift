@@ -20,7 +20,7 @@ func save(rooms: [ChatRoom]) {
 		do {
 			try filter.save()
 		} catch {
-			handleError(error, "while saving a filter")
+            handleError(error, "while saving \(type(of: filter))")
 		}
 	}
 	
