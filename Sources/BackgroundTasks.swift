@@ -85,7 +85,7 @@ func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
 	let shouldReboot = reason == .reboot || reason == .update
 	
 	reporter.postFetcher.stop()
-	
+    
 	//Wait for pending messages to be posted.
 	for room in rooms {
 		while !room.messageQueue.isEmpty {
@@ -193,7 +193,7 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 				if r.shouldStandby {
 					rooms.first!.postMessage("[ [\(botName)](\(githubLink)) ] Switching to standby mode on \(location).")
 					
-					shutDown(reason: .reboot, rooms: rooms)
+					listener.stop(.reboot)
 				}
                 
                 if let commit = updateVersion {
