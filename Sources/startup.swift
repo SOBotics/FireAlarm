@@ -240,6 +240,18 @@ func main() throws {
     rooms.forEach { room in
         let trainWrecker = TrainWrecker(room: room)
         room.onMessage { message, isEdit in
+            let content = message.content.lowercased()
+            if (content == "@bots alive") {
+                do {
+                try CommandStatus(listener: listener, message: message, arguments: []).run()
+                } catch {
+                    handleError(error, "while handling '@bots alive'")
+                }
+            }
+            else if message.room.roomID == 111347 && ["🚆", "🚅", "🚂", "🚊"].contains(content) {
+                room.postMessage("[🚃](https://www.youtube.com/watch?v=dQw4w9WgXcQ)")
+            }
+            
             if !isEdit { trainWrecker.process(message: message) }
             listener.processMessage(room, message: message, isEdit: isEdit)
         }
