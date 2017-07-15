@@ -100,7 +100,7 @@ func prepareUpdate(to commit: String? = nil, listener: ChatListener, rooms: [Cha
     }
     
     isUpdating = true
-    rooms.forEach { $0.postMessage("Updating...") }
+    rooms.forEach { $0.postMessage("\(reportHeader) Updating...") }
     
     do {
         try downloadUpdate(commit: commit)
@@ -111,11 +111,11 @@ func prepareUpdate(to commit: String? = nil, listener: ChatListener, rooms: [Cha
     }
     
     if installUpdate() {
-        rooms.forEach { $0.postMessage("Update complete; rebooting...") }
+        rooms.forEach { $0.postMessage("\(reportHeader) Update complete; rebooting...") }
         listener.stop(.update)
     } else {
         isUpdating = false
-        rooms.forEach { $0.postMessage("Update failed!") }
+        rooms.forEach { $0.postMessage("\(reportHeader) Update failed!") }
     }
     return true
 }

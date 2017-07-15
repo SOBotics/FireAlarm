@@ -276,7 +276,7 @@ func main() throws {
         
         let message = components.count > 1 ? (" (" + components[1..<components.count].joined(separator: " ") + ")") : ""
         
-        startupMessage = "Updated from [`\(oldShort)`](\(oldLink)) to [`\(newShort)`](\(newLink))\(message)."
+        startupMessage = "\(reportHeader) Updated from [`\(oldShort)`](\(oldLink)) to [`\(newShort)`](\(newLink))\(message)."
         try! new.write(toFile: "version.txt", atomically: true, encoding: .utf8)
         currentVersion = new
         startupMessageCompletion = {_ in
