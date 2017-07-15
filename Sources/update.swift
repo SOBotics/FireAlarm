@@ -42,7 +42,7 @@ func installUpdate() -> Bool {
         return !FileManager.default.fileExists(atPath: "update-failure")
         
     } catch {
-        handleError(error, "while installing an update")
+        handleError(error, "while updating")
     }
     
     return false
@@ -100,7 +100,7 @@ func prepareUpdate(to commit: String? = nil, listener: ChatListener, rooms: [Cha
     }
     
     isUpdating = true
-    rooms.forEach { $0.postMessage("Installing update...") }
+    rooms.forEach { $0.postMessage("Updating...") }
     
     do {
         try downloadUpdate(commit: commit)
