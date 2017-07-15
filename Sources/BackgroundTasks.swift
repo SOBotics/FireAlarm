@@ -165,12 +165,13 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 			guard let r = redunda else { task.cancel(); return }
             
             let webhookHandler: WebhookHandler?
+            var ciVersion: String?
             var updateVersion: String?
             if let secret = secrets.githubWebhookSecret {
                 webhookHandler = WebhookHandler(githubSecret: secret)
                 webhookHandler!.onSuccess {repo, branches, commit in
                     if repo == "SOBotics/FireAlarm" && branches.contains(updateBranch) {
-                        updateVersion = commit
+                        ciVersion = commit
                     }
                 }
                 webhookHandler!.onUpdate { commit in
@@ -196,7 +197,7 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 					listener.stop(.reboot)
 				}
                 
-                if let commit = updateVersion {
+                if let commit = ciVersion ?? updateVersion {
                     _ = update(to: commit, listener: listener, rooms: [rooms.first!])
                 }
 			} catch {
