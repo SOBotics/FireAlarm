@@ -327,13 +327,7 @@ func main() throws {
     scheduleBackgroundTasks(rooms: rooms, listener: listener)
 }
 
-//func halt(reboot: Bool = false, update: Bool = false) {
-//	shutDown(update: update, reboot: reboot, rooms: rooms)
-//	backgroundTasks.append(.shutDown(reboot: reboot, update: update))
-//	backgroundSemaphore.signal()
-//}
-
-func sendUpdateBroadcast(commit: String) throws {
+private func sendUpdateBroadcast(commit: String) throws {
     //Send the update notification.
     if let token = secrets.githubWebhookSecret, let r = redunda {
         let payload = [
@@ -347,4 +341,41 @@ func sendUpdateBroadcast(commit: String) throws {
             contentType: "application/json"
         )
     }
+}
+
+
+private func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
+    let shouldReboot = reason == .reboot || reason == .update
+    
+    reporter.postFetcher.stop()
+    
+    //Wait for pending messages to be posted.
+    for room in rooms {
+        while !room.messageQueue.isEmpty {
+            sleep(1)
+        }
+    }
+    while reporter != nil && !(reporter.postFetcher.ws.state == .disconnected || reporter.postFetcher.ws.state == .error) {
+        sleep(1)
+    }
+    
+    save(rooms: rooms)
+    
+    rooms.forEach { $0.leave() }
+    
+    if shouldReboot {
+        
+        //Reload the program binary, which will restart the bot.
+        if reason == .update {
+            execv("FireAlarm", CommandLine.unsafeArgv)
+        } else {
+            //Change to the old working directory.
+            let _ = FileManager.default.changeCurrentDirectoryPath(originalWorkingDirectory)
+            execv(CommandLine.arguments[0], CommandLine.unsafeArgv)
+        }
+        //If the exec failed, exit 1 for my script, which automatically reboots on crashes.
+        exit(1)
+    }
+    
+    exit(0)
 }

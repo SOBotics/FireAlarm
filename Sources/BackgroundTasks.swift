@@ -81,45 +81,6 @@ func handleInput(input: String, rooms: [ChatRoom], listener: ChatListener) {
 }
 
 
-func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
-	let shouldReboot = reason == .reboot || reason == .update
-	
-	reporter.postFetcher.stop()
-    
-	//Wait for pending messages to be posted.
-	for room in rooms {
-		while !room.messageQueue.isEmpty {
-			sleep(1)
-		}
-	}
-	while reporter != nil && !(reporter.postFetcher.ws.state == .disconnected || reporter.postFetcher.ws.state == .error) {
-		sleep(1)
-	}
-	
-	save(rooms: rooms)
-	
-	rooms.forEach { $0.leave() }
-	
-	if shouldReboot {
-		
-		//Reload the program binary, which will restart the bot.
-        if reason == .update {
-            execv("FireAlarm", CommandLine.unsafeArgv)
-        } else {
-            //Change to the old working directory.
-            let _ = FileManager.default.changeCurrentDirectoryPath(originalWorkingDirectory)
-            execv(CommandLine.arguments[0], CommandLine.unsafeArgv)
-        }
-		//If the exec failed, exit 1 for my script, which automatically reboots on crashes.
-		exit(1)
-	}
-	
-	exit(0)
-}
-
-
-
-
 func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 	BackgroundTaskManager.shared.tasks = [
 		//Save
