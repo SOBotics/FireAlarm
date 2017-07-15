@@ -220,11 +220,8 @@ class Reporter {
             }
             
             var reported = false
-            
             var bayesianDifference: Int?
-            
             var postDetails = "Details unknown."
-            
             
             
             let title = "\(post.title ?? "<no title>")"
@@ -232,18 +229,12 @@ class Reporter {
                 .replacingOccurrences(of: "]", with: "\\]")
             
             let tags = post.tags ?? []
-            
-            let header = reasons.map { $0.header }.joined(separator: ", ")
-            
             postDetails = reasons.map {$0.details ?? "Details unknown."}.joined (separator: ", ")
-            
-            
             
             var messages: [(host: ChatRoom.Host, roomID: Int, messageID: Int)] = []
             
-            
-            
             let sema = DispatchSemaphore(value: 0)
+            
             
             for room in rooms {
                 //Filter out Bayesian scores which are less than this room's threshold.
@@ -267,6 +258,7 @@ class Reporter {
                         throw ReportError.missingSite(id: site)
                 }
                 
+                let header = reasons.map { $0.header }.joined(separator: ", ")
                 let message = "[ [\(botName)](\(stackAppsLink)) ] " +
                     "[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//\(domain)/q/\(id)) " +
                     room.notificationString(tags: tags, reasons: reasons)
