@@ -84,7 +84,8 @@ func main() throws {
     if let redundaKey = try? loadFile("redunda_key.txt").trimmingCharacters(in: .whitespacesAndNewlines) {
         //standby until Redunda tells us not to
         redunda = Redunda(key: redundaKey, client: client, filesToSync: [
-            "^reports\\.json$", "^room_\\d+_[a-z\\.]+\\.json$", "^secrets.json$"
+            "^reports\\.json$", "^room_\\d+_[a-z\\.]+\\.json$", "^secrets.json$",
+            "^blacklisted_\\w*\\.json"
             ])
         
         var shouldStandby = false
