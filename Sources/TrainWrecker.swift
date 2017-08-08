@@ -18,7 +18,7 @@ let trains = [  //From https://github.com/Tiny-Giant/myuserscripts/blob/master/T
     "https://upload.wikimedia.org/wikipedia/commons/1/19/Train_wreck_at_Montparnasse_1895.jpg",
     "https://s3.amazonaws.com/img.ultrasignup.com/events/raw/6a76f4a3-4ad2-4ae2-8a3b-c092e85586af.jpg",
     "https://kassontrainwreck.files.wordpress.com/2015/03/cropped-trainwreck.jpg",
-    "http://www.ncbam.org/images/photos/train-wreck.jpg",
+    "http://web.archive.org/web/20160426074422if_/http://www.ncbam.org/images/photos/train-wreck.jpg",
     "http://oralfixationshow.com/wp-content/uploads/2014/09/train-wreck.jpg",
     "http://experiencedynamics.blogs.com/.a/6a00d8345a66bf69e201901ed419a4970b-pi",
     "https://timedotcom.files.wordpress.com/2015/05/150513-1943-train-wreck-02.jpg?quality=75&strip=color&w=573",
