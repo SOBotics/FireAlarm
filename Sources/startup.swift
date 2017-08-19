@@ -58,18 +58,6 @@ func main() throws {
     let _ = FileManager.default.changeCurrentDirectoryPath(saveDirURL.path)
     
     
-    do {
-        guard let secretsJSON = (try JSONSerialization.jsonObject(
-            with: Data(contentsOf: saveDirURL.appendingPathComponent("secrets.json"))
-            ) as? [String:String]) else {
-                fatalError("Could not load secrets: secrets.json has an invalid format")
-        }
-        secrets = Secrets(json: secretsJSON)
-    } catch {
-        fatalError("Could not load secrets: \(error)")
-    }
-    
-    
     apiClient.key = "HNA2dbrFtyTZxeHN6rThNg(("
     apiClient.defaultFilter = "!-*f(6rOFHc24"
     
@@ -116,6 +104,18 @@ func main() throws {
         } catch {
             print("Could not download files!")
         }
+    }
+    
+    
+    do {
+        guard let secretsJSON = (try JSONSerialization.jsonObject(
+            with: Data(contentsOf: saveDirURL.appendingPathComponent("secrets.json"))
+            ) as? [String:String]) else {
+                fatalError("Could not load secrets: secrets.json has an invalid format")
+        }
+        secrets = Secrets(json: secretsJSON)
+    } catch {
+        fatalError("Could not load secrets: \(error)")
     }
     
     
