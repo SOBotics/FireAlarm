@@ -15,7 +15,7 @@ import CryptoSwift
 let commands: [Command.Type] = [
     CommandCheckThreshold.self, CommandSetThreshold.self, CommandCheckSites.self, CommandAddSite.self, CommandRemoveSite.self,
     CommandSay.self, CommandDeleteMessage.self,
-    CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self,
+    CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self, CommandPingOnError.self,
     CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
     CommandCheckPost.self, CommandQuota.self,
     CommandBlacklistKeyword.self, CommandGetBlacklistedKeywords.self, CommandUnblacklistKeyword.self,
