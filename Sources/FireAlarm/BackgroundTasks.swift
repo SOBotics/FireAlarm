@@ -48,9 +48,7 @@ func handleInput(input: String, rooms: [ChatRoom], listener: ChatListener) {
 	
 	let room: ChatRoom
 	if firstComponent.hasPrefix(">") {
-		let roomIDStr = firstComponent.substring(
-			from: firstComponent.characters.index(after: firstComponent.characters.startIndex)
-		)
+        let roomIDStr = firstComponent[firstComponent.index(after: firstComponent.startIndex)...]
 		guard let roomID = Int(roomIDStr) else {
 			print("Invalid room ID.")
 			return

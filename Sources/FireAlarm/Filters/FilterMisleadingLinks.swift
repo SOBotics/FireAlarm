@@ -33,14 +33,8 @@ class FilterMisleadingLinks: Filter {
             for match in regex.matches(in: body, options: [], range: NSMakeRange(0, nsString.length)) {
                 
                 
-                #if os(Linux)
                     let linkString = nsString.substring(with: match.range(at: 1))
                     let textString = nsString.substring(with: match.range(at: 2))
-                #else
-                    
-                    let linkString = nsString.substring(with: match.rangeAt(1)) as String
-                    let textString = nsString.substring(with: match.rangeAt(2)) as String
-                #endif
                 guard
                     let link = URL(string: linkString),
                     let text = URL(string: textString),

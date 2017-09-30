@@ -1,10 +1,16 @@
+// swift-tools-version:4.0
+
 import PackageDescription
 
 let package = Package(
     name: "FireAlarm",
     dependencies: [
-        .Package(url: "git://github.com/SOBotics/SwiftChatSE",      majorVersion: 4),
-        .Package(url: "git://github.com/SOBotics/SwiftStack",       majorVersion: 0),
-        .Package(url: "git://github.com/krzyzanowskim/CryptoSwift", majorVersion: 0, minor: 6)
+        .package(url: "git://github.com/SOBotics/SwiftChatSE",      from: "5.0.0"),
+        .package(url: "git://github.com/SOBotics/SwiftStack",       from: "0.5.0"),
+        .package(url: "git://github.com/krzyzanowskim/CryptoSwift", from: "0.7.0")
+    ],
+    targets: [
+        .target(name: "FireAlarm", dependencies: ["SwiftChatSE", "SwiftStack", "CryptoSwift"]),
+        .testTarget(name: "FireAlarmTests", dependencies: ["FireAlarm"])
     ]
 )

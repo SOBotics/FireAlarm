@@ -71,7 +71,7 @@ class CommandReport: Command {
             reply("That post has already been reported.")
         case .notBad:
             reply("this should never happen (cc @NobodyNada): `\(#file)`, line \(#line)")
-        case .reported(_):
+        case .reported:
             break
         }
     }
