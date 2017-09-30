@@ -9,6 +9,7 @@
 import Foundation
 import SwiftStack
 import SwiftChatSE
+import Dispatch
 
 let saveDirURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 
@@ -152,32 +153,37 @@ func run(command: String, printOutput: Bool = true) -> (exitCode: Int, stdout: S
     var stdout = Data()
     var stderr = Data()
     var combined = Data()
-    let queue = DispatchQueue(label: "org.SOBotics.firealarm.commandOutputQueue")
     
-    stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
-        let data = handle.availableData
-        queue.sync {
-            stdout += data
-            combined += data
-            if printOutput {
-                FileHandle.standardOutput.write(data)
-            }
+    let queue = DispatchQueue(label: "org.SOBotics.firealarm.commandOutputQueue")
+    let stdoutSource = DispatchSource.makeReadSource(fileDescriptor: stdoutPipe.fileHandleForReading.fileDescriptor)
+    let stderrSource = DispatchSource.makeReadSource(fileDescriptor: stderrPipe.fileHandleForReading.fileDescriptor)
+    
+    stdoutSource.setEventHandler {
+        let data = stdoutPipe.fileHandleForReading.availableData
+        stderr += data
+        combined += data
+        if printOutput {
+            FileHandle.standardError.write(data)
         }
     }
-    stderrPipe.fileHandleForReading.readabilityHandler = { handle in
-        let data = handle.availableData
-        queue.sync {
-            stderr += data
-            combined += data
-            if printOutput {
-                FileHandle.standardError.write(data)
-            }
+    stderrSource.setEventHandler {
+        let data = stderrPipe.fileHandleForReading.availableData
+        stdout += data
+        combined += data
+        if printOutput {
+            FileHandle.standardOutput.write(data)
         }
     }
+    
+    stdoutSource.resume()
+    stderrSource.resume()
     
     process.launch()
     process.waitUntilExit()
     
+    queue.sync {}
+    stdoutSource.cancel()
+    stderrSource.cancel()
     queue.sync {}
     stdoutPipe.fileHandleForReading.closeFile()
     stderrPipe.fileHandleForReading.closeFile()
