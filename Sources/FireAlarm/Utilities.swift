@@ -139,7 +139,7 @@ func addPrivileges() {
     ChatUser.Privileges.add(name: "Filter", for: .filter)
 }
 
-func run(command: String) -> (exitCode: Int, stdout: String?, stderr: String?, combinedOutput: String?) {
+func run(command: String, printOutput: Bool = true) -> (exitCode: Int, stdout: String?, stderr: String?, combinedOutput: String?) {
     let process = Process()
     process.launchPath = "/usr/bin/env"
     process.arguments = ["bash", "-c", command]
@@ -159,6 +159,9 @@ func run(command: String) -> (exitCode: Int, stdout: String?, stderr: String?, c
         queue.sync {
             stdout += data
             combined += data
+            if printOutput {
+                FileHandle.standardOutput.write(data)
+            }
         }
     }
     stderrPipe.fileHandleForReading.readabilityHandler = { handle in
@@ -166,6 +169,9 @@ func run(command: String) -> (exitCode: Int, stdout: String?, stderr: String?, c
         queue.sync {
             stderr += data
             combined += data
+            if printOutput {
+                FileHandle.standardError.write(data)
+            }
         }
     }
     

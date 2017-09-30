@@ -10,7 +10,7 @@ import SwiftChatSE
 
 class CommandGitStatus: Command {
     override class func usage() -> [String] {
-        return ["git status", "gistatus"]
+        return ["git status", "gitstatus"]
     }
     
     override func run() throws {
