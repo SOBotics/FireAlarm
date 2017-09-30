@@ -366,7 +366,7 @@ private func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
         for i in 0..<args.count {
             argBuffer[i] = .allocate(capacity: args[i].utf8CString.count)
             _ = args[i].utf8CString.withUnsafeBufferPointer {
-                strcpy(argBuffer[i], $0.baseAddress)
+                strcpy(argBuffer[i]!, $0.baseAddress!)
             }
         }
         argBuffer[args.count] = nil
