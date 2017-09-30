@@ -30,7 +30,7 @@ var device = "<unknown device>"
 var originalWorkingDirectory: String!
 
 
-let updateBranch = "master"
+let updateBranch = "swift3"
 
 var development = false
 var noUpdate = false
