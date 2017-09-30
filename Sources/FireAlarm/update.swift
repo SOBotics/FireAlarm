@@ -13,7 +13,7 @@ var isUpdating = false
 
 func getCurrentVersion() -> String {
     let versionResults = run(command: "git rev-parse HEAD")
-    return (versionResults.exitCode != 0 ? versionResults.stdout : nil)?.replacingOccurrences(of: "\n", with: "") ?? "<unknown version>"
+    return (versionResults.exitCode == 0 ? versionResults.stdout : nil)?.replacingOccurrences(of: "\n", with: "") ?? "<unknown version>"
 }
 
 public func getShortVersion(_ version: String) -> String {

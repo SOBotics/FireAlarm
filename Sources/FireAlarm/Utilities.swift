@@ -160,7 +160,7 @@ func run(command: String, printOutput: Bool = true) -> (exitCode: Int, stdout: S
     
     stdoutSource.setEventHandler {
         let data = stdoutPipe.fileHandleForReading.availableData
-        stderr += data
+        stdout += data
         combined += data
         if printOutput {
             FileHandle.standardError.write(data)
@@ -168,7 +168,7 @@ func run(command: String, printOutput: Bool = true) -> (exitCode: Int, stdout: S
     }
     stderrSource.setEventHandler {
         let data = stderrPipe.fileHandleForReading.availableData
-        stdout += data
+        stderr += data
         combined += data
         if printOutput {
             FileHandle.standardOutput.write(data)

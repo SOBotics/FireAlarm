@@ -255,59 +255,11 @@ func main() throws {
     
     try rooms.forEach { try $0.join() }
     
-    //Post the startup message
-    let startupMessage: String?
-    let startupMessageCompletion: ((Int?) -> Void)?
-    
     currentVersion = getCurrentVersion()
-    if let new = try? loadFile("version-new.txt").replacingOccurrences(of: "\n", with: "") {
-        let components = new.components(separatedBy: " ")
-        let new = components.first ?? ""
-        let newShort = getShortVersion(new)
-        let newLink = getVersionLink(new)
-        
-        let old = currentVersion
-        let oldShort = getShortVersion(old)
-        let oldLink = getVersionLink(old)
-        
-        let message = components.count > 1 ? (" (" + components[1..<components.count].joined(separator: " ") + ")") : ""
-        
-        startupMessage = "\(reportHeader) Updated from [`\(oldShort)`](\(oldLink)) to [`\(newShort)`](\(newLink))\(message)."
-        try! new.write(toFile: "version.txt", atomically: true, encoding: .utf8)
-        currentVersion = new
-        startupMessageCompletion = {_ in
-            do {
-                if FileManager.default.fileExists(atPath: "version-new.txt") {
-                    try FileManager.default.removeItem(atPath: "version-new.txt")
-                }
-            } catch {
-                handleError(error, "while clearing the update status")
-            }
-        }
-        
-        do {
-            try sendUpdateBroadcast(commit: new)
-        } catch {
-            print("Failed to send update broadcast: \(error)")
-        }
-    }
-    else {
-        startupMessage = nil
-        startupMessageCompletion = nil
-        let short = getShortVersion(currentVersion)
-        let link = getVersionLink(currentVersion)
-        
-        rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at revision [`\(short)`](\(link)) on \(location).")
-    }
-    
-    if let message = startupMessage {
-        //rooms.dropLast().forEach { $0.postMessage(message); sleep(1) }
-        //rooms.last!.postMessage(message, completion: startupMessageCompletion);
-        rooms.first?.postMessage(message, completion: startupMessageCompletion)
-    }
-    
     shortVersion = getShortVersion(currentVersion)
     versionLink = getVersionLink(currentVersion)
+    
+    rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at revision [`\(shortVersion)`](\(versionLink)) on \(location).")
     
     //Load the filter
     reporter = Reporter(rooms)
