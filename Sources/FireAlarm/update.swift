@@ -58,7 +58,7 @@ func update(to commit: String?, listener: ChatListener, rooms: [ChatRoom], force
     
     rooms.forEach { $0.postMessage("\(reportHeader) Updating...") }
     
-    let buildResult = run(command: "swift build -c release")
+    let buildResult = run(command: "swift package update && swift build -c release")
     if buildResult.exitCode != 0 {
         if let output = buildResult.combinedOutput, !output.isEmpty {
             let message = "    " + output.components(separatedBy: .newlines).joined(separator: "\n    ")
