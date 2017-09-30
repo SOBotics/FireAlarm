@@ -3,4 +3,14 @@ FireAlarm.xcodeproj
 FireAlarm.xcworkspace
 .DS_Store
 Package.pins
+Package.resolved
 .build
+filter.json
+blacklisted_*.json
+filter_static.sqlite
+redunda_key.txt
+secrets.json
+room_*_stackoverflow.com.json
+room_*_stackexchange.com.json
+room_*_meta.stackexchange.com.json
+reports.json

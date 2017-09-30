@@ -15,7 +15,8 @@ import CryptoSwift
 let commands: [Command.Type] = [
     CommandCheckThreshold.self, CommandSetThreshold.self, CommandCheckSites.self, CommandAddSite.self, CommandRemoveSite.self,
     CommandSay.self, CommandDeleteMessage.self,
-    CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self, CommandUpdate.self, CommandStatus.self, CommandPingOnError.self,
+    CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self,
+    CommandUpdate.self, CommandStatus.self, CommandPingOnError.self, CommandGitStatus.self,
     CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
     CommandCheckPost.self, CommandQuota.self,
     CommandBlacklistKeyword.self, CommandGetBlacklistedKeywords.self, CommandUnblacklistKeyword.self,
@@ -43,20 +44,7 @@ func main() throws {
     
     noUpdate = ProcessInfo.processInfo.arguments.contains("--noupdate")
     
-    
-    //Save the working directory & change to the chatbot directory.
-    originalWorkingDirectory = FileManager.default.currentDirectoryPath
-    
-    let saveDirURL = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".firealarm", isDirectory: true)
-    
-    if !FileManager.default.fileExists(atPath: saveDirURL.path) {
-        try! FileManager.default.createDirectory(at: saveDirURL, withIntermediateDirectories: false, attributes: nil)
-    }
-    
     saveURL = saveDirURL
-    
-    let _ = FileManager.default.changeCurrentDirectoryPath(saveDirURL.path)
-    
     
     apiClient.key = "HNA2dbrFtyTZxeHN6rThNg(("
     apiClient.defaultFilter = "!-*f(6rOFHc24"
@@ -104,6 +92,8 @@ func main() throws {
         } catch {
             print("Could not download files!")
         }
+    } else {
+        fputs("warning: Could not load redunda_key.txt; running without Redunda.\n", stderr)
     }
     
     
@@ -118,7 +108,11 @@ func main() throws {
         fatalError("Could not load secrets: \(error)")
     }
     
-    
+    print("Decompressing filter...")
+    let result = run(command: "gunzip -c filter_static.sqlite.gz > filter_static.sqlite")
+    if result.exitCode != 0 {
+        print("Failed to decompress filter_static.sqlite.gz: \(result.stderr ?? "<no error>")")
+    }
     
     //Log in
     let env =  ProcessInfo.processInfo.environment
@@ -245,7 +239,7 @@ func main() throws {
             let content = message.content.lowercased()
             if (content == "@bots alive") {
                 do {
-                try CommandStatus(listener: listener, message: message, arguments: []).run()
+                    try CommandStatus(listener: listener, message: message, arguments: []).run()
                 } catch {
                     handleError(error, "while handling '@bots alive'")
                 }
@@ -335,7 +329,7 @@ private func sendUpdateBroadcast(commit: String) throws {
         let payload = [
             "token": token,
             "commit": commit,
-        ]
+            ]
         let data = try JSONSerialization.data(withJSONObject: payload)
         let (_, _) = try r.client.post(
             "https://redunda.sobotics.org/bots/6/events/update_to?broadcast=true",
@@ -366,15 +360,17 @@ private func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
     rooms.forEach { $0.leave() }
     
     if shouldReboot {
-        
-        //Reload the program binary, which will restart the bot.
-        if reason == .update {
-            execv("FireAlarm", CommandLine.unsafeArgv)
-        } else {
-            //Change to the old working directory.
-            let _ = FileManager.default.changeCurrentDirectoryPath(originalWorkingDirectory)
-            execv(CommandLine.arguments[0], CommandLine.unsafeArgv)
+        let command = "/usr/bin/env swift run -c release"
+        let args = command.components(separatedBy: .whitespaces)
+        let argBuffer = UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>.allocate(capacity: args.count + 1)
+        for i in 0..<args.count {
+            argBuffer[i] = .allocate(capacity: args[i].utf8CString.count)
+            _ = args[i].utf8CString.withUnsafeBufferPointer {
+                strcpy(argBuffer[i], $0.baseAddress)
+            }
         }
+        argBuffer[args.count] = nil
+        execv("/usr/bin/env", argBuffer)
         //If the exec failed, exit 1 for my script, which automatically reboots on crashes.
         exit(1)
     }
