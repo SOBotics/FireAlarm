@@ -32,13 +32,9 @@ class CommandCheckPost: Command {
         }
         
         guard
-            let site = try reporter.staticDB.run(
-                "SELECT id FROM sites WHERE domain = ?",
-                siteDomain
-                ).first?.column(at: 0) as Int? else {
-                    
-                    reply("That does not look like a site on which I run.")
-                    return
+            let site = try Site.with(domain: siteDomain, db: reporter.staticDB) else {
+                reply("That does not look like a site on which I run.")
+                return
         }
         
         guard

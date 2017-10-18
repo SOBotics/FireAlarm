@@ -35,16 +35,8 @@ class FilterNaiveBayes: Filter {
         print ("Loading Naive Bayes filter...")
     }
     
-    func check(_ post: Question, site: Int) throws -> FilterResult? {
-        guard let initialProbability = try reporter.staticDB.run(
-            "SELECT initialProbability FROM sites WHERE id = ?", site
-            ).first?.column(at: 0) as Double? else {
-                
-                print("No initialProbability for site \(site)")
-                return nil
-        }
-        
-        var trueProbability = Double(initialProbability)
+    func check(_ post: Question, site: Site) throws -> FilterResult? {
+        var trueProbability = Double(site.initialProbability)
         var falseProbability = Double(1 - trueProbability)
         var postWords = [String]()
         var checkedWords = [String]()
@@ -78,7 +70,7 @@ class FilterNaiveBayes: Filter {
                 "SELECT * FROM words " +
                 "WHERE site = ? " +
                 "AND word = ?;",
-                site, postWord
+                site.id, postWord
                 ).first.map(Word.init) else {
                     
                 continue

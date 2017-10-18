@@ -38,20 +38,21 @@ class CommandSetThreshold: Command {
                 message.reply("Which site would you like to change threshold for?")
             }
         } else {
-            guard let siteID = try reporter.staticDB.run("SELECT id FROM sites " +
+            guard let site = try reporter.staticDB.run("SELECT id FROM sites " +
                 "WHERE apiSiteParameter = ? OR domain = ?",
                                       arguments.last!, arguments.last!
-                ).first?.column(at: 0) as Int? else {
+                ).first.map(Site.from) else {
                     
                     message.reply("That does not look like a site on which I run.")
                     return
             }
-            guard message.room.thresholds[siteID] != nil else {
+            guard message.room.thresholds[site.id] != nil else {
                 message.reply("I do not report posts from that site here.")
                 return
             }
             
-            message.room.thresholds[siteID] = newThreshold
+            message.room.thresholds[site.id] = newThreshold
+            reply("Set threshold for `\(site.domain)` to \(newThreshold).")
         }
     }
 }

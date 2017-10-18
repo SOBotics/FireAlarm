@@ -21,18 +21,18 @@ class CommandRemoveSite: Command {
     override func run() throws {
         guard
             let siteName = arguments.first,
-            let site: Int = try reporter.staticDB.run(
+            let site = try reporter.staticDB.run(
                 "SELECT id FROM sites WHERE domain = ? OR apiSiteParameter = ?",
                 siteName, siteName
-                ).first?.column(at: 0),
-            message.room.thresholds[site] != nil else {
+                ).first.map(Site.from),
+            message.room.thresholds[site.id] != nil else {
                 
                 reply("Please enter a site and a threshold.")
                 return
         }
         
-        message.room.thresholds[site] = nil
+        message.room.thresholds[site.id] = nil
         
-        reply("Removed \(siteName) from this room's sites.")
+        reply("Removed \(site.domain) from this room's sites.")
     }
 }

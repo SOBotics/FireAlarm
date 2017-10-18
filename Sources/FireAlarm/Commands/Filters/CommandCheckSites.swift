@@ -22,9 +22,7 @@ class CommandCheckSites: Command {
         }
         
         let siteNames: [String] = try message.room.thresholds.keys.map {
-            try reporter.staticDB.run(
-                "SELECT domain FROM sites WHERE id = ?", $0
-                ).first?.column(at: 0) ?? "<unknown site \($0)>"
+            try Site.with(id: $0, db: reporter.staticDB)?.domain ?? "<unknown site \($0)>"
         }
         
         reply("This room reports posts from \(formatArray(siteNames, conjunction: "and")).")

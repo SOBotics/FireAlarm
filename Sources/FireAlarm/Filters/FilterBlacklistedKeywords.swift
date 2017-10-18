@@ -38,7 +38,7 @@ class FilterBlacklistedKeywords: Filter {
             if FileManager.default.fileExists(atPath: keywordURL.path) {
                 print("Backing up blacklisted_users.json.")
                 do {
-                    try FileManager.default.moveItem(at: keywordURL, to: saveDirURL.appendingPathComponent("blacklisted_users.json.bak"))
+                    try FileManager.default.moveItem(at: keywordURL, to: saveDirURL.appendingPathComponent("blacklisted_keywords.json.bak"))
                 } catch {
                     handleError(error, "while backing up the blacklisted keywords")
                 }
@@ -46,7 +46,7 @@ class FilterBlacklistedKeywords: Filter {
         }
     }
     
-    func check(_ post: Question, site: Int) -> FilterResult? {
+    func check(_ post: Question, site: Site) -> FilterResult? {
         guard let content = post.body else {
             print("No body for \(post.id.map { String($0) } ?? "<no ID>")!")
             return nil

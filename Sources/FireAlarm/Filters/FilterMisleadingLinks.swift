@@ -14,7 +14,7 @@ import Dispatch
 class FilterMisleadingLinks: Filter {
     required init (reporter: Reporter) {}
     
-    func check(_ post: Question, site: Int) -> FilterResult? {
+    func check(_ post: Question, site: Site) -> FilterResult? {
         do {
             let regex = try NSRegularExpression(pattern:
                 "<a href=\"([^\"]*)\" rel=\"nofollow(?: noreferrer)?\">\\s*([^<\\s]*)(?=\\s*</a>)", options: []

@@ -12,7 +12,7 @@ import SwiftStack
 import Dispatch
 
 class PostFetcher {
-    var postsToCheck = [(id: Int, site: Int)]()
+    var postsToCheck = [(id: Int, site: Site)]()
     
     var queue = DispatchQueue(label: "Filter", attributes: [.concurrent])
     
@@ -72,7 +72,7 @@ class PostFetcher {
                         !posts.contains { $0.id == post.id && $0.site == post.site }
                     }
                     
-                    var postsBySite = [Int:[Int]]()
+                    var postsBySite = [Site:[Int]]()
                     for post in posts {
                         if postsBySite[post.site] != nil {
                             postsBySite[post.site]!.append(post.id)
@@ -82,17 +82,9 @@ class PostFetcher {
                     }
                     
                     for (site, posts) in postsBySite {
-                        guard let apiSiteParameter = try self.staticDB.run(
-                            "SELECT apiSiteParameter FROM sites WHERE id = ?",
-                            site
-                            ).first?.column(at: 0) as String? else {
-                                
-                                throw QuestionProcessingError.siteLookupFailed(siteID: site)
-                        }
-                        
                         for post in try apiClient.fetchQuestions(
                             posts,
-                            parameters: ["site":apiSiteParameter]
+                            parameters: ["site":site.apiSiteParameter]
                             ).items ?? [] {
                                 
                                 //don't report posts that are more than a day old
@@ -214,14 +206,11 @@ class PostFetcher {
                     throw QuestionProcessingError.noDataObject(json: string)
                 }
                 
-                guard let site = data["apiSiteParameter"] as? String else {
+                guard let apiSiteParameter = data["apiSiteParameter"] as? String else {
                     throw QuestionProcessingError.noSite(json: string)
                 }
                 
-                guard let siteID = try staticDB.run(
-                    "SELECT id FROM sites WHERE apiSiteParameter = ?",
-                    site
-                    ).first?.column(at: 0) as Int? else {
+                guard let site = try Site.with(apiSiteParameter: apiSiteParameter, db: staticDB) else {
                         return
                 }
                 
@@ -229,8 +218,7 @@ class PostFetcher {
                     throw QuestionProcessingError.noQuestionID(json: string)
                 }
                 
-                
-                postsToCheck.append((id: id, site: siteID))
+                postsToCheck.append((id: id, site: site))
                 //print("Another post has been recieved.  There are now \(postsToCheck.count) posts to check.")
                 
             } catch {

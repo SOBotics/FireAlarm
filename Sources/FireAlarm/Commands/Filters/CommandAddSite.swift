@@ -30,17 +30,17 @@ class CommandAddSite: Command {
             return
         }
         
-        guard let site: Int = try reporter.staticDB.run(
+        guard let site = try reporter.staticDB.run(
             "SELECT id FROM sites WHERE domain = ? OR apiSiteParameter = ?",
             siteName, siteName
-            ).first?.column(at: 0) else {
+            ).first.map(Site.from) else {
                 
                 reply("That does not look like a site on which I run.")
                 return
         }
         
-        message.room.thresholds[site] = threshold
+        message.room.thresholds[site.id] = threshold
         
-        reply("Added \(siteName) to this room's sites with threshold \(threshold).")
+        reply("Added \(site.domain) to this room's sites with threshold \(threshold).")
     }
 }
