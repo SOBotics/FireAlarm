@@ -87,7 +87,7 @@ func main() throws {
         }
         
         do {
-            //try redunda!.downloadFiles()
+            try redunda!.downloadFiles()
         } catch {
             print("Could not download files!")
         }
