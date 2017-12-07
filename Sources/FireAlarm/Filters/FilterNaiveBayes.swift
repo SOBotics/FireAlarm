@@ -48,7 +48,7 @@ class FilterNaiveBayes: Filter {
         
         var currentWord: String = ""
         let set = CharacterSet.alphanumerics.inverted
-        for character in body.lowercased().characters {
+        for character in body.lowercased() {
             if !set.contains(String(character).unicodeScalars.first!) {
                 currentWord.append(character)
             }

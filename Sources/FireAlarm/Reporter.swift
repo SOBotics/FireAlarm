@@ -90,6 +90,8 @@ class Reporter {
     
     var filters = [Filter]()
     
+    var blacklistManager: BlacklistManager
+    
     private let queue = DispatchQueue(label: "Reporter queue")
     
     
@@ -106,6 +108,23 @@ class Reporter {
         print ("Reporter loading...")
         
         self.rooms = rooms
+        
+        let blacklistURL = saveDirURL.appendingPathComponent("blacklists.json")
+        do {
+            blacklistManager = try BlacklistManager(url: blacklistURL)
+        } catch {
+            handleError(error, "while loading blacklists")
+            print("Loading an empty blacklist.")
+            blacklistManager = BlacklistManager()
+            if FileManager.default.fileExists(atPath: blacklistURL.path) {
+                print("Backing up blacklists.json.")
+                do {
+                    try FileManager.default.moveItem(at: blacklistURL, to: saveDirURL.appendingPathComponent("blacklist.json.bak"))
+                } catch {
+                    handleError(error, "while backing up the blacklists")
+                }
+            }
+        }
         
         let reportsURL = saveDirURL.appendingPathComponent("reports.json")
         let usernameURL = saveDirURL.appendingPathComponent("blacklisted_users.json")
@@ -130,7 +149,7 @@ class Reporter {
                 do {
                     try FileManager.default.moveItem(at: usernameURL, to: saveDirURL.appendingPathComponent("reports.json.bak"))
                 } catch {
-                    handleError(error, "while backing up the blacklisted usernames")
+                    handleError(error, "while backing up the reports")
                 }
             }
         }
@@ -144,8 +163,9 @@ class Reporter {
         filters = [
             FilterNaiveBayes(reporter: self),
             FilterMisleadingLinks(reporter: self),
-            FilterBlacklistedKeywords(reporter: self),
-            FilterBlacklistedUsernames(reporter: self)
+            FilterBlacklistedKeyword(reporter: self),
+            FilterBlacklistedUsername(reporter: self),
+            FilterBlacklistedTag(reporter: self)
         ]
         
         postFetcher = PostFetcher(rooms: rooms, reporter: self, staticDB: staticDB)

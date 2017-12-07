@@ -29,6 +29,12 @@ func save(rooms: [ChatRoom]) {
 	} catch {
 		handleError(error, "while saving reports")
 	}
+    
+    do {
+        try reporter.blacklistManager.save(url: saveDirURL.appendingPathComponent("blacklists.json"))
+    } catch {
+        handleError(error, "while saving blacklists")
+    }
 	
 	do {
 		try redunda?.uploadFiles()

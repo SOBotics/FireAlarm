@@ -19,8 +19,7 @@ let commands: [Command.Type] = [
     CommandUpdate.self, CommandStatus.self, CommandPingOnError.self, CommandGitStatus.self,
     CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
     CommandCheckPost.self, CommandQuota.self,
-    CommandBlacklistKeyword.self, CommandGetBlacklistedKeywords.self, CommandUnblacklistKeyword.self,
-    CommandBlacklistUsername.self, CommandGetBlacklistedUsernames.self, CommandUnblacklistUsername.self,
+    CommandBlacklist.self, CommandGetBlacklist.self, CommandUnblacklist.self,
     CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self, CommandLeaveRoom.self,
     CommandLocation.self, CommandReport.self, CommandUnclosed.self, CommandTestBayesian.self,
     CommandWhy.self,
@@ -88,7 +87,7 @@ func main() throws {
         }
         
         do {
-            try redunda!.downloadFiles()
+            //try redunda!.downloadFiles()
         } catch {
             print("Could not download files!")
         }
@@ -175,10 +174,10 @@ func main() throws {
             
             location = "\(user)/\(device)"
             
-            location = String(location.characters.filter { !"\n".characters.contains($0) })
+            location = String(location.filter { !"\n".characters.contains($0) })
             userLocation = location
-            user = String(user.characters.filter { !"\n".characters.contains($0) })
-            device = String(device.characters.filter { !"\n".characters.contains($0) })
+            user = String(user.filter { !"\n".characters.contains($0) })
+            device = String(device.filter { !"\n".characters.contains($0) })
             ping = " (cc @\(user))"
             userLocation = location
         } catch {

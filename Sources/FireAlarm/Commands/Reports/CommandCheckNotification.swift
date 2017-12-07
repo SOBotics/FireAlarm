@@ -15,25 +15,43 @@ class CommandCheckNotification: Command {
 	}
 	
 	override func run() throws {
-		if !message.user.notified {
+		if message.user.notificationReasons.isEmpty {
 			reply("You will not be notified of any reports.")
 		}
-		else if message.user.notificationTags.isEmpty && message.user.notificationReasons.isEmpty {
+        else if message.user.notificationReasons.contains(where: { if case .all = $0 { return true } else { return false } }) {
 			reply("You will be notified of all reports.")
 		}
 		else {
 			var reasons: [String] = []
-			if !message.user.notificationTags.isEmpty {
-				let formattedTags = formatArray(message.user.notificationTags.map { "[tag:\($0)]" }, conjunction: "or")
-				reasons.append("reports tagged "+formattedTags)
+            
+            let tags = message.user.notificationReasons.flatMap {
+                if case .tag(let tag) = $0 { return tag }
+                else { return nil }
+            }
+            
+            let blacklists = message.user.notificationReasons.flatMap {
+                if case .blacklist(let list) = $0 { return list }
+                else { return nil }
+            } as [BlacklistManager.BlacklistType]
+            
+            let containsMisleadingLink = message.user.notificationReasons.contains {
+                if case .misleadingLinks = $0 { return true }
+                else { return false }
+            }
+            
+            
+			if !tags.isEmpty {
+				let formattedTags = formatArray(tags.map { "[tag:\($0)]" }, conjunction: "or")
+				reasons.append("reports tagged \(formattedTags)")
 			}
-			if message.user.notificationReasons.contains("username") {
-				reasons.append("blacklisted usernames")
+			if !blacklists.isEmpty {
+                let formattedBlacklists = formatArray(blacklists.map { "\($0.rawValue)s" }, conjunction: "and")
+				reasons.append("blacklisted \(formattedBlacklists)")
 			}
-			if message.user.notificationReasons.contains("misleadingLink") {
-				reasons.append("misleading links")
-			}
-			let formatted = formatArray(reasons, conjunction: "or")
+            if containsMisleadingLink {
+                reasons.append("misleading links")
+            }
+			let formatted = formatArray(reasons, conjunction: "and")
 			reply("You will be notified of \(formatted).")
 		}
 

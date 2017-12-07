@@ -37,25 +37,57 @@ var development = false
 var noUpdate = false
 
 extension ChatUser {
-    var notified: Bool {
-        get {
-            return ((info["notified"] as? Int) ?? 0) == 1 ? true : false
-        } set {
-            info["notified"] = (newValue ? 1 : 0)
+    enum NotificationReason {
+        case misleadingLinks
+        case blacklist(BlacklistManager.BlacklistType)
+        case tag(String)
+        case all
+        
+        var asString: String {
+            switch self {
+            case .misleadingLinks: return "misleading_links"
+            case .blacklist(let list): return "blacklist:\(list.rawValue)"
+            case .tag(let tag): return "tag:\(tag)"
+            case .all: return "all"
+            }
+        }
+        init?(string: String) {
+            if string == "misleading_links" { self = .misleadingLinks }
+            else if string == "all" { self = .all }
+            else {
+                let components = string.components(separatedBy: ":")
+                guard components.count >= 2 else { return nil }
+                let type = components.first!
+                let value = components.dropFirst().joined(separator: ":")
+                switch type {
+                case "blacklist":
+                    if let result = BlacklistManager.BlacklistType(rawValue: value).map(NotificationReason.blacklist) {
+                        self = result
+                    } else {
+                        return nil
+                    }
+                case "tag":
+                    self = .tag(value)
+                default:
+                    return nil
+                }
+            }
+        }
+        
+        var description: String {
+            switch self {
+            case .misleadingLinks: return "misleading link"
+            case .blacklist(let list): return "blacklisted \(list.rawValue)"
+            case .tag(let tag): return "\(tag)"
+            case .all: return "all reports"
+            }
         }
     }
-    var notificationTags: [String] {
+    var notificationReasons: [NotificationReason] {
         get {
-            return (info["notificationTags"] as? [String]) ?? []
+            return (info["notificationReasons"] as? [String])?.flatMap { NotificationReason(string: $0) } ?? []
         } set {
-            info["notificationTags"] = newValue
-        }
-    }
-    var notificationReasons: [String] {
-        get {
-            return (info["notificationReasons"] as? [String]) ?? []
-        } set {
-            info["notificationReasons"] = newValue
+            info["notificationReasons"] = newValue.map { $0.asString }
         }
     }
 }
@@ -64,29 +96,27 @@ extension ChatRoom {
     func notificationString(tags: [String], reasons: [FilterResult]) -> String {
         var users = [ChatUser]()
         for user in userDB {
-            var shouldNotify = false
-            
-            if user.notified {
-                if !user.notificationTags.isEmpty {
-                    for tag in tags {
-                        if user.notificationTags.contains(tag) {
-                            shouldNotify = true
+            let shouldNotify = user.notificationReasons.contains { notificationReason in
+                switch notificationReason {
+                case .all: return true
+                case .blacklist(let type):
+                    return reasons.contains {
+                        if case .customFilter(let filter) = $0.type {
+                            return (filter as? BlacklistFilter).map { $0.blacklistType == type } ?? false
+                        } else {
+                            return false
                         }
                     }
-                }
-                else {
-                    shouldNotify = true
-                }
-                
-                for reason in reasons {
-                    guard case .customFilter(let filter) = reason.type else { continue }
-                    
-                    if filter is FilterBlacklistedUsernames && user.notificationReasons.contains("username") {
-                        shouldNotify = true
+                case .misleadingLinks:
+                    return reasons.contains {
+                        if case .customFilter(let filter) = $0.type {
+                            return filter is FilterMisleadingLinks
+                        } else {
+                            return false
+                        }
                     }
-                    if filter is FilterMisleadingLinks && user.notificationReasons.contains("misleadingLink") {
-                        shouldNotify = true
-                    }
+                case .tag(let tag):
+                    return tags.contains(tag)
                 }
             }
             
