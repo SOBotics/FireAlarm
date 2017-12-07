@@ -60,7 +60,7 @@ func main() throws {
         //standby until Redunda tells us not to
         redunda = Redunda(key: redundaKey, client: client, filesToSync: [
             "^reports\\.json$", "^room_\\d+_[a-z\\.]+\\.json$", "^secrets.json$",
-            "^blacklisted_\\w*\\.json"
+            "^blacklists.json"
             ])
         
         var shouldStandby = false
