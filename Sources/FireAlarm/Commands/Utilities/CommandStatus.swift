@@ -28,11 +28,11 @@ open class CommandStatus: Command {
 		let weeks = uptime
 		
 		var uptimeStrings: [String] = []
-		if weeks != 0 { uptimeStrings.append("\(weeks) \(pluralize(weeks, "weeks"))") }
-		if days != 0 { uptimeStrings.append("\(days) \(pluralize(days, "days"))") }
-		if hours != 0 { uptimeStrings.append("\(hours) \(pluralize(hours, "hours"))") }
-		if minutes != 0 { uptimeStrings.append("\(minutes) \(pluralize(minutes, "minutes"))") }
-		if seconds != 0 { uptimeStrings.append("\(seconds) \(pluralize(seconds, "seconds"))") }
+		if weeks != 0 { uptimeStrings.append("\(weeks) \(pluralize(weeks, "week"))") }
+		if days != 0 { uptimeStrings.append("\(days) \(pluralize(days, "day"))") }
+		if hours != 0 { uptimeStrings.append("\(hours) \(pluralize(hours, "hour"))") }
+		if minutes != 0 { uptimeStrings.append("\(minutes) \(pluralize(minutes, "minute"))") }
+		if seconds != 0 { uptimeStrings.append("\(seconds) \(pluralize(seconds, "second"))") }
 		
 		
 		let status = "[\(botName)](\(stackAppsLink)) version [\(shortVersion)](\(versionLink)), " +
