@@ -232,9 +232,7 @@ func main() throws {
     
     listener = ChatListener(commands: commands)
     listener.onShutdown { shutDown(reason: $0, rooms: rooms) }
-    rooms.forEach { room in
-        let trainWrecker = TrainWrecker(room: room)
-        room.onMessage { message, isEdit in
+    rooms.forEach { room in        room.onMessage { message, isEdit in
             let content = message.content.lowercased()
             if (content == "@bots alive") {
                 do {
@@ -247,7 +245,6 @@ func main() throws {
                 room.postMessage("[🚃](https://www.youtube.com/watch?v=dQw4w9WgXcQ)")
             }
             
-            if !isEdit { trainWrecker.process(message: message) }
             listener.processMessage(room, message: message, isEdit: isEdit)
         }
     }
