@@ -251,7 +251,7 @@ func main() throws {
                 room.postMessage("[🚃](https://www.youtube.com/watch?v=dQw4w9WgXcQ)")
             }
             
-			if (message.room.roomID == 111347 || message.room.roomID == 123602) && let wrecker = trainWrecker {
+			if (message.room.roomID == 111347 || message.room.roomID == 123602), let wrecker = trainWrecker {
 				if !isEdit { wrecker.process(message: message) }
 			}
 							
