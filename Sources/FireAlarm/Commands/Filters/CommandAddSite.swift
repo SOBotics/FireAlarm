@@ -31,7 +31,7 @@ class CommandAddSite: Command {
         }
         
         guard let site = try reporter.staticDB.run(
-            "SELECT id FROM sites WHERE domain = ? OR apiSiteParameter = ?",
+            "SELECT * FROM sites WHERE domain = ? OR apiSiteParameter = ?",
             siteName, siteName
             ).first.map(Site.from) else {
                 
