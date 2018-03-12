@@ -38,7 +38,7 @@ class CommandSetThreshold: Command {
                 message.reply("Which site would you like to change threshold for?")
             }
         } else {
-            guard let site = try reporter.staticDB.run("SELECT id FROM sites " +
+            guard let site = try reporter.staticDB.run("SELECT * FROM sites " +
                 "WHERE apiSiteParameter = ? OR domain = ?",
                                       arguments.last!, arguments.last!
                 ).first.map(Site.from) else {
