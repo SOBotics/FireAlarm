@@ -26,4 +26,4 @@ install:
     popd
 
 script:
-  - swift build
+  - swift test
