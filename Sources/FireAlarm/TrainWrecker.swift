@@ -42,7 +42,6 @@ let trains = [  //From https://github.com/Tiny-Giant/myuserscripts/blob/master/T
     "http://www3.gendisasters.com/files/newphotos/Naperville%20IL%20Train%20Wreck%204-26-1946.JPG",
     "http://static01.nyt.com/images/2011/07/25/world/25china-span/25china-span-articleLarge.jpg",
     "http://shorespeak.com/blog/wp-content/uploads/2011/01/train_wreck_2.jpg",
-    "http://www.cfm-fmh.org/files/QuickSiteImages/MuseumPhotos/Train_Wreck.jpg",
     "http://www.circusesandsideshows.com/images/algbarnestrainwrecklarge.jpg",
     "http://www.scitechantiques.com/trainwreck/trainwreck.jpg",
     "http://www3.gendisasters.com/files/newphotos/nj-woodbridge-trainwreck3r.jpg",
