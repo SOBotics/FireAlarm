@@ -1,6 +1,7 @@
 import XCTest
 @testable import FireAlarm
 import SwiftChatSE
+import Dispatch
 
 class FireAlarmTests: XCTestCase {
     func testTrainWreckerImages() {
