@@ -5,7 +5,7 @@ branches:
 
 language: generic
 sudo: required
-env: SWIFT_VERSION=4.0
+env: SWIFT_VERSION=4.0.3
 
 matrix:
   include:
