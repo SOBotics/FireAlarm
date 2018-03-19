@@ -23,7 +23,8 @@ install:
     git clone "https://github.com/warmcat/libwebsockets" || exit 3;
     pushd libwebsockets || exit 5;
     (cmake . && make && sudo make install) || exit 5;
-    popd
+    popd;
+    sudo ldconfig
 
 script:
   - swift test
