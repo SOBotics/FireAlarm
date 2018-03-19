@@ -11,7 +11,6 @@ matrix:
   include:
     - os: linux
       dist: trusty
-      after_install: sudo ldconfig
     - os: osx
       osx_image: xcode9
       env:
@@ -25,6 +24,7 @@ install:
     pushd libwebsockets || exit 5;
     (cmake . && make && sudo make install) || exit 5;
     popd;
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ldconfig; fi;
 
 script:
   - swift test
