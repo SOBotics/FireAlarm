@@ -26,7 +26,7 @@ class FireAlarmTests: XCTestCase {
             }
         }
         
-        waitForExpectations(timeout: 10)
+        waitForExpectations(timeout: 30)
     }
     
     
