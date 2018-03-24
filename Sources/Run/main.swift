@@ -17,7 +17,7 @@ import FireAlarm
 
 
 do {
-	try main()
+	try FireAlarm.main()
 } catch {
 	handleError(error, "while starting up")
 	abort()

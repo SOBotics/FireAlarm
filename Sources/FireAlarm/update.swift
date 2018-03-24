@@ -20,8 +20,8 @@ public func getShortVersion(_ version: String) -> String {
     if version == "<unknown version>" {
         return "<unknown>"
     }
-    return version.characters.count > 7 ?
-        String(version[version.startIndex..<version.index(version.characters.startIndex, offsetBy: 7)]) :
+    return version.count > 7 ?
+        String(version[version.startIndex..<version.index(version.startIndex, offsetBy: 7)]) :
     "<unknown version>"
 }
 

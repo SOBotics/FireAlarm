@@ -10,6 +10,10 @@ import Foundation
 import SwiftChatSE
 
 class CommandGetBlacklist: Command {
+    public class func blacklistManager(reporter: Reporter) -> BlacklistManager {
+        return reporter.blacklistManager
+    }
+    
     override class func usage() -> [String] {
         return ["blacklisted *"]
     }
@@ -21,7 +25,7 @@ class CommandGetBlacklist: Command {
                     return
         }
         
-        let list = reporter.blacklistManager.blacklist(ofType: listType)
+        let list = type(of: self).blacklistManager(reporter: reporter).blacklist(ofType: listType)
         if list.items.count == 0 {
             reply("No \(listType.rawValue)s are blacklisted.")
             return

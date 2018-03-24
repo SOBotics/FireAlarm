@@ -22,7 +22,7 @@ class CommandRemoveSite: Command {
         guard
             let siteName = arguments.first,
             let site = try reporter.staticDB.run(
-                "SELECT id FROM sites WHERE domain = ? OR apiSiteParameter = ?",
+                "SELECT * FROM sites WHERE domain = ? OR apiSiteParameter = ?",
                 siteName, siteName
                 ).first.map(Site.from),
             message.room.thresholds[site.id] != nil else {

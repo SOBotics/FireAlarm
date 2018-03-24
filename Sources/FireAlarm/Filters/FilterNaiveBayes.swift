@@ -35,7 +35,7 @@ class FilterNaiveBayes: Filter {
         print ("Loading Naive Bayes filter...")
     }
     
-    func check(_ post: Question, site: Site) throws -> FilterResult? {
+    func check(_ post: Post, site: Site) throws -> FilterResult? {
         var trueProbability = Double(site.initialProbability)
         var falseProbability = Double(1 - trueProbability)
         var postWords = [String]()

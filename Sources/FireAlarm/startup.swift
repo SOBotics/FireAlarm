@@ -25,6 +25,18 @@ let commands: [Command.Type] = [
     CommandWhy.self,
 ]
 
+let trollCommands: [Command.Type] = [
+    CommandSay.self, CommandDeleteMessage.self,
+    CommandHelp.self, CommandListRunning.self, CommandStop.self, CommandKill.self,
+    CommandUpdate.self, CommandStatus.self, CommandPingOnError.self, CommandGitStatus.self,
+    CommandCheckPrivileges.self, CommandPrivilege.self, CommandUnprivilege.self,
+    CommandCheckPost.self, CommandQuota.self,
+    TrollCommandBlacklist.self, TrollCommandGetBlacklist.self, TrollCommandUnblacklist.self,
+    TrollCommandEnable.self, TrollCommandDisable.self,
+    CommandOptIn.self, CommandOptOut.self, CommandCheckNotification.self, CommandLeaveRoom.self,
+    CommandLocation.self, CommandWhy.self
+]
+
 
 fileprivate var listener: ChatListener!
 
@@ -46,7 +58,7 @@ public func main() throws {
     saveURL = saveDirURL
     
     apiClient.key = "HNA2dbrFtyTZxeHN6rThNg(("
-    apiClient.defaultFilter = "!-*f(6rOFHc24"
+    apiClient.defaultFilter = "!21PcIZT2MQcDURcNm2uJH"
     
     let client = Client()
     
@@ -174,10 +186,10 @@ public func main() throws {
             
             location = "\(user)/\(device)"
             
-            location = String(location.filter { !"\n".characters.contains($0) })
+            location = String(location.filter { !"\n".contains($0) })
             userLocation = location
-            user = String(user.filter { !"\n".characters.contains($0) })
-            device = String(device.filter { !"\n".characters.contains($0) })
+            user = String(user.filter { !"\n".contains($0) })
+            device = String(device.filter { !"\n".contains($0) })
             ping = " (cc @\(user))"
             userLocation = location
         } catch {
@@ -216,12 +228,14 @@ public func main() throws {
             ChatRoom(client: client, host: .stackOverflow, roomID: 123602), //FireAlarm Development
             ChatRoom(client: client, host: .stackOverflow, roomID: 111347), //SOBotics
             ChatRoom(client: client, host: .stackOverflow, roomID: 41570),  //SO Close Vote Reviewers
-            ChatRoom(client: client, host: .stackExchange, roomID: 54445),	//SEBotics
+            //ChatRoom(client: client, host: .stackExchange, roomID: 54445),	//SEBotics
         ]
         
         development = false
     }
-    try rooms.forEach {try $0.loadUserDB()}
+    let trollRooms: [ChatRoom] = [ChatRoom(client: client, host: .stackExchange, roomID: 54445)] //SEBotics
+    
+    try (rooms + trollRooms).forEach {try $0.loadUserDB()}
     
     afterTooManyErrors = {
         print("Too many errors; aborting...")
@@ -231,7 +245,7 @@ public func main() throws {
     
     
     listener = ChatListener(commands: commands)
-    listener.onShutdown { shutDown(reason: $0, rooms: rooms) }
+    listener.onShutdown { shutDown(reason: $0, rooms: rooms + trollRooms) }
     rooms.forEach { room in
 			let trainWrecker = TrainWrecker(room: room)
 			room.onMessage { message, isEdit in
@@ -256,7 +270,16 @@ public func main() throws {
         }
     }
     
+    let trollListener = ChatListener(commands: trollCommands)
+    trollListener.onShutdown(listener.stop)
+    trollRooms.forEach { room in
+        room.onMessage { message, isEdit in
+            trollListener.processMessage(room, message: message, isEdit: isEdit)
+        }
+    }
+    
     try rooms.forEach { try $0.join() }
+    try trollRooms.forEach { try $0.join() }
     
     currentVersion = getCurrentVersion()
     shortVersion = getShortVersion(currentVersion)
@@ -265,7 +288,7 @@ public func main() throws {
     rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at revision [`\(shortVersion)`](\(versionLink)) on \(location).")
     
     //Load the filter
-    reporter = Reporter(rooms)
+    reporter = Reporter(rooms: rooms, trollRooms: trollRooms)
     try reporter.postFetcher.start()
     
     errorsInLast30Seconds = 0

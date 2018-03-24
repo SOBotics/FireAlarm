@@ -10,6 +10,10 @@ import Foundation
 import SwiftChatSE
 
 class CommandBlacklist: Command {
+    public class func blacklistManager(reporter: Reporter) -> BlacklistManager {
+        return reporter.blacklistManager
+    }
+    
     override class func usage() -> [String] {
         return ["blacklist ...", "blacklist ..."]
     }
@@ -27,7 +31,7 @@ class CommandBlacklist: Command {
                 return
         }
         let regex = arguments.dropFirst().joined(separator: " ")
-        if reporter.blacklistManager.blacklist(ofType: list).add(item: regex) == false {
+        if type(of: self).blacklistManager(reporter: reporter).blacklist(ofType: list).add(item: regex) == false {
             reply("`\(regex) was already on the \(list.rawValue) blacklist.")
         } else {
             reply("Added regular expression `\(regex)` to the \(list.rawValue) blacklist.")

@@ -13,27 +13,36 @@ import SwiftStack
 
 class BlacklistFilter: Filter {
     let reporter: Reporter
+    let troll: Bool
+    
+    var blacklistManager: BlacklistManager { return troll ? reporter.trollBlacklistManager : reporter.blacklistManager }
     
     required init(reporter: Reporter) {
         self.reporter = reporter
+        self.troll = false
+    }
+    
+    required init(reporter: Reporter, troll: Bool = false) {
+        self.reporter = reporter
+        self.troll = troll
     }
     
     
     var blacklistType: BlacklistManager.BlacklistType {
         fatalError("blacklistType must be overridden")
     }
-    func content(for post: Question, site: Site) -> [String?] {
+    func content(for post: Post, site: Site) -> [String?] {
         fatalError("content(for:site:) must be overridden")
     }
     
-    func check(_ post: Question, site: Site) -> FilterResult? {
+    func check(_ post: Post, site: Site) -> FilterResult? {
         let content = self.content(for: post, site: site).flatMap { $0 }
         guard !content.isEmpty else {
             print("\(String(describing: type(of: self))): No content for \(post.id.map { String($0) } ?? "<no ID>")!")
             return nil
         }
         
-        let blacklist = reporter.blacklistManager.blacklist(ofType: blacklistType)
+        let blacklist = blacklistManager.blacklist(ofType: blacklistType)
         let matches = content.map { blacklist.items(catching: $0) }.joined()
         let uppercasedBlacklistName = String(blacklistType.rawValue.first!).uppercased() + blacklistType.rawValue.dropFirst()
         
@@ -62,15 +71,17 @@ class BlacklistFilter: Filter {
 
 class FilterBlacklistedKeyword: BlacklistFilter {
     override var blacklistType: BlacklistManager.BlacklistType { return .keyword }
-    override func content(for post: Question, site: Site) -> [String?] { return [post.body] }
+    override func content(for post: Post, site: Site) -> [String?] { return [post.body] }
 }
 
 class FilterBlacklistedUsername: BlacklistFilter {
     override var blacklistType: BlacklistManager.BlacklistType { return .username }
-    override func content(for post: Question, site: Site) -> [String?] { return [post.owner?.display_name] }
+    override func content(for post: Post, site: Site) -> [String?] { return [post.owner?.display_name] }
 }
 
 class FilterBlacklistedTag: BlacklistFilter {
     override var blacklistType: BlacklistManager.BlacklistType { return .tag }
-    override func content(for post: Question, site: Site) -> [String?] { return post.tags ?? [] }
+    override func content(for post: Post, site: Site) -> [String?] {
+        return (post as? Question)?.tags ?? (post as? Answer)?.tags ?? []
+    }
 }

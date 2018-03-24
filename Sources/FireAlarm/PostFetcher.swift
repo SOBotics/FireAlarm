@@ -49,6 +49,7 @@ class PostFetcher {
         case noDataObject(json: String)
         case noQuestionID(json: String)
         case noSite(json: String)
+        case noSiteBaseHostAddress(json: String)
         
         case siteLookupFailed(siteID: Int)
     }
@@ -96,8 +97,23 @@ class PostFetcher {
                                 }
                                 
                                 try self.reporter.checkAndReportPost(post, site: site)
+                                
+                                guard self.reporter.trollSites.contains(site) else { continue }
+                                for answer in post.answers ?? [] {
+                                    answer.title = post.title
+                                    answer.tags = post.tags
+                                    
+                                    //don't report answers that are more than a day old
+                                    let creation = (answer.creation_date ?? Date()).timeIntervalSinceReferenceDate
+                                    let activity = (answer.last_activity_date ?? Date()).timeIntervalSinceReferenceDate
+                                    
+                                    if creation < (activity - 60 * 60 * 24) {
+                                        continue
+                                    }
+                                    
+                                    try self.reporter.checkAndReportPost(answer, site: site)
+                                }
                         }
-                        
                     }
                 } catch {
                     handleError(error, "while checking active posts")
@@ -206,19 +222,33 @@ class PostFetcher {
                     throw QuestionProcessingError.noDataObject(json: string)
                 }
                 
-                guard let apiSiteParameter = data["apiSiteParameter"] as? String else {
-                    throw QuestionProcessingError.noSite(json: string)
-                }
-                
-                guard let site = try Site.with(apiSiteParameter: apiSiteParameter, db: staticDB) else {
-                        return
-                }
-                
                 guard let id = data["id"] as? Int else {
                     throw QuestionProcessingError.noQuestionID(json: string)
                 }
                 
-                postsToCheck.append((id: id, site: site))
+                guard let apiSiteParameter = data["apiSiteParameter"] as? String else {
+                    throw QuestionProcessingError.noSite(json: string)
+                }
+                
+                let trollSite: Site?
+                switch reporter.trollSites {
+                case .all:
+                    guard let domain = data["siteBaseHostAddress"] as? String else {
+                        throw QuestionProcessingError.noSiteBaseHostAddress(json: string)
+                    }
+                    trollSite = Site(id: -1, apiSiteParameter: apiSiteParameter, domain: domain, initialProbability: 0)
+                case .sites(let sites): trollSite = sites.filter { $0.apiSiteParameter == apiSiteParameter }.first
+                }
+                
+                if let site = trollSite {
+                    postsToCheck.append((id: id, site: site))
+                } else {
+                    guard let site = try Site.with(apiSiteParameter: apiSiteParameter, db: staticDB) else {
+                        return
+                    }
+                    
+                    postsToCheck.append((id: id, site: site))
+                }
                 //print("Another post has been recieved.  There are now \(postsToCheck.count) posts to check.")
                 
             } catch {

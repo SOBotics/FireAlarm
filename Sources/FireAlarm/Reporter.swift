@@ -85,12 +85,36 @@ var reportedPosts = [Report]()
 class Reporter {
     var postFetcher: PostFetcher!
     let rooms: [ChatRoom]
+    let trollRooms: [ChatRoom]
+    
+    enum TrollSites {
+        case sites([Site])
+        case all
+        
+        mutating func add(_ site: Site) {
+            switch self {
+            case .all: break
+            case .sites(let sites): self = .sites(sites + [site])
+            }
+        }
+        
+        func contains(_ site: Site) -> Bool {
+            switch self {
+            case .all: return true
+            case .sites(let sites): return sites.contains(site)
+            }
+        }
+    }
+    
+    var trollFilters = [Filter]()
+    var trollSites: TrollSites = .sites([])
     
     var staticDB: DatabaseConnection
     
     var filters = [Filter]()
     
     var blacklistManager: BlacklistManager
+    var trollBlacklistManager: BlacklistManager
     
     private let queue = DispatchQueue(label: "Reporter queue")
     
@@ -104,12 +128,14 @@ class Reporter {
         return nil
     }
     
-    init(_ rooms: [ChatRoom]) {
+    init(rooms: [ChatRoom], trollRooms: [ChatRoom] = []) {
         print ("Reporter loading...")
         
         self.rooms = rooms
+        self.trollRooms = trollRooms
         
         let blacklistURL = saveDirURL.appendingPathComponent("blacklists.json")
+        trollBlacklistManager = BlacklistManager()
         do {
             blacklistManager = try BlacklistManager(url: blacklistURL)
         } catch {
@@ -167,15 +193,21 @@ class Reporter {
             FilterBlacklistedUsername(reporter: self),
             FilterBlacklistedTag(reporter: self)
         ]
+        trollFilters = [
+            FilterBlacklistedKeyword(reporter: self, troll: true),
+            FilterBlacklistedUsername(reporter: self, troll: true),
+            FilterBlacklistedTag(reporter: self, troll: true)
+        ]
         
         postFetcher = PostFetcher(rooms: rooms, reporter: self, staticDB: staticDB)
     }
     
-    func checkPost(_ post: Question, site: Site) throws -> [FilterResult] {
+    func checkPost(_ post: Post, site: Site) throws -> [FilterResult] {
+        let filters = trollSites.contains(site) ? trollFilters : self.filters
         return try filters.flatMap { try $0.check(post, site: site) }
     }
     
-    @discardableResult func checkAndReportPost(_ post: Question, site: Site) throws -> ReportResult {
+    @discardableResult func checkAndReportPost(_ post: Post, site: Site) throws -> ReportResult {
         let results = try checkPost(post, site: site)
         
         return try report(post: post, site: site, reasons: results)
@@ -210,7 +242,7 @@ class Reporter {
     }
     
     ///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
-    func report(post: Question, site: Site, reasons: [FilterResult]) throws -> ReportResult {
+    func report(post: Post, site: Site, reasons: [FilterResult]) throws -> ReportResult {
         var status: ReportResult.Status = .notBad
         
         queue.sync {
@@ -234,11 +266,11 @@ class Reporter {
                 return
             }
             
-            if !isManualReport && post.closed_reason != nil {
-                print ("Not reporting \(post.id ?? 0) as it is closed.")
-                status = .alreadyClosed
-                return
-            }
+            /*if !isManualReport && post.closed_reason != nil {
+             print ("Not reporting \(post.id ?? 0) as it is closed.")
+             status = .alreadyClosed
+             return
+             }*/
             
             var reported = false
             var bayesianDifference: Int?
@@ -249,13 +281,14 @@ class Reporter {
                 .replacingOccurrences(of: "[", with: "\\[")
                 .replacingOccurrences(of: "]", with: "\\]")
             
-            let tags = post.tags ?? []
+            let tags = (post as? Question)?.tags ?? []
             postDetails = reasons.map {$0.details ?? "Details unknown."}.joined (separator: ", ")
             
             var messages: [(host: ChatRoom.Host, roomID: Int, messageID: Int)] = []
             
             let sema = DispatchSemaphore(value: 0)
             
+            let rooms: [ChatRoom] = trollSites.contains(site) ? self.trollRooms : self.rooms
             
             for room in rooms {
                 //Filter out Bayesian scores which are less than this room's threshold.
