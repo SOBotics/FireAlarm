@@ -43,6 +43,7 @@ fileprivate var listener: ChatListener!
 var reporter: Reporter!
 
 var redunda: Redunda?
+var bonfire: Bonfire?
 
 //var apiClient = APIClient(proxyAddress: "127.0.0.1", proxyPort: 8080)
 var apiClient = APIClient()
@@ -66,7 +67,9 @@ public func main() throws {
         srand(UInt32(time(nil)))    //This is not cryptographically secure; it's just for train wrecking
     #endif
     
-    
+    if let bonfireKey = try? loadFile("bonfire_key.txt").trimmingCharacters(in: .whitespacesAndNewlines) {
+        bonfire = Bonfire(key: bonfireKey, client: client)
+    }
     
     if let redundaKey = try? loadFile("redunda_key.txt").trimmingCharacters(in: .whitespacesAndNewlines) {
         //standby until Redunda tells us not to

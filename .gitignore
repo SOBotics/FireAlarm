@@ -10,8 +10,13 @@ blacklisted_*.json
 blacklists.json
 filter_static.sqlite
 redunda_key.txt
+bonfire_key.txt
 secrets.json
 room_*_stackoverflow.com.json
 room_*_stackexchange.com.json
 room_*_meta.stackexchange.com.json
 reports.json
+
+# Ignore swap files; I use vim.
+*.swp
+*.sw[klmno]
