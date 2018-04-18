@@ -7,7 +7,7 @@ let package = Package(
     dependencies: [
         .package(url: "git://github.com/SOBotics/SwiftChatSE",      from: "5.0.0"),
         .package(url: "git://github.com/SOBotics/SwiftStack",       from: "0.5.0"),
-        .package(url: "git://github.com/krzyzanowskim/CryptoSwift", .exactly("0.8.3")),
+        .package(url: "git://github.com/krzyzanowskim/CryptoSwift", .exact("0.8.3")),
     ],
     targets: [
         .target(name: "FireAlarm", dependencies: ["SwiftChatSE", "SwiftStack", "CryptoSwift"]),
