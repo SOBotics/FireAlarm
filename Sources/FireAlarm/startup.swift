@@ -66,11 +66,7 @@ func main() throws {
     #if os(Linux)
         srand(UInt32(time(nil)))    //This is not cryptographically secure; it's just for train wrecking
     #endif
-    
-    if let bonfireKey = try? loadFile("bonfire_key.txt").trimmingCharacters(in: .whitespacesAndNewlines) {
-        bonfire = Bonfire(key: bonfireKey, client: client)
-    }
-    
+
     if let redundaKey = try? loadFile("redunda_key.txt").trimmingCharacters(in: .whitespacesAndNewlines) {
         //standby until Redunda tells us not to
         redunda = Redunda(key: redundaKey, client: client, filesToSync: [
@@ -121,7 +117,11 @@ func main() throws {
     } catch {
         fatalError("Could not load secrets: \(error)")
     }
-    
+
+    if let bonfireKey = secrets.bonfireKey {
+        bonfire = Bonfire(key: bonfireKey, client: client)
+    }
+
     print("Decompressing filter...")
     let result = run(command: "gunzip -c filter_static.sqlite.gz > filter_static.sqlite")
     if result.exitCode != 0 {

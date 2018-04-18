@@ -44,7 +44,6 @@ class Bonfire {
         
         let dataDict = [
             "authorization": self.key,
-            "key": self.key,
             "site": post.link?.absoluteString.components(separatedBy: "/q")[0] ?? "https://stackoverflow.com",
             "reasons": reasonList,
             "post": [
