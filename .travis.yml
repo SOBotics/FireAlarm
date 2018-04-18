@@ -5,14 +5,14 @@ branches:
 
 language: generic
 sudo: required
-env: SWIFT_VERSION=4.0.3
+env: SWIFT_VERSION=4.1
 
 matrix:
   include:
     - os: linux
       dist: trusty
     - os: osx
-      osx_image: xcode9
+      osx_image: xcode9.3
       env:
         - OPENSSL_ROOT_DIR=$(brew --prefix openssl)
 
