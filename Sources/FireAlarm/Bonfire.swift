@@ -41,22 +41,24 @@ class Bonfire {
                 reasonList.append(reason)
             }
         }
+
+        let postDict: [String:String?] = [
+            "title": post.title,
+            "body": post.body,
+            "question_id": String(post.id ?? -1),
+            "likelihood": String(likelihood),
+            "link": post.link?.absoluteString,
+            "username": post.owner?.display_name,
+            "user_reputation": String(post.owner?.reputation ?? 1),
+            "user_link": post.owner?.link?.absoluteString,
+            "post_creation_date": creation_date
+        ]
         
         let dataDict = [
             "authorization": self.key,
             "site": post.link?.absoluteString.components(separatedBy: "/q")[0] ?? "https://stackoverflow.com",
             "reasons": reasonList,
-            "post": [
-                "title": post.title,
-                "body": post.body,
-                "question_id": String(post.id ?? -1),
-                "likelihood": String(likelihood),
-                "link": post.link?.absoluteString,
-                "username": post.owner?.display_name,
-                "user_reputation": String(post.owner?.reputation ?? 1),
-                "user_link": post.owner?.link?.absoluteString,
-                "post_creation_date": creation_date
-            ]
+            "post": postDict
         ] as [String : Any]
 
         let jsonData = try JSONSerialization.data(withJSONObject: dataDict)
