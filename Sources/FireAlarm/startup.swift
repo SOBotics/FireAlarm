@@ -47,7 +47,7 @@ var redunda: Redunda?
 //var apiClient = APIClient(proxyAddress: "127.0.0.1", proxyPort: 8080)
 var apiClient = APIClient()
 
-public func main() throws {
+func main() throws {
     print("FireAlarm starting...")
     startTime = Date()
     afterTooManyErrors = {}
