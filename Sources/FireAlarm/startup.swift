@@ -119,7 +119,7 @@ func main() throws {
     }
 
     if let bonfireKey = secrets.bonfireKey {
-        bonfire = Bonfire(key: bonfireKey, client: client)
+        bonfire = Bonfire(key: bonfireKey, client: client, host: "https://bonfire.sobotics.org:6001")
     }
 
     print("Decompressing filter...")
