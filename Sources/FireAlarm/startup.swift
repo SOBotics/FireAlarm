@@ -43,6 +43,7 @@ fileprivate var listener: ChatListener!
 var reporter: Reporter!
 
 var redunda: Redunda?
+var bonfire: Bonfire?
 
 //var apiClient = APIClient(proxyAddress: "127.0.0.1", proxyPort: 8080)
 var apiClient = APIClient()
@@ -65,9 +66,7 @@ func main() throws {
     #if os(Linux)
         srand(UInt32(time(nil)))    //This is not cryptographically secure; it's just for train wrecking
     #endif
-    
-    
-    
+
     if let redundaKey = try? loadFile("redunda_key.txt").trimmingCharacters(in: .whitespacesAndNewlines) {
         //standby until Redunda tells us not to
         redunda = Redunda(key: redundaKey, client: client, filesToSync: [
@@ -118,7 +117,11 @@ func main() throws {
     } catch {
         fatalError("Could not load secrets: \(error)")
     }
-    
+
+    if let bonfireKey = secrets.bonfireKey {
+        bonfire = Bonfire(key: bonfireKey, client: client, host: "https://bonfire.sobotics.org:6001")
+    }
+
     print("Decompressing filter...")
     let result = run(command: "gunzip -c filter_static.sqlite.gz > filter_static.sqlite")
     if result.exitCode != 0 {

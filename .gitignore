@@ -15,3 +15,7 @@ room_*_stackoverflow.com.json
 room_*_stackexchange.com.json
 room_*_meta.stackexchange.com.json
 reports.json
+location.txt
+
+# Ignore swap files; I use vim.
+*.sw[klmnop]

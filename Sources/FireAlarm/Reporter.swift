@@ -275,8 +275,7 @@ class Reporter {
             var reported = false
             var bayesianDifference: Int?
             var postDetails = "Details unknown."
-            
-            
+
             let title = "\(post.title ?? "<no title>")"
                 .replacingOccurrences(of: "[", with: "\\[")
                 .replacingOccurrences(of: "]", with: "\\]")
@@ -289,6 +288,7 @@ class Reporter {
             let sema = DispatchSemaphore(value: 0)
             
             let rooms: [ChatRoom] = trollSites.contains(site) ? self.trollRooms : self.rooms
+            var bonfireLink: String?
             
             for room in rooms {
                 //Filter out Bayesian scores which are less than this room's threshold.
@@ -306,10 +306,27 @@ class Reporter {
                 
                 reported = true
                 
+                if bonfireLink == nil {
+                    do {
+                        bonfireLink = try bonfire?.uploadPost(post: post, postDetails: postDetails, likelihood: bayesianDifference ?? -1)
+                    } catch {
+                        print("Could not upload the post to Bonfire!")
+                        print(error)
+                    }
+                }
+                
                 let header = reasons.map { $0.header }.joined(separator: ", ")
-                let message = "[ [\(botName)](\(stackAppsLink)) ] " +
-                    "[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//\(site.domain)/q/\(id)) " +
-                    room.notificationString(tags: tags, reasons: reasons)
+                let message: String
+                
+                if let bonfireLink = bonfireLink {
+                    message = "[ [\(botName)](\(stackAppsLink)) | [Bonfire](\(bonfireLink)) ] " +
+                        "[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//\(site.domain)/q/\(id)) " +
+                        room.notificationString(tags: tags, reasons: reasons)
+                } else {
+                    message = "[ [\(botName)](\(stackAppsLink)) ] " +
+                        "[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//\(site.domain)/q/\(id)) " +
+                        room.notificationString(tags: tags, reasons: reasons)
+                }
                 
                 room.postMessage(message, completion: {message in
                     if let message = message {
@@ -322,14 +339,15 @@ class Reporter {
             
             
             if reported {
-                reportedPosts.append(Report(
+                let report = Report(
                     id: id,
                     when: Date(),
                     difference: bayesianDifference,
                     messages: messages,
                     details: postDetails
-                    )
                 )
+                
+                reportedPosts.append(report)
                 
                 status = .reported
                 return

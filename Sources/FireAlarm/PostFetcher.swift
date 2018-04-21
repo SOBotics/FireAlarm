@@ -35,9 +35,7 @@ class PostFetcher {
         running = false
         
         self.rooms = rooms
-        
         self.reporter = reporter
-        
         self.staticDB = staticDB
     }
     
