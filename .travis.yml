@@ -5,20 +5,21 @@ branches:
 
 language: generic
 sudo: required
+
+os:
+    - linux
+    - osx
+    
+dist: trusty
+osx_image: xcode9.3
+
 env: 
     - SWIFT_VERSION=4.0
     - SWIFT_VERSION=4.1
 
-matrix:
-  include:
-    - os: linux
-      dist: trusty
-    - os: osx
-      osx_image: xcode9.3
-      env:
-        - OPENSSL_ROOT_DIR=$(brew --prefix openssl)
-
 install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export OPENSSL_ROOT_DIR=$(brew --prefix openssl); fi;
+
   - eval "$(curl -sL https://swiftenv.fuller.li/install.sh)"
   
   - echo "Installing libwebsockets...";
