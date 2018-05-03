@@ -276,9 +276,13 @@ class Reporter {
             var bayesianDifference: Int?
             var postDetails = "Details unknown."
 
-            let title = "\(post.title ?? "<no title>")"
+            var title = "\(post.title ?? "<no title>")"
                 .replacingOccurrences(of: "[", with: "\\[")
                 .replacingOccurrences(of: "]", with: "\\]")
+            
+            while title.hasSuffix("\\") {
+                title = String(title.dropLast())
+            }
             
             let tags = (post as? Question)?.tags ?? []
             postDetails = reasons.map {$0.details ?? "Details unknown."}.joined (separator: ", ")
