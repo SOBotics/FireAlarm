@@ -15,6 +15,7 @@ struct Report {
     let id: Int
     let when: Date
     let difference: Int?
+    let likelihood: Int
     
     let messages: [(host: ChatRoom.Host, roomID: Int, messageID: Int)]
     let details: String?
@@ -22,6 +23,7 @@ struct Report {
     init(
         id: Int,
         when: Date,
+        likelihood: Int,
         difference: Int?,
         messages: [(host: ChatRoom.Host, roomID: Int, messageID: Int)] = [],
         details: String? = nil
@@ -29,6 +31,7 @@ struct Report {
         
         self.id = id
         self.when = when
+        self.likelihood = likelihood
         self.difference = difference
         self.messages = messages
         self.details = details
@@ -48,11 +51,17 @@ struct Report {
             
             return (host: host, roomID: room, messageID: message)
             } as [(host: ChatRoom.Host, roomID: Int, messageID: Int)]? ?? []
+        
+        guard let likelihood = json["l"] as? Int else {
+            return nil
+        }
+        
         let why = json["w"] as? String
         
         self.init(
             id: id,
             when: Date(timeIntervalSince1970: TimeInterval(when)),
+            likelihood: likelihood,
             difference: (json["d"] as? Int),
             messages: messages,
             details: why
@@ -63,6 +72,7 @@ struct Report {
         var result = [String:Any]()
         result["id"] = id
         result["t"] = Int(when.timeIntervalSince1970)
+        result["l"] = likelihood
         if let d = difference {
             result["d"] = d
         }
@@ -191,7 +201,8 @@ class Reporter {
             FilterMisleadingLinks(reporter: self),
             FilterBlacklistedKeyword(reporter: self),
             FilterBlacklistedUsername(reporter: self),
-            FilterBlacklistedTag(reporter: self)
+            FilterBlacklistedTag(reporter: self),
+            FilterImageWithoutCode(reporter: self)
         ]
         trollFilters = [
             FilterBlacklistedKeyword(reporter: self, troll: true),
@@ -273,8 +284,8 @@ class Reporter {
              }*/
             
             var reported = false
-            var bayesianDifference: Int?
             var postDetails = "Details unknown."
+            var bayesianDifference: Int?
 
             var title = "\(post.title ?? "<no title>")"
                 .replacingOccurrences(of: "[", with: "\\[")
@@ -294,15 +305,28 @@ class Reporter {
             let rooms: [ChatRoom] = trollSites.contains(site) ? self.trollRooms : self.rooms
             var bonfireLink: String?
             
+            //Post weight including custom filter weight subtracted from Naive Bayes difference.
+            var combinedPostWeight = 0
+            for reason in reasons {
+                if case .bayesianFilter(let difference) = reason.type {
+                    bayesianDifference = difference
+                    combinedPostWeight += difference
+                } else if case .customFilterWithWeight(_, let weight) = reason.type {
+                    combinedPostWeight -= weight
+                }
+            }
+            
             for room in rooms {
-                //Filter out Bayesian scores which are less than this room's threshold.
+                //Filter out weights which are less than this room's threshold.
                 let reasons = reasons.filter {
-                    if case .bayesianFilter(let difference) = $0.type {
-                        bayesianDifference = difference
-                        return difference < room.thresholds[site.id] ?? Int.min
+                    if case .bayesianFilter(_) = $0.type {
+                        return combinedPostWeight < room.thresholds[site.id] ?? Int.min
+                    } else if case .customFilterWithWeight(_, _) = $0.type {
+                        return combinedPostWeight < room.thresholds[site.id] ?? Int.min
                     }
                     return true
                 }
+                
                 if reasons.isEmpty {
                     sema.signal()
                     continue
@@ -312,7 +336,7 @@ class Reporter {
                 
                 if bonfireLink == nil {
                     do {
-                        bonfireLink = try bonfire?.uploadPost(post: post, postDetails: postDetails, likelihood: bayesianDifference ?? -1)
+                        bonfireLink = try bonfire?.uploadPost(post: post, postDetails: postDetails, likelihood: combinedPostWeight)
                     } catch {
                         print("Could not upload the post to Bonfire!")
                         print(error)
@@ -346,6 +370,7 @@ class Reporter {
                 let report = Report(
                     id: id,
                     when: Date(),
+                    likelihood: combinedPostWeight,
                     difference: bayesianDifference,
                     messages: messages,
                     details: postDetails

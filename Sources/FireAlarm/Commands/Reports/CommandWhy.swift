@@ -47,7 +47,11 @@ class CommandWhy: Command {
 				return
 			}
 		}
-		
-		reply(matchingReport.details ?? "Details for this report are not available.")
+        
+        if let details = matchingReport.details {
+            reply("Detected with likelihood \(matchingReport.likelihood): \(details)")
+        } else {
+            reply("Details for this post are not available (cc @AshishAhuja @NobodyNada).")
+        }
 	}
 }
