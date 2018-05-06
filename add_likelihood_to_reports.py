@@ -10,7 +10,7 @@ for item in data:
     except KeyError as e:
         print("KeyError occurred: ")
         print(str(e))
-        print("Writing likelihood of -1")
+        print("Writing likelihood as -1")
         item["l"] = -1
 
 with open("reports.json", "w") as file_handle:
