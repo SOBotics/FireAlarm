@@ -27,6 +27,7 @@ struct FilterResult {
 	enum ResultType {
 		case bayesianFilter(difference: Int)
 		case customFilter(filter: Filter)
+        case customFilterWithWeight(filter: Filter, weight: Int)
         case manuallyReported
 	}
 	
