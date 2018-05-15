@@ -52,8 +52,12 @@ struct Report {
             return (host: host, roomID: room, messageID: message)
             } as [(host: ChatRoom.Host, roomID: Int, messageID: Int)]? ?? []
         
-        guard let likelihood = json["l"] as? Int else {
-            return nil
+        let likelihood: Int
+        
+        if let l = json["l"] as? Int {
+            likelihood = l
+        } else {
+            likelihood = (json["d"] as? Int) ?? -1
         }
         
         let why = json["w"] as? String
