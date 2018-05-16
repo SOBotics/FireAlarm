@@ -17,7 +17,7 @@ class FilterImageWithoutCode: Filter {
         //Filter weight; increase this is the filter is very accurate, decrease otherwise. Will get subtracted from Naive Bayes difference.
         let reasonWeight = 13
         
-        if post.body!.contains("<img src") && !post.body!.contains("<code>") {
+        if (post.body!.contains("<img src") || post.body!.contains("i.stack.imgur.com")) && !post.body!.contains("<code>") {
             let header = "Image without code"
             let details = header + " (weight \(reasonWeight))"
             return FilterResult (
