@@ -207,7 +207,8 @@ class Reporter {
             FilterBlacklistedUsername(reporter: self),
             FilterBlacklistedTag(reporter: self),
             FilterImageWithoutCode(reporter: self),
-            FilterLowLength(reporter: self)
+            FilterLowLength(reporter: self),
+            FilterCodeWithoutExplanation(reporter: self)
         ]
         trollFilters = [
             FilterBlacklistedKeyword(reporter: self, troll: true),
