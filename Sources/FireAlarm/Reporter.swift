@@ -312,13 +312,21 @@ class Reporter {
             
             //Post weight including custom filter weight subtracted from Naive Bayes difference.
             var combinedPostWeight = 0
+            var customFilterExists = false
             for reason in reasons {
                 if case .bayesianFilter(let difference) = reason.type {
                     bayesianDifference = difference
                     combinedPostWeight += difference
                 } else if case .customFilterWithWeight(_, let weight) = reason.type {
                     combinedPostWeight -= weight
+                } else if case .customFilter(_) = reason.type {
+                    customFilterExists = true
                 }
+            }
+           
+            //I've put some restriction in Bonfire so that erroneous data is caught.
+            if combinedPostWeight < -1 || customFilterExists {
+                combinedPostWeight = -1
             }
             
             for room in rooms {

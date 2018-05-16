@@ -18,7 +18,7 @@ class FilterLowLength: Filter {
         var reasonWeight = 0
         
         if post.body!.count < 100 {
-            reasonWeight = 10
+            reasonWeight = 15
         } else if post.body!.count < 150 {
             reasonWeight = 5
         }
