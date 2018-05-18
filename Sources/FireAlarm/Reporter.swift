@@ -202,6 +202,7 @@ class Reporter {
         
         filters = [
             FilterNaiveBayes(reporter: self),
+            FilterNonEnglishPost(reporter: self),
             FilterMisleadingLinks(reporter: self),
             FilterBlacklistedKeyword(reporter: self),
             FilterBlacklistedUsername(reporter: self),
