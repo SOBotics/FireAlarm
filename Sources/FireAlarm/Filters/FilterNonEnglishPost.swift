@@ -51,6 +51,8 @@ class FilterNonEnglishPost: Filter {
                 return nil
             }
         #endif
+        
+        return nil
     }
     
     func save() throws {}
