@@ -34,21 +34,23 @@ class FilterNonEnglishPost: Filter {
     }
     
     func check(_ post: Post, site: Site) -> FilterResult? {
-        if #available(OSX 10.13, *) {
-            if NSLinguisticTagger.dominantLanguage(for: extractParagraphs(in: post.body!)) != "en" {
-                let header = "Non English Post"
-                let details = header
-                return FilterResult (
-                    type: .customFilter(filter: self),
-                    header: header,
-                    details: details
-                )
+        #if os(macOS)
+            if #available(OSX 10.13, *) {
+                if NSLinguisticTagger.dominantLanguage(for: extractParagraphs(in: post.body!)) != "en" {
+                    let header = "Non English Post"
+                    let details = header
+                    return FilterResult (
+                        type: .customFilter(filter: self),
+                        header: header,
+                        details: details
+                    )
+                } else {
+                    return nil
+                }
             } else {
                 return nil
             }
-        } else {
-            return nil
-        }
+        #endif
     }
     
     func save() throws {}
