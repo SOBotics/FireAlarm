@@ -64,9 +64,9 @@ func main() throws {
     let client = Client()
     
     #if os(Linux)
-        srand(UInt32(time(nil)))    //This is not cryptographically secure; it's just for train wrecking
+    srand(UInt32(time(nil)))    //This is not cryptographically secure; it's just for train wrecking
     #endif
-
+    
     if let redundaKey = try? loadFile("redunda_key.txt").trimmingCharacters(in: .whitespacesAndNewlines) {
         //standby until Redunda tells us not to
         redunda = Redunda(key: redundaKey, client: client, filesToSync: [
@@ -117,11 +117,11 @@ func main() throws {
     } catch {
         fatalError("Could not load secrets: \(error)")
     }
-
+    
     if let bonfireKey = secrets.bonfireKey {
         bonfire = Bonfire(key: bonfireKey, client: client, host: "https://bonfire.sobotics.org")
     }
-
+    
     print("Decompressing filter...")
     let result = run(command: "gunzip -c filter_static.sqlite.gz > filter_static.sqlite")
     if result.exitCode != 0 {
@@ -250,9 +250,8 @@ func main() throws {
     listener = ChatListener(commands: commands)
     listener.onShutdown { shutDown(reason: $0, rooms: rooms + trollRooms) }
     rooms.forEach { room in
-			let trainWrecker = TrainWrecker(room: room)
-			room.onMessage { message, isEdit in
-			
+        let trainWrecker = TrainWrecker(room: room)
+        room.onMessage { message, isEdit in
             let content = message.content.lowercased()
             if (content == "@bots alive") {
                 do {
@@ -265,10 +264,10 @@ func main() throws {
                 room.postMessage("[🚃](https://www.youtube.com/watch?v=dQw4w9WgXcQ)")
             }
             
-			if (message.room.roomID == 111347 || message.room.roomID == 123602) {
-				if !isEdit { trainWrecker.process(message: message) }
-			}
-							
+            if (message.room.roomID == 111347 || message.room.roomID == 123602) {
+                if !isEdit { trainWrecker.process(message: message) }
+            }
+            
             listener.processMessage(room, message: message, isEdit: isEdit)
         }
     }
