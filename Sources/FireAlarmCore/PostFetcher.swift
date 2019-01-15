@@ -11,32 +11,42 @@ import SwiftChatSE
 import SwiftStack
 import Dispatch
 
+protocol Reporter {
+    func report(post: Post, reasons: [FilterResult])
+}
+
 class PostFetcher {
-    var postsToCheck = [(id: Int, site: Site)]()
+    public var postsToCheck = [(id: Int, site: Site)]()
     
-    var queue = DispatchQueue(label: "Filter", attributes: [.concurrent])
+    public let queue = DispatchQueue(label: "Filter", attributes: [.concurrent])
     
-    var staticDB: DatabaseConnection
     
-    var ws: WebSocket!
-    fileprivate var wsRetries: Int
-    fileprivate let wsMaxRetries: Int
+    private var ws: WebSocket!
+    private var wsRetries: Int
+    private let wsMaxRetries: Int
     
-    let rooms: [ChatRoom]
-    weak var reporter: Reporter!
+    public let rooms: [ChatRoom]
+    public var reporter: Reporter
+    public var apiClient: APIClient
+    public let staticDB: DatabaseConnection
+    public var callback: (Post, Site) -> ()
     
-    private(set) var running: Bool
+    public var shouldFetchAnswers = false
+    
+    public private(set) var running: Bool
     
     private var lastEventDate: Date?
     
-    init (rooms: [ChatRoom], reporter: Reporter, staticDB: DatabaseConnection) {
+    init (rooms: [ChatRoom], reporter: Reporter, apiClient: APIClient, staticDB: DatabaseConnection, callback: @escaping (Post, Site) -> ()) {
         wsRetries = 0
         wsMaxRetries = 10
         running = false
         
         self.rooms = rooms
         self.reporter = reporter
+        self.apiClient = apiClient
         self.staticDB = staticDB
+        self.callback = callback
     }
     
     enum QuestionProcessingError: Error {
@@ -68,22 +78,22 @@ class PostFetcher {
                     
                     //print("Checking \(posts.count) posts.")
                     self.postsToCheck = self.postsToCheck.filter { post in
-                        !posts.contains { $0.id == post.id && $0.site == post.site }
+                        !posts.contains { $0.id == post.id && $0.site.api_site_parameter == post.site.api_site_parameter }
                     }
                     
-                    var postsBySite = [Site:[Int]]()
+                    var postsBySite = [String:[Int]]()
                     for post in posts {
-                        if postsBySite[post.site] != nil {
-                            postsBySite[post.site]!.append(post.id)
+                        if postsBySite[post.site.api_site_parameter!] != nil {
+                            postsBySite[post.site.api_site_parameter!]!.append(post.id)
                         } else {
-                            postsBySite[post.site] = [post.id]
+                            postsBySite[post.site.api_site_parameter!] = [post.id]
                         }
                     }
                     
                     for (site, posts) in postsBySite {
-                        for post in try apiClient.fetchQuestions(
+                        for post in try self.apiClient.fetchQuestions(
                             posts,
-                            parameters: ["site":site.apiSiteParameter]
+                            parameters: ["site":site]
                             ).items ?? [] {
                                 
                                 //don't report posts that are more than a day old
@@ -94,9 +104,9 @@ class PostFetcher {
                                     continue
                                 }
                                 
-                                try self.reporter.checkAndReportPost(post, site: site)
+                                try self.scan(post: post, site: site)
                                 
-                                guard self.reporter.trollSites.contains(site) else { continue }
+                                guard shouldScanAnswers else { continue }
                                 for answer in post.answers ?? [] {
                                     answer.title = post.title
                                     answer.tags = post.tags
@@ -109,7 +119,7 @@ class PostFetcher {
                                         continue
                                     }
                                     
-                                    try self.reporter.checkAndReportPost(answer, site: site)
+                                    try self.reporter.scan(post: answer, site: site)
                                 }
                         }
                     }
@@ -128,7 +138,7 @@ class PostFetcher {
         //ws.eventQueue = room.client.queue
         //ws.delegate = self
         //ws.open()
-        ws = try WebSocket("wss://qa.sockets.stackexchange.com/")
+        ws = try WebSocket.open("wss://qa.sockets.stackexchange.com/")
         
         ws.onOpen {socket in
             self.webSocketOpen()
@@ -146,8 +156,6 @@ class PostFetcher {
         ws.onError {socket in
             self.webSocketEnd(0, reason: "", wasClean: true, error: socket.error)
         }
-        
-        try ws.connect()
         
         doCheckPosts()
     }
@@ -228,7 +236,7 @@ class PostFetcher {
                     throw QuestionProcessingError.noSite(json: string)
                 }
                 
-                let trollSite: Site?
+                /*let trollSite: Site?
                 switch reporter.trollSites {
                 case .all:
                     guard let domain = data["siteBaseHostAddress"] as? String else {
@@ -246,7 +254,7 @@ class PostFetcher {
                     }
                     
                     postsToCheck.append((id: id, site: site))
-                }
+                }*/
                 //print("Another post has been recieved.  There are now \(postsToCheck.count) posts to check.")
                 
             } catch {

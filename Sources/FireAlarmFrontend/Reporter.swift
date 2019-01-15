@@ -96,8 +96,8 @@ struct Report {
 
 var reportedPosts = [Report]()
 
-class Reporter {
-    var postFetcher: PostFetcher!
+class FireAlarmReporter: Reporter {
+    weak var scanner: PostScanner!
     let rooms: [ChatRoom]
     let trollRooms: [ChatRoom]
     
@@ -133,14 +133,14 @@ class Reporter {
     private let queue = DispatchQueue(label: "Reporter queue")
     
     
-    func filter<T: Filter>(ofType type: T.Type) -> T? {
+    /*func filter<T: Filter>(ofType type: T.Type) -> T? {
         for filter in filters {
             if let f = filter as? T {
                 return f
             }
         }
         return nil
-    }
+    }*/
     
     init(rooms: [ChatRoom], trollRooms: [ChatRoom] = []) {
         print ("Reporter loading...")
@@ -217,7 +217,11 @@ class Reporter {
             FilterBlacklistedTag(reporter: self, troll: true)
         ]
         
-        postFetcher = PostFetcher(rooms: rooms, reporter: self, staticDB: staticDB)
+        postFetcher = PostFetcher(
+            rooms: rooms,
+            reporter: self,
+            staticDB: staticDB
+        )
     }
     
     func checkPost(_ post: Post, site: Site) throws -> [FilterResult] {
