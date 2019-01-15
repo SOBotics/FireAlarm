@@ -9,9 +9,10 @@ import Foundation
 import SwiftStack
 import SwiftChatSE
 import Dispatch
+import FireAlarmCore
 
 class FilterNonEnglishPost: Filter {
-    required init(reporter: Reporter) {}
+    init() {}
   
     //Take from https://stackoverflow.com/a/27880748/4688119
     func regexMatches(for regex: String, in text: String) -> [String] {
@@ -33,7 +34,7 @@ class FilterNonEnglishPost: Filter {
         return regexMatches(for: "<p>.*?</p>", in: text).joined(separator: " ").replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
     }
     
-    func check(_ post: Post, site: Site) -> FilterResult? {
+    func check(post: Post, site: String) -> FilterResult? {
         #if os(macOS)
             if #available(OSX 10.13, *) {
                 if NSLinguisticTagger.dominantLanguage(for: extractParagraphs(in: post.body!)) != "en" {
@@ -47,8 +48,6 @@ class FilterNonEnglishPost: Filter {
                 } else {
                     return nil
                 }
-            } else {
-                return nil
             }
         #endif
         

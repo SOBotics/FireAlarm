@@ -10,11 +10,12 @@ import Foundation
 import SwiftChatSE
 import SwiftStack
 import Dispatch
+import FireAlarmCore
 
 class FilterMisleadingLinks: Filter {
-    required init (reporter: Reporter) {}
+    init() {}
     
-    func check(_ post: Post, site: Site) -> FilterResult? {
+    func check(post: Post, site: String) -> FilterResult? {
         do {
             let regex = try NSRegularExpression(pattern:
                 "<a href=\"([^\"]*)\" rel=\"nofollow(?: noreferrer)?\">\\s*([^<\\s]*)(?=\\s*</a>)", options: []

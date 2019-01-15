@@ -10,6 +10,7 @@ import Foundation
 import SwiftChatSE
 import Dispatch
 import SwiftStack
+import FireAlarmCore
 
 class BlacklistFilter: Filter {
     let reporter: Reporter
@@ -31,12 +32,12 @@ class BlacklistFilter: Filter {
     var blacklistType: BlacklistManager.BlacklistType {
         fatalError("blacklistType must be overridden")
     }
-    func content(for post: Post, site: Site) -> [String?] {
+    func content(for post: Post, site: String) -> [String?] {
         fatalError("content(for:site:) must be overridden")
     }
     
-    func check(_ post: Post, site: Site) -> FilterResult? {
-        let content = self.content(for: post, site: site).flatMap { $0 }
+    func check(post: Post, site: String) -> FilterResult? {
+        let content = self.content(for: post, site: site).compactMap { $0 }
         guard !content.isEmpty else {
             print("\(String(describing: type(of: self))): No content for \(post.id.map { String($0) } ?? "<no ID>")!")
             return nil
@@ -71,17 +72,17 @@ class BlacklistFilter: Filter {
 
 class FilterBlacklistedKeyword: BlacklistFilter {
     override var blacklistType: BlacklistManager.BlacklistType { return .keyword }
-    override func content(for post: Post, site: Site) -> [String?] { return [post.body] }
+    override func content(for post: Post, site: String) -> [String?] { return [post.body] }
 }
 
 class FilterBlacklistedUsername: BlacklistFilter {
     override var blacklistType: BlacklistManager.BlacklistType { return .username }
-    override func content(for post: Post, site: Site) -> [String?] { return [post.owner?.display_name] }
+    override func content(for post: Post, site: String) -> [String?] { return [post.owner?.display_name] }
 }
 
 class FilterBlacklistedTag: BlacklistFilter {
     override var blacklistType: BlacklistManager.BlacklistType { return .tag }
-    override func content(for post: Post, site: Site) -> [String?] {
+    override func content(for post: Post, site: String) -> [String?] {
         return (post as? Question)?.tags ?? (post as? Answer)?.tags ?? []
     }
 }

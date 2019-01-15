@@ -11,12 +11,8 @@ import SwiftChatSE
 import SwiftStack
 import Dispatch
 
-protocol Reporter {
-    func report(post: Post, reasons: [FilterResult])
-}
-
-class PostFetcher {
-    public var postsToCheck = [(id: Int, site: Site)]()
+open class PostFetcher {
+    open var postsToCheck = [(id: Int, site: String)]()
     
     public let queue = DispatchQueue(label: "Filter", attributes: [.concurrent])
     
@@ -25,31 +21,27 @@ class PostFetcher {
     private var wsRetries: Int
     private let wsMaxRetries: Int
     
-    public let rooms: [ChatRoom]
-    public var reporter: Reporter
     public var apiClient: APIClient
-    public let staticDB: DatabaseConnection
-    public var callback: (Post, Site) -> ()
     
-    public var shouldFetchAnswers = false
+    /// A callback that recieves a post and its apiSiteParameter.
+    open var callback: (Post, String) throws -> ()
+    
+    open var shouldFetchAnswers = false
     
     public private(set) var running: Bool
     
     private var lastEventDate: Date?
     
-    init (rooms: [ChatRoom], reporter: Reporter, apiClient: APIClient, staticDB: DatabaseConnection, callback: @escaping (Post, Site) -> ()) {
+    public init (apiClient: APIClient, callback: @escaping (Post, String) throws -> ()) {
         wsRetries = 0
         wsMaxRetries = 10
         running = false
         
-        self.rooms = rooms
-        self.reporter = reporter
         self.apiClient = apiClient
-        self.staticDB = staticDB
         self.callback = callback
     }
     
-    enum QuestionProcessingError: Error {
+    public enum QuestionProcessingError: Error {
         case textNotUTF8(text: String)
         
         case jsonNotDictionary(json: String)
@@ -62,10 +54,10 @@ class PostFetcher {
         case siteLookupFailed(siteID: Int)
     }
     
-    func doCheckPosts() {
+    open func doCheckPosts() {
         queue.async {
-            while true {
-                do {
+            do {
+                while true {
                     let posts = self.postsToCheck
                     sleep(60)
                     if !self.running {
@@ -78,15 +70,15 @@ class PostFetcher {
                     
                     //print("Checking \(posts.count) posts.")
                     self.postsToCheck = self.postsToCheck.filter { post in
-                        !posts.contains { $0.id == post.id && $0.site.api_site_parameter == post.site.api_site_parameter }
+                        !posts.contains { $0.id == post.id && $0.site == post.site }
                     }
                     
                     var postsBySite = [String:[Int]]()
                     for post in posts {
-                        if postsBySite[post.site.api_site_parameter!] != nil {
-                            postsBySite[post.site.api_site_parameter!]!.append(post.id)
+                        if postsBySite[post.site] != nil {
+                            postsBySite[post.site]!.append(post.id)
                         } else {
-                            postsBySite[post.site.api_site_parameter!] = [post.id]
+                            postsBySite[post.site] = [post.id]
                         }
                     }
                     
@@ -104,9 +96,9 @@ class PostFetcher {
                                     continue
                                 }
                                 
-                                try self.scan(post: post, site: site)
+                                try self.callback(post, site)
                                 
-                                guard shouldScanAnswers else { continue }
+                                guard self.shouldFetchAnswers else { continue }
                                 for answer in post.answers ?? [] {
                                     answer.title = post.title
                                     answer.tags = post.tags
@@ -119,18 +111,18 @@ class PostFetcher {
                                         continue
                                     }
                                     
-                                    try self.reporter.scan(post: answer, site: site)
+                                    try self.callback(answer, site)
                                 }
                         }
                     }
-                } catch {
-                    handleError(error, "while checking active posts")
                 }
+            } catch {
+                handleError(error, "while fetching posts")
             }
         }
     }
     
-    func start() throws {
+    open func start() throws {
         running = true
         
         //let request = URLRequest(url: URL(string: "ws://qa.sockets.stackexchange.com/")!)
@@ -160,12 +152,12 @@ class PostFetcher {
         doCheckPosts()
     }
     
-    func stop() {
+    open func stop() {
         running = false
         ws?.disconnect()
     }
     
-    func webSocketOpen() {
+    private func webSocketOpen() {
         print("Listening to active questions!")
         wsRetries = 0
         ws.write("155-questions-active")
@@ -183,15 +175,15 @@ class PostFetcher {
         }
     }
     
-    func webSocketClose(_ code: Int, reason: String, wasClean: Bool) {
+    private func webSocketClose(_ code: Int, reason: String, wasClean: Bool) {
         //do nothing -- we'll handle this in webSocketEnd
     }
     
-    func webSocketError(_ error: NSError) {
+    private func webSocketError(_ error: NSError) {
         //do nothing -- we'll handle this in webSocketEnd
     }
     
-    func webSocketMessageText(_ text: String) {
+    private func webSocketMessageText(_ text: String) {
         do {
             guard let data = text.data(using: .utf8) else {
                 throw QuestionProcessingError.textNotUTF8(text: text)
@@ -202,7 +194,7 @@ class PostFetcher {
         }
     }
     
-    func webSocketMessageData(_ data: Data) {
+    private func webSocketMessageData(_ data: Data) {
         lastEventDate = Date()
         let string = String(data: data, encoding: .utf8) ?? "<not UTF-8: \(data.base64EncodedString())>"
         do {
@@ -236,25 +228,27 @@ class PostFetcher {
                     throw QuestionProcessingError.noSite(json: string)
                 }
                 
-                /*let trollSite: Site?
-                switch reporter.trollSites {
-                case .all:
-                    guard let domain = data["siteBaseHostAddress"] as? String else {
-                        throw QuestionProcessingError.noSiteBaseHostAddress(json: string)
-                    }
-                    trollSite = Site(id: -1, apiSiteParameter: apiSiteParameter, domain: domain, initialProbability: 0)
-                case .sites(let sites): trollSite = sites.filter { $0.apiSiteParameter == apiSiteParameter }.first
-                }
+                postsToCheck.append((id: id, site: apiSiteParameter))
                 
-                if let site = trollSite {
-                    postsToCheck.append((id: id, site: site))
-                } else {
-                    guard let site = try Site.with(apiSiteParameter: apiSiteParameter, db: staticDB) else {
-                        return
-                    }
-                    
-                    postsToCheck.append((id: id, site: site))
-                }*/
+                /*let trollSite: Site?
+                 switch reporter.trollSites {
+                 case .all:
+                 guard let domain = data["siteBaseHostAddress"] as? String else {
+                 throw QuestionProcessingError.noSiteBaseHostAddress(json: string)
+                 }
+                 trollSite = Site(id: -1, apiSiteParameter: apiSiteParameter, domain: domain, initialProbability: 0)
+                 case .sites(let sites): trollSite = sites.filter { $0.apiSiteParameter == apiSiteParameter }.first
+                 }
+                 
+                 if let site = trollSite {
+                 postsToCheck.append((id: id, site: site))
+                 } else {
+                 guard let site = try Site.with(apiSiteParameter: apiSiteParameter, db: staticDB) else {
+                 return
+                 }
+                 
+                 postsToCheck.append((id: id, site: site))
+                 }*/
                 //print("Another post has been recieved.  There are now \(postsToCheck.count) posts to check.")
                 
             } catch {
@@ -290,7 +284,7 @@ class PostFetcher {
         } while !done
     }
     
-    func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: Error?) {
+    private func webSocketEnd(_ code: Int, reason: String, wasClean: Bool, error: Error?) {
         if let e = error {
             print("Websocket error:\n\(e)")
         }

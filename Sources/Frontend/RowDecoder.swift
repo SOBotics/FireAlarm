@@ -51,7 +51,7 @@ private class _RowDecoder: Decoder {
 private class KeyedDecoder<K: CodingKey>: KeyedDecodingContainerProtocol {
     var codingPath: [CodingKey]
     var allKeys: [K] {
-        return decoder.row.columnNames.keys.flatMap { K(stringValue: $0) }
+        return decoder.row.columnNames.keys.compactMap { K(stringValue: $0) }
     }
     
     let decoder: _RowDecoder

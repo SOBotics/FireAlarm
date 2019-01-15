@@ -11,7 +11,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "FireAlarmCore", dependencies: ["SwiftChatSE", "SwiftStack", "CryptoSwift"]),
-        .target(name: "FireAlarmFrontend", dependencies: ["FireAlarmCore", "SwiftChatSE", "CryptoSwift"]),
-        .testTarget(name: "FireAlarmTests", dependencies: ["FireAlarmFrontend"])
+        .target(name: "Frontend", dependencies: ["FireAlarmCore", "SwiftChatSE", "CryptoSwift"]),
+        .testTarget(name: "FireAlarmTests", dependencies: ["Frontend"])
     ]
 )

@@ -9,6 +9,7 @@ import Foundation
 import SwiftChatSE
 import Dispatch
 import SwiftStack
+import FireAlarmCore
 
 class Word {
     let text: String
@@ -31,11 +32,16 @@ class Word {
 }
 
 class FilterNaiveBayes: Filter {
+    let reporter: Reporter
     required init(reporter: Reporter) {
-        print ("Loading Naive Bayes filter...")
+        self.reporter = reporter
     }
     
-    func check(_ post: Post, site: Site) throws -> FilterResult? {
+    func check(post: Post, site: String) throws -> FilterResult? {
+        guard let site = try Site.with(apiSiteParameter: site, db: reporter.staticDB) else {
+            return nil
+        }
+        
         var trueProbability = Double(site.initialProbability)
         var falseProbability = Double(1 - trueProbability)
         var postWords = [String]()

@@ -8,6 +8,7 @@
 
 import CryptoSwift
 import SwiftChatSE
+import FireAlarmCore
 
 class WebhookHandler {
     enum GithubWebhookError: Error {
@@ -61,7 +62,7 @@ class WebhookHandler {
             let commitHash = content["sha"] as? String,
             let state = content["state"] as? String,
             let repoName = content["name"] as? String,
-            let branches = (content["branches"] as? [[String:Any]])?.flatMap({ $0["name"] as? String })
+            let branches = (content["branches"] as? [[String:Any]])?.compactMap({ $0["name"] as? String })
             
             else {
                 throw GithubWebhookError.invalidPayload(payload: event.content)

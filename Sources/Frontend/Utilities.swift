@@ -10,6 +10,7 @@ import Foundation
 import SwiftStack
 import SwiftChatSE
 import Dispatch
+import FireAlarmCore
 
 let saveDirURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 
@@ -85,7 +86,7 @@ extension ChatUser {
     }
     var notificationReasons: [NotificationReason] {
         get {
-            return (info["notificationReasons"] as? [String])?.flatMap { NotificationReason(string: $0) } ?? []
+            return (info["notificationReasons"] as? [String])?.compactMap { NotificationReason(string: $0) } ?? []
         } set {
             info["notificationReasons"] = newValue.map { $0.asString }
         }
