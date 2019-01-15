@@ -229,7 +229,7 @@ func main() throws {
     }
     else {
         rooms = [
-            ChatRoom(client: client, host: .stackOverflow, roomID: 123602), //FireAlarm Development
+//            ChatRoom(client: client, host: .stackOverflow, roomID: 123602), //FireAlarm Development
             ChatRoom(client: client, host: .stackOverflow, roomID: 111347), //SOBotics
             ChatRoom(client: client, host: .stackOverflow, roomID: 41570),  //SO Close Vote Reviewers
             //ChatRoom(client: client, host: .stackExchange, roomID: 54445),	//SEBotics
@@ -251,7 +251,7 @@ func main() throws {
     listener = ChatListener(commands: commands)
     listener.onShutdown { shutDown(reason: $0, rooms: rooms + trollRooms) }
     rooms.forEach { room in
-        let trainWrecker = TrainWrecker(room: room)
+        //let trainWrecker = TrainWrecker(room: room)
         room.onMessage { message, isEdit in
             let content = message.content.lowercased()
             if (content == "@bots alive") {
@@ -265,9 +265,9 @@ func main() throws {
                 room.postMessage("[🚃](https://www.youtube.com/watch?v=dQw4w9WgXcQ)")
             }
             
-            if (message.room.roomID == 111347 || message.room.roomID == 123602) {
-                if !isEdit { trainWrecker.process(message: message) }
-            }
+            //if (message.room.roomID == 111347 || message.room.roomID == 123602) {
+            //    if !isEdit { trainWrecker.process(message: message) }
+            //}
             
             listener.processMessage(room, message: message, isEdit: isEdit)
         }
