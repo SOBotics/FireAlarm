@@ -228,7 +228,7 @@ func main() throws {
     }
     else {
         rooms = [
-            ChatRoom(client: client, host: .stackOverflow, roomID: 123602), //FireAlarm Development
+//            ChatRoom(client: client, host: .stackOverflow, roomID: 123602), //FireAlarm Development
             ChatRoom(client: client, host: .stackOverflow, roomID: 111347), //SOBotics
             ChatRoom(client: client, host: .stackOverflow, roomID: 41570),  //SO Close Vote Reviewers
             //ChatRoom(client: client, host: .stackExchange, roomID: 54445),	//SEBotics
