@@ -11,6 +11,7 @@ import Dispatch
 import SwiftChatSE
 import SwiftStack
 import CryptoSwift
+import FireAlarmCore
 
 let commands: [Command.Type] = [
     CommandCheckThreshold.self, CommandSetThreshold.self, CommandCheckSites.self, CommandAddSite.self, CommandRemoveSite.self,
@@ -330,9 +331,6 @@ private func shutDown(reason: ChatListener.StopReason, rooms: [ChatRoom]) {
         while !room.messageQueue.isEmpty {
             sleep(1)
         }
-    }
-    while reporter != nil && !(reporter.postFetcher.ws.state == .disconnected || reporter.postFetcher.ws.state == .error) {
-        sleep(1)
     }
     
     save(rooms: rooms)

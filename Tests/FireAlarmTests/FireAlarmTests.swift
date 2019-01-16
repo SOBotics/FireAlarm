@@ -1,5 +1,5 @@
 import XCTest
-@testable import FireAlarm
+@testable import FireAlarmCore
 
 class FireAlarmTests: XCTestCase {
     static var allTests : [(String, (FireAlarmTests) -> () throws -> Void)] {

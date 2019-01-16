@@ -11,7 +11,7 @@ import SwiftChatSE
 import SwiftStack
 import Dispatch
 
-extension Post {
+public extension Post {
 	var id: Int? {
 		if let q = self as? Question, let id = q.question_id {
 			return id
@@ -23,27 +23,26 @@ extension Post {
 	}
 }
 
-struct FilterResult {
-	enum ResultType {
+public struct FilterResult {
+	public enum ResultType {
 		case bayesianFilter(difference: Int)
 		case customFilter(filter: Filter)
         case customFilterWithWeight(filter: Filter, weight: Int)
         case manuallyReported
 	}
 	
-	let type: ResultType
-	let header: String
-	let details: String?
+	public let type: ResultType
+	public let header: String
+	public let details: String?
 	
-	init(type: ResultType, header: String, details: String? = nil) {
+	public init(type: ResultType, header: String, details: String? = nil) {
 		self.type = type
 		self.header = header
 		self.details = details
 	}
 }
 
-protocol Filter: class {
-    init(reporter: Reporter)
-    func check(_ post: Post, site: Site) throws -> FilterResult?
+public protocol Filter: class {
+    func check(post: Post, site: String) throws -> FilterResult?
 	func save() throws
 }

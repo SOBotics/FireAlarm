@@ -9,30 +9,30 @@
 import Foundation
 import Dispatch
 
-final class BackgroundTask: Hashable {
-	private(set) var isCancelled = false
-	private(set) var isScheduled = false
+public final class BackgroundTask: Hashable {
+	public private(set) var isCancelled = false
+	public private(set) var isScheduled = false
 	
 	private(set) var manager: BackgroundTaskManager!
 	
-	var run: ((BackgroundTask) -> ())?
+	public var run: ((BackgroundTask) -> ())?
 	
-	func onRun(_ block: @escaping (BackgroundTask) -> ()) {
+	public func onRun(_ block: @escaping (BackgroundTask) -> ()) {
 		run = block
 	}
 	
 	
 	
-	var interval: TimeInterval?
+	public var interval: TimeInterval?
 	
-	init(interval: TimeInterval? = nil, run: @escaping (BackgroundTask) -> ()) {
+	public init(interval: TimeInterval? = nil, run: @escaping (BackgroundTask) -> ()) {
 		self.interval = interval
 		self.run = run
 	}
 	
 	
 	
-	func schedule(manager: BackgroundTaskManager) {
+	public func schedule(manager: BackgroundTaskManager) {
 		if isScheduled { return }
 		self.manager = manager
 		
@@ -61,7 +61,7 @@ final class BackgroundTask: Hashable {
 		}
 	}
 	
-	func cancel() {
+	public func cancel() {
 		if isCancelled { return }
 		
 		isCancelled = true
@@ -75,13 +75,13 @@ final class BackgroundTask: Hashable {
 		return lhs === rhs
 	}
 	
-	var hashValue: Int {
+	public var hashValue: Int {
 		return Unmanaged.passUnretained(self).toOpaque().hashValue
 	}
 }
 
-class BackgroundTaskManager {
-	var tasks = [BackgroundTask]() {
+open class BackgroundTaskManager {
+	open var tasks = [BackgroundTask]() {
 		didSet {
 			//Schedule all tasks which have not been scheduled.
 			for task in tasks {
@@ -97,7 +97,7 @@ class BackgroundTaskManager {
 		}
 	}
 	
-	let queue = DispatchQueue(label: "Background Tasks", attributes: .concurrent)
+	public let queue = DispatchQueue(label: "Background Tasks", attributes: .concurrent)
 	
-	static var shared = BackgroundTaskManager()
+	public static var shared = BackgroundTaskManager()
 }

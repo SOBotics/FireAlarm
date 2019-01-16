@@ -11,24 +11,24 @@ import SwiftChatSE
 import Dispatch
 import CryptoSwift
 
-class Redunda {
-    enum RedundaError: Error {
+open class Redunda {
+    public enum RedundaError: Error {
         case invalidJSON(json: Any)
         case downloadFailed(status: Int)
         case uploadFailed(status: Int)
     }
     
     
-    struct Event {
-        let name: String
-        let headers: [String:String]
-        let content: String
+    public struct Event {
+        public let name: String
+        public let headers: [String:String]
+        public let content: String
         
-        func contentAsJSON() throws -> Any {
+        public func contentAsJSON() throws -> Any {
             return try JSONSerialization.jsonObject(with: content.data(using: .utf8)!)
         }
         
-        init(json: [String:Any]) throws {
+        public init(json: [String:Any]) throws {
             guard let name = json["name"] as? String,
                 let headers = json["headers"] as? [String:String],
                 let content = json["content"] as? String
@@ -40,12 +40,12 @@ class Redunda {
         }
     }
 	
-	let key: String
-	let client: Client
-	let filesToSync: [String]	//An array of regexes.
+	public let key: String
+	public let client: Client
+	public let filesToSync: [String]	//An array of regexes.
 	
 	
-	func downloadFile(named name: String) throws {
+	open func downloadFile(named name: String) throws {
 		print("Downloading \(name).")
 		
 		let (data, response) = try client.get("https://redunda.sobotics.org/bots/data/\(name)?key=\(key)")
@@ -59,7 +59,7 @@ class Redunda {
 		)
 	}
 	
-	func uploadFile(named name: String) throws {
+	open func uploadFile(named name: String) throws {
 		print("Uploading \(name).")
 		
 		let data = try Data(contentsOf:
@@ -77,14 +77,14 @@ class Redunda {
 	}
 	
 	
-	func hash(of file: String) throws -> String {
+	open func hash(of file: String) throws -> String {
         return try Data(contentsOf: URL(fileURLWithPath: file)).sha256().toHexString()
 	}
 	
 	///Downloads modified files from Redunda.
 	///- Warning:
 	///Do not post non-`RedundaError`s to chat; they may contain the instance key!
-	func downloadFiles() throws {
+	open func downloadFiles() throws {
 		let response = try client.parseJSON(client.get("https://redunda.sobotics.org/bots/data.json?key=\(key)"))
 		
 		guard let json = response as? [[String:Any]] else {
@@ -110,7 +110,7 @@ class Redunda {
 	///Downloads modified files from Redunda.
 	///- Warning:
 	///Do not post non-`RedundaError`s to chat; they may contain the instance key!
-	func uploadFiles() throws {
+	open func uploadFiles() throws {
 		let response = try client.parseJSON(client.get("https://redunda.sobotics.org/bots/data.json?key=\(key)"))
 		
 		guard let json = response as? [[String:Any]] else {
@@ -136,19 +136,19 @@ class Redunda {
 		}
 	}
 	
-	init(key: String, client: Client, filesToSync: [String] = []) {
+	public init(key: String, client: Client, filesToSync: [String] = []) {
 		self.key = key
 		self.client = client
 		self.filesToSync = filesToSync
 	}
 	
-	var shouldStandby: Bool = false
-	var locationName: String?
+	open var shouldStandby: Bool = false
+	open var locationName: String?
     
     //The number of unread events.
-    var eventCount: Int = 0
+    open var eventCount: Int = 0
     
-    func fetchEvents() throws -> [Event] {
+    open func fetchEvents() throws -> [Event] {
         let json = try client.parseJSON(
             try client.post(
                 "https://redunda.sobotics.org/events.json",
@@ -164,7 +164,7 @@ class Redunda {
         return events
     }
 	
-	func sendStatusPing(version: String? = nil) throws {
+	open func sendStatusPing(version: String? = nil) throws {
 		let data = version == nil ? ["key":key] : ["key":key, "version":version!]
 		let response = try client.parseJSON(try client.post("https://redunda.sobotics.org/status.json", data))
 		guard let json = response as? [String:Any] else {

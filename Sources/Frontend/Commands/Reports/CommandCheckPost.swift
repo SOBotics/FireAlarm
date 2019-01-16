@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftChatSE
+import FireAlarmCore
 
 class CommandCheckPost: Command {
     override class func usage() -> [String] {
@@ -48,8 +49,8 @@ class CommandCheckPost: Command {
         }
         
         
-        let result = try reporter.checkAndReportPost(question, site: site)
-        let score: Int? = result.filterResults.flatMap { reason in
+        let result = try reporter.checkAndReport(post: question, site: site.apiSiteParameter)
+        let score: Int? = result.filterResults.compactMap { reason in
             if case .bayesianFilter(let score) = reason.type {
                 return score
             } else {
@@ -57,7 +58,7 @@ class CommandCheckPost: Command {
             }
             }.first
         
-        let otherFilters = result.filterResults.flatMap { reason -> (FilterResult?) in
+        let otherFilters = result.filterResults.compactMap { reason -> (FilterResult?) in
             if case .bayesianFilter = reason.type {
                 return nil
             } else {

@@ -14,7 +14,7 @@ class CommandGitStatus: Command {
     }
     
     override func run() throws {
-        let result = FireAlarm.run(command: "git status")
+        let result = Frontend.run(command: "git status")
         if result.exitCode != 0 {
             if result.combinedOutput != nil {
                 reply("`git status` returned exit code \(result.exitCode):")

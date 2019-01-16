@@ -24,12 +24,12 @@ class CommandCheckNotification: Command {
 		else {
 			var reasons: [String] = []
             
-            let tags = message.user.notificationReasons.flatMap {
-                if case .tag(let tag) = $0 { return tag }
+            let tags = message.user.notificationReasons.compactMap { (reason: ChatUser.NotificationReason) -> String? in
+                if case .tag(let tag) = reason { return tag }
                 else { return nil }
             }
             
-            let blacklists = message.user.notificationReasons.flatMap {
+            let blacklists = message.user.notificationReasons.compactMap {
                 if case .blacklist(let list) = $0 { return list }
                 else { return nil }
             } as [BlacklistManager.BlacklistType]

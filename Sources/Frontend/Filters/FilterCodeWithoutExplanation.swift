@@ -9,12 +9,13 @@ import Foundation
 import SwiftStack
 import SwiftChatSE
 import Dispatch
+import FireAlarmCore
 
 //Detects post where code exists but no explanation, i.e, code dump questions.
 class FilterCodeWithoutExplanation: Filter {
-    required init(reporter: Reporter) {}
+    init() {}
     
-    func check(_ post: Post, site: Site) -> FilterResult? {
+    func check(post: Post, site: String) -> FilterResult? {
         if post.body!.contains("<code>") && !post.body!.contains("<p>") {
             let header = "Code without explanation"
             let details = header

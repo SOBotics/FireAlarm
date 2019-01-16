@@ -10,6 +10,7 @@ import Foundation
 import SwiftStack
 import SwiftChatSE
 import Dispatch
+import FireAlarmCore
 
 struct Report {
     let id: Int
@@ -42,7 +43,7 @@ struct Report {
             return nil
         }
         
-        let messages = (json["m"] as? [[String:Any]])?.flatMap { messageJSON in
+        let messages = (json["m"] as? [[String:Any]])?.compactMap { messageJSON in
             guard let host = (messageJSON["h"] as? Int).map ({ChatRoom.Host(rawValue: $0)}) ?? nil,
                 let room = messageJSON["r"] as? Int,
                 let message = messageJSON["m"] as? Int else {
@@ -97,7 +98,6 @@ struct Report {
 var reportedPosts = [Report]()
 
 class Reporter {
-    var postFetcher: PostFetcher!
     let rooms: [ChatRoom]
     let trollRooms: [ChatRoom]
     
@@ -118,29 +118,37 @@ class Reporter {
             case .sites(let sites): return sites.contains(site)
             }
         }
+        
+        func contains(apiSiteParameter: String) -> Bool {
+            switch self {
+            case .all: return true
+            case .sites(let sites): return sites.contains { $0.apiSiteParameter == apiSiteParameter }
+            }
+        }
     }
     
-    var trollFilters = [Filter]()
     var trollSites: TrollSites = .sites([])
     
     var staticDB: DatabaseConnection
     
-    var filters = [Filter]()
-    
     var blacklistManager: BlacklistManager
     var trollBlacklistManager: BlacklistManager
+    
+    let postFetcher: PostFetcher
+    let postScanner: PostScanner
+    let trollScanner: PostScanner
     
     private let queue = DispatchQueue(label: "Reporter queue")
     
     
-    func filter<T: Filter>(ofType type: T.Type) -> T? {
+    /*func filter<T: Filter>(ofType type: T.Type) -> T? {
         for filter in filters {
             if let f = filter as? T {
                 return f
             }
         }
         return nil
-    }
+    }*/
     
     init(rooms: [ChatRoom], trollRooms: [ChatRoom] = []) {
         print ("Reporter loading...")
@@ -200,33 +208,37 @@ class Reporter {
             fatalError("Could not load filter_static.sqlite:\n\(error)")
         }
         
-        filters = [
+        postFetcher = PostFetcher(apiClient: apiClient, callback: {_,_ in })
+        postScanner = PostScanner(filters: [])
+        trollScanner = PostScanner(filters: [])
+        
+        postFetcher.callback = { [weak self] in try self?.checkAndReport(post: $0, site: $1) }
+        
+        postScanner.filters = [
             FilterNaiveBayes(reporter: self),
-            FilterNonEnglishPost(reporter: self),
-            FilterMisleadingLinks(reporter: self),
+            FilterNonEnglishPost(),
+            FilterMisleadingLinks(),
             FilterBlacklistedKeyword(reporter: self),
             FilterBlacklistedUsername(reporter: self),
             FilterBlacklistedTag(reporter: self),
-            FilterImageWithoutCode(reporter: self),
-            FilterLowLength(reporter: self),
-            FilterCodeWithoutExplanation(reporter: self)
+            FilterImageWithoutCode(),
+            FilterLowLength(),
+            FilterCodeWithoutExplanation()
         ]
-        trollFilters = [
+        trollScanner.filters = [
             FilterBlacklistedKeyword(reporter: self, troll: true),
             FilterBlacklistedUsername(reporter: self, troll: true),
             FilterBlacklistedTag(reporter: self, troll: true)
         ]
-        
-        postFetcher = PostFetcher(rooms: rooms, reporter: self, staticDB: staticDB)
     }
     
-    func checkPost(_ post: Post, site: Site) throws -> [FilterResult] {
-        let filters = trollSites.contains(site) ? trollFilters : self.filters
-        return try filters.flatMap { try $0.check(post, site: site) }
+    func check(post: Post, site: String) throws -> [FilterResult] {
+        let scanner = trollSites.contains(apiSiteParameter: site) ? trollScanner : postScanner
+        return try scanner.scan(post: post, site: site)
     }
     
-    @discardableResult func checkAndReportPost(_ post: Post, site: Site) throws -> ReportResult {
-        let results = try checkPost(post, site: site)
+    @discardableResult func checkAndReport(post: Post, site: String) throws -> ReportResult {
+        let results = try check(post: post, site: site)
         
         return try report(post: post, site: site, reasons: results)
     }
@@ -260,7 +272,11 @@ class Reporter {
     }
     
     ///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
-    func report(post: Post, site: Site, reasons: [FilterResult]) throws -> ReportResult {
+    func report(post: Post, site apiSiteParameter: String, reasons: [FilterResult]) throws -> ReportResult {
+        guard let site = try Site.with(apiSiteParameter: apiSiteParameter, db: staticDB) else {
+             return ReportResult(status: .notBad, filterResults: reasons)
+        }
+        
         var status: ReportResult.Status = .notBad
         
         queue.sync {

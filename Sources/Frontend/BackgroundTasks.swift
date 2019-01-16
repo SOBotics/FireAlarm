@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftChatSE
+import FireAlarmCore
 
 func save(rooms: [ChatRoom]) {
 	do {
@@ -16,7 +17,7 @@ func save(rooms: [ChatRoom]) {
 		handleError(error, "while saving the user database")
 	}
 	
-	for filter in reporter.filters {
+	for filter in reporter.postScanner.filters {
 		do {
 			try filter.save()
 		} catch {

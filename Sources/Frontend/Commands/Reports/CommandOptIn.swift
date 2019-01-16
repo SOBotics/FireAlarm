@@ -20,8 +20,8 @@ class CommandOptIn: Command {
             return
         }
         
-        let existingTags = message.user.notificationReasons.flatMap {
-            if case .tag(let t) = $0 { return t }
+        let existingTags = message.user.notificationReasons.compactMap { (reason: ChatUser.NotificationReason) -> String? in
+            if case .tag(let t) = reason { return t }
             return nil
         }
         
@@ -31,8 +31,8 @@ class CommandOptIn: Command {
             }
         }
         
-        let newTags = message.user.notificationReasons.flatMap {
-            if case .tag(let t) = $0 { return t }
+        let newTags = message.user.notificationReasons.compactMap { (reason: ChatUser.NotificationReason) -> String? in
+            if case .tag(let t) = reason { return t }
             return nil
         }
         
@@ -46,8 +46,8 @@ class CommandOptIn: Command {
             return
         }
         
-        let existingBlacklists = message.user.notificationReasons.flatMap {
-            if case .blacklist(let l) = $0 { return l.rawValue }
+        let existingBlacklists = message.user.notificationReasons.compactMap { (reason: ChatUser.NotificationReason) -> String? in
+            if case .blacklist(let l) = reason { return l.rawValue }
             return nil
         }
         
@@ -63,8 +63,8 @@ class CommandOptIn: Command {
         }
         message.user.notificationReasons += reasonsToAdd
         
-        let newBlacklists = message.user.notificationReasons.flatMap {
-            if case .blacklist(let l) = $0 { return l.rawValue + "s" }
+        let newBlacklists = message.user.notificationReasons.compactMap { (reason: ChatUser.NotificationReason) -> String? in
+            if case .blacklist(let l) = reason { return l.rawValue + "s" }
             return nil
         }
         
