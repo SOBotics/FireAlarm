@@ -98,7 +98,6 @@ struct Report {
 var reportedPosts = [Report]()
 
 class Reporter {
-    weak var scanner: PostScanner!
     let rooms: [ChatRoom]
     let trollRooms: [ChatRoom]
     
@@ -234,7 +233,7 @@ class Reporter {
     }
     
     func check(post: Post, site: String) throws -> [FilterResult] {
-        let scanner: PostScanner = trollSites.contains(apiSiteParameter: site) ? trollScanner : self.scanner
+        let scanner = trollSites.contains(apiSiteParameter: site) ? trollScanner : postScanner
         return try scanner.scan(post: post, site: site)
     }
     
