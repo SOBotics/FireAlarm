@@ -85,6 +85,9 @@ func handleInput(input: String, rooms: [ChatRoom], listener: ChatListener) {
 	)
 }
 
+let maxRedundaErrors = 3
+var redundaErrorCount = 0
+
 
 func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 	BackgroundTaskManager.shared.tasks = [
@@ -163,11 +166,21 @@ func scheduleBackgroundTasks(rooms: [ChatRoom], listener: ChatListener) {
 					listener.stop(.reboot)
 				}
                 
+                if redundaErrorCount >= maxRedundaErrors {
+                    rooms.first!.postMessage("[ [\(botName)](\(githubLink)) ] Redunda appears to be back up (cc @NobodyNada).")
+                }
+                redundaErrorCount = 0
+                
                 if let commit = ciVersion ?? updateVersion {
                     _ = update(to: commit, listener: listener, rooms: [rooms.first!])
                 }
 			} catch {
-				handleError(error, "while sending a status ping to Redunda")
+                redundaErrorCount += 1
+                if redundaErrorCount == maxRedundaErrors {
+                    rooms.first!.postMessage("[ [\(botName)](\(githubLink)) ] Redunda appears to be down; silencing errors (cc @NobodyNada).")
+                } else if redundaErrorCount < maxRedundaErrors {
+                    handleError(error, "while sending a status ping to Redunda")
+                }
 			}
 		}
 	]
