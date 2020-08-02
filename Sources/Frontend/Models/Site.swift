@@ -39,6 +39,8 @@ struct Site: Codable, Hashable {
         return try with(parameter: apiSiteParameter, name: "apiSiteParameter", db: db)
     }
     
-    var hashValue: Int { return apiSiteParameter.hashValue }
+    func hash(into hasher: inout Hasher) {
+        apiSiteParameter.hash(into: &hasher)
+    }
     static func ==(lhs: Site, rhs: Site) -> Bool { return lhs.apiSiteParameter == rhs.apiSiteParameter }
 }

@@ -39,7 +39,7 @@ class CommandOptOut: Command {
     }
     
     func removeNotificationLinks() {
-        guard let index = message.user.notificationReasons.index(where: {
+        guard let index = message.user.notificationReasons.firstIndex(where: {
             if case .misleadingLinks = $0 { return true }
             else { return false }
         }) else {

@@ -230,16 +230,16 @@ func main() throws {
     else {
         rooms = [
 //            ChatRoom(client: client, host: .stackOverflow, roomID: 123602), //FireAlarm Development
-            ChatRoom(client: client, host: .stackOverflow, roomID: 111347), //SOBotics
-            ChatRoom(client: client, host: .stackOverflow, roomID: 41570),  //SO Close Vote Reviewers
-            //ChatRoom(client: client, host: .stackExchange, roomID: 54445),	//SEBotics
+//            ChatRoom(client: client, host: .stackOverflow, roomID: 111347), //SOBotics
+//            ChatRoom(client: client, host: .stackOverflow, roomID: 41570),  //SO Close Vote Reviewers
+//            ChatRoom(client: client, host: .stackExchange, roomID: 54445),	//SEBotics
         ]
         
         development = false
     }
-    let trollRooms: [ChatRoom] = [ChatRoom(client: client, host: .stackExchange, roomID: 54445)] //SEBotics
+    //let trollRooms: [ChatRoom] = [ChatRoom(client: client, host: .stackExchange, roomID: 54445)] //SEBotics
     
-    try (rooms + trollRooms).forEach {try $0.loadUserDB()}
+    try rooms.forEach {try $0.loadUserDB()}
     
     afterTooManyErrors = {
         print("Too many errors; aborting...")
@@ -249,7 +249,7 @@ func main() throws {
     
     
     listener = ChatListener(commands: commands)
-    listener.onShutdown { shutDown(reason: $0, rooms: rooms + trollRooms) }
+    listener.onShutdown { shutDown(reason: $0, rooms: rooms) }
     rooms.forEach { room in
         //let trainWrecker = TrainWrecker(room: room)
         room.onMessage { message, isEdit in
@@ -273,16 +273,16 @@ func main() throws {
         }
     }
     
-    let trollListener = ChatListener(commands: trollCommands)
-    trollListener.onShutdown(listener.stop)
-    trollRooms.forEach { room in
-        room.onMessage { message, isEdit in
-            trollListener.processMessage(room, message: message, isEdit: isEdit)
-        }
-    }
+    //let trollListener = ChatListener(commands: trollCommands)
+    //trollListener.onShutdown(listener.stop)
+    //trollRooms.forEach { room in
+    //    room.onMessage { message, isEdit in
+    //        trollListener.processMessage(room, message: message, isEdit: isEdit)
+    //    }
+    //}
     
     try rooms.forEach { try $0.join() }
-    try trollRooms.forEach { try $0.join() }
+    //try trollRooms.forEach { try $0.join() }
     
     currentVersion = getCurrentVersion()
     shortVersion = getShortVersion(currentVersion)
@@ -291,7 +291,7 @@ func main() throws {
     rooms.first?.postMessage("[ [\(botName)](\(stackAppsLink)) ] FireAlarm started at revision [`\(shortVersion)`](\(versionLink)) on \(location).")
     
     //Load the filter
-    reporter = Reporter(rooms: rooms, trollRooms: trollRooms)
+    reporter = Reporter(rooms: rooms, trollRooms: [])
     try reporter.postFetcher.start()
     
     errorsInLast30Seconds = 0

@@ -12,9 +12,9 @@ import SwiftStack
 import Dispatch
 
 open class PostFetcher {
-    open var postsToCheck = [(id: Int, site: String)]()
+    open var postsToCheck = [String:[Int]]() // Posts by apiSiteParameter
     
-    public let queue = DispatchQueue(label: "Filter", attributes: [.concurrent])
+    public let queue = DispatchQueue(label: "Filter")
     
     
     private var ws: WebSocket!
@@ -54,10 +54,79 @@ open class PostFetcher {
         case siteLookupFailed(siteID: Int)
     }
     
+    open func checkStackOverflow() {
+        Thread.detachNewThread {
+            var lastCheck = Date()
+            while true {
+                do {
+                    let wakeTime = lastCheck.addingTimeInterval(60)
+                    lastCheck = Date()
+                    Thread.sleep(until: wakeTime)
+                    
+                    if !self.running {
+                        return
+                    }
+                    
+                    var hasMore = true
+                    var page = 1
+                    var posts: [Post] = []
+                    while hasMore {
+                        let response = try self.queue.sync { try self.apiClient.fetchQuestions(parameters: [
+                            "pagesize": "100",
+                            "page": "\(page)",
+                            "fromdate": String(Int(lastCheck.timeIntervalSince1970)),
+                            "site": "stackoverflow"
+                        ])}
+                        hasMore = response.has_more ?? false
+                        page += 1
+                        posts.append(contentsOf: response.items ?? [])
+                    }
+                    
+                    let questionIDs = posts.compactMap { $0.id }
+                    
+                    // now fetch answers
+                    hasMore = true
+                    page = 1
+                    while hasMore {
+                        let response = try self.queue.sync { try self.apiClient.fetchAnswersOn(
+                            questions: questionIDs,
+                            parameters: [
+                                "pagesize": "100",
+                                "page": "\(page)",
+                                "site": "stackoverflow"
+                            ])}
+                        hasMore = response.has_more ?? false
+                        page += 1
+                        posts.append(contentsOf: response.items ?? [])
+                    }
+                    
+                    self.queue.sync {
+                        posts.forEach { post in
+                            do {
+                                //don't report posts that are more than a day old
+                                let creation = (post.creation_date ?? Date()).timeIntervalSinceReferenceDate
+                                let activity = (post.last_activity_date ?? Date()).timeIntervalSinceReferenceDate
+                                
+                                if creation > (activity - 60 * 60 * 24) {
+                                    try self.callback(post, "stackoverflow")
+                                }
+                            } catch {
+                                handleError(error, "while processing a post")
+                            }
+                        }
+                    }
+                } catch {
+                    handleError(error, "while fetching questions on Stack Overflow")
+                }
+            }
+        }
+    }
+    
     open func doCheckPosts() {
-        queue.async {
-            do {
-                while true {
+        Thread.detachNewThread {
+            while true {
+                do {
+                    // Wait 60 seconds due to API caching.
                     let posts = self.postsToCheck
                     sleep(60)
                     if !self.running {
@@ -68,56 +137,68 @@ open class PostFetcher {
                         continue
                     }
                     
-                    //print("Checking \(posts.count) posts.")
-                    self.postsToCheck = self.postsToCheck.filter { post in
-                        !posts.contains { $0.id == post.id && $0.site == post.site }
-                    }
-                    
-                    var postsBySite = [String:[Int]]()
-                    for post in posts {
-                        if postsBySite[post.site] != nil {
-                            postsBySite[post.site]!.append(post.id)
-                        } else {
-                            postsBySite[post.site] = [post.id]
+                    // Remove the posts we're checking now from the list of postsToCheck.
+                    for site in self.postsToCheck.keys {
+                        let postsToCheckNow = posts[site] ?? []
+                        self.postsToCheck[site] = self.postsToCheck[site]?.filter { post in
+                            !postsToCheckNow.contains(post)
                         }
                     }
                     
-                    for (site, posts) in postsBySite {
-                        for post in try self.apiClient.fetchQuestions(
-                            posts,
-                            parameters: ["site":site]
-                            ).items ?? [] {
-                                
-                                //don't report posts that are more than a day old
-                                let creation = (post.creation_date ?? Date()).timeIntervalSinceReferenceDate
-                                let activity = (post.last_activity_date ?? Date()).timeIntervalSinceReferenceDate
-                                
-                                if creation < (activity - 60 * 60 * 24) {
-                                    continue
-                                }
-                                
-                                try self.callback(post, site)
-                                
-                                guard self.shouldFetchAnswers else { continue }
-                                for answer in post.answers ?? [] {
-                                    answer.title = post.title
-                                    answer.tags = post.tags
+                    for (site, posts) in posts {
+                        var fetchedPosts = [Post]()
+                        
+                        var hasMore = true
+                        var page = 1
+                        while hasMore {
+                            let response = try self.queue.sync { try self.apiClient.fetchQuestions(
+                                posts, parameters: [
+                                    "pagesize": "100",
+                                    "page": "\(page)",
+                                    "site": site
+                                ])}
+                            hasMore = response.has_more ?? false
+                            page += 1
+                            fetchedPosts.append(contentsOf: response.items ?? [])
+                        }
+                        
+                        let questionIDs = fetchedPosts.compactMap { $0.id }
+                        
+                        // now fetch answers
+                        hasMore = true
+                        page = 1
+                        while hasMore {
+                            let response = try self.queue.sync { try self.apiClient.fetchAnswersOn(
+                                questions: questionIDs,
+                                parameters: [
+                                    "pagesize": "100",
+                                    "page": "\(page)",
+                                    "site": site
+                                ])}
+                            hasMore = response.has_more ?? false
+                            page += 1
+                            fetchedPosts.append(contentsOf: response.items ?? [])
+                        }
+                        
+                        self.queue.sync {
+                            fetchedPosts.forEach { post in
+                                do {
+                                    //don't report posts that are more than a day old
+                                    let creation = (post.creation_date ?? Date()).timeIntervalSinceReferenceDate
+                                    let activity = (post.last_activity_date ?? Date()).timeIntervalSinceReferenceDate
                                     
-                                    //don't report answers that are more than a day old
-                                    let creation = (answer.creation_date ?? Date()).timeIntervalSinceReferenceDate
-                                    let activity = (answer.last_activity_date ?? Date()).timeIntervalSinceReferenceDate
-                                    
-                                    if creation < (activity - 60 * 60 * 24) {
-                                        continue
+                                    if creation > (activity - 60 * 60 * 24) {
+                                        try self.callback(post, site)
                                     }
-                                    
-                                    try self.callback(answer, site)
+                                } catch {
+                                    handleError(error, "while processing a post")
                                 }
+                            }
                         }
                     }
+                } catch {
+                    handleError(error, "while fetching posts")
                 }
-            } catch {
-                handleError(error, "while fetching posts")
             }
         }
     }
@@ -162,7 +243,7 @@ open class PostFetcher {
         wsRetries = 0
         ws.write("155-questions-active")
         
-        queue.async {
+        Thread.detachNewThread {
             while true {
                 sleep(600)
                 if (Date().timeIntervalSinceReferenceDate -
@@ -228,28 +309,9 @@ open class PostFetcher {
                     throw QuestionProcessingError.noSite(json: string)
                 }
                 
-                postsToCheck.append((id: id, site: apiSiteParameter))
-                
-                /*let trollSite: Site?
-                 switch reporter.trollSites {
-                 case .all:
-                 guard let domain = data["siteBaseHostAddress"] as? String else {
-                 throw QuestionProcessingError.noSiteBaseHostAddress(json: string)
-                 }
-                 trollSite = Site(id: -1, apiSiteParameter: apiSiteParameter, domain: domain, initialProbability: 0)
-                 case .sites(let sites): trollSite = sites.filter { $0.apiSiteParameter == apiSiteParameter }.first
-                 }
-                 
-                 if let site = trollSite {
-                 postsToCheck.append((id: id, site: site))
-                 } else {
-                 guard let site = try Site.with(apiSiteParameter: apiSiteParameter, db: staticDB) else {
-                 return
-                 }
-                 
-                 postsToCheck.append((id: id, site: site))
-                 }*/
-                //print("Another post has been recieved.  There are now \(postsToCheck.count) posts to check.")
+                if apiSiteParameter != "stackoverflow" {    // SO questions are handled seperately
+                    postsToCheck[apiSiteParameter, default: []].append(id)
+                }
                 
             } catch {
                 if let e = errorAsNSError(error) {

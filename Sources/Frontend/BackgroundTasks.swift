@@ -61,7 +61,7 @@ func handleInput(input: String, rooms: [ChatRoom], listener: ChatListener) {
 			return
 		}
 		
-		guard let roomIndex = rooms.index(where: { roomID == $0.roomID }) else {
+        guard let roomIndex = rooms.firstIndex(where: { roomID == $0.roomID }) else {
 			print("I'm not  in that room.")
 			return
 		}

@@ -37,7 +37,7 @@ class Blacklist: Codable {
     ///Removes an item from the blacklist.
     ///- returns: `true` if the item was removed; `false` if it was not present.
     @discardableResult func remove(item: String) -> Bool {
-        guard let index = items.index(of: item) else { return false }
+        guard let index = items.firstIndex(of: item) else { return false }
         items.remove(at: index)
         return true
     }

@@ -1,9 +1,12 @@
-// swift-tools-version:4.1
+// swift-tools-version:5.2
 
 import PackageDescription
 
 let package = Package(
     name: "FireAlarm",
+    platforms: [
+        .macOS(.v10_12),
+    ],
     dependencies: [
         .package(url: "git://github.com/SOBotics/SwiftChatSE",      from: "5.1.0"),
         .package(url: "git://github.com/SOBotics/SwiftStack",       from: "0.5.0"),

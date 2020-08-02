@@ -125,7 +125,7 @@ open class Redunda {
 					continue
 				}
 				
-				if let index = json.index(where: { filename == $0["key"] as? String }) {
+                if let index = json.firstIndex(where: { filename == $0["key"] as? String }) {
 					if try hash(of: filename) != json[index]["sha256"] as? String {
 						try uploadFile(named: filename)
 					}

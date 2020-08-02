@@ -44,7 +44,7 @@ class TrollCommandEnable: Command {
         sites.reserveCapacity(arguments.count)
         
         for siteName in arguments {
-            guard let index = allSites.index(where: { $0.api_site_parameter == siteName || $0.site_url?.host == siteName }) else {
+            guard let index = allSites.firstIndex(where: { $0.api_site_parameter == siteName || $0.site_url?.host == siteName }) else {
                 reply("Unknown site \(siteName).")
                 return
             }

@@ -74,10 +74,10 @@ public final class BackgroundTask: Hashable {
 	public static func ==(lhs: BackgroundTask, rhs: BackgroundTask) -> Bool {
 		return lhs === rhs
 	}
-	
-	public var hashValue: Int {
-		return Unmanaged.passUnretained(self).toOpaque().hashValue
-	}
+    
+    public func hash(into hasher: inout Hasher) {
+        ObjectIdentifier(self).hash(into: &hasher)
+    }
 }
 
 open class BackgroundTaskManager {
