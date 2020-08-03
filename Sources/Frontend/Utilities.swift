@@ -190,19 +190,23 @@ func run(command: String, printOutput: Bool = true) -> (exitCode: Int, stdout: S
     let stderrSource = DispatchSource.makeReadSource(fileDescriptor: stderrPipe.fileHandleForReading.fileDescriptor)
     
     stdoutSource.setEventHandler {
-        let data = stdoutPipe.fileHandleForReading.availableData
-        stdout += data
-        combined += data
-        if printOutput {
-            FileHandle.standardError.write(data)
+        queue.sync {
+            let data = stdoutPipe.fileHandleForReading.availableData
+            stdout += data
+            combined += data
+            if printOutput {
+                FileHandle.standardError.write(data)
+            }
         }
     }
     stderrSource.setEventHandler {
-        let data = stderrPipe.fileHandleForReading.availableData
-        stderr += data
-        combined += data
-        if printOutput {
-            FileHandle.standardOutput.write(data)
+        queue.sync {
+            let data = stderrPipe.fileHandleForReading.availableData
+            stderr += data
+            combined += data
+            if printOutput {
+                FileHandle.standardOutput.write(data)
+            }
         }
     }
     
@@ -212,12 +216,14 @@ func run(command: String, printOutput: Bool = true) -> (exitCode: Int, stdout: S
     process.launch()
     process.waitUntilExit()
     
-    queue.sync {}
-    stdoutSource.cancel()
-    stderrSource.cancel()
-    queue.sync {}
-    stdoutPipe.fileHandleForReading.closeFile()
-    stderrPipe.fileHandleForReading.closeFile()
+    queue.sync {
+        stdoutSource.cancel()
+        stderrSource.cancel()
+    }
+    queue.sync {
+        stdoutPipe.fileHandleForReading.closeFile()
+        stderrPipe.fileHandleForReading.closeFile()
+    }
     
     let stdoutString = String(data: stdout, encoding: .utf8)
     let stderrString = String(data: stderr, encoding: .utf8)

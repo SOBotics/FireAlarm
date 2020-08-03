@@ -146,6 +146,7 @@ open class PostFetcher {
                     }
                     
                     for (site, posts) in posts {
+                        if posts.isEmpty { continue }
                         var fetchedPosts = [Post]()
                         
                         var hasMore = true

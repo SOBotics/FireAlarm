@@ -215,15 +215,15 @@ class Reporter {
         postFetcher.callback = { [weak self] in try self?.checkAndReport(post: $0, site: $1) }
         
         postScanner.filters = [
-            FilterNaiveBayes(reporter: self),
-            FilterNonEnglishPost(),
-            FilterMisleadingLinks(),
+            //FilterNaiveBayes(reporter: self),
+            //FilterNonEnglishPost(),
+            //FilterMisleadingLinks(),
             FilterBlacklistedKeyword(reporter: self),
             FilterBlacklistedUsername(reporter: self),
             FilterBlacklistedTag(reporter: self),
-            FilterImageWithoutCode(),
-            FilterLowLength(),
-            FilterCodeWithoutExplanation()
+            //FilterImageWithoutCode(),
+            //FilterLowLength(),
+            //FilterCodeWithoutExplanation()
         ]
         trollScanner.filters = [
             FilterBlacklistedKeyword(reporter: self, troll: true),
@@ -273,9 +273,9 @@ class Reporter {
     
     ///Reports a post if it has not been recently reported.  Returns either .reported or .alreadyReported.
     func report(post: Post, site apiSiteParameter: String, reasons: [FilterResult]) throws -> ReportResult {
-        guard let site = try Site.with(apiSiteParameter: apiSiteParameter, db: staticDB) else {
+        /*guard let site = try Site.with(apiSiteParameter: apiSiteParameter, db: staticDB) else {
              return ReportResult(status: .notBad, filterResults: reasons)
-        }
+        }*/
         
         var status: ReportResult.Status = .notBad
         
@@ -297,6 +297,11 @@ class Reporter {
             if !isManualReport && reportedPosts.lazy.reversed().contains(where: { $0.id == id }) {
                 print("Not reporting \(id) because it was recently reported.")
                 status = .alreadyReported
+                return
+            }
+            
+            guard let link = post.share_link else {
+                print("Not reporting \(id) because it has no link.")
                 return
             }
             
@@ -325,7 +330,7 @@ class Reporter {
             
             let sema = DispatchSemaphore(value: 0)
             
-            let rooms: [ChatRoom] = trollSites.contains(site) ? self.trollRooms : self.rooms
+            let rooms = self.rooms //let rooms: [ChatRoom] = trollSites.contains(site) ? self.trollRooms : self.rooms
             var bonfireLink: String?
             
             //Post weight including custom filter weight subtracted from Naive Bayes difference.
@@ -349,14 +354,14 @@ class Reporter {
             
             for room in rooms {
                 //Filter out weights which are less than this room's threshold.
-                let reasons = reasons.filter {
+                /*let reasons = reasons.filter {
                     if case .bayesianFilter(_) = $0.type {
                         return combinedPostWeight < room.thresholds[site.id] ?? Int.min
                     } else if case .customFilterWithWeight(_, _) = $0.type {
                         return combinedPostWeight < room.thresholds[site.id] ?? Int.min
                     }
                     return true
-                }
+                }*/
                 
                 if reasons.isEmpty {
                     sema.signal()
@@ -377,13 +382,17 @@ class Reporter {
                 let header = reasons.map { $0.header }.joined(separator: ", ")
                 let message: String
                 
+                var tagStr: String
+                if let tag = tags.first { tagStr = "[tag:\(tag)] " }
+                else { tagStr = "" }
+                
                 if let bonfireLink = bonfireLink {
                     message = "[ [\(botName)](\(stackAppsLink)) | [Bonfire](\(bonfireLink)) ] " +
-                        "[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//\(site.domain)/q/\(id)) " +
+                        "\(tagStr)\(header) [\(title)](\(link)) " +
                         room.notificationString(tags: tags, reasons: reasons)
                 } else {
                     message = "[ [\(botName)](\(stackAppsLink)) ] " +
-                        "[tag:\(tags.first ?? "tagless")] \(header) [\(title)](//\(site.domain)/q/\(id)) " +
+                        "\(tagStr)\(header) [\(title)](\(link)) " +
                         room.notificationString(tags: tags, reasons: reasons)
                 }
                 

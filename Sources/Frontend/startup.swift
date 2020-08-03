@@ -60,7 +60,7 @@ func main() throws {
     saveURL = saveDirURL
     
     apiClient.key = "HNA2dbrFtyTZxeHN6rThNg(("
-    apiClient.defaultFilter = "!21PcIZT2MQcDURcNm2uJH"
+    apiClient.defaultFilter = "!*2TT1aq3F80e34)G*C84ugY4)D53V1hQSOTMtjcj5"
     
     let client = Client()
     
@@ -233,6 +233,7 @@ func main() throws {
 //            ChatRoom(client: client, host: .stackOverflow, roomID: 111347), //SOBotics
 //            ChatRoom(client: client, host: .stackOverflow, roomID: 41570),  //SO Close Vote Reviewers
 //            ChatRoom(client: client, host: .stackExchange, roomID: 54445),	//SEBotics
+            ChatRoom(client: client, host: .stackOverflow, roomID: 167908)  // SOBotics Workshop
         ]
         
         development = false

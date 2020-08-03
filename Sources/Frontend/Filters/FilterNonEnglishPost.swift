@@ -17,7 +17,7 @@ class FilterNonEnglishPost: Filter {
     //Take from https://stackoverflow.com/a/27880748/4688119
     func regexMatches(for regex: String, in text: String) -> [String] {
         do {
-            let regex = try NSRegularExpression(pattern: regex)
+            let regex = try NSRegularExpression(pattern: regex, options: .caseInsensitive)
             let results = regex.matches(in: text,
                                         range: NSRange(text.startIndex..., in: text))
             return results.map {

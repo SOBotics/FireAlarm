@@ -1,11 +1,12 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
+// You can downgrade to an earlier Swift version if needed (5.0 or newer should be OK)
 
 import PackageDescription
 
 let package = Package(
     name: "FireAlarm",
     platforms: [
-        .macOS(.v10_12),
+        .macOS(.v10_16),    // You can downgrade to 10.12 or newer if needed
     ],
     dependencies: [
         .package(url: "git://github.com/SOBotics/SwiftChatSE",      from: "5.1.0"),
